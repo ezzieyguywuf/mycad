@@ -8,3 +8,6 @@ set(CMAKE_BUILD_TYPE "Debug")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 add_compile_options(-std=c++11 -Wpedantic -Werror -Wextra -Wall)
+
+# --------------- Add Sub-Directories --------------
+add_subdirectory(test)
