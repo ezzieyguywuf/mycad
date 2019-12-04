@@ -1,6 +1,18 @@
 #include <MyCAD/Shapes.hpp>
 
 using namespace MyCAD::Shapes;
+//=============================================================================
+//                      Vertex Class Definition
+//=============================================================================
+Vertex::Vertex(MyCAD::Geometry::Point const& pnt)
+    : myPoint(pnt)
+{
+}
+
+MyCAD::Geometry::Point const& Vertex::point() const
+{
+    return myPoint;
+}
 
 //=============================================================================
 //                         Box Class Definition

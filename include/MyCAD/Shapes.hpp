@@ -17,12 +17,24 @@
 #ifndef MYCAD_SHAPES_HEADER
 #define MYCAD_SHAPES_HEADER
 
+#include "Geometry.hpp"
+
 #include <vector>
 
 namespace MyCAD
 {
     namespace Shapes
     {
+        class Vertex
+        {
+            public:
+                Vertex(Geometry::Point const& pnt);
+                Geometry::Point const& point() const;
+
+            private:
+                Geometry::Point myPoint;
+        };
+
         class Face
         {
             public:

@@ -29,6 +29,9 @@ namespace MyCAD
                 float y() const;
                 float z() const;
 
+                bool operator==(Point const& aPoint) const;
+                bool operator!=(Point const& aPoint) const;
+
             private:
                 float myX;
                 float myY;

@@ -23,3 +23,13 @@ float Point::z() const
 {
     return myZ;
 }
+
+bool Point::operator==(Point const& aPoint) const
+{
+    return myX == aPoint.myX and myY == aPoint.myY and myZ == aPoint.myZ;
+}
+
+bool Point::operator!=(Point const& aPoint) const
+{
+    return not (*this == aPoint);
+}
