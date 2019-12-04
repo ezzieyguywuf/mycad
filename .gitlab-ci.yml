@@ -1,0 +1,39 @@
+# This is the docker image that is used. Our ubuntu-occt-dev comes pre-installed with
+# things like cmake, git, etc.
+image: ezzieyguywuf/ubuntu-occt-dev
+
+stages:
+    - build
+    - test
+    - pages
+
+build:
+    stage: build
+    script:
+        - mkdir -p build
+        - cd build
+        - cmake ..
+        - make -j4 all
+    artifacts:
+        paths:
+            - ./build
+    only:
+        - master
+
+test:
+    stage: test
+    script:
+        - ./build/bin/MyCAD_Tests
+    only:
+        - master
+
+pages:
+    stage: pages
+    script:
+        - doxygen doc/Doxyfile
+        - mv doc/doxygen/html/ public/
+    artifacts:
+        paths:
+            - public
+    only:
+        - master
