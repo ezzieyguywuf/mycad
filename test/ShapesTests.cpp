@@ -42,7 +42,6 @@ SCENARIO("Basic topological entities wrap geometric constructs")
             MyCAD::Shapes::Edge edge(line);
             THEN("we should be able to retrive the Line")
             {
-                MyCAD::Geometry::Line line(p1, p2);
                 REQUIRE(edge.getLine() == line);
             }
         }
