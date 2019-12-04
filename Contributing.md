@@ -28,7 +28,14 @@ Rather, the workflow should be something like
 This way, the CI is only triggered once per "feature" addition, as defined by the TDD
 methodology.
 
-I don't know if this is the best approach or not, but we'll start with this
+I don't know if this is the best approach or not, but we'll start with this.
+
+Finally, before pushing `master` to the repository, some care should be taken to "clean
+up" the git log. In other words, something along the lines of `git rebase -i HEAD~10`
+should be ran, and then as much as feasible multiple commits should be "squased" into one.
+
+This allows the `master_staging` git log to be as verbose as we want it to be while
+keeping the `master` log relatively concise, yet still informative.
 
 ## Code Documentation [↑][1] <a name="code-documentation"></a>
 
