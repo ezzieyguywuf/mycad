@@ -18,7 +18,7 @@
 
 #include <MyCAD/Geometry.hpp>
 
-SCENARIO("CAD Programs require cartesian geometry")
+SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
 {
     GIVEN("a Point")
     {

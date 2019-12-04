@@ -18,7 +18,7 @@
 
 #include <MyCAD/Shapes.hpp>
 
-SCENARIO("Basic topological entities wrap geometric constructs")
+SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
 {
     GIVEN("A Point")
     {
@@ -48,7 +48,7 @@ SCENARIO("Basic topological entities wrap geometric constructs")
     }
 }
 
-SCENARIO("CAD Programs can create Primitive Solids")
+SCENARIO("CAD Programs can create Primitive Solids", "[Shapes]")
 {
     GIVEN("A Box")
     {
