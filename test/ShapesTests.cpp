@@ -18,6 +18,41 @@
 
 #include <MyCAD/Shapes.hpp>
 
+SCENARIO("CAD Programs require detailed geometry")
+{
+    Given("A point")
+    {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+        MyCAD::Geometry::Point pnt(x, y, z);
+
+        WHEN("the X value is retrieved")
+        {
+            THEN("it should equal the constructed value")
+            {
+                REQUIRE(pnt.x() == x);
+            }
+        }
+
+        WHEN("the Y value is retrieved")
+        {
+            THEN("it should equal the constructed value")
+            {
+                REQUIRE(pnt.y() == y);
+            }
+        }
+
+        WHEN("the Z value is retrieved")
+        {
+            THEN("it should equal the constructed value")
+            {
+                REQUIRE(pnt.z() == z);
+            }
+        }
+    }
+}
+
 SCENARIO("CAD Programs can create Primitive Solids")
 {
     GIVEN("A Box")
