@@ -27,6 +27,32 @@ MyCAD::Geometry::Line const& Edge::getLine() const
     return myLine;
 }
 
+bool Edge::operator==(Edge const& anEdge) const
+{
+    return this->getLine() == anEdge.getLine();
+}
+
+bool Edge::operator!=(Edge const& anEdge) const
+{
+    return not (*this == anEdge);
+}
+
+//=============================================================================
+//                      Wire Class Definition
+//=============================================================================
+Wire::Wire(std::vector<MyCAD::Geometry::Line> const& lines)
+{
+    for(MyCAD::Geometry::Line const& aLine: lines)
+    {
+        myEdges.push_back(Edge(aLine));
+    }
+}
+
+std::vector<Edge> const& Wire::getEdges() const
+{
+    return myEdges;
+}
+
 //=============================================================================
 //                         Box Class Definition
 //=============================================================================

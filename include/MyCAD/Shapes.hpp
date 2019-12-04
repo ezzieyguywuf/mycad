@@ -44,8 +44,25 @@ namespace MyCAD
                 Edge(Geometry::Line const& aLine);
                 Geometry::Line const& getLine() const;
 
+                bool operator==(Edge const& anEdge) const;
+                bool operator!=(Edge const& anEdge) const;
+
             private:
                 Geometry::Line myLine;
+        };
+
+        /** @brief A wire is a collection of edges*/
+        class Wire
+        {
+            public:
+                /** @brief Construct a Wire from the given Lines*/
+                Wire(std::vector<Geometry::Line> const& lines);
+
+                /** @brief Returns the Edges that make up the Wire*/
+                std::vector<Edge> const& getEdges() const;
+
+            private:
+                std::vector<Edge> myEdges;
         };
 
         /** @brief A two-dimensional portion of space */
