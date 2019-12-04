@@ -18,6 +18,22 @@
 
 #include <MyCAD/Shapes.hpp>
 
+SCENARIO("Basic topological entities wrap geometric constructs")
+{
+    GIVEN("A point")
+    {
+        MyCAD::Geometry::Point pnt(1,2,3);
+        WHEN("a vertex is created with it")
+        {
+            MyCAD::Shapes::Vertex vert(pnt);
+            THEN("we should be able to get that same point back.")
+            {
+                REQUIRE(pnt == vert.point());
+            }
+        }
+    }
+}
+
 SCENARIO("CAD Programs can create Primitive Solids")
 {
     GIVEN("A Box")
