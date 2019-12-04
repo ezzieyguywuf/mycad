@@ -20,15 +20,29 @@
 
 SCENARIO("Basic topological entities wrap geometric constructs")
 {
-    GIVEN("A point")
+    GIVEN("A Point")
     {
         MyCAD::Geometry::Point pnt(1,2,3);
-        WHEN("a vertex is created with it")
+        WHEN("a Vertex is created with it")
         {
             MyCAD::Shapes::Vertex vert(pnt);
             THEN("we should be able to get that same point back.")
             {
                 REQUIRE(pnt == vert.point());
+            }
+        }
+    }
+    Given("Two points")
+    {
+        MyCAD::Geometry::Point p1(0,0,0);
+        MyCAD::Geometry::Point p2(10,10,10);
+        WHEN("an Edge is created with them")
+        {
+            MyCAD::Shapes::Edge edge(p1, p2);
+            THEN("a straight Line should be inferred and created between the two points")
+            {
+                MyCAD::Geometry::Line line(p1, p2);
+                REQUIRE(edge.Line(), line);
             }
         }
     }
