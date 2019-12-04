@@ -54,10 +54,11 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
     {
         MyCAD::Geometry::Point p1(0,0,0);
         MyCAD::Geometry::Point p2(10,10,0);
-        MyCAD::Geometry::Point p3(0,10,10);
+        MyCAD::Geometry::Point p3(0,10,0);
 
         MyCAD::Geometry::Line l1(p1, p2);
         MyCAD::Geometry::Line l2(p2, p3);
+
         WHEN("a Wire is made with them")
         {
             MyCAD::Shapes::Wire wire({l1, l2});
@@ -67,6 +68,25 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
                 MyCAD::Shapes::Edge e2(l2);
                 std::vector<MyCAD::Shapes::Edge> check({e1, e2});
                 REQUIRE_THAT(wire.getEdges(), UnorderedEquals(check));
+            }
+        }
+    }
+
+    GIVEN("two lines without a common Point")
+    {
+        MyCAD::Geometry::Point p1(0,0,0);
+        MyCAD::Geometry::Point p2(5,5,0);
+        MyCAD::Geometry::Point p3(10,10,0);
+        MyCAD::Geometry::Point p4(15,15,0);
+
+        MyCAD::Geometry::Line l1(p1, p2);
+        MyCAD::Geometry::Line l2(p3, p4);
+        
+        WHEN("we try to make a Wire with them")
+        {
+            THEN("an error should be thrown.")
+            {
+                REQUIRE_THROWS_AS(MyCAD::Shapes::Wire(l1, l2), MyCAD::Exception);
             }
         }
     }
