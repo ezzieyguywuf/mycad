@@ -2,6 +2,9 @@
 
 using namespace MyCAD::Geometry;
 
+//=============================================================================
+//                        Point Class Definition
+//=============================================================================
 Point::Point(float x, float y, float z)
     : myX(x), myY(y), myZ(z)
 {}
