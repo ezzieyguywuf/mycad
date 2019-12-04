@@ -9,8 +9,8 @@
     4. [Write More Tests](#writing-more-tests)
 5. [Licencing New Files](#licencing-new-files)
 
-<a name="work-flow"></a>
 ## Work Flow [↑][1]
+<a name="work-flow"></a>
 
 For now, let's keep all active development in the `master_staging` branch - it should be
 relatively painless to commit and push these changes to upstream.
