@@ -28,13 +28,6 @@ namespace MyCAD
         public:
             Exception(std::string const& message);
 
-            /** @name Rule of three*/
-            ///@{
-            Exception(Exception const& anException);
-            Exception& operator=(Exception const& anException);
-            virtual ~Exception() = 0;
-            //@}
-
             const char* what() const noexcept override;
 
         private:

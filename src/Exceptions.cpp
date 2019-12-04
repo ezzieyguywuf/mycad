@@ -17,7 +17,7 @@
 
 #include <MyCAD/Exceptions.hpp>
 
-using namespace MyCAD::Exceptions;
+using namespace MyCAD;
 
 //=============================================================================
 //                        Exception Class Definition
@@ -26,19 +26,6 @@ using namespace MyCAD::Exceptions;
 Exception::Exception(std::string const& aMessage)
     : myMessage(aMessage)
 {}
-
-Exception::Exception(Exception const& anException)
-{
-    myMessage = anException.myMessage;
-}
-
-Exception& Exception::operator=(Exception const& anException)
-{
-    myMessage = anException.myMessage;
-    return *this;
-}
-
-Exception::~Exception(){};
 
 const char* Exception::what() const noexcept
 {
