@@ -59,8 +59,19 @@ namespace MyCAD
         {
             public:
                 Line(Point const& p1, Point const& p2);
+
+                /** @name Parameter Information*/
+                ///@{
+                /** Get information about the parametrization of the line*/
                 float getLowerParameter() const;
                 float getUpperParameter() const;
+                ///@}
+
+                /** @name operators*/
+                ///@{
+                bool operator==(Line const& aLine) const;
+                bool operator!=(Line const& aLine) const;
+                ///@}
         };
     }
 }

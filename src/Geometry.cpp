@@ -51,3 +51,14 @@ float Line::getUpperParameter() const
 {
     return 10;
 }
+
+bool Line::operator==(Line const& aLine) const
+{
+    return (this->getLowerParameter() == aLine.getLowerParameter() and 
+            this->getUpperParameter() == aLine.getUpperParameter());
+}
+
+bool Line::operator!=(Line const& aLine) const
+{
+    return not (*this == aLine);
+}

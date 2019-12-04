@@ -49,6 +49,11 @@ SCENARIO("CAD Programs require cartesian geometry")
                 REQUIRE(line.getLowerParameter() == 0);
                 REQUIRE(line.getUpperParameter() == 10);
             }
+            THEN("two Lines created with them should be equal")
+            {
+                MyCAD::Geometry::Line line2(p1, p2);
+                REQUIRE(line == line2);
+            }
         }
     }
 }
