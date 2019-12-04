@@ -1,5 +1,25 @@
-Code Documentation
-==================
+# Work Flow
+
+For now, let's keep all active development in the `master_staging` branch - it should be
+relatively painless to commit and push these changes to upstream.
+
+However, let's be more selective about when to merge into `master` - the gitlab continuous
+integration will only trigger for new commits in `master`. Therefore, while I say "more
+selective", that's not to say "don't ever merge to master."
+
+Rather, the workflow should be something like
+
+1. Write new test (See TDD below)
+2. Write code, iterate till test passes
+3. Update documentation, refactor code
+4. Merge into master
+
+This way, the CI is only triggered once per "feature" addition, as defined by the TDD
+methodology.
+
+I don't know if this is the best approach or not, but we'll start with this
+
+# Code Documentation
 
 The header file should contain doxygen-style code documentation. However, the
 documentation present in the header should be somewhat minimal. The header documentation
@@ -16,8 +36,7 @@ This should provide a decent balance between readability of the header file (whi
 likely to be references than the source code) while still provide as much detail in the
 documentation as is needed.
 
-Header Files
-============
+# Header Files
 
 Any header files which describe the public api should be placed in the top-level `include`
 directory. Any headers which describe purely "internal" constructs, i.e. stuff that users
@@ -26,8 +45,7 @@ don't need to worry about, can be placed somewhere in the `src` tree.
 Please note that a "user" here could be an end-user using the software, or a developer
 using our code as a library. Keep this in mind when choosing where to put things.
 
-Test-Driven Development (TDD)
-=============================
+# Test-Driven Development (TDD)
 
 As much as feasible, a Test-Driven Development methodology should be employed. In other
 words, the development cycle should go something like this:
@@ -38,8 +56,7 @@ words, the development cycle should go something like this:
 
 I'll expound on these a bit, but honestly I am no expert.
 
-Writing Tests
--------------
+## Writing Tests
 
 Tests should be minimal - in other words, consider a feature or behaviour that you need
 the program to perform. Now write a test that only tests that feature or behaviour.
@@ -59,8 +76,7 @@ like:
 This will fail for many reasons: first, there is no class defined which is called
 Calculator. Next, even if there were, then it wouldn't have the requested methods.
 
-Writing code: first pass
-------------------------
+## Writing code: first pass
 
 Apparently, we're supposed to forget everythnig we know about good coding practices etc.
 here and "just make the test pass!" So let's try that:
@@ -85,8 +101,7 @@ namespace Calculator
 
 If we try this out, I think it will compile. What's more, I think our test wil pass!!!
 
-Writing Code: second pass
--------------------------
+## Writing Code: second pass
 
 Now that we have a passing test (phew!), let's take a step back and observe our creation.
 We're using a global variable. Yuck. let's go back and refactor this a bit in order to use
@@ -117,8 +132,7 @@ encapsulated the `myDigits` variable in a class. The class is purely static, whi
 feel great, but I guess until the tests require us to change it, we'll just leave it
 alone...
 
-Write More Tests
-----------------
+## Write More Tests
 
 As far as I can tell, that's really the gist of TDD. Now just rinse, lather and repeat.
 
@@ -126,8 +140,7 @@ I've actually had limited success using this type of approach, but maybe it's be
 don't really know what I'm doing. Let's try to use this disciplined, structured approach,
 in order to ensure that our code-base is bulletproof!
 
-Licencing New Files
-===================
+# Licencing New Files
 
 The following has been taken directly from the GNU AGPLv3. Any new source files should
 contain, at the least, the two lines listed, though preferably the entire block, as the
