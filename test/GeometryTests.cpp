@@ -16,20 +16,38 @@
  */
 #include "catch.hpp"
 
-#include <MyCAD/Shapes.hpp>
-
-SCENARIO("CAD Programs can create Primitive Solids")
+SCENARIO("CAD Programs require cartesian geometry")
 {
-    GIVEN("A Box")
+    Given("A point")
     {
-        MyCAD::Shapes::Box box(10, 10, 10);
-        WHEN("the Faces are retrieved")
+        float x = 1;
+        float y = 2;
+        float z = 3;
+        MyCAD::Geometry::Point pnt(x, y, z);
+
+        WHEN("the X value is retrieved")
         {
-            const std::vector<MyCAD::Shapes::Face>& faces = box.getFaces();
-            THEN("there should be only 6 faces")
+            THEN("it should equal the constructed value")
             {
-                REQUIRE(faces.size() == 6);
+                REQUIRE(pnt.x() == x);
+            }
+        }
+
+        WHEN("the Y value is retrieved")
+        {
+            THEN("it should equal the constructed value")
+            {
+                REQUIRE(pnt.y() == y);
+            }
+        }
+
+        WHEN("the Z value is retrieved")
+        {
+            THEN("it should equal the constructed value")
+            {
+                REQUIRE(pnt.z() == z);
             }
         }
     }
 }
+

@@ -1,9 +1,11 @@
 set(TEST_SRCS
     main.cpp
+    GeometryTests.cpp
     ShapesTests.cpp
 )
 
 set(TEST_LINKS
+    MyCAD_Geometry
     MyCAD_Shapes
 )
 add_executable(MyCAD_Tests ${TEST_SRCS})
