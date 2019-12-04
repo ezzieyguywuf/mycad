@@ -8,6 +8,106 @@ don't need to worry about, can be placed somewhere in the `src` tree.
 Please note that a "user" here could be an end-user using the software, or a developer
 using our code as a library. Keep this in mind when choosing where to put things.
 
+Test-Driven Development (TDD)
+=============================
+
+As much as feasible, a Test-Driven Development methodology should be employed. In other
+words, the development cycle should go something like this:
+
+1. Write a test that fails (compilation error is a failure)
+2. Write the least amount of code needed to make it pass
+3. Refactor the code to make it...right
+
+I'll expound on these a bit, but honestly I am no expert.
+
+Writing Tests
+-------------
+
+Tests should be minimal - in other words, consider a feature or behaviour that you need
+the program to perform. Now write a test that only tests that feature or behaviour.
+
+Here's an example - let's say we're writing a calculator program. That's a big task. It's
+difficult to write a succinct test that "calculates", because there are so many variables
+to consider.
+
+Instead, start at step one - we need to be able to provide numbers to the calculator.
+
+So, our first test might be `testGiveDigits` and some pseudocode for the test might look
+like:
+
+    Calculator::giveDigits("123");
+    assert(Calculator::getDigits(), "123");
+    
+This will fail for many reasons: first, there is no class defined which is called
+Calculator. Next, even if there were, then it wouldn't have the requested methods.
+
+Writing code: first pass
+------------------------
+
+Apparently, we're supposed to forget everythnig we know about good coding practices etc.
+here and "just make the test pass!" So let's try that:
+
+```cpp
+#include <string>
+
+namespace Calculator
+{
+    std::string myDigits;
+    giveDigits(const std::string& numbs)
+    {
+        myDigits = numbs;
+    }
+    std::string getDigits()
+    {
+        return myDigits;
+    }
+}
+
+```
+
+If we try this out, I think it will compile. What's more, I think our test wil pass!!!
+
+Writing Code: second pass
+-------------------------
+
+Now that we have a passing test (phew!), let's take a step back and observe our creation.
+We're using a global variable. Yuck. let's go back and refactor this a bit in order to use
+some decent coding practices.
+
+```cpp
+#include <string>
+
+class Calculator
+{
+    public:
+        static giveDigits(const std::string& numbs)
+        {
+            myDigits = numbs;
+        }
+
+        const std::string& getDigits() const
+        {
+            return myDigits;
+        }
+    private:
+        static std::string myDigits;
+}
+```
+
+This is a bit better. We got rid of some `std::string` copying that was going on, and we
+encapsulated the `myDigits` variable in a class. The class is purely static, which doesn't
+feel great, but I guess until the tests require us to change it, we'll just leave it
+alone...
+
+Write More Tests
+----------------
+
+As far as I can tell, that's really the gist of TDD. Now just rinse, lather and repeat.
+
+I've actually had limited success using this type of approach, but maybe it's because  I
+don't really know what I'm doing. Let's try to use this disciplined, structured approach,
+in order to ensure that our code-base is bulletproof!
+
 Licencing New Files
 ===================
 
