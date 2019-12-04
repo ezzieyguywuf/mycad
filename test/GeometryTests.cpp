@@ -20,7 +20,7 @@
 
 SCENARIO("CAD Programs require cartesian geometry")
 {
-    GIVEN("A point")
+    GIVEN("a Point")
     {
         float x = 1;
         float y = 2;
@@ -34,6 +34,20 @@ SCENARIO("CAD Programs require cartesian geometry")
                 REQUIRE(pnt.x() == x);
                 REQUIRE(pnt.y() == y);
                 REQUIRE(pnt.z() == z);
+            }
+        }
+    }
+    GIVEN("two Points")
+    {
+        MyCAD::Geometry::Point p1(0, 0, 0);
+        MyCAD::Geometry::Point p2(10, 10, 10);
+        WHEN("we make a Line between them")
+        {
+            MyCAD::Geometry::Line line(p1, p2);
+            THEN("it should get parametrized")
+            {
+                REQUIRE(line.getLowerParameter() == 0);
+                REQUIRE(line.getUpperParameter() == 10);
             }
         }
     }
