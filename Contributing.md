@@ -1,3 +1,13 @@
+Header Files
+============
+
+Any header files which describe the public api should be placed in the top-level `include`
+directory. Any headers which describe purely "internal" constructs, i.e. stuff that users
+don't need to worry about, can be placed somewhere in the `src` tree.
+
+Please note that a "user" here could be an end-user using the software, or a developer
+using our code as a library. Keep this in mind when choosing where to put things.
+
 Licencing New Files
 ===================
 
