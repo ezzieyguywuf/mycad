@@ -1,6 +1,5 @@
-# This is the docker image that is used. Our ubuntu-occt-dev comes pre-installed with
-# things like cmake, git, etc.
-image: ezzieyguywuf/ubuntu-occt-dev
+# This is the docker image that is used. 
+image: mszg/docker-ubuntu-dev
 
 stages:
     - build
