@@ -16,7 +16,8 @@
  */
 #include <MyCAD/Shapes.hpp>
 
-using namespace MyCAD::Shapes;
+namespace MyCAD{
+namespace Shapes{
 //=============================================================================
 //                      Vertex Class Definition
 //=============================================================================
@@ -60,7 +61,7 @@ Wire::Wire(std::vector<MyCAD::Geometry::Line> const& lines)
 {
     for(MyCAD::Geometry::Line const& aLine: lines)
     {
-        myEdges.push_back(Edge(aLine));
+        myEdges.emplace_back(aLine);
     }
 }
 
@@ -88,3 +89,6 @@ std::vector<Face> Box::getFaces() const
 {
     return {Face(), Face(), Face(), Face(), Face(), Face()};
 }
+
+} // namespace Shapes
+} // namespace MyCAD

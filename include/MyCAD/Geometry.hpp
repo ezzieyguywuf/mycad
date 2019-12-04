@@ -21,58 +21,58 @@
 /** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
 {
-    /** @brief Anything related to geomtry*/
-    namespace Geometry
+/** @brief Anything related to geomtry*/
+namespace Geometry
+{
+    /** @brief A point in cartesian space.*/
+    class Point
     {
-        /** @brief A point in cartesian space.*/
-        class Point
-        {
-            public:
-                /** @brief Construct a Point in 3D space
-                 *  @param x,y,z The cartesian coordinates of the point
-                 */
-                Point(float x, float y, float z);
+        public:
+            /** @brief Construct a Point in 3D space
+             *  @param x,y,z The cartesian coordinates of the point
+             */
+            Point(float x, float y, float z);
 
-                /// @name Access Methods
-                ///@{
-                /// @brief Retrieve the given coordinates of the Point.
-                float x() const;
-                float y() const;
-                float z() const;
-                ///@}
+            /// @name Access Methods
+            ///@{
+            /// @brief Retrieve the given coordinates of the Point.
+            float x() const;
+            float y() const;
+            float z() const;
+            ///@}
 
 
-                /// @name Operators
-                ///@{
-                bool operator==(Point const& aPoint) const;
-                bool operator!=(Point const& aPoint) const;
-                ///@}
+            /// @name Operators
+            ///@{
+            bool operator==(Point const& aPoint) const;
+            bool operator!=(Point const& aPoint) const;
+            ///@}
 
-            private:
-                float myX;
-                float myY;
-                float myZ;
-        };
+        private:
+            float myX;
+            float myY;
+            float myZ;
+    };
 
-        /** @brief A parametrized line*/
-        class Line
-        {
-            public:
-                Line(Point const& p1, Point const& p2);
+    /** @brief A parametrized line*/
+    class Line
+    {
+        public:
+            Line(Point const& p1, Point const& p2);
 
-                /** @name Parameter Information*/
-                ///@{
-                /** Get information about the parametrization of the line*/
-                float getLowerParameter() const;
-                float getUpperParameter() const;
-                ///@}
+            /** @name Parameter Information*/
+            ///@{
+            /** Get information about the parametrization of the line*/
+            float getLowerParameter() const;
+            float getUpperParameter() const;
+            ///@}
 
-                /** @name operators*/
-                ///@{
-                bool operator==(Line const& aLine) const;
-                bool operator!=(Line const& aLine) const;
-                ///@}
-        };
-    }
-}
+            /** @name operators*/
+            ///@{
+            bool operator==(Line const& aLine) const;
+            bool operator!=(Line const& aLine) const;
+            ///@}
+    };
+} // namespace Geometry
+} // namespace MyCAD
 #endif // MYCAD_GEOMETRY_HEADER

@@ -16,8 +16,8 @@
  */
 #include <MyCAD/Geometry.hpp>
 
-using namespace MyCAD::Geometry;
-
+namespace MyCAD{
+namespace Geometry{
 //=============================================================================
 //                        Point Class Definition
 //=============================================================================
@@ -78,3 +78,6 @@ bool Line::operator!=(Line const& aLine) const
 {
     return not (*this == aLine);
 }
+
+} // namespace Geometry
+} // namespace MyCAD

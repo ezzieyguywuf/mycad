@@ -17,17 +17,20 @@
 
 #include <MyCAD/Exceptions.hpp>
 
-using namespace MyCAD;
+#include <utility> // for std::move
 
+namespace MyCAD{
 //=============================================================================
 //                        Exception Class Definition
 //=============================================================================
 
-Exception::Exception(std::string const& aMessage)
-    : myMessage(aMessage)
+Exception::Exception(std::string aMessage)
+    : myMessage(std::move(aMessage))
 {}
 
 const char* Exception::what() const noexcept
 {
     return myMessage.c_str();
 }
+
+} // namespace MyCAD
