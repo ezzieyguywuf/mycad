@@ -23,67 +23,67 @@
 
 namespace MyCAD
 {
-    /** @brief Topological shapes - distinctly _not_ geometry */
-    namespace Shapes
-    {
-        /** @brief A point in space */
-        class Vertex
-        {
-            public:
-                Vertex(Geometry::Point const& pnt);
-                Geometry::Point const& point() const;
+/** @brief Topological shapes - distinctly _not_ geometry */
+namespace Shapes
+{
+/** @brief A point in space */
+class Vertex
+{
+    public:
+        explicit Vertex(Geometry::Point const& pnt);
+        Geometry::Point const& point() const;
 
-            private:
-                Geometry::Point myPoint;
-        };
+    private:
+        Geometry::Point myPoint;
+};
 
-        /** @brief A curve described by a 1D parametric space*/
-        class Edge
-        {
-            public:
-                Edge(Geometry::Line const& aLine);
-                Geometry::Line const& getLine() const;
+/** @brief A curve described by a 1D parametric space*/
+class Edge
+{
+    public:
+        explicit Edge(Geometry::Line const& aLine);
+        Geometry::Line const& getLine() const;
 
-                bool operator==(Edge const& anEdge) const;
-                bool operator!=(Edge const& anEdge) const;
+        bool operator==(Edge const& anEdge) const;
+        bool operator!=(Edge const& anEdge) const;
 
-            private:
-                Geometry::Line myLine;
-        };
+    private:
+        Geometry::Line myLine;
+};
 
-        /** @brief A wire is a collection of edges*/
-        class Wire
-        {
-            public:
-                /** @brief Construct a Wire from the given Lines*/
-                Wire(std::vector<Geometry::Line> const& lines);
+/** @brief A wire is a collection of edges*/
+class Wire
+{
+    public:
+        /** @brief Construct a Wire from the given Lines*/
+        explicit Wire(std::vector<Geometry::Line> const& lines);
 
-                /** @brief Returns the Edges that make up the Wire*/
-                std::vector<Edge> const& getEdges() const;
+        /** @brief Returns the Edges that make up the Wire*/
+        std::vector<Edge> const& getEdges() const;
 
-            private:
-                std::vector<Edge> myEdges;
-        };
+    private:
+        std::vector<Edge> myEdges;
+};
 
-        /** @brief A two-dimensional portion of space */
-        class Face
-        {
-            public:
-                Face() = default;
-        };
+/** @brief A two-dimensional portion of space */
+class Face
+{
+    public:
+        Face() = default;
+};
 
-        /** @brief A Solid made of six Faces */
-        class Box
-        {
-            public:
-                /** @brief Construct a box with the given dimesions
-                 *  @param x,y,z The length of the sides of the box in the given cartesian
-                 *               directions
-                 */
-                Box(unsigned int x, unsigned int y, unsigned int z);
-                std::vector<Face> getFaces() const;
-        };
-    }
-}
+/** @brief A Solid made of six Faces */
+class Box
+{
+    public:
+        /** @brief Construct a box with the given dimesions
+         *  @param x,y,z The length of the sides of the box in the given cartesian
+         *               directions
+         */
+        Box(unsigned int x, unsigned int y, unsigned int z);
+        std::vector<Face> getFaces() const;
+};
+} // namespace Shapes
+} // namespace MyCAD
 
 #endif //MYCAD_SHAPES_HEADER

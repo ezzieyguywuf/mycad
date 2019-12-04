@@ -23,15 +23,15 @@
 
 namespace MyCAD
 {
-    class Exception : public std::exception
-    {
-        public:
-            Exception(std::string const& message);
+class Exception : public std::exception
+{
+    public:
+        explicit Exception(std::string message);
 
-            const char* what() const noexcept override;
+        const char* what() const noexcept override;
 
-        private:
-            std::string myMessage;
-    };
-}
+    private:
+        std::string myMessage;
+};
+} // namespace MyCAD
 #endif // MYCAD_EXCEPTIONS_HEADER
