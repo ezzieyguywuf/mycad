@@ -17,20 +17,36 @@
 
 #ifndef MYCAD_GEOMETRY_HEADER
 #define MYCAD_GEOMETRY_HEADER
+
+/** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
 {
+    /** @brief Anything related to geomtry*/
     namespace Geometry
     {
+        /** @brief A point in cartesian space.*/
         class Point
         {
             public:
+                /** @brief Construct a Point in 3D space
+                 *  @param x,y,z The cartesian coordinates of the point
+                 */
                 Point(float x, float y, float z);
+
+                /// @name Access Methods
+                ///@{
+                /// @brief Retrieve the given coordinates of the Point.
                 float x() const;
                 float y() const;
                 float z() const;
+                ///@}
 
+
+                /// @name Operators
+                ///@{
                 bool operator==(Point const& aPoint) const;
                 bool operator!=(Point const& aPoint) const;
+                ///@}
 
             private:
                 float myX;

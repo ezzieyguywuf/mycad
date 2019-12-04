@@ -23,8 +23,10 @@
 
 namespace MyCAD
 {
+    /** @brief Topological shapes - distinctly _not_ geometry */
     namespace Shapes
     {
+        /** @brief A point in space */
         class Vertex
         {
             public:
@@ -35,15 +37,21 @@ namespace MyCAD
                 Geometry::Point myPoint;
         };
 
+        /** @brief A two-dimensional portion of space */
         class Face
         {
             public:
                 Face() = default;
         };
 
+        /** @brief A Solid made of six Faces */
         class Box
         {
             public:
+                /** @brief Construct a box with the given dimesions
+                 *  @param x,y,z The length of the sides of the box in the given cartesian
+                 *               directions
+                 */
                 Box(unsigned int x, unsigned int y, unsigned int z);
                 std::vector<Face> getFaces() const;
         };
