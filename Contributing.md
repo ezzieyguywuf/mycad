@@ -9,7 +9,7 @@
     4. [Write More Tests](#writing-more-tests)
 5. [Licencing New Files](#licencing-new-files)
 
-## Work Flow [←](#table-of-contents) <a name="work-flow"></a>
+## Work Flow [↑][1] <a name="work-flow"></a>
 
 For now, let's keep all active development in the `master_staging` branch - it should be
 relatively painless to commit and push these changes to upstream.
@@ -30,7 +30,7 @@ methodology.
 
 I don't know if this is the best approach or not, but we'll start with this
 
-## Code Documentation [←](#table-of-contents) <a name="code-documentation"></a>
+## Code Documentation [↑][1] <a name="code-documentation"></a>
 
 The header file should contain doxygen-style code documentation. However, the
 documentation present in the header should be somewhat minimal. The header documentation
@@ -47,7 +47,7 @@ This should provide a decent balance between readability of the header file (whi
 likely to be references than the source code) while still provide as much detail in the
 documentation as is needed.
 
-## Header Files [←](#table-of-contents) <a name="header-files"></a>
+## Header Files [↑][1] <a name="header-files"></a>
 
 Any header files which describe the public api should be placed in the top-level `include`
 directory. Any headers which describe purely "internal" constructs, i.e. stuff that users
@@ -56,7 +56,7 @@ don't need to worry about, can be placed somewhere in the `src` tree.
 Please note that a "user" here could be an end-user using the software, or a developer
 using our code as a library. Keep this in mind when choosing where to put things.
 
-## Test-Driven Development (TDD) [←](#table-of-contents) <a name="test-driven-development-tdd">
+## Test-Driven Development (TDD) [↑][1] <a name="test-driven-development-tdd">
 
 As much as feasible, a Test-Driven Development methodology should be employed. In other
 words, the development cycle should go something like this:
@@ -67,7 +67,7 @@ words, the development cycle should go something like this:
 
 I'll expound on these a bit, but honestly I am no expert.
 
-### Writing Tests [←](#test-driven-development-tdd) <a name="writing-tests"></a>
+### Writing Tests [↑](#test-driven-development-tdd) <a name="writing-tests"></a>
 
 Tests should be minimal - in other words, consider a feature or behaviour that you need
 the program to perform. Now write a test that only tests that feature or behaviour.
@@ -87,7 +87,7 @@ like:
 This will fail for many reasons: first, there is no class defined which is called
 Calculator. Next, even if there were, then it wouldn't have the requested methods.
 
-### Writing code: first pass [←](#test-driven-development-tdd) <a name="writing-code-first-pass"></a>
+### Writing code: first pass [↑](#test-driven-development-tdd) <a name="writing-code-first-pass"></a>
 
 Apparently, we're supposed to forget everythnig we know about good coding practices etc.
 here and "just make the test pass!" So let's try that:
@@ -112,7 +112,7 @@ namespace Calculator
 
 If we try this out, I think it will compile. What's more, I think our test wil pass!!!
 
-### Writing Code: second pass [←](#test-driven-development-tdd) <a name="writing-code-second-pass"></a>
+### Writing Code: second pass [↑](#test-driven-development-tdd) <a name="writing-code-second-pass"></a>
 
 Now that we have a passing test (phew!), let's take a step back and observe our creation.
 We're using a global variable. Yuck. let's go back and refactor this a bit in order to use
@@ -143,7 +143,7 @@ encapsulated the `myDigits` variable in a class. The class is purely static, whi
 feel great, but I guess until the tests require us to change it, we'll just leave it
 alone...
 
-### Write More Tests [←](#test-driven-development-tdd) <a name="write-more-tests"></a>
+### Write More Tests [↑](#test-driven-development-tdd) <a name="write-more-tests"></a>
 
 As far as I can tell, that's really the gist of TDD. Now just rinse, lather and repeat.
 
@@ -151,7 +151,7 @@ I've actually had limited success using this type of approach, but maybe it's be
 don't really know what I'm doing. Let's try to use this disciplined, structured approach,
 in order to ensure that our code-base is bulletproof!
 
-## Licencing New Files [←](#table-of-contents) <a name="licencing-new-files"></a>
+## Licencing New Files [↑][1] <a name="licencing-new-files"></a>
 
 The following has been taken directly from the GNU AGPLv3. Any new source files should
 contain, at the least, the two lines listed, though preferably the entire block, as the
@@ -198,3 +198,5 @@ first lines in the file.
 > if any, to sign a "copyright disclaimer" for the program, if necessary.
 > For more information on this, and how to apply and follow the GNU AGPL, see
 > <https://www.gnu.org/licenses/>.
+
+[1]: #table-of-contents
