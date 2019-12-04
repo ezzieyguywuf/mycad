@@ -14,28 +14,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MYCAD_SHAPES_HEADER
-#define MYCAD_SHAPES_HEADER
 
-#include <vector>
-
+#ifndef MYCAD_GEOMETRY_HEADER
+#define MYCAD_GEOMETRY_HEADER
 namespace MyCAD
 {
-    namespace Shapes
+    namespace Geometry
     {
-        class Face
+        class Point
         {
             public:
-                Face() = default;
-        };
+                Point(float x, float y, float z);
+                float x() const;
+                float y() const;
+                float z() const;
 
-        class Box
-        {
-            public:
-                Box(unsigned int x, unsigned int y, unsigned int z);
-                std::vector<Face> getFaces() const;
+            private:
+                float myX;
+                float myY;
+                float myZ;
         };
     }
 }
-
-#endif //MYCAD_SHAPES_HEADER
+#endif // MYCAD_GEOMETRY_HEADER

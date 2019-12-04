@@ -16,9 +16,11 @@
  */
 #include "catch.hpp"
 
+#include <MyCAD/Geometry.hpp>
+
 SCENARIO("CAD Programs require cartesian geometry")
 {
-    Given("A point")
+    GIVEN("A point")
     {
         float x = 1;
         float y = 2;
