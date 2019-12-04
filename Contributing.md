@@ -1,13 +1,13 @@
 # Table of Contents
-1. [Work Flow](#Work-Flow)
-2. [Code Documentation](#Code-Documentation)
-3. [Header Files](#Header-Files)
-4. [Test-Driven Development (TDD)](#Test-Driven-Development-tdd)
-    1. [Writing Tests](#Writing-Tests)
-    2. [Writing Code: first pass](#Writing-Code-first-pass)
-    3. [Writing Code: second pass](#Writing-Code-second-pass)
-    4. [Write More Tests](#Writing-More-Tests)
-5. [Licencing New Files](#Licencing-New-Files)
+1. [Work Flow](#work-flow)
+2. [Code Documentation](#code-documentation)
+3. [Header Files](#header-files)
+4. [Test-Driven Development (TDD)](#test-driven-development-tdd)
+    1. [Writing Tests](#writing-tests)
+    2. [Writing Code: first pass](#writing-code-first-pass)
+    3. [Writing Code: second pass](#writing-code-second-pass)
+    4. [Write More Tests](#writing-more-tests)
+5. [Licencing New Files](#licencing-new-files)
 
 ## Work Flow
 
