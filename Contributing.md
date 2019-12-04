@@ -2,14 +2,14 @@
 1. [Work Flow](#work-flow)
 2. [Code Documentation](#code-documentation)
 3. [Header Files](#header-files)
-4. [Test-Driven Development (TDD)](#test-driven-development-tdd)
+4. [Test-Driven Development (TDD)][#test-driven-development-tdd]
     1. [Writing Tests](#writing-tests)
     2. [Writing Code: first pass](#writing-code-first-pass)
     3. [Writing Code: second pass](#writing-code-second-pass)
     4. [Write More Tests](#writing-more-tests)
 5. [Licencing New Files](#licencing-new-files)
 
-## <a name="work-flow"></a> Work Flow [↑][1]
+## Work Flow [↑][1] <a name="work-flow"></a>
 
 For now, let's keep all active development in the `master_staging` branch - it should be
 relatively painless to commit and push these changes to upstream.
@@ -67,7 +67,7 @@ words, the development cycle should go something like this:
 
 I'll expound on these a bit, but honestly I am no expert.
 
-### Writing Tests [↑](#test-driven-development-tdd) <a name="writing-tests"></a>
+### Writing Tests [↑][2] <a name="writing-tests"></a>
 
 Tests should be minimal - in other words, consider a feature or behaviour that you need
 the program to perform. Now write a test that only tests that feature or behaviour.
@@ -87,7 +87,7 @@ like:
 This will fail for many reasons: first, there is no class defined which is called
 Calculator. Next, even if there were, then it wouldn't have the requested methods.
 
-### Writing code: first pass [↑](#test-driven-development-tdd) <a name="writing-code-first-pass"></a>
+### Writing code: first pass [↑][2] <a name="writing-code-first-pass"></a>
 
 Apparently, we're supposed to forget everythnig we know about good coding practices etc.
 here and "just make the test pass!" So let's try that:
@@ -112,7 +112,7 @@ namespace Calculator
 
 If we try this out, I think it will compile. What's more, I think our test wil pass!!!
 
-### Writing Code: second pass [↑](#test-driven-development-tdd) <a name="writing-code-second-pass"></a>
+### Writing Code: second pass [↑][2] <a name="writing-code-second-pass"></a>
 
 Now that we have a passing test (phew!), let's take a step back and observe our creation.
 We're using a global variable. Yuck. let's go back and refactor this a bit in order to use
@@ -143,7 +143,7 @@ encapsulated the `myDigits` variable in a class. The class is purely static, whi
 feel great, but I guess until the tests require us to change it, we'll just leave it
 alone...
 
-### Write More Tests [↑](#test-driven-development-tdd) <a name="write-more-tests"></a>
+### Write More Tests [↑][2] <a name="write-more-tests"></a>
 
 As far as I can tell, that's really the gist of TDD. Now just rinse, lather and repeat.
 
@@ -200,3 +200,4 @@ first lines in the file.
 > <https://www.gnu.org/licenses/>.
 
 [1]: #table-of-contents
+[2]: #test-driven-development-tdd
