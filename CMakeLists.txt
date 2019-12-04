@@ -9,5 +9,12 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 add_compile_options(-std=c++11 -Wpedantic -Werror -Wextra -Wall)
 
+# --------- Various CMake Configs --------------
+message("${CMAKE_CURRENT_SOURCE_DIR}/misc/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/misc/cmake")
+
+# ------------ Find Things ---------------------
+find_package(OpenCasCade REQUIRED)
+
 # --------------- Add Sub-Directories --------------
 add_subdirectory(test)
