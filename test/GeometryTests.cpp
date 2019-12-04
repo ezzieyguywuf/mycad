@@ -27,26 +27,12 @@ SCENARIO("CAD Programs require cartesian geometry")
         float z = 3;
         MyCAD::Geometry::Point pnt(x, y, z);
 
-        WHEN("the X value is retrieved")
+        WHEN("the any cartesian value is requested")
         {
-            THEN("it should equal the constructed value")
+            THEN("it should equal the value used to construct it")
             {
                 REQUIRE(pnt.x() == x);
-            }
-        }
-
-        WHEN("the Y value is retrieved")
-        {
-            THEN("it should equal the constructed value")
-            {
                 REQUIRE(pnt.y() == y);
-            }
-        }
-
-        WHEN("the Z value is retrieved")
-        {
-            THEN("it should equal the constructed value")
-            {
                 REQUIRE(pnt.z() == z);
             }
         }
