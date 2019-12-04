@@ -1,3 +1,21 @@
+Code Documentation
+==================
+
+The header file should contain doxygen-style code documentation. However, the
+documentation present in the header should be somewhat minimal. The header documentation
+can and should include:
+
+1. A brief description of the class/method/function
+2. Documentation for the parameters
+3. Documentation for what is returned
+
+Any more detailed description, including documentation of exceptions raised, should go
+into the source file.
+
+This should provide a decent balance between readability of the header file (which is more
+likely to be references than the source code) while still provide as much detail in the
+documentation as is needed.
+
 Header Files
 ============
 
