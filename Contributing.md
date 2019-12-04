@@ -9,8 +9,7 @@
     4. [Write More Tests](#id-subsection4)
 5. [Licencing New Files](#id-section5)
 
-<div id='id-section1'/>
-## Work Flow
+## Work Flow <div id='id-section1'/>
 
 For now, let's keep all active development in the `master_staging` branch - it should be
 relatively painless to commit and push these changes to upstream.
@@ -31,8 +30,7 @@ methodology.
 
 I don't know if this is the best approach or not, but we'll start with this
 
-<div id='id-section2'/>
-## Code Documentation
+## Code Documentation <div id='id-section2'/>
 
 The header file should contain doxygen-style code documentation. However, the
 documentation present in the header should be somewhat minimal. The header documentation
@@ -49,8 +47,7 @@ This should provide a decent balance between readability of the header file (whi
 likely to be references than the source code) while still provide as much detail in the
 documentation as is needed.
 
-<div id='id-section3'/>
-## Header Files
+## Header Files <div id='id-section3'/>
 
 Any header files which describe the public api should be placed in the top-level `include`
 directory. Any headers which describe purely "internal" constructs, i.e. stuff that users
@@ -59,8 +56,7 @@ don't need to worry about, can be placed somewhere in the `src` tree.
 Please note that a "user" here could be an end-user using the software, or a developer
 using our code as a library. Keep this in mind when choosing where to put things.
 
-<div id='id-section4'/>
-## Test-Driven Development (TDD)
+## Test-Driven Development (TDD) <div id='id-section4'/>
 
 As much as feasible, a Test-Driven Development methodology should be employed. In other
 words, the development cycle should go something like this:
@@ -71,8 +67,7 @@ words, the development cycle should go something like this:
 
 I'll expound on these a bit, but honestly I am no expert.
 
-<div id='id-subsection1'/>
-### Writing Tests
+### Writing Tests <div id='id-subsection1'/>
 
 Tests should be minimal - in other words, consider a feature or behaviour that you need
 the program to perform. Now write a test that only tests that feature or behaviour.
@@ -92,8 +87,7 @@ like:
 This will fail for many reasons: first, there is no class defined which is called
 Calculator. Next, even if there were, then it wouldn't have the requested methods.
 
-<div id='id-subsection2'/>
-### Writing code: first pass
+### Writing code: first pass <div id='id-subsection2'/>
 
 Apparently, we're supposed to forget everythnig we know about good coding practices etc.
 here and "just make the test pass!" So let's try that:
@@ -118,8 +112,7 @@ namespace Calculator
 
 If we try this out, I think it will compile. What's more, I think our test wil pass!!!
 
-<div id='id-subsection3'/>
-### Writing Code: second pass
+### Writing Code: second pass <div id='id-subsection3'/>
 
 Now that we have a passing test (phew!), let's take a step back and observe our creation.
 We're using a global variable. Yuck. let's go back and refactor this a bit in order to use
@@ -150,8 +143,7 @@ encapsulated the `myDigits` variable in a class. The class is purely static, whi
 feel great, but I guess until the tests require us to change it, we'll just leave it
 alone...
 
-<div id='id-subsection4'/>
-### Write More Tests
+### Write More Tests <div id='id-subsection4'/>
 
 As far as I can tell, that's really the gist of TDD. Now just rinse, lather and repeat.
 
@@ -159,8 +151,7 @@ I've actually had limited success using this type of approach, but maybe it's be
 don't really know what I'm doing. Let's try to use this disciplined, structured approach,
 in order to ensure that our code-base is bulletproof!
 
-<div id='id-section5'/>
-## Licencing New Files
+## Licencing New Files <div id='id-section5'/>
 
 The following has been taken directly from the GNU AGPLv3. Any new source files should
 contain, at the least, the two lines listed, though preferably the entire block, as the
