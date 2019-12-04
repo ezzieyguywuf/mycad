@@ -1,5 +1,5 @@
 set(TEST_SRCS
     main.cpp
-    ShapeTests.cpp
+    ShapesTests.cpp
 )
 add_executable(MyCAD_Tests ${TEST_SRCS})

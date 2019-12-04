@@ -20,7 +20,7 @@ SCENARIO("CAD Programs can create Primitive Solids")
 {
     GIVEN("A Box")
     {
-        MyCAD::Shape box(10, 10, 10);
+        MyCAD::Shapes::Box box(10, 10, 10);
         WHEN("the Faces are retrieved")
         {
             const std::vector<MyCAD::Face>& faces = box.getFaces();
