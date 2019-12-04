@@ -14,6 +14,9 @@ a group of volunteers - we all do our best.
 However, in an attempt to satisfy the OCD in me, I'm going to try a "ground up" approach
 to what I think a CAD package should/could be.
 
+Doxygen-generated documentation is hosted [here on
+gitlab](https://ezzieyguywuf.gitlab.io/mycad)
+
 Goals
 =====
 
