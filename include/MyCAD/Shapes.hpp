@@ -37,6 +37,17 @@ namespace MyCAD
                 Geometry::Point myPoint;
         };
 
+        /** @brief A curve described by a 1D parametric space*/
+        class Edge
+        {
+            public:
+                Edge(Geometry::Line const& aLine);
+                Geometry::Line const& getLine() const;
+
+            private:
+                Geometry::Line myLine;
+        };
+
         /** @brief A two-dimensional portion of space */
         class Face
         {

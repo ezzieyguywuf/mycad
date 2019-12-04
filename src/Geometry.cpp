@@ -33,3 +33,32 @@ bool Point::operator!=(Point const& aPoint) const
 {
     return not (*this == aPoint);
 }
+
+//=============================================================================
+//                        Line Class Definition
+//=============================================================================
+
+Line::Line(Point const& /*p1*/, Point const& /*p2*/)
+{
+}
+
+float Line::getLowerParameter() const
+{
+    return 0;
+}
+
+float Line::getUpperParameter() const
+{
+    return 10;
+}
+
+bool Line::operator==(Line const& aLine) const
+{
+    return (this->getLowerParameter() == aLine.getLowerParameter() and 
+            this->getUpperParameter() == aLine.getUpperParameter());
+}
+
+bool Line::operator!=(Line const& aLine) const
+{
+    return not (*this == aLine);
+}

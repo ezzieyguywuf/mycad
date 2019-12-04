@@ -15,6 +15,19 @@ MyCAD::Geometry::Point const& Vertex::point() const
 }
 
 //=============================================================================
+//                      Edge Class Definition
+//=============================================================================
+Edge::Edge(MyCAD::Geometry::Line const& aLine)
+    : myLine(aLine)
+{
+}
+
+MyCAD::Geometry::Line const& Edge::getLine() const
+{
+    return myLine;
+}
+
+//=============================================================================
 //                         Box Class Definition
 //=============================================================================
 /** Notice that it is possible to pass negative numbers into this constructor. What this

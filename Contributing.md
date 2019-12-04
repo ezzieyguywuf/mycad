@@ -7,7 +7,8 @@
     2. [Writing Code: first pass](#writing-code-first-pass)
     3. [Writing Code: second pass](#writing-code-second-pass)
     4. [Write More Tests](#writing-more-tests)
-5. [Licencing New Files](#licencing-new-files)
+5. [TODO File](#todo-file)
+6. [Licencing New Files](#licencing-new-files)
 
 ## Work Flow [↑][1] <a name="work-flow"></a>
 
@@ -157,6 +158,34 @@ As far as I can tell, that's really the gist of TDD. Now just rinse, lather and 
 I've actually had limited success using this type of approach, but maybe it's because  I
 don't really know what I'm doing. Let's try to use this disciplined, structured approach,
 in order to ensure that our code-base is bulletproof!
+
+## TODO File [↑][1] <a name="todo-file"></a>
+
+A  `TODO` will always be present at the top-level of this repository. Given the nature of
+how we're approaching TDD, first-passes at writing code can and will likely lead to bad
+code. In fact, you may find yourself writing something like:
+
+```cpp
+    float MyClass::calculate() const
+    {
+        return 20;
+    }
+```
+
+Because you know that this will force the unit-test you wrote earlier to pass. This is 
+ok - future unit-tests (motivated by the desire for the calculate function to do more than
+just return `20`) will force us to change this.
+
+However, for something as blatantly wrong as this, it should be noted in the `TODO` file
+so that we don't lose track of it.
+
+The `TODO` file is _not_ intended to grow forever. Rather, as we enter the "second pass"
+of our TDD cycle, we should address some of our issues in the `TODO` file, and erase them
+from the `TODO` file as they are resolved.
+
+It is OK if you leave something in `TODO` for a few cycles.
+
+It is _not_ ok to leave somthing in `TODO` forever - either do it, or don't.
 
 ## Licencing New Files [↑][1] <a name="licencing-new-files"></a>
 

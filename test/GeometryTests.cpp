@@ -18,36 +18,41 @@
 
 #include <MyCAD/Geometry.hpp>
 
-SCENARIO("CAD Programs require cartesian geometry")
+SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
 {
-    GIVEN("A point")
+    GIVEN("a Point")
     {
         float x = 1;
         float y = 2;
         float z = 3;
         MyCAD::Geometry::Point pnt(x, y, z);
 
-        WHEN("the X value is retrieved")
+        WHEN("the any cartesian value is requested")
         {
-            THEN("it should equal the constructed value")
+            THEN("it should equal the value used to construct it")
             {
                 REQUIRE(pnt.x() == x);
-            }
-        }
-
-        WHEN("the Y value is retrieved")
-        {
-            THEN("it should equal the constructed value")
-            {
                 REQUIRE(pnt.y() == y);
+                REQUIRE(pnt.z() == z);
             }
         }
-
-        WHEN("the Z value is retrieved")
+    }
+    GIVEN("two Points")
+    {
+        MyCAD::Geometry::Point p1(0, 0, 0);
+        MyCAD::Geometry::Point p2(10, 10, 10);
+        WHEN("we make a Line between them")
         {
-            THEN("it should equal the constructed value")
+            MyCAD::Geometry::Line line(p1, p2);
+            THEN("it should get parametrized")
             {
-                REQUIRE(pnt.z() == z);
+                REQUIRE(line.getLowerParameter() == 0);
+                REQUIRE(line.getUpperParameter() == 10);
+            }
+            THEN("two Lines created with them should be equal")
+            {
+                MyCAD::Geometry::Line line2(p1, p2);
+                REQUIRE(line == line2);
             }
         }
     }

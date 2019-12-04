@@ -18,12 +18,12 @@
 
 #include <MyCAD/Shapes.hpp>
 
-SCENARIO("Basic topological entities wrap geometric constructs")
+SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
 {
-    GIVEN("A point")
+    GIVEN("A Point")
     {
         MyCAD::Geometry::Point pnt(1,2,3);
-        WHEN("a vertex is created with it")
+        WHEN("a Vertex is created with it")
         {
             MyCAD::Shapes::Vertex vert(pnt);
             THEN("we should be able to get that same point back.")
@@ -32,9 +32,23 @@ SCENARIO("Basic topological entities wrap geometric constructs")
             }
         }
     }
+    GIVEN("a line")
+    {
+        MyCAD::Geometry::Point p1(0,0,0);
+        MyCAD::Geometry::Point p2(10,10,10);
+        MyCAD::Geometry::Line line(p1, p2);
+        WHEN("an Edge is created with it")
+        {
+            MyCAD::Shapes::Edge edge(line);
+            THEN("we should be able to retrive the Line")
+            {
+                REQUIRE(edge.getLine() == line);
+            }
+        }
+    }
 }
 
-SCENARIO("CAD Programs can create Primitive Solids")
+SCENARIO("CAD Programs can create Primitive Solids", "[Shapes]")
 {
     GIVEN("A Box")
     {
