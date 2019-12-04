@@ -14,22 +14,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "catch.hpp"
+#ifndef MYCAD_SHAPES_HEADER
+#define MYCAD_SHAPES_HEADER
 
-#include <MyCAD/Shapes.hpp>
+#include <vector>
 
-SCENARIO("CAD Programs can create Primitive Solids")
+namespace MyCAD
 {
-    GIVEN("A Box")
+    namespace Shapes
     {
-        MyCAD::Shapes::Box box(10, 10, 10);
-        WHEN("the Faces are retrieved")
+        class Face
         {
-            const std::vector<MyCAD::Shapes::Face>& faces = box.getFaces();
-            THEN("there should be only 6 faces")
-            {
-                REQUIRE(faces.size() == 6);
-            }
-        }
+            public:
+                Face() = default;
+        };
+
+        class Box
+        {
+            public:
+                Box(unsigned int x, unsigned int y, unsigned int z);
+                std::vector<Face> getFaces() const;
+        };
     }
 }
+
+#endif //MYCAD_SHAPES_HEADER

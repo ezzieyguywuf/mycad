@@ -12,9 +12,11 @@ add_compile_options(-std=c++11 -Wpedantic -Werror -Wextra -Wall)
 # --------- Various CMake Configs --------------
 message("${CMAKE_CURRENT_SOURCE_DIR}/misc/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/misc/cmake")
+include_directories("include")
 
 # ------------ Find Things ---------------------
 find_package(OpenCasCade REQUIRED)
 
 # --------------- Add Sub-Directories --------------
+add_subdirectory(src)
 add_subdirectory(test)
