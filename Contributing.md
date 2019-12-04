@@ -12,8 +12,10 @@
 
 ## Work Flow [↑][1] <a name="work-flow"></a>
 
-For now, let's keep all active development in the `master_staging` branch - it should be
-relatively painless to commit and push these changes to upstream.
+For now, let's keep all active development in the `master_development` branch - it should be
+relatively painless to commit and push these changes to upstream. By this I mean that
+pull-requests to `master_development` should be accepted with frequency (assuming robust
+development practices are being used!).
 
 However, let's be more selective about when to merge into `master` - the gitlab continuous
 integration will only trigger for new commits in `master`. Therefore, while I say "more
@@ -32,11 +34,42 @@ methodology.
 I don't know if this is the best approach or not, but we'll start with this.
 
 Finally, before pushing `master` to the repository, some care should be taken to "clean
-up" the git log. In other words, something along the lines of `git rebase -i HEAD~10`
-should be ran, and then as much as feasible multiple commits should be "squased" into one.
+up" the git log. In other words, something along the lines of the following should be
+done:
 
-This allows the `master_staging` git log to be as verbose as we want it to be while
+```sh
+# First, let's make sure our master branch is up-to-date with upstream
+git checkout master
+git pull upstream master
+
+# Next, let's replay our local changes on top of the latest upstream
+git checkout master_development
+git rebase master
+
+# We'll switch to the staging branch, and again, get it up-to-speed with upstream
+git checkout master_staging
+git rebase master
+
+# Finally, we can merge our latest changes into the staging area
+git merge master_development
+
+# Here's where we clean up our commit history. I'm using "10" here as an example. Use
+# whatever number makes sense for your particular merge.
+git rebase -i HEAD~10
+```
+
+This allows the `master_development` git log to be as verbose as we want it to be while
 keeping the `master` log relatively concise, yet still informative.
+
+To reiterate from the comments in the bash code above: `HEAD~10` is merely used as an
+example. In practice, you should rebase as far back as you need to in order to fully
+capture all the commits you are attempting to merge.
+
+Finally, the intent here is not to reduce your commit history down to a single commit.
+Rather, the idea is to allow you as a developer to commit as often as you deem appropriate
+("fixed bug from previous commit", "nevermind, I didn't realize there's a runtime crash",
+"still trying to make it work...", etc...) while still keeping the master git log
+informative and "clean" ("Added NEWFEATURE.", "Fixed BUG 2158", etc...).
 
 ## Code Documentation [↑][1] <a name="code-documentation"></a>
 
