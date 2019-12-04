@@ -53,6 +53,15 @@ namespace MyCAD
                 float myY;
                 float myZ;
         };
+
+        /** @brief A parametrized line*/
+        class Line
+        {
+            public:
+                Line(Point const& p1, Point const& p2);
+                float getLowerParameter() const;
+                float getUpperParameter() const;
+        };
     }
 }
 #endif // MYCAD_GEOMETRY_HEADER
