@@ -24,8 +24,7 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
     {
         float x = 1;
         float y = 2;
-        float z = 3;
-        MyCAD::Geometry::Point pnt(x, y, z);
+        MyCAD::Geometry::Point pnt(x, y);
 
         WHEN("the any cartesian value is requested")
         {
@@ -33,14 +32,13 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
             {
                 REQUIRE(pnt.x() == x);
                 REQUIRE(pnt.y() == y);
-                REQUIRE(pnt.z() == z);
             }
         }
     }
     GIVEN("two Points")
     {
-        MyCAD::Geometry::Point p1(0, 0, 0);
-        MyCAD::Geometry::Point p2(10, 10, 10);
+        MyCAD::Geometry::Point p1(0, 0);
+        MyCAD::Geometry::Point p2(10, 10);
         WHEN("we make a Line between them")
         {
             MyCAD::Geometry::Line line(p1, p2);

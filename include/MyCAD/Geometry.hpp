@@ -18,6 +18,11 @@
 #ifndef MYCAD_GEOMETRY_HEADER
 #define MYCAD_GEOMETRY_HEADER
 
+#include <CGAL/Simple_cartesian.h>
+typedef CGAL::Simple_cartesian<double> Kernel;
+typedef Kernel::Point_2 Point_2;
+typedef Kernel::Segment_2 Segment_2;
+
 /** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
 {
@@ -28,17 +33,16 @@ namespace Geometry
     class Point
     {
         public:
-            /** @brief Construct a Point in 3D space
-             *  @param x,y,z The cartesian coordinates of the point
+            /** @brief Construct a Point in 2D space
+             *  @param x,y The cartesian coordinates of the point
              */
-            Point(float x, float y, float z);
+            Point(float x, float y);
 
             /// @name Access Methods
             ///@{
             /// @brief Retrieve the given coordinates of the Point.
             float x() const;
             float y() const;
-            float z() const;
             ///@}
 
 
@@ -49,9 +53,7 @@ namespace Geometry
             ///@}
 
         private:
-            float myX;
-            float myY;
-            float myZ;
+            Point_2 myPoint;
     };
 
     /** @brief A parametrized line*/

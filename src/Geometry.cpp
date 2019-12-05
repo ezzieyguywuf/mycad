@@ -21,28 +21,23 @@ namespace Geometry{
 //=============================================================================
 //                        Point Class Definition
 //=============================================================================
-Point::Point(float x, float y, float z)
-    : myX(x), myY(y), myZ(z)
+Point::Point(float x, float y)
+    : myPoint(x, y)
 {}
 
 float Point::x() const
 {
-    return myX;
+    return CGAL::to_double(myPoint.x());
 }
 
 float Point::y() const
 {
-    return myY;
-}
-
-float Point::z() const
-{
-    return myZ;
+    return CGAL::to_double(myPoint.y());
 }
 
 bool Point::operator==(Point const& aPoint) const
 {
-    return myX == aPoint.myX and myY == aPoint.myY and myZ == aPoint.myZ;
+    return myPoint == aPoint.myPoint;
 }
 
 bool Point::operator!=(Point const& aPoint) const
