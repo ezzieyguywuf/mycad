@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0.0)
-cmake_policy(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.13)
+cmake_policy(VERSION 3.13)
 project(MyCAD VERSION 0.0.1)
 
 # --------------- Compile Options ------------------
@@ -16,6 +16,7 @@ include_directories("include")
 
 # ------------ Find Things ---------------------
 find_package(OpenCasCade REQUIRED)
+find_package(CGAL REQUIRED)
 
 # --------------- Add Sub-Directories --------------
 add_subdirectory(src)
