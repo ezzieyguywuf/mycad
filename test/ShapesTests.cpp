@@ -36,29 +36,29 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
         }
     }
 
-    GIVEN("a line")
+    GIVEN("a LineSegment")
     {
         MyCAD::Geometry::Point p1(0,0);
         MyCAD::Geometry::Point p2(10,10);
-        MyCAD::Geometry::Line line(p1, p2);
+        MyCAD::Geometry::LineSegment line(p1, p2);
         WHEN("an Edge is created with it")
         {
             MyCAD::Shapes::Edge edge(line);
-            THEN("we should be able to retrive the Line")
+            THEN("we should be able to retrive the LineSegment")
             {
-                REQUIRE(edge.getLine() == line);
+                REQUIRE(edge.getLineSegment() == line);
             }
         }
     }
 
-    GIVEN("two lines with one common Point")
+    GIVEN("two LineSegments with one common Point")
     {
         MyCAD::Geometry::Point p1(0,0);
         MyCAD::Geometry::Point p2(10,10);
         MyCAD::Geometry::Point p3(0,10);
 
-        MyCAD::Geometry::Line l1(p1, p2);
-        MyCAD::Geometry::Line l2(p2, p3);
+        MyCAD::Geometry::LineSegment l1(p1, p2);
+        MyCAD::Geometry::LineSegment l2(p2, p3);
 
         WHEN("a Wire is made with them")
         {
@@ -73,15 +73,15 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
         }
     }
 
-    GIVEN("two lines without a common Point")
+    GIVEN("two LineSegments without a common Point")
     {
         MyCAD::Geometry::Point p1(0,0);
         MyCAD::Geometry::Point p2(5,5);
         MyCAD::Geometry::Point p3(10,10);
         MyCAD::Geometry::Point p4(15,15);
 
-        MyCAD::Geometry::Line l1(p1, p2);
-        MyCAD::Geometry::Line l2(p3, p4);
+        MyCAD::Geometry::LineSegment l1(p1, p2);
+        MyCAD::Geometry::LineSegment l2(p3, p4);
         
         WHEN("we try to make a Wire with them")
         {

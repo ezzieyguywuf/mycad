@@ -36,13 +36,13 @@ namespace Geometry
             /** @brief Construct a Point in 2D space
              *  @param x,y The cartesian coordinates of the point
              */
-            Point(float x, float y);
+            Point(Kernel::FT const& x, Kernel::FT const& y);
 
-            /// @name Access Methods
-            ///@{
-            /// @brief Retrieve the given coordinates of the Point.
-            float x() const;
-            float y() const;
+            /// @name Access methods
+            /// @{
+            /// Retrieve the precise coordinates
+            Kernel::FT x() const;
+            Kernel::FT y() const;
             ///@}
 
 
@@ -57,23 +57,24 @@ namespace Geometry
     };
 
     /** @brief A parametrized line*/
-    class Line
+    class LineSegment
     {
         public:
-            Line(Point const& p1, Point const& p2);
+            LineSegment(Point const& p1, Point const& p2);
 
-            /** @name Parameter Information*/
-            ///@{
-            /** Get information about the parametrization of the line*/
-            float getLowerParameter() const;
-            float getUpperParameter() const;
-            ///@}
+            /** Returns the start point of the Segment*/
+            Point start() const;
+            /** Returns the end point of the Segment*/
+            Point end() const;
 
             /** @name operators*/
             ///@{
-            bool operator==(Line const& aLine) const;
-            bool operator!=(Line const& aLine) const;
+            bool operator==(LineSegment const& aLineSegment) const;
+            bool operator!=(LineSegment const& aLineSegment) const;
             ///@}
+
+        private:
+            Segment_2 mySegment;
     };
 } // namespace Geometry
 } // namespace MyCAD

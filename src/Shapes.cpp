@@ -34,19 +34,19 @@ MyCAD::Geometry::Point const& Vertex::point() const
 //=============================================================================
 //                      Edge Class Definition
 //=============================================================================
-Edge::Edge(MyCAD::Geometry::Line const& aLine)
-    : myLine(aLine)
+Edge::Edge(MyCAD::Geometry::LineSegment const& aLineSegment)
+    : myLineSegment(aLineSegment)
 {
 }
 
-MyCAD::Geometry::Line const& Edge::getLine() const
+MyCAD::Geometry::LineSegment const& Edge::getLineSegment() const
 {
-    return myLine;
+    return myLineSegment;
 }
 
 bool Edge::operator==(Edge const& anEdge) const
 {
-    return this->getLine() == anEdge.getLine();
+    return this->getLineSegment() == anEdge.getLineSegment();
 }
 
 bool Edge::operator!=(Edge const& anEdge) const
@@ -57,11 +57,11 @@ bool Edge::operator!=(Edge const& anEdge) const
 //=============================================================================
 //                      Wire Class Definition
 //=============================================================================
-Wire::Wire(std::vector<MyCAD::Geometry::Line> const& lines)
+Wire::Wire(std::vector<MyCAD::Geometry::LineSegment> const& lineSegments)
 {
-    for(MyCAD::Geometry::Line const& aLine: lines)
+    for(MyCAD::Geometry::LineSegment const& aLineSegment: lineSegments)
     {
-        myEdges.emplace_back(aLine);
+        myEdges.emplace_back(aLineSegment);
     }
 }
 
