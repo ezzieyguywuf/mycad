@@ -41,22 +41,22 @@ class Vertex
 class Edge
 {
     public:
-        explicit Edge(Geometry::Line const& aLine);
-        Geometry::Line const& getLine() const;
+        explicit Edge(Geometry::LineSegment const& aLineSegment);
+        Geometry::LineSegment const& getLineSegment() const;
 
         bool operator==(Edge const& anEdge) const;
         bool operator!=(Edge const& anEdge) const;
 
     private:
-        Geometry::Line myLine;
+        Geometry::LineSegment myLineSegment;
 };
 
 /** @brief A wire is a collection of edges*/
 class Wire
 {
     public:
-        /** @brief Construct a Wire from the given Lines*/
-        explicit Wire(std::vector<Geometry::Line> const& lines);
+        /** @brief Construct a Wire from the given LineSegments*/
+        explicit Wire(std::vector<Geometry::LineSegment> const& lineSegments);
 
         /** @brief Returns the Edges that make up the Wire*/
         std::vector<Edge> const& getEdges() const;
