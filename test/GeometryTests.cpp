@@ -36,24 +36,25 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
             }
         }
     }
-    //GIVEN("two Points")
-    //{
-        //MyCAD::Geometry::Point p1(0, 0);
-        //MyCAD::Geometry::Point p2(10, 10);
-        //WHEN("we make a LineSegment between them")
-        //{
-            //MyCAD::Geometry::LineSegment line(p1, p2);
-            //THEN("we should be able to retrieve the begining and ending points")
-            //{
-                //REQUIRE(line.start() == p1);
-                //REQUIRE(line.end() == p2);
-            //}
-            //THEN("two Lines created with them should be equal")
-            //{
-                //MyCAD::Geometry::Line line2(p1, p2);
-                //REQUIRE(line == line2);
-            //}
-        //}
-    //}
+
+    GIVEN("two Points")
+    {
+        MyCAD::Geometry::Point p1(0, 0);
+        MyCAD::Geometry::Point p2(10, 10);
+        WHEN("we make a LineSegment between them")
+        {
+            MyCAD::Geometry::LineSegment line(p1, p2);
+            THEN("we should be able to retrieve the begining and ending points")
+            {
+                REQUIRE(line.start() == p1);
+                REQUIRE(line.end() == p2);
+            }
+            THEN("two Lines created with them should be equal")
+            {
+                MyCAD::Geometry::LineSegment line2(p1, p2);
+                REQUIRE(line == line2);
+            }
+        }
+    }
 }
 
