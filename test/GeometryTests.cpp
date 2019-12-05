@@ -22,37 +22,38 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
 {
     GIVEN("a Point")
     {
-        float x = 1;
-        float y = 2;
+        double x = 1;
+        double y = 2;
         MyCAD::Geometry::Point pnt(x, y);
 
         WHEN("the any cartesian value is requested")
         {
             THEN("it should equal the value used to construct it")
             {
-                REQUIRE(pnt.x() == x);
-                REQUIRE(pnt.y() == y);
+                Point_2 check(x, y);
+                REQUIRE(pnt.x() == check.x());
+                REQUIRE(pnt.y() == check.y());
             }
         }
     }
-    GIVEN("two Points")
-    {
-        MyCAD::Geometry::Point p1(0, 0);
-        MyCAD::Geometry::Point p2(10, 10);
-        WHEN("we make a Line between them")
-        {
-            MyCAD::Geometry::Line line(p1, p2);
-            THEN("it should get parametrized")
-            {
-                REQUIRE(line.getLowerParameter() == 0);
-                REQUIRE(line.getUpperParameter() == 10);
-            }
-            THEN("two Lines created with them should be equal")
-            {
-                MyCAD::Geometry::Line line2(p1, p2);
-                REQUIRE(line == line2);
-            }
-        }
-    }
+    //GIVEN("two Points")
+    //{
+        //MyCAD::Geometry::Point p1(0, 0);
+        //MyCAD::Geometry::Point p2(10, 10);
+        //WHEN("we make a LineSegment between them")
+        //{
+            //MyCAD::Geometry::LineSegment line(p1, p2);
+            //THEN("we should be able to retrieve the begining and ending points")
+            //{
+                //REQUIRE(line.start() == p1);
+                //REQUIRE(line.end() == p2);
+            //}
+            //THEN("two Lines created with them should be equal")
+            //{
+                //MyCAD::Geometry::Line line2(p1, p2);
+                //REQUIRE(line == line2);
+            //}
+        //}
+    //}
 }
 

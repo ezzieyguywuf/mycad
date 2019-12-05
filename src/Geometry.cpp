@@ -21,16 +21,16 @@ namespace Geometry{
 //=============================================================================
 //                        Point Class Definition
 //=============================================================================
-Point::Point(float x, float y)
-    : myPoint(x, y)
+Point::Point(Kernel::FT const& x, Kernel::FT const& y)
+    :myPoint(x, y)
 {}
 
-float Point::x() const
+Kernel::FT Point::x() const
 {
     return CGAL::to_double(myPoint.x());
 }
 
-float Point::y() const
+Kernel::FT Point::y() const
 {
     return CGAL::to_double(myPoint.y());
 }
@@ -46,32 +46,31 @@ bool Point::operator!=(Point const& aPoint) const
 }
 
 //=============================================================================
-//                        Line Class Definition
+//                        LineSegment Class Definition
 //=============================================================================
 
-Line::Line(Point const& /*p1*/, Point const& /*p2*/)
+LineSegment::LineSegment(Point const& p1, Point const& p2)
+    : mySegment({p1.x(), p1.y()}, {p2.x(), p2.y()})
+{}
+
+Point LineSegment::start() const
 {
+    return Point(mySegment.source().x(), mySegment.source().y());
 }
 
-float Line::getLowerParameter() const
+Point LineSegment::end() const
 {
-    return 0;
+    return Point(mySegment.target().x(), mySegment.target().y());
 }
 
-float Line::getUpperParameter() const
+bool LineSegment::operator==(LineSegment const& aLineSegment) const
 {
-    return 10;
+    return mySegment == aLineSegment.mySegment;
 }
 
-bool Line::operator==(Line const& aLine) const
+bool LineSegment::operator!=(LineSegment const& aLineSegment) const
 {
-    return (this->getLowerParameter() == aLine.getLowerParameter() and 
-            this->getUpperParameter() == aLine.getUpperParameter());
-}
-
-bool Line::operator!=(Line const& aLine) const
-{
-    return not (*this == aLine);
+    return not (*this == aLineSegment);
 }
 
 } // namespace Geometry
