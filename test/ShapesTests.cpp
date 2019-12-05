@@ -25,7 +25,7 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
 {
     GIVEN("A Point")
     {
-        MyCAD::Geometry::Point pnt(1,2,3);
+        MyCAD::Geometry::Point pnt(1,2);
         WHEN("a Vertex is created with it")
         {
             MyCAD::Shapes::Vertex vert(pnt);
@@ -38,8 +38,8 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
 
     GIVEN("a line")
     {
-        MyCAD::Geometry::Point p1(0,0,0);
-        MyCAD::Geometry::Point p2(10,10,10);
+        MyCAD::Geometry::Point p1(0,0);
+        MyCAD::Geometry::Point p2(10,10);
         MyCAD::Geometry::Line line(p1, p2);
         WHEN("an Edge is created with it")
         {
@@ -53,9 +53,9 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
 
     GIVEN("two lines with one common Point")
     {
-        MyCAD::Geometry::Point p1(0,0,0);
-        MyCAD::Geometry::Point p2(10,10,0);
-        MyCAD::Geometry::Point p3(0,10,0);
+        MyCAD::Geometry::Point p1(0,0);
+        MyCAD::Geometry::Point p2(10,10);
+        MyCAD::Geometry::Point p3(0,10);
 
         MyCAD::Geometry::Line l1(p1, p2);
         MyCAD::Geometry::Line l2(p2, p3);
@@ -75,10 +75,10 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
 
     GIVEN("two lines without a common Point")
     {
-        MyCAD::Geometry::Point p1(0,0,0);
-        MyCAD::Geometry::Point p2(5,5,0);
-        MyCAD::Geometry::Point p3(10,10,0);
-        MyCAD::Geometry::Point p4(15,15,0);
+        MyCAD::Geometry::Point p1(0,0);
+        MyCAD::Geometry::Point p2(5,5);
+        MyCAD::Geometry::Point p3(10,10);
+        MyCAD::Geometry::Point p4(15,15);
 
         MyCAD::Geometry::Line l1(p1, p2);
         MyCAD::Geometry::Line l2(p3, p4);

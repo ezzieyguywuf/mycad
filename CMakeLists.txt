@@ -17,6 +17,7 @@ include_directories("include")
 # ------------ Find Things ---------------------
 find_package(OpenCasCade REQUIRED)
 find_package(CGAL REQUIRED)
+include(${CGAL_USE_FILE})
 
 # --------------- Add Sub-Directories --------------
 add_subdirectory(src)
