@@ -84,9 +84,9 @@ here.))err";
     }
 }
 
-std::vector<Edge> const& Wire::getEdges() const
+std::vector<Edge> Wire::getEdges() const
 {
-    return myEdges;
+    return std::vector<Edge>({});
 }
 
 //=============================================================================

@@ -71,7 +71,7 @@ class Wire
         explicit Wire(std::vector<Geometry::LineSegment> const& lineSegments);
 
         /** @brief Returns the Edges that make up the Wire*/
-        std::vector<Edge> const& getEdges() const;
+        std::vector<Edge> getEdges() const;
 
     private:
         Arrangement_2 arr;
