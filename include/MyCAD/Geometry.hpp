@@ -19,9 +19,6 @@
 #define MYCAD_GEOMETRY_HEADER
 
 #include <CGAL/Simple_cartesian.h>
-typedef CGAL::Simple_cartesian<double> Kernel;
-typedef Kernel::Point_2 Point_2;
-typedef Kernel::Segment_2 Segment_2;
 
 /** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
@@ -29,6 +26,11 @@ namespace MyCAD
 /** @brief Anything related to geomtry*/
 namespace Geometry
 {
+
+typedef CGAL::Simple_cartesian<double> Kernel;
+typedef Kernel::Point_2 Point_2;
+typedef Kernel::Segment_2 Segment_2;
+
     /** @brief A point in cartesian space.*/
     class Point
     {
@@ -67,8 +69,16 @@ namespace Geometry
             /** Returns the end point of the Segment*/
             Point end() const;
 
+            /** Returns the point with the lowest x-value */
+            Point min() const;
+            /** Returns the point with the highest x-value */
+            Point max() const;
+
             /** Check if this LineSegment intersects with another*/
             bool intersects(LineSegment const& aLineSegment) const;
+
+            /** Return a copy of the underlying CGAL Segment_2*/
+            Segment_2 getGeometry() const;
 
             /** @name operators*/
             ///@{

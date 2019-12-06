@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <MyCAD/Exceptions.hpp>
 #include <MyCAD/Shapes.hpp>
 
 namespace MyCAD{
@@ -21,12 +22,12 @@ namespace Shapes{
 //=============================================================================
 //                      Vertex Class Definition
 //=============================================================================
-Vertex::Vertex(MyCAD::Geometry::Point const& pnt)
+Vertex::Vertex(Geometry::Point const& pnt)
     : myPoint(pnt)
 {
 }
 
-MyCAD::Geometry::Point const& Vertex::point() const
+Geometry::Point const& Vertex::point() const
 {
     return myPoint;
 }
@@ -34,12 +35,12 @@ MyCAD::Geometry::Point const& Vertex::point() const
 //=============================================================================
 //                      Edge Class Definition
 //=============================================================================
-Edge::Edge(MyCAD::Geometry::LineSegment const& aLineSegment)
+Edge::Edge(Geometry::LineSegment const& aLineSegment)
     : myLineSegment(aLineSegment)
 {
 }
 
-MyCAD::Geometry::LineSegment const& Edge::getLineSegment() const
+Geometry::LineSegment const& Edge::getLineSegment() const
 {
     return myLineSegment;
 }
@@ -57,17 +58,35 @@ bool Edge::operator!=(Edge const& anEdge) const
 //=============================================================================
 //                      Wire Class Definition
 //=============================================================================
-Wire::Wire(std::vector<MyCAD::Geometry::LineSegment> const& lineSegments)
+Wire::Wire(std::vector<Geometry::LineSegment> const& lineSegments)
 {
-    for(MyCAD::Geometry::LineSegment const& aLineSegment: lineSegments)
+
+    Geometry::LineSegment last = lineSegments.at(0);
+    for(Geometry::LineSegment const& aLineSegment: lineSegments)
     {
-        myEdges.emplace_back(aLineSegment);
+        if (aLineSegment == last)
+        {
+            continue;
+        }
+        if(aLineSegment.min() != last.max())
+        {
+            std::string message = R"err(
+Each consecutive LineSegment must line up to the last one!
+
+In other words, given two LineSegment "first" and "next", first.max() === next.min().
+Review CGAL::Segment_2 documentation, as well as
+CGAL::Arragement_2::insert_from_left_vertex documentation if you want a lot more
+information about this (the CGAL::Arragement_2 User Manual in general is a great reference
+here.))err";
+            throw Exception(message);
+        }
+        last = aLineSegment;
     }
 }
 
-std::vector<Edge> const& Wire::getEdges() const
+std::vector<Edge> Wire::getEdges() const
 {
-    return myEdges;
+    return std::vector<Edge>({});
 }
 
 //=============================================================================
