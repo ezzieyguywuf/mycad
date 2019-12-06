@@ -22,6 +22,14 @@
 #include <CGAL/Arrangement_2.h>
 #include "Geometry.hpp"
 
+#include <vector>
+
+namespace MyCAD
+{
+/** @brief Topological shapes - distinctly _not_ geometry */
+namespace Shapes
+{
+
 // These typedefs define the portions of the CGAL infrastructure that we'll be using.
 typedef int                                Number_type;
 typedef CGAL::Cartesian<Number_type>       Kernel;
@@ -30,14 +38,6 @@ typedef Traits_3::Point_2                  Point_2;
 typedef Traits_2::X_monotone_curve_2       Segment_2;
 typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
 
-
-#include <vector>
-
-namespace MyCAD
-{
-/** @brief Topological shapes - distinctly _not_ geometry */
-namespace Shapes
-{
 /** @brief A point in space */
 class Vertex
 {
