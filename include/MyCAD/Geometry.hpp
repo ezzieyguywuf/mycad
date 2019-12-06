@@ -47,6 +47,8 @@ typedef Kernel::Segment_2 Segment_2;
             Kernel::FT y() const;
             ///@}
 
+            /** Return a copy of the underlying CGAL Point_2*/
+            Point_2 getGeometry() const;
 
             /// @name Operators
             ///@{
