@@ -18,7 +18,9 @@
 #ifndef MYCAD_GEOMETRY_HEADER
 #define MYCAD_GEOMETRY_HEADER
 
-#include <CGAL/Simple_cartesian.h>
+#include <CGAL/Cartesian.h>
+#include <CGAL/Arr_segment_traits_2.h>
+#include <CGAL/Arrangement_2.h>
 
 /** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
@@ -26,10 +28,16 @@ namespace MyCAD
 /** @brief Anything related to geomtry*/
 namespace Geometry
 {
+    // These typedefs define the portions of the CGAL infrastructure that we'll be using.
+    typedef int                                Number_type;
+    typedef CGAL::Cartesian<Number_type>       Kernel;
+    typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
+    typedef Traits_2::Point_2                  Point_2;
+    typedef Traits_2::X_monotone_curve_2       Segment_2;
+    typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
+    typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
+    typedef Arrangement_2::Vertex_handle       Vertex_handle;
 
-typedef CGAL::Simple_cartesian<double> Kernel;
-typedef Kernel::Point_2 Point_2;
-typedef Kernel::Segment_2 Segment_2;
 
     /** @brief A point in cartesian space.*/
     class Point
