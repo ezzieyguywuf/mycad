@@ -64,7 +64,7 @@ class Wire
         std::vector<Edge> getEdges() const;
 
     private:
-        Arrangement_2 arr;
+        Geometry::Arrangement_2 arr;
 };
 
 /** @brief A two-dimensional portion of space */
