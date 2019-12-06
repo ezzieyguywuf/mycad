@@ -21,12 +21,12 @@ namespace Shapes{
 //=============================================================================
 //                      Vertex Class Definition
 //=============================================================================
-Vertex::Vertex(MyCAD::Geometry::Point const& pnt)
+Vertex::Vertex(Geometry::Point const& pnt)
     : myPoint(pnt)
 {
 }
 
-MyCAD::Geometry::Point const& Vertex::point() const
+Geometry::Point const& Vertex::point() const
 {
     return myPoint;
 }
@@ -34,12 +34,12 @@ MyCAD::Geometry::Point const& Vertex::point() const
 //=============================================================================
 //                      Edge Class Definition
 //=============================================================================
-Edge::Edge(MyCAD::Geometry::LineSegment const& aLineSegment)
+Edge::Edge(Geometry::LineSegment const& aLineSegment)
     : myLineSegment(aLineSegment)
 {
 }
 
-MyCAD::Geometry::LineSegment const& Edge::getLineSegment() const
+Geometry::LineSegment const& Edge::getLineSegment() const
 {
     return myLineSegment;
 }
@@ -57,9 +57,10 @@ bool Edge::operator!=(Edge const& anEdge) const
 //=============================================================================
 //                      Wire Class Definition
 //=============================================================================
-Wire::Wire(std::vector<MyCAD::Geometry::LineSegment> const& lineSegments)
+Wire::Wire(std::vector<Geometry::LineSegment> const& lineSegments)
 {
-    for(MyCAD::Geometry::LineSegment const& aLineSegment: lineSegments)
+
+    for(Geometry::LineSegment const& aLineSegment: lineSegments)
     {
         myEdges.emplace_back(aLineSegment);
     }
