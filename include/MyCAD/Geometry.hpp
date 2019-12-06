@@ -76,6 +76,7 @@ class LineSegment
 {
     public:
         LineSegment(Point const& p1, Point const& p2);
+        LineSegment(Segment_2 const& seg);
 
         /** Returns the start point of the Segment*/
         Point start() const;
