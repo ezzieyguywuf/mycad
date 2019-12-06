@@ -67,11 +67,12 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
         {
             MyCAD::Geometry::Point p3(15, 15);
             MyCAD::Geometry::Point p4(20, 20);
-            MyCAD::Geometry::LineSegment s2(p1, p2);
+            MyCAD::Geometry::LineSegment s2(p3, p4);
 
             THEN("the two should not intersect")
             {
-                REQUIRE_FALSE(s2.intersects(s2));
+
+                REQUIRE_FALSE(s1.intersects(s2));
             }
         }
     }

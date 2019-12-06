@@ -67,6 +67,9 @@ namespace Geometry
             /** Returns the end point of the Segment*/
             Point end() const;
 
+            /** Check if this LineSegment intersects with another*/
+            bool intersects(LineSegment const& aLineSegment) const;
+
             /** @name operators*/
             ///@{
             bool operator==(LineSegment const& aLineSegment) const;
