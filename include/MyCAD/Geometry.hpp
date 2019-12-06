@@ -33,7 +33,8 @@ namespace Geometry
     typedef CGAL::Cartesian<Number_type>       Kernel;
     typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
     typedef Traits_2::Point_2                  Point_2;
-    typedef Traits_2::X_monotone_curve_2       Segment_2;
+    typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
+    typedef Kernel::Segment_2                  Segment_2;
     typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
     typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
     typedef Arrangement_2::Vertex_handle       Vertex_handle;
@@ -97,7 +98,7 @@ namespace Geometry
             ///@}
 
         private:
-            Segment_2 mySegment;
+            MonoCurve_2 myMonotoneCurve;
     };
 } // namespace Geometry
 } // namespace MyCAD
