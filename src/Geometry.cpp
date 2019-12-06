@@ -73,6 +73,11 @@ bool LineSegment::intersects(LineSegment const& aLineSegment) const
     return false;
 }
 
+Segment_2 LineSegment::getGeometry() const
+{
+    return mySegment;
+}
+
 bool LineSegment::operator==(LineSegment const& aLineSegment) const
 {
     return mySegment == aLineSegment.mySegment;
