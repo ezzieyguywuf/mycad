@@ -70,6 +70,9 @@ namespace Geometry
             /** Check if this LineSegment intersects with another*/
             bool intersects(LineSegment const& aLineSegment) const;
 
+            /** Return a copy of the underlying CGAL Segment_2*/
+            Segment_2 getGeometry() const;
+
             /** @name operators*/
             ///@{
             bool operator==(LineSegment const& aLineSegment) const;
