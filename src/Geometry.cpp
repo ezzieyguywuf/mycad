@@ -16,6 +16,8 @@
  */
 #include <MyCAD/Geometry.hpp>
 
+#include <CGAL/intersections.h>
+
 namespace MyCAD{
 namespace Geometry{
 //=============================================================================
@@ -61,6 +63,14 @@ Point LineSegment::start() const
 Point LineSegment::end() const
 {
     return Point(mySegment.target().x(), mySegment.target().y());
+}
+
+bool LineSegment::intersects(LineSegment const& aLineSegment) const
+{
+    auto ans = intersection(mySegment, aLineSegment.mySegment);
+    if(ans)
+        return true;
+    return false;
 }
 
 bool LineSegment::operator==(LineSegment const& aLineSegment) const

@@ -26,7 +26,7 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
         double y = 2;
         MyCAD::Geometry::Point pnt(x, y);
 
-        WHEN("the any cartesian value is requested")
+        WHEN("any cartesian value is requested")
         {
             THEN("it should equal the value used to construct it")
             {
@@ -49,10 +49,30 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
                 REQUIRE(line.start() == p1);
                 REQUIRE(line.end() == p2);
             }
-            THEN("two Lines created with them should be equal")
+            THEN("a second LineSegment created with them should be equal to the first.")
             {
                 MyCAD::Geometry::LineSegment line2(p1, p2);
                 REQUIRE(line == line2);
+            }
+        }
+    }
+
+    GIVEN("a LineSegment")
+    {
+        MyCAD::Geometry::Point p1(0, 0);
+        MyCAD::Geometry::Point p2(10, 10);
+        MyCAD::Geometry::LineSegment s1(p1, p2);
+
+        WHEN("a second, non-overlapping LineSegment is constructed")
+        {
+            MyCAD::Geometry::Point p3(15, 15);
+            MyCAD::Geometry::Point p4(20, 20);
+            MyCAD::Geometry::LineSegment s2(p3, p4);
+
+            THEN("the two should not intersect")
+            {
+
+                REQUIRE_FALSE(s1.intersects(s2));
             }
         }
     }
