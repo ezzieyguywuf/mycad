@@ -18,6 +18,8 @@
 
 #include <MyCAD/Geometry.hpp>
 
+using Point_2 = MyCAD::Geometry::Point_2;
+
 SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
 {
     GIVEN("a Point")
