@@ -117,7 +117,14 @@ Wire::Wire(std::vector<Geometry::LineSegment> const& lineSegments)
 
 std::vector<Edge> Wire::getEdges() const
 {
-    return std::vector<Edge>({});
+    std::vector<Edge> out;
+    for(auto it = arr.edges_begin() ; it != arr.edges_end() ; it++ )
+    {
+        Geometry::Segment_2 seg(it->curve());
+        Geometry::LineSegment line(seg);
+        out.emplace_back(line);
+    }
+    return out;
 }
 
 //=============================================================================

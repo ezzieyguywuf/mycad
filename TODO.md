@@ -3,7 +3,6 @@
   with examples.
 - Should we explicitly `#include` every header needed, regardless of whether its already
   been included elsewhere?
-- Fix Wire::getEdges, currently only returns as empty vector.
 - Make a logging facility.
 - Decide whether or not to keep individual libraries or one monolithic library - maybe
   different for dev vs. release?
