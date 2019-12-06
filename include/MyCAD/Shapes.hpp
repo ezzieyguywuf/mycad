@@ -37,6 +37,8 @@ typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef Traits_2::Point_2                  Point_2;
 typedef Traits_2::X_monotone_curve_2       Segment_2;
 typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
+typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
+typedef Arrangement_2::Vertex_handle       Vertex_handle;
 
 /** @brief A point in space */
 class Vertex
