@@ -28,78 +28,79 @@ namespace MyCAD
 /** @brief Anything related to geomtry*/
 namespace Geometry
 {
-    // These typedefs define the portions of the CGAL infrastructure that we'll be using.
-    typedef int                                Number_type;
-    typedef CGAL::Cartesian<Number_type>       Kernel;
-    typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
-    typedef Traits_2::Point_2                  Point_2;
-    typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
-    typedef Kernel::Segment_2                  Segment_2;
-    typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
-    typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
-    typedef Arrangement_2::Vertex_handle       Vertex_handle;
+// These typedefs define the portions of the CGAL infrastructure that we'll be using.
+typedef int                                Number_type;
+typedef CGAL::Cartesian<Number_type>       Kernel;
+typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
+typedef Traits_2::Point_2                  Point_2;
+typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
+typedef Kernel::Segment_2                  Segment_2;
+typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
+typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
+typedef Arrangement_2::Vertex_handle       Vertex_handle;
 
 
-    /** @brief A point in cartesian space.*/
-    class Point
-    {
-        public:
-            /** @brief Construct a Point in 2D space
-             *  @param x,y The cartesian coordinates of the point
-             */
-            Point(Kernel::FT const& x, Kernel::FT const& y);
+/** @brief A point in cartesian space.*/
+class Point
+{
+    public:
+        /** @brief Construct a Point in 2D space
+         *  @param x,y The cartesian coordinates of the point
+         */
+        Point(Kernel::FT const& x, Kernel::FT const& y);
 
-            /// @name Access methods
-            /// @{
-            /// Retrieve the precise coordinates
-            Kernel::FT x() const;
-            Kernel::FT y() const;
-            ///@}
+        /// @name Access methods
+        /// @{
+        /// Retrieve the precise coordinates
+        Kernel::FT x() const;
+        Kernel::FT y() const;
+        ///@}
 
-            /** Return a copy of the underlying CGAL Point_2*/
-            Point_2 getGeometry() const;
+        /** Return a copy of the underlying CGAL Point_2*/
+        Point_2 getGeometry() const;
 
-            /// @name Operators
-            ///@{
-            bool operator==(Point const& aPoint) const;
-            bool operator!=(Point const& aPoint) const;
-            ///@}
+        /// @name Operators
+        ///@{
+        bool operator==(Point const& aPoint) const;
+        bool operator!=(Point const& aPoint) const;
+        ///@}
 
-        private:
-            Point_2 myPoint;
-    };
+    private:
+        Point_2 myPoint;
+};
 
-    /** @brief A parametrized line*/
-    class LineSegment
-    {
-        public:
-            LineSegment(Point const& p1, Point const& p2);
+/** @brief A parametrized line*/
+class LineSegment
+{
+    public:
+        LineSegment(Point const& p1, Point const& p2);
 
-            /** Returns the start point of the Segment*/
-            Point start() const;
-            /** Returns the end point of the Segment*/
-            Point end() const;
+        /** Returns the start point of the Segment*/
+        Point start() const;
+        /** Returns the end point of the Segment*/
+        Point end() const;
 
-            /** Returns the point with the lowest x-value */
-            Point min() const;
-            /** Returns the point with the highest x-value */
-            Point max() const;
+        /** Returns the point with the lowest x-value */
+        Point min() const;
+        /** Returns the point with the highest x-value */
+        Point max() const;
 
-            /** Check if this LineSegment intersects with another*/
-            bool intersects(LineSegment const& aLineSegment) const;
+        /** Check if this LineSegment intersects with another*/
+        bool intersects(LineSegment const& aLineSegment) const;
 
-            /** Return a copy of the underlying CGAL Segment_2*/
-            Segment_2 getGeometry() const;
+        /** Return a copy of the underlying CGAL Segment_2*/
+        Segment_2 getGeometry() const;
 
-            /** @name operators*/
-            ///@{
-            bool operator==(LineSegment const& aLineSegment) const;
-            bool operator!=(LineSegment const& aLineSegment) const;
-            ///@}
+        /** @name operators*/
+        ///@{
+        bool operator==(LineSegment const& aLineSegment) const;
+        bool operator!=(LineSegment const& aLineSegment) const;
+        ///@}
 
-        private:
-            MonoCurve_2 myMonotoneCurve;
-    };
+    private:
+        MonoCurve_2 myMonotoneCurve;
+};
+
 } // namespace Geometry
 } // namespace MyCAD
 #endif // MYCAD_GEOMETRY_HEADER
