@@ -57,32 +57,34 @@ Point_2 Point::getGeometry() const
 //=============================================================================
 
 LineSegment::LineSegment(Point const& p1, Point const& p2)
-    : mySegment({p1.x(), p1.y()}, {p2.x(), p2.y()})
+    : myMonotoneCurve({p1.x(), p1.y()}, {p2.x(), p2.y()})
 {}
 
 Point LineSegment::start() const
 {
-    return Point(mySegment.source().x(), mySegment.source().y());
+    return Point(myMonotoneCurve.source().x(), myMonotoneCurve.source().y());
 }
 
 Point LineSegment::end() const
 {
-    return Point(mySegment.target().x(), mySegment.target().y());
+    return Point(myMonotoneCurve.target().x(), myMonotoneCurve.target().y());
 }
 
 Point LineSegment::min() const
 {
-    return Point(mySegment.min().x(), mySegment.min().y());
+    Segment_2 seg(myMonotoneCurve);
+    return Point(seg.min().x(), seg.min().y());
 }
 
 Point LineSegment::max() const
 {
-    return Point(mySegment.max().x(), mySegment.max().y());
+    Segment_2 seg(myMonotoneCurve);
+    return Point(seg.max().x(), seg.max().y());
 }
 
 bool LineSegment::intersects(LineSegment const& aLineSegment) const
 {
-    auto ans = intersection(mySegment, aLineSegment.mySegment);
+    auto ans = intersection(getGeometry(), aLineSegment.getGeometry());
     if(ans)
         return true;
     return false;
@@ -90,12 +92,12 @@ bool LineSegment::intersects(LineSegment const& aLineSegment) const
 
 Segment_2 LineSegment::getGeometry() const
 {
-    return mySegment;
+    return myMonotoneCurve;
 }
 
 bool LineSegment::operator==(LineSegment const& aLineSegment) const
 {
-    return mySegment == aLineSegment.mySegment;
+    return getGeometry() == aLineSegment.getGeometry();
 }
 
 bool LineSegment::operator!=(LineSegment const& aLineSegment) const
