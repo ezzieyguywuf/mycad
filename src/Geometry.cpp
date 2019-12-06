@@ -65,6 +65,16 @@ Point LineSegment::end() const
     return Point(mySegment.target().x(), mySegment.target().y());
 }
 
+Point LineSegment::min() const
+{
+    return Point(mySegment.min().x(), mySegment.min().y());
+}
+
+Point LineSegment::max() const
+{
+    return Point(mySegment.max().x(), mySegment.max().y());
+}
+
 bool LineSegment::intersects(LineSegment const& aLineSegment) const
 {
     auto ans = intersection(mySegment, aLineSegment.mySegment);
