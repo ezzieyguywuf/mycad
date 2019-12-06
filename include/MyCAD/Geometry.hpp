@@ -70,7 +70,7 @@ namespace Geometry
             /** Returns the point with the lowest x-value */
             Point min() const;
             /** Returns the point with the highest x-value */
-            point max() const;
+            Point max() const;
 
             /** Check if this LineSegment intersects with another*/
             bool intersects(LineSegment const& aLineSegment) const;
