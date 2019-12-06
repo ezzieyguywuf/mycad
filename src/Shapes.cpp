@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <MyCAD/Exceptions.hpp>
 #include <MyCAD/Shapes.hpp>
 
 namespace MyCAD{
@@ -60,9 +61,26 @@ bool Edge::operator!=(Edge const& anEdge) const
 Wire::Wire(std::vector<Geometry::LineSegment> const& lineSegments)
 {
 
+    Geometry::LineSegment const& last = lineSegments.at(0);
     for(Geometry::LineSegment const& aLineSegment: lineSegments)
     {
-        myEdges.emplace_back(aLineSegment);
+        if (aLineSegment == last)
+        {
+            continue;
+        }
+        if(aLineSegment.min() != last.max())
+        {
+            std::string message = R"err(
+Each consecutive LineSegment must line up to the last one!
+
+In other words, given two LineSegment "first" and "next", first.max() === next.min().
+Review CGAL::Segment_2 documentation, as well as
+CGAL::Arragement_2::insert_from_left_vertex documentation if you want a lot more
+information about this (the CGAL::Arragement_2 User Manual in general is a great reference
+here.))err"
+            throw Exception(message);
+        }
+        last = aLineSegment;
     }
 }
 
