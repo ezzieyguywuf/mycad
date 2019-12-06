@@ -22,6 +22,8 @@
 #include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Arrangement_2.h>
 
+#include <ostream>
+
 /** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
 {
@@ -100,6 +102,10 @@ class LineSegment
     private:
         MonoCurve_2 myMonotoneCurve;
 };
+
+// Add these operators to ease debugging.
+std::ostream& operator<< (std::ostream& ost, Point const& aPoint);
+std::ostream& operator<< (std::ostream& ost, LineSegment const& aLineSegment);
 
 } // namespace Geometry
 } // namespace MyCAD

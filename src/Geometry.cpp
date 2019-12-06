@@ -105,5 +105,21 @@ bool LineSegment::operator!=(LineSegment const& aLineSegment) const
     return not (*this == aLineSegment);
 }
 
+//=============================================================================
+//                      Free (global) Function Definitions
+//=============================================================================
+
+std::ostream& operator<< (std::ostream& ost, Point const& aPoint)
+{
+    ost << "(" << aPoint.x() << ", " << aPoint.y() << ")";
+    return ost;
+}
+
+std::ostream& operator<< (std::ostream& ost, LineSegment const& aLineSegment)
+{
+    ost << aLineSegment.start() << " -> " << aLineSegment.end();
+    return ost;
+}
+
 } // namespace Geometry
 } // namespace MyCAD

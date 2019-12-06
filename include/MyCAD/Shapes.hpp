@@ -21,6 +21,7 @@
 #include "Geometry.hpp"
 
 #include <vector>
+#include <ostream>
 
 namespace MyCAD
 {
@@ -85,6 +86,12 @@ class Box
         Box(unsigned int x, unsigned int y, unsigned int z);
         std::vector<Face> getFaces() const;
 };
+
+// Add these operators to ease debugging.
+std::ostream& operator<< (std::ostream& ost, Vertex const& aVertex);
+std::ostream& operator<< (std::ostream& ost, Edge const& aWire);
+std::ostream& operator<< (std::ostream& ost, Wire const& aWire);
+
 } // namespace Shapes
 } // namespace MyCAD
 

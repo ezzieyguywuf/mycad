@@ -140,5 +140,39 @@ std::vector<Face> Box::getFaces() const
     return {Face(), Face(), Face(), Face(), Face(), Face()};
 }
 
+//=============================================================================
+//                      Free (global) Function Definitions
+//=============================================================================
+
+std::ostream& operator<< (std::ostream& ost, Vertex const& aVertex)
+{
+    ost << aVertex.point();
+    return ost;
+}
+
+std::ostream& operator<< (std::ostream& ost, Edge const& anEdge)
+{
+    ost << anEdge.getLineSegment();
+    return ost;
+}
+
+std::ostream& operator<< (std::ostream& ost, Wire const& aWire)
+{
+    bool first = true;
+    for(auto const& anEdge : aWire.getEdges())
+    {
+        if (not first)
+        {
+            ost << " => ";
+        }
+        if (first)
+        {
+            first = false;
+        }
+        ost << anEdge;
+    }
+
+    return ost;
+}
 } // namespace Shapes
 } // namespace MyCAD
