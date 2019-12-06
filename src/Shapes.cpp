@@ -70,14 +70,7 @@ Wire::Wire(std::vector<Geometry::LineSegment> const& lineSegments)
         }
         if(aLineSegment.min() != last.max())
         {
-            std::string message = R"err(
-Each consecutive LineSegment must line up to the last one!
-
-In other words, given two LineSegment "first" and "next", first.max() === next.min().
-Review CGAL::Segment_2 documentation, as well as
-CGAL::Arragement_2::insert_from_left_vertex documentation if you want a lot more
-information about this (the CGAL::Arragement_2 User Manual in general is a great reference
-here.))err";
+            std::string message = "Each consecutive LineSegment must line up to the last one!";
             throw Exception(message);
         }
         last = aLineSegment;
