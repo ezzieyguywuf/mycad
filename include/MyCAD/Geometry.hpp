@@ -67,6 +67,11 @@ namespace Geometry
             /** Returns the end point of the Segment*/
             Point end() const;
 
+            /** Returns the point with the lowest x-value */
+            Point min() const;
+            /** Returns the point with the highest x-value */
+            point max() const;
+
             /** Check if this LineSegment intersects with another*/
             bool intersects(LineSegment const& aLineSegment) const;
 
