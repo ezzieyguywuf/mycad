@@ -17,7 +17,19 @@
 #ifndef MYCAD_SHAPES_HEADER
 #define MYCAD_SHAPES_HEADER
 
+#include <CGAL/Cartesian.h>
+#include <CGAL/Arr_segment_traits_2.h>
+#include <CGAL/Arrangement_2.h>
 #include "Geometry.hpp"
+
+// These typedefs define the portions of the CGAL infrastructure that we'll be using.
+typedef int                                Number_type;
+typedef CGAL::Cartesian<Number_type>       Kernel;
+typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
+typedef Traits_3::Point_2                  Point_2;
+typedef Traits_2::X_monotone_curve_2       Segment_2;
+typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
+
 
 #include <vector>
 
@@ -62,7 +74,7 @@ class Wire
         std::vector<Edge> const& getEdges() const;
 
     private:
-        std::vector<Edge> myEdges;
+        Arrangement_2 arr;
 };
 
 /** @brief A two-dimensional portion of space */
