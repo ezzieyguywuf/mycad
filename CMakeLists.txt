@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.13)
-cmake_policy(VERSION 3.13)
+cmake_minimum_required(VERSION 3.11)
+cmake_policy(VERSION 3.11)
 project(MyCAD VERSION 0.0.1)
 
 # --------------- Compile Options ------------------
