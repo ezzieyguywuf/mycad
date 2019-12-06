@@ -5,7 +5,6 @@ set(TEST_SRCS
 )
 
 set(TEST_LINKS
-    MyCAD_Geometry
     MyCAD_Shapes
     MyCAD_Exceptions
 )
