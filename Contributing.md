@@ -12,64 +12,39 @@
 
 ## Work Flow [↑][1] <a name="work-flow"></a>
 
-For now, let's keep all active development in the `master_development` branch - it should be
-relatively painless to commit and push these changes to upstream. By this I mean that
-pull-requests to `master_development` should be accepted with frequency (assuming robust
-development practices are being used!).
+Per the information gleaned [here][3], [here][4], and [here][5], we're going to add
+structure and discpline to our workflow as follows:
 
-However, let's be more selective about when to merge into `master` - the gitlab continuous
-integration will only trigger for new commits in `master`. Therefore, while I say "more
-selective", that's not to say "don't ever merge to master."
+1. Only production-ready, stable code will be merged into `master`. It should compile, it
+   should pass all tests, and there should be no known bugs
+   - Any bugs discovered after a commit has been added to `master` which is deamed
+     "critical" will immediately have a dedicated branch created (locally - i.e. not on
+     the central repository), fixed, and the merged into master. The version number will
+     be bumped to "Z+1", i.e. "v.X.Y.Z+1"
+2. The "active" branch will be `development`. It will run parallel to `master` for all of
+   - Any bugs found in commited `development` code can be fixed wherever and then merged
+     back into `development`
+3. Whenever a new release in being prepared, we'll branch _of of development_ into
+   `release/vx.x`. Notice I'm using two parts of the version number
+   - Any new bug fixes found in development must be merged into here
+4. Finalize all the good stuff needed for release in the release branch.
+5. Merge the release branch into master and then delete it - we don't need it any more,
+   remember, `master` is our official release
+6. Go back to development on `master`.
 
-Rather, the workflow should be something like
+Contributors and encouraged to utilize whatever branching methodology they want to
+locally. However, whenever they are preparing a pull-request (or preparing to push code to
+upstream, if they have access) they must ensure they are following these rules.
 
-1. Write new test (See TDD below)
-2. Write code, iterate till test passes
-3. Update documentation, refactor code
-4. Merge into master
+Additionally, any pull requests, regardless of the manner in which the underlying code was
+committed, should make a good faith attempt at "cleaning up the commit history" per [this
+link from before][4].
 
-This way, the CI is only triggered once per "feature" addition, as defined by the TDD
-methodology.
+We're not dictators here - we don't uphold any given strategy as sacred. But, like I said,
+"good faith".
 
-I don't know if this is the best approach or not, but we'll start with this.
-
-Finally, before pushing `master` to the repository, some care should be taken to "clean
-up" the git log. In other words, something along the lines of the following should be
-done:
-
-```sh
-# First, let's make sure our master branch is up-to-date with upstream
-git checkout master
-git pull upstream master
-
-# Next, let's replay our local changes on top of the latest upstream
-git checkout master_development
-git rebase master
-
-# We'll switch to the staging branch, and again, get it up-to-speed with upstream
-git checkout master_staging
-git rebase master
-
-# Finally, we can merge our latest changes into the staging area
-git merge master_development
-
-# Here's where we clean up our commit history. I'm using "10" here as an example. Use
-# whatever number makes sense for your particular merge.
-git rebase -i HEAD~10
-```
-
-This allows the `master_development` git log to be as verbose as we want it to be while
-keeping the `master` log relatively concise, yet still informative.
-
-To reiterate from the comments in the bash code above: `HEAD~10` is merely used as an
-example. In practice, you should rebase as far back as you need to in order to fully
-capture all the commits you are attempting to merge.
-
-Finally, the intent here is not to reduce your commit history down to a single commit.
-Rather, the idea is to allow you as a developer to commit as often as you deem appropriate
-("fixed bug from previous commit", "nevermind, I didn't realize there's a runtime crash",
-"still trying to make it work...", etc...) while still keeping the master git log
-informative and "clean" ("Added NEWFEATURE.", "Fixed BUG 2158", etc...).
+If you don't know how to use git, you need to learn. Sorry! Please ask questions, we'll
+help.
 
 ## Code Documentation [↑][1] <a name="code-documentation"></a>
 
@@ -270,3 +245,6 @@ first lines in the file.
 
 [1]: #table-of-contents
 [2]: #test-driven-development-tdd
+[3]: https://sethrobertson.github.io/GitBestPractices/#read
+[4]: http://sethrobertson.github.io/GitPostProduction/gpp.html
+[5]: https://nvie.com/posts/a-successful-git-branching-model/
