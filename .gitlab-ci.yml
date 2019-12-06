@@ -1,5 +1,5 @@
 # This is the docker image that is used. 
-image: mszg/docker-ubuntu-dev
+image: ezzieyguywuf/mycad_devel
 
 stages:
     - build
