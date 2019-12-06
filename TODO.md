@@ -8,7 +8,6 @@
 - Decide whether or not to keep individual libraries or one monolithic library - maybe
   different for dev vs. release?
 # Geometry
-- Fix Wire constructor -> should actually check whether to throw error
 - Check logic in Wire constructor -> is it ok to simply check for equality in order to
   determine if we're on the first iteration of the for-loop? Or should we do:
   ```cpp
