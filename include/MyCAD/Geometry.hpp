@@ -30,7 +30,15 @@ namespace MyCAD
 /** @brief Anything related to geomtry*/
 namespace Geometry
 {
-// These typedefs define the portions of the CGAL infrastructure that we'll be using.
+/// @name CGAL-Related Typedefs
+///{@
+/** These typedefs are our entry-point into CGAL. They fully describe the type of geometry
+ *  that we can use, as well as the various geometric objects that we understand.
+ */
+/** @brief The precision for numbers
+ *
+ * This can be changed to obtain the desired level of precision for numbers.
+ */
 typedef int                                Number_type;
 typedef CGAL::Cartesian<Number_type>       Kernel;
 typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
@@ -40,6 +48,7 @@ typedef Kernel::Segment_2                  Segment_2;
 typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
 typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
 typedef Arrangement_2::Vertex_handle       Vertex_handle;
+///@}
 
 
 /** @brief A point in cartesian space.*/
@@ -47,6 +56,7 @@ class Point
 {
     public:
         /** @brief Construct a Point in 2D space
+         *
          *  @param x,y The cartesian coordinates of the point
          */
         Point(Kernel::FT const& x, Kernel::FT const& y);
