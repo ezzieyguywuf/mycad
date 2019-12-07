@@ -6,6 +6,8 @@
 - Make a logging facility.
 - Decide whether or not to keep individual libraries or one monolithic library - maybe
   different for dev vs. release?
+- Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
+  our Geometry namespace
 # Geometry
 - Check logic in Wire constructor -> is it ok to simply check for equality in order to
   determine if we're on the first iteration of the for-loop? Or should we do:
