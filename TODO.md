@@ -6,9 +6,16 @@
 - Make a logging facility.
 - Decide whether or not to keep individual libraries or one monolithic library - maybe
   different for dev vs. release?
-- Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
-  our Geometry namespace
 # Geometry
+- Take out any CGAL-specific stuff from the Geometry headers, i.e. the public API. This
+  should make it feasible to implement this api using different "backends" - let's test
+  this out by duplicating the existing implementation using OpenCascade rather than CGAL,
+  just for fun.
+    - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
+      our Geometry namespace
+    - We should probably also make a `Number` class. This provide our users with public
+      access to any arbitrary number-type used in the implementation, i.e. `int`,
+      `double`, `CGAL:FT`, etc...
 - Check logic in Wire constructor -> is it ok to simply check for equality in order to
   determine if we're on the first iteration of the for-loop? Or should we do:
   ```cpp
