@@ -11,7 +11,7 @@ build:
     script:
         - mkdir -p build
         - cd build
-        - cmake ..
+        - CXXFLAGS=-fext-numeric-literals cmake ..
         - make -j4 all
     artifacts:
         paths:
