@@ -1,4 +1,6 @@
 # General
+- Figure out if we can set up a cross-platform (i.e. including windows and mac) automated
+  build system
 - Update documentation with examples.
 - Should we explicitly `#include` every header needed, regardless of whether its already
   been included elsewhere?
