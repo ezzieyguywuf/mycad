@@ -19,19 +19,41 @@
 #include <CGAL/intersections.h>
 
 namespace MyCAD{
+/** This namespace describes MyCAD's entry-point into the CGAL world. Anything
+ *  CGAL-related is fully abstracted away within this namespace. What this means is that
+ *  any users of MyCAD can forget about CGAL altogether, and simply access the information
+ *  they need using the classes and functions found in this namespace.
+ *
+ *  As a developer, please keep in mind that this abstraction is intended to be strict on
+ *  purpose - in the future, this makes it more feasible to move away from CGAL into a
+ *  different library.
+ */
 namespace Geometry{
 //=============================================================================
 //                        Point Class Definition
 //=============================================================================
+/** A point is the simplest geometric construct that is supported in MyCAD. It is
+ *  described simply as a set of n-coordinates. The value of "n" is dictated by the type
+ *  of CGAL kernel that is being used. At the time of this documentation, 2019-12-07,
+ *  there appears to be strong support for 2D geometry in CGAL, very good support for 3D
+ *  geometry, and burgeoning support for nD geometry.
+ *
+ *  Our geometric classes are all currently strictly 2D. This might change in the future,
+ *  which will affect the API.
+ */
 Point::Point(Kernel::FT const& x, Kernel::FT const& y)
     :myPoint(x, y)
 {}
 
+/** @brief Get the precise x-coordinate.
+ */
 Kernel::FT Point::x() const
 {
     return CGAL::to_double(myPoint.x());
 }
 
+/** @brief Get the precise y-coordinate.
+ */
 Kernel::FT Point::y() const
 {
     return CGAL::to_double(myPoint.y());

@@ -2,31 +2,7 @@
 image: ezzieyguywuf/mycad_devel
 
 stages:
-    - build
-    - test
     - pages
-
-build:
-    stage: build
-    script:
-        - mkdir -p build
-        - cd build
-        - CXXFLAGS=-fext-numeric-literals cmake ..
-        - make -j4 all
-    artifacts:
-        paths:
-            - ./build
-    only:
-        - master
-        - development
-
-test:
-    stage: test
-    script:
-        - ./build/bin/MyCAD_Tests
-    only:
-        - master
-        - development
 
 pages:
     stage: pages
@@ -37,4 +13,4 @@ pages:
         paths:
             - public
     only:
-        - master
+        - pages

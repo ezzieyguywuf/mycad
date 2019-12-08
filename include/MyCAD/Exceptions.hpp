@@ -23,11 +23,13 @@
 
 namespace MyCAD
 {
+/** @brief A concrete implementation of std::exception */
 class Exception : public std::exception
 {
     public:
         explicit Exception(std::string message);
 
+        /** @brief Return the mesage we were instantiated with */
         const char* what() const noexcept override;
 
     private:

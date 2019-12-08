@@ -6,6 +6,8 @@
 - Make a logging facility.
 - Decide whether or not to keep individual libraries or one monolithic library - maybe
   different for dev vs. release?
+- Figure out how to make groups in member definitions share the same header styling as,
+  say "Public Member Functions"
 # Geometry
 - Take out any CGAL-specific stuff from the Geometry headers, i.e. the public API. This
   should make it feasible to implement this api using different "backends" - let's test
@@ -29,3 +31,7 @@
       }
   }
   ```
+# Shapes
+- Consider renaming from `Shapes` to `Topology`
+- Rename `getLineSegment` to `getGeometry`? Or add an abstraction or inheritence level?
+- Update Wire constructor to accept Edge rather than LineSegment?

@@ -30,7 +30,14 @@ namespace MyCAD
 /** @brief Anything related to geomtry*/
 namespace Geometry
 {
-// These typedefs define the portions of the CGAL infrastructure that we'll be using.
+/** @{
+ *  @name CGAL-Related Typedefs
+ *
+ *  These typedefs are our entry-point into CGAL. They fully describe the type of geometry
+ *  that we can use, as well as the various geometric objects that we understand.
+ */
+/** @brief The precision for numbers - change as desired/needed.
+ */
 typedef int                                Number_type;
 typedef CGAL::Cartesian<Number_type>       Kernel;
 typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
@@ -40,32 +47,39 @@ typedef Kernel::Segment_2                  Segment_2;
 typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
 typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
 typedef Arrangement_2::Vertex_handle       Vertex_handle;
+///@}
 
 
-/** @brief A point in cartesian space.*/
+/** @brief A point in space.*/
 class Point
 {
     public:
         /** @brief Construct a Point in 2D space
+         *
          *  @param x,y The cartesian coordinates of the point
          */
         Point(Kernel::FT const& x, Kernel::FT const& y);
 
-        /// @name Access methods
-        /// @{
-        /// Retrieve the precise coordinates
+        /** @name Geometric Coordinate Access
+         *
+         *  The precision is entirely dictated by the precision of the Number_type
+         *  typedef.
+         *
+         *  @{
+         */
         Kernel::FT x() const;
         Kernel::FT y() const;
-        ///@}
+        /** @} */
 
-        /** Return a copy of the underlying CGAL Point_2*/
+        /** @brief Return a copy of the underlying CGAL Point_2*/
         Point_2 getGeometry() const;
 
-        /// @name Operators
-        ///@{
+        /** @name Operators
+         *  @{
+         */
         bool operator==(Point const& aPoint) const;
         bool operator!=(Point const& aPoint) const;
-        ///@}
+        /** @} */
 
     private:
         Point_2 myPoint;
@@ -104,7 +118,6 @@ class LineSegment
         MonoCurve_2 myMonotoneCurve;
 };
 
-// Add these operators to ease debugging.
 std::ostream& operator<< (std::ostream& ost, Point const& aPoint);
 std::ostream& operator<< (std::ostream& ost, LineSegment const& aLineSegment);
 
