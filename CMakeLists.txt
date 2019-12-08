@@ -10,8 +10,6 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 add_compile_options(-std=c++11 -Wpedantic -Werror -Wextra -Wall)
 
 # --------- Various CMake Configs --------------
-message("${CMAKE_CURRENT_SOURCE_DIR}/misc/cmake")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/misc/cmake")
 include_directories("include")
 
 # ------------ Find Things ---------------------
