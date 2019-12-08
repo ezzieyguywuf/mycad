@@ -25,3 +25,7 @@
       }
   }
   ```
+# Shapes
+- Consider renaming from `Shapes` to `Topology`
+- Rename `getLineSegment` to `getGeometry`? Or add an abstraction or inheritence level?
+- Update Wire constructor to accept Edge rather than LineSegment?

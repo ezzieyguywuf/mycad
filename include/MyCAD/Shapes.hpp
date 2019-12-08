@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2019  Wolfgang E. Sanyer <ezzieyguywuf@gmail.com>
 
  * This program is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@ class Vertex
         Geometry::Point myPoint;
 };
 
-/** @brief A curve described by a 1D parametric space*/
+/** @brief A bounded piece of a curve */
 class Edge
 {
     public:
@@ -87,7 +87,6 @@ class Box
         std::vector<Face> getFaces() const;
 };
 
-// Add these operators to ease debugging.
 std::ostream& operator<< (std::ostream& ost, Vertex const& aVertex);
 std::ostream& operator<< (std::ostream& ost, Edge const& aWire);
 std::ostream& operator<< (std::ostream& ost, Wire const& aWire);

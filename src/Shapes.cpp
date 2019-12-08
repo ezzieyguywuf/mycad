@@ -18,6 +18,30 @@
 #include <MyCAD/Shapes.hpp>
 
 namespace MyCAD{
+/** A Shape is distinct from geometry. Consider a Point (a geometric entity) defined in
+ *  2-dimensional euclidian space at \f$x = 5\f$, \f$y = 5\f$, or more conventionally
+ *  \f$(5,5)\f$. By definition, this point is located in a single spot. It cannot be
+ *  moved.
+ *
+ *  Similarly, the line \f$y=x+5\f$ specifically describes an infinite line that crosses
+ *  the y-axis at \f$y=5\f$ with a slope of \f$1\f$. Again - this line cannot be
+ *  translated or rotated, because then we would have a different line entirely.
+ *
+ *  This is what we refer to as "Geometry", and we have classes for some common geometric
+ *  constructs in the Geometry namespace.
+ *
+ *  Now, let's consider a Vertex, a "Topological" entity. What I mean by "Topological" is
+ *  that it exists as a single-point in space (exactly like a Point), but is not affected
+ *  by changes in size/shape/location.
+ *
+ *  In other words, a Vertex can be moved. Similarly, an Edge (which is like a Line, but
+ *  bounded, i.e. not infinite) can be translated, rotated etc. Wheneven these
+ *  transformations happen, by definition, the Edge will need a new, distinct Line to
+ *  describe it geometrically. But it's still the Same Edge - only the Line has changed.
+ *
+ *  Just like moving a Vertex means we're associating it with a different Point - but it's
+ *  still the same Vertex.
+ */
 namespace Shapes{
 //=============================================================================
 //                      Vertex Class Definition
@@ -58,6 +82,17 @@ bool Edge::operator!=(Edge const& anEdge) const
 //=============================================================================
 //                      Wire Class Definition
 //=============================================================================
+/** A Wire is comprised of several "interlocking" LineSegment. Each succesive LineSegment
+ *  provided to the constructor _must_ be connected to either the first LineSegment or the
+ *  previous LineSegment at one end.
+ *
+ *  In other words:
+ *
+ *  1. None of the LineSegment can cross or intersect in any way
+ *  2. Each LineSegment must be connected to at least one other LineSegment by way of one
+ *     of its ends
+ *  3. The order in which the LineSegment are provided is important.
+ */
 Wire::Wire(std::vector<Geometry::LineSegment> const& lineSegments)
 {
 
