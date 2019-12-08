@@ -1,4 +1,3 @@
-find_package(Qt5 COMPONENTS Test REQUIRED)
-
-add_executable(MyCAD_GuiTests ApplicationTests.cpp)
-target_link_libraries(MyCAD_GuiTests Qt5::Widgets Qt5::Test)
+target_sources(MyCAD_Tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ApplicationTests.cpp)
+set(_MYCAD_GUI_TEST_LIBS Qt5::Widgets PARENT_SCOPE)
+#target_link_libraries(MyCAD_Tests Qt5::Widgets)

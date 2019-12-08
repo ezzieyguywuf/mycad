@@ -1,18 +1,45 @@
-#include <QtTest/QtTest>
+/* 
+ * Copyright (C) 2019  Wolfgang E. Sanyer <ezzieyguywuf@gmail.com>
 
-class TestQString : public QObject
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#include "catch.hpp"
+
+#include <QString>
+
+SCENARIO("We want to test out unit-seting Qt with Catch2", "[GUI]")
 {
-    Q_OBJECT
+    GIVEN("a QString")
+    {
+        QString val("This is a string.");
+        WHEN("we copy-construct it")
+        {
+            QString check(val);
+            THEN("we should get the same thing on both sides.")
+            {
+                REQUIRE(val == check);
+            }
+        }
 
-    private slots: 
-        void toUpper();
-};
-
-void TestQString::toUpper()
-{
-    QString str = "Hello, test!";
-    QCOMPARE(str.toUpper(), "HELLO, TEST!");
+        WHEN("we have a typo in our test")
+        {
+            QString check("whoops!");
+            THEN("it should fail")
+            {
+                REQUIRE(val == check);
+            }
+        }
+    }
 }
 
-QTEST_MAIN(TestQString)
-#include "ApplicationTests.moc"
