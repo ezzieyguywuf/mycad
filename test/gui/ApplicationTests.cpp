@@ -2,7 +2,7 @@
 
 class TestQString : public QObject
 {
-    QObject
+    Q_OBJECT
 
     private slots: 
         void toUpper();
