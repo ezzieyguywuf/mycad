@@ -30,14 +30,13 @@ namespace MyCAD
 /** @brief Anything related to geomtry*/
 namespace Geometry
 {
-/// @name CGAL-Related Typedefs
-///{@
-/** These typedefs are our entry-point into CGAL. They fully describe the type of geometry
+/** @{
+ *  @name CGAL-Related Typedefs
+ *
+ *  These typedefs are our entry-point into CGAL. They fully describe the type of geometry
  *  that we can use, as well as the various geometric objects that we understand.
  */
-/** @brief The precision for numbers
- *
- * This can be changed to obtain the desired level of precision for numbers.
+/** @brief The precision for numbers - change as desired/needed.
  */
 typedef int                                Number_type;
 typedef CGAL::Cartesian<Number_type>       Kernel;
@@ -51,7 +50,7 @@ typedef Arrangement_2::Vertex_handle       Vertex_handle;
 ///@}
 
 
-/** @brief A point in cartesian space.*/
+/** @brief A point in space.*/
 class Point
 {
     public:
@@ -61,21 +60,26 @@ class Point
          */
         Point(Kernel::FT const& x, Kernel::FT const& y);
 
-        /// @name Access methods
-        /// @{
-        /// Retrieve the precise coordinates
+        /** @name Geometric Coordinate Access
+         *
+         *  The precision is entirely dictated by the precision of the Number_type
+         *  typedef.
+         *
+         *  @{
+         */
         Kernel::FT x() const;
         Kernel::FT y() const;
-        ///@}
+        /** @} */
 
-        /** Return a copy of the underlying CGAL Point_2*/
+        /** @brief Return a copy of the underlying CGAL Point_2*/
         Point_2 getGeometry() const;
 
-        /// @name Operators
-        ///@{
+        /** @name Operators
+         *  @{
+         */
         bool operator==(Point const& aPoint) const;
         bool operator!=(Point const& aPoint) const;
-        ///@}
+        /** @} */
 
     private:
         Point_2 myPoint;
@@ -114,7 +118,6 @@ class LineSegment
         MonoCurve_2 myMonotoneCurve;
 };
 
-// Add these operators to ease debugging.
 std::ostream& operator<< (std::ostream& ost, Point const& aPoint);
 std::ostream& operator<< (std::ostream& ost, LineSegment const& aLineSegment);
 

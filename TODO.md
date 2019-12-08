@@ -8,6 +8,9 @@
   different for dev vs. release?
 - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
   our Geometry namespace
+# Documentation
+- Figure out how to make groups in member definitions share the same header styling as,
+  say "Public Member Functions"
 # Geometry
 - Check logic in Wire constructor -> is it ok to simply check for equality in order to
   determine if we're on the first iteration of the for-loop? Or should we do:
