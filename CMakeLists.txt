@@ -15,7 +15,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/misc/cmake")
 include_directories("include")
 
 # ------------ Find Things ---------------------
-find_package(OpenCasCade REQUIRED)
 find_package(CGAL REQUIRED)
 include(${CGAL_USE_FILE})
 
