@@ -1,6 +1,5 @@
 # General
-- Update documentation to provide clear instructions on what each class does/doesn't do,
-  with examples.
+- Update documentation with examples.
 - Should we explicitly `#include` every header needed, regardless of whether its already
   been included elsewhere?
 - Make a logging facility.
