@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.11)
 cmake_policy(VERSION 3.11)
 project(MyCAD VERSION 0.0.1)
 
+# This sub-directory will contain various files that are all `include`d automatically when
+# we add it using add_subdirectory. The intent is to, as much as possible, keep heavy
+# "logic" out of this file, and defer it to the sub-directory.
+add_subdirectory(cmake)
+
 # --------------- Compile Options ------------------
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_BUILD_TYPE "Debug")
