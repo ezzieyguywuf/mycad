@@ -18,7 +18,7 @@
 
 #include <QString>
 
-SCENARIO("We want to test out unit-seting Qt with Catch2", "[GUI]")
+SCENARIO("We want to test out unit-testing Qt with Catch2", "[GUI]")
 {
     GIVEN("a QString")
     {
