@@ -7,6 +7,7 @@ set(TEST_SRCS
 set(TEST_LINKS
     MyCAD_Shapes
     MyCAD_Exceptions
+    MyCAD_Server
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
