@@ -2,11 +2,13 @@ set(TEST_SRCS
     main.cpp
     GeometryTests.cpp
     ShapesTests.cpp
+    ServerTests.cpp
 )
 
 set(TEST_LINKS
     MyCAD_Shapes
     MyCAD_Exceptions
+    MyCAD_Server
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
