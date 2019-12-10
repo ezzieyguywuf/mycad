@@ -18,7 +18,9 @@ add_compile_options(-std=c++11 -Wpedantic -Werror -Wextra -Wall)
 include_directories("include")
 
 # ------------ Find Things ---------------------
-mycad_find_qt()
+if(MYCAD_BUILD_GUI)
+    mycad_find_qt()
+endif()
 find_package(CGAL REQUIRED)
 include(${CGAL_USE_FILE})
 
