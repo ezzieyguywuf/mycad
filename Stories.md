@@ -17,6 +17,3 @@ should be motivated by a Story from this list.
 **AS A** Power User \
 **I WANT** to use python to make geometric objects \
 **SO THAT** I can automate my work flow. \
-
-some info
-{: .alert .alert-info}
