@@ -12,14 +12,17 @@
 
 ## Work Flow [↑][1] <a name="work-flow"></a>
 
-I had a nicely updated Work Flow section made up - and then I borked it up with a silly
-`git rebase --hard` trying to get fancy with my history re-writes.
+NOTE: I had a nicely updated Work Flow section made up - and then I borked it up with a
+silly `git rebase --hard` trying to get fancy with my history re-writes.
 
 Long story short:
 
 1. Always start with an issue (in gitlab)
 2. Use the TDD methodolgy outline in this document
 3. Use a merge-request to get your code added to master.
+
+One of the User Stories listed in [UserStories][UserStories.md] should be used as the
+starting point for most (alL?) new features.
 
 the information gleaned [here][3], [here][4], and [here][5] were referenced in creating
 this document, and some others.
