@@ -22,6 +22,8 @@ namespace MyCAD
     class Server
     {
         public:
+            Server();
+
             bool processArgs(int argc, char ** argv) const;
     };
 } // MyCAD

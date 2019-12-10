@@ -11,6 +11,7 @@
   say "Public Member Functions"
 # Server
 - Fix server to reflect actual version when `--version` is passed.
+- Code smell? Look at the `static bool first` line in Server.cpp
 # Geometry
 - Take out any CGAL-specific stuff from the Geometry headers, i.e. the public API. This
   should make it feasible to implement this api using different "backends" - let's test

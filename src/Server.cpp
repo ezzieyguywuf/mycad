@@ -27,9 +27,14 @@ namespace MyCAD
 
 Server::Server()
 {
-    OPTIONS.add_options()
-        ("d,debug", "Enable debugging.")
-        ;
+    static bool first = true;
+    if (first)
+    {
+        first = false;
+        OPTIONS.add_options()
+            ("d,debug", "Enable debugging.")
+            ;
+    }
 }
 bool Server::processArgs(int argc, char ** argv) const
 {
