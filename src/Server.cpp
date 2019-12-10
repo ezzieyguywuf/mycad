@@ -31,7 +31,7 @@ Server::Server()
         ("d,debug", "Enable debugging.")
         ;
 }
-bool Server::processArgs(int argc, char **& argv) const
+bool Server::processArgs(int argc, char ** argv) const
 {
     try{
         auto result = OPTIONS.parse(argc, argv);

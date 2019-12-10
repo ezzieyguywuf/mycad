@@ -22,7 +22,7 @@ namespace MyCAD
     class Server
     {
         public:
-            bool processArgs(char const* argv[]) const;
+            bool processArgs(int argc, char ** argv) const;
     };
 } // MyCAD
 #endif //MYCAD_SERVER_HEADER
