@@ -32,7 +32,7 @@ Server::Server()
     {
         first = false;
         OPTIONS.add_options()
-            ("d,debug", "Enable debugging.")
+            ("v,version", "Return the version of the MyCAD server")
             ;
     }
 }
