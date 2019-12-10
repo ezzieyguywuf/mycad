@@ -2,10 +2,6 @@ These User Stories will be used to develop new features. For the most work, new 
 should be motivated by a Story from this list.
 
 # Create geometric objects
-**AS A** Designer \
-**I WANT** to create lines in space \
-**SO THAT** I can use them to make more complex geometry \
-
 **AS A** Desktop User \
 **I WANT** to use my mouse to make geometric objects \
 **SO THAT** I can visualize how these objects relate to each other \
@@ -17,3 +13,13 @@ should be motivated by a Story from this list.
 **AS A** Power User \
 **I WANT** to use python to make geometric objects \
 **SO THAT** I can automate my work flow. \
+
+# Create topological objects
+
+**AS A** Designer \
+**I WANT** to create a Face from a collection of Edges \
+**SO THAT** I can eventually use it to make some sort of Solid \
+
+**AS A** Designer \
+**I WANT** to create a Primitive Solid \
+**SO THAT** I can use it to describe some physical object \
