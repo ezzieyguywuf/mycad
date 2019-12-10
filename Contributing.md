@@ -12,39 +12,19 @@
 
 ## Work Flow [↑][1] <a name="work-flow"></a>
 
-Per the information gleaned [here][3], [here][4], and [here][5], we're going to add
-structure and discpline to our workflow as follows:
+I had a nicely updated Work Flow section made up - and then I borked it up with a silly
+`git rebase --hard` trying to get fancy with my history re-writes.
 
-1. Only production-ready, stable code will be merged into `master`. It should compile, it
-   should pass all tests, and there should be no known bugs
-   - Any bugs discovered after a commit has been added to `master` which is deamed
-     "critical" will immediately have a dedicated branch created (locally - i.e. not on
-     the central repository), fixed, and the merged into master. The version number will
-     be bumped to "Z+1", i.e. "v.X.Y.Z+1"
-2. The "active" branch will be `development`. It will run parallel to `master` for all of
-   - Any bugs found in commited `development` code can be fixed wherever and then merged
-     back into `development`
-3. Whenever a new release in being prepared, we'll branch _of of development_ into
-   `release/vx.x`. Notice I'm using two parts of the version number
-   - Any new bug fixes found in development must be merged into here
-4. Finalize all the good stuff needed for release in the release branch.
-5. Merge the release branch into master and then delete it - we don't need it any more,
-   remember, `master` is our official release
-6. Go back to development on `master`.
+Long story short:
 
-Contributors and encouraged to utilize whatever branching methodology they want to
-locally. However, whenever they are preparing a pull-request (or preparing to push code to
-upstream, if they have access) they must ensure they are following these rules.
+1. Always start with an issue (in gitlab)
+2. Use the TDD methodolgy outline in this document
+3. Use a merge-request to get your code added to master.
 
-Additionally, any pull requests, regardless of the manner in which the underlying code was
-committed, should make a good faith attempt at "cleaning up the commit history" per [this
-link from before][4].
+the information gleaned [here][3], [here][4], and [here][5] were referenced in creating
+this document, and some others.
 
-We're not dictators here - we don't uphold any given strategy as sacred. But, like I said,
-"good faith".
-
-If you don't know how to use git, you need to learn. Sorry! Please ask questions, we'll
-help.
+to be continued... (need to recover the last info...just rewrite it.)
 
 ## Code Documentation [↑][1] <a name="code-documentation"></a>
 
