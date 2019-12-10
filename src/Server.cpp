@@ -39,7 +39,11 @@ Server::Server()
 bool Server::processArgs(int argc, char ** argv) const
 {
     try{
-        auto result = OPTIONS.parse(argc, argv);
+        cxxopts::ParseResult result = OPTIONS.parse(argc, argv);
+        if(result.count("version") > 0)
+        {
+            std::cout << "MyCAD©, v" MYCAD_VERSION << std::endl;
+        }
     }
     catch (cxxopts::OptionParseException const& e)
     {

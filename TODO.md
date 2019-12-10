@@ -10,8 +10,9 @@
 - Figure out how to make groups in member definitions share the same header styling as,
   say "Public Member Functions"
 # Server
-- Fix server to reflect actual version when `--version` is passed.
 - Code smell? Look at the `static bool first` line in Server.cpp
+- File bug-report or merge request with upstream cxxopts so that we can default-construct
+  the cxxapts::ParseResult
 # Geometry
 - Take out any CGAL-specific stuff from the Geometry headers, i.e. the public API. This
   should make it feasible to implement this api using different "backends" - let's test
