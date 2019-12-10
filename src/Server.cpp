@@ -16,10 +16,31 @@
 
 #include <MyCAD/Server.hpp>
 
+#include "cxxopts.hpp"
+
 namespace MyCAD
 {
-bool Server::processArgs(int argc, char const* argv[]) const
+    namespace
+    {
+        cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
+    } // namespace
+
+Server::Server()
 {
+    OPTIONS.add_options()
+        ("d,debug", "Enable debugging.")
+        ;
+}
+bool Server::processArgs(int argc, char **& argv) const
+{
+    try{
+        auto result = OPTIONS.parse(argc, argv);
+    }
+    catch (cxxopts::OptionParseException const& e)
+    {
+        std::cout << e.what() << std::endl;
+        return false;
+    }
     return true;
 }
 } // MyCAD
