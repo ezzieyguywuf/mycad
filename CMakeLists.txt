@@ -15,6 +15,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 add_compile_options(-std=c++11 -Wpedantic -Werror -Wextra -Wall)
 
 # --------- Various CMake Configs --------------
+SetupCppMacros()
 include_directories("include")
 
 # ------------ Find Things ---------------------
