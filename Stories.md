@@ -7,8 +7,8 @@ should be motivated by a Story from this list.
 **SO THAT** I can visualize how these objects relate to each other \
 
 **AS A** Remote User \
-**I WANT** to send requests to MyCAD server using TCP/IP \
-**SO THAT** I can recieve responses and use the calculated geometry \
+**I WANT** to send a request to make Vectors and Lines using specified geomtric information \
+**SO THAT** I can later manipulate those objects in space
 
 **AS A** Power User \
 **I WANT** to use python to make geometric objects \
@@ -28,3 +28,8 @@ should be motivated by a Story from this list.
 **AS A** Designer \
 **I WANT** to create lines in space \
 **SO THAT** I can use them to make more complex geometry \
+
+**AS A** Remote User \
+**I WANT** to send requests to MyCAD server using TCP/IP \
+**SO THAT** I can recieve responses and use the calculated geometry \
+
