@@ -62,8 +62,8 @@ This project has also drawn influence and inspiration from:
 [^1]: Let's be honest - how much do we take browsers for granted? I mean, I learned
   everything I know about programming on the internet. That's not a hyperbole. Literally
   everything (ok, fine, I took ONE FORTRAN class in college. And no, I'm not that old,
-  just our curriculum was...). 
-
+  just our curriculum was...). \
+\
   Without the internet, and the dedicated and wonderful communities that exist to share
   and propogate information, this project would not exist - at least not coming from me.
   So THANK YOU!
