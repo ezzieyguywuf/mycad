@@ -19,6 +19,9 @@ namespace
     cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
 } // namespace
 
+//=============================================================================
+//                       Server Class Definition
+//=============================================================================
 Server::Server()
 {
     static bool first = true;
