@@ -97,13 +97,14 @@ bool Server::processArgs(int argc, char ** argv) const
  *
  *  A return value of `false` indicates that there was an error processing the request
  */
-std::string Server::processRequest(Request const& request) const
+bool Server::processRequest(Request const& request)
 {
     if(request.get() == "version")
     {
-        return MYCAD_VERSION;
+        myResponse = std::string(MYCAD_VERSION);
+        return true;
     }
-    return "";
+    return false;
 }
 } // Communication
 } // MyCAD

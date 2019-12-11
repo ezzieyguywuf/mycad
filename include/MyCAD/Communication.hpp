@@ -44,13 +44,15 @@ class Server
          *  @returns 0 on success
          *  @returns -1 on error
          */
-        int processRequest(Request const& request) const;
+        bool processRequest(Request const& request);
 
         /** Returns the result of processing the last Request
          *  @returns an empty std::string if there was an error
          *  @returns the result of the last Request
          */
         std::string getResponse() const;
+    private:
+        std::string myResponse;
 };
 } // namespace Communication
 } // namespace MyCAD
