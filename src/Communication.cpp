@@ -13,6 +13,11 @@
 
 namespace MyCAD
 {
+/** This namespace describes the fundamental userspace of MyCAD. In a nutshell, MyCAD is
+ *  designed from the beginning to work in a server-client model. The classes in this
+ *  namespace describe that server-client relationship, as well as how to communicate
+ *  between the two.
+ */
 namespace Communication
 {
 
@@ -20,9 +25,18 @@ namespace
 {
     cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
 } // namespace
+
 //=============================================================================
 //                      Request Class Definition
 //=============================================================================
+/** A Request is defined as a "command" (currently a simple std::string). A "command" is
+ *  something that MyCAD::Server knows how to interpret. Upon receiving this "command",
+ *  MyCAD::Server will execute whatever code it needs to and then store a "response" for
+ *  the requestor to later query.
+ *
+ *  In the future, it may be desireable to abstract away this concept of a "command",
+ *  perhaps into a Command class.
+ */
 Request::Request(std::string aRequest)
     : myRequest(std::move(aRequest))
 {}
@@ -35,6 +49,15 @@ std::string const& Request::get() const
 //=============================================================================
 //                       Server Class Definition
 //=============================================================================
+/** A Server knows how to process various Request and do something with them. In general,
+ *  this will probably mean creating/manipulating/querying topological or geometric
+ *  information.
+ *
+ *  Server understands various command-line arguments which can be used to initialize/set
+ *  various internal variables. While Server does not provide a main-loop, it is rather
+ *  trivial to create one which leverages Server. Make sure to call Server::processArgs if
+ *  you're interested in accepting command-line input from Users.
+ */
 Server::Server()
 {
     static bool first = true;
@@ -46,6 +69,13 @@ Server::Server()
             ;
     }
 }
+
+/** This will process the list of provided command-line arguments. If there is an error,
+ *  the caller is notified by a return value of false.
+ *
+ *  @warning The caller should check the return value and respond appropriately, otherwise
+ *           Server will contain an unknown (to the caller) state
+ */
 bool Server::processArgs(int argc, char ** argv) const
 {
     try{
@@ -63,13 +93,41 @@ bool Server::processArgs(int argc, char ** argv) const
     return true;
 }
 
-std::string Server::processRequest(Request const& request) const
+/** Given the Request, perform the requested action.
+ *
+ *  A return value of `false` indicates that there was an error processing the request
+ */
+bool Server::processRequest(Request const& request)
 {
     if(request.get() == "version")
     {
-        return MYCAD_VERSION;
+        myResponse = std::string(MYCAD_VERSION);
+        return true;
     }
-    return "";
+    return false;
+}
+
+/** Returns the response from the last succesfully processed Request.
+ *
+ *  @warning Server does not know anything about the last Request at this point, or even
+ *           if we've received a request yet. In other words, the caller must ensure that:
+ *
+ *           1. They have actually sent a Request prior to calling `getResponse`
+ *           2. That the last request was processed succesfully prior to calling
+ *           `getRespons`
+ *
+ *           If these two things are not done, bad things won't happen. But, you'll
+ *           either:
+ *
+ *           1. Get an empty string as a response. The caller __must only__ rely on this
+ *              empty string as a true response iff they did the two things mentioned
+ *              above.
+ *           2. Get the response from the previously succesful processing, which could
+ *              lead to surprising results on your end.
+ */
+std::string Server::getResponse() const
+{
+    return myResponse;
 }
 } // Communication
 } // MyCAD

@@ -20,7 +20,18 @@ SCENARIO("A Remote User sends a TCP/IP request to the Server and expects a respo
             MyCAD::Communication::Request request("version");
             THEN("We should get the expected result")
             {
-                REQUIRE(server.processRequest(request) == MYCAD_VERSION);
+                REQUIRE(server.processRequest(request) == true);
+                REQUIRE(server.getResponse() == MYCAD_VERSION);
+            }
+        }
+
+        WHEN("A request to create a Vertex in 2D-space in recieved")
+        {
+            MyCAD::Communication::Request request("vertex 5.0 10.0");
+            THEN("We should end up with a vertex in that location")
+            {
+                REQUIRE(server.processRequest(request) == true);
+                REQUIRE(server.getResponse() == "");
             }
         }
     }

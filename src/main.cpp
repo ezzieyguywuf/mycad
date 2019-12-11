@@ -5,11 +5,11 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#include <MyCAD/Server.hpp>
+#include <MyCAD/Communication.hpp>
 
 int main(int argc, char* argv[])
 {
-    MyCAD::Server myServer;
+    MyCAD::Communication::Server myServer;
     myServer.processArgs(argc, argv);
     return 0;
 }

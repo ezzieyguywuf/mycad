@@ -9,4 +9,4 @@ add_library(MyCAD_Exceptions SHARED Exceptions.cpp)
 add_library(MyCAD_Communication SHARED Communication.cpp)
 
 add_executable(MyCAD main.cpp)
-target_link_libraries(MyCAD MyCAD_Server)
+target_link_libraries(MyCAD MyCAD_Communication)
