@@ -62,5 +62,14 @@ bool Server::processArgs(int argc, char ** argv) const
     }
     return true;
 }
+
+std::string Server::processRequest(Request const& request) const
+{
+    if(request.get() == "version")
+    {
+        return MYCAD_VERSION;
+    }
+    return "";
+}
 } // Communication
 } // MyCAD
