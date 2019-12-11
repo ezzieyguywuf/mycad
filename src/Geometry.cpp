@@ -68,9 +68,10 @@ LineSegment::LineSegment(Point const& p1, Point const& p2)
     : myMonotoneCurve({p1.x(), p1.y()}, {p2.x(), p2.y()})
 {}
 
-LineSegment::LineSegment(Segment_2 const& seg)
-    : myMonotoneCurve(seg)
+LineSegment::LineSegment(LineSegment const& seg)
+    : myMonotoneCurve(seg.myMonotoneCurve)
 {}
+
 Point LineSegment::start() const
 {
     return Point(myMonotoneCurve.source().x(), myMonotoneCurve.source().y());
