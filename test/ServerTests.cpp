@@ -15,12 +15,12 @@ SCENARIO("A Remote User sends a TCP/IP request to the Server and expects a respo
     {
         MyCAD::Server server;
 
-        WHEN("I instantiate MyCAD::Client")
+        WHEN("A request for the version is received")
         {
-            MyCAD::Client client;
-            THEN("Client should be able to ask Server a quest.")
+            MyCAD::Request request("version");
+            THEN("We should get the expected result")
             {
-
+                REQUIRE(server.processRequest(request) == MYCAD_VERSION);
             }
         }
     }
