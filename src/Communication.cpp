@@ -5,17 +5,36 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#include <MyCAD/Server.hpp>
+#include <MyCAD/Communication.hpp>
 
 #include "cxxopts.hpp"
 
+#include <utility> // for std::move
+
 namespace MyCAD
 {
-    namespace
-    {
-        cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
-    } // namespace
+namespace Communication
+{
 
+namespace
+{
+    cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
+} // namespace
+//=============================================================================
+//                      Request Class Definition
+//=============================================================================
+Request::Request(std::string aRequest)
+    : myRequest(std::move(aRequest))
+{}
+
+std::string const& Request::get() const
+{
+    return myRequest;
+}
+
+//=============================================================================
+//                       Server Class Definition
+//=============================================================================
 Server::Server()
 {
     static bool first = true;
@@ -43,4 +62,14 @@ bool Server::processArgs(int argc, char ** argv) const
     }
     return true;
 }
+
+std::string Server::processRequest(Request const& request) const
+{
+    if(request.get() == "version")
+    {
+        return MYCAD_VERSION;
+    }
+    return "";
+}
+} // Communication
 } // MyCAD
