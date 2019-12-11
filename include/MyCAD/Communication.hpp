@@ -35,7 +35,13 @@ class Server
         Server();
 
         bool processArgs(int argc, char ** argv) const;
-        std::string processRequest(Request const& request) const;
+        int processRequest(Request const& request) const;
+
+        /** Returns the result of processing the last Request
+         *  @returns an empty std::string if there was an error
+         *  @returns the result of the last Request
+         */
+        std::string getResponse() const;
 };
 } // namespace Communication
 } // namespace MyCAD
