@@ -21,7 +21,11 @@ class Client
 
 class Request
 {
+    public:
+        Request(std::string request);
 
+    private:
+        std::string myRequest;
 };
 
 class Server
