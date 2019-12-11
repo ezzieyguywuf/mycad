@@ -40,14 +40,17 @@ SCENARIO("We want to test out unit-testing Qt with Catch2", "[GUI]")
             }
         }
 
-        WHEN("we have a typo in our test")
-        {
-            QString check("whoops!");
-            THEN("it should fail")
-            {
-                REQUIRE(val == check);
-            }
-        }
+        // The test below was writen specifically to fail. I'm commenting it rather than
+        // deleting it for no other reason that nostalgia. Feel free to delete it if you
+        // wish.
+        //WHEN("we have a typo in our test")
+        //{
+            //QString check("whoops!");
+            //THEN("it should fail")
+            //{
+                //REQUIRE(val == check);
+            //}
+        //}
     }
 }
 
