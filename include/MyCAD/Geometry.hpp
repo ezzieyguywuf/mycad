@@ -117,7 +117,7 @@ class Arrangement
         Arrangement(std::vector<LineSegment> const& segments);
 
         /** @brief Returns the list of LineSegment that make up this Arrangement */
-        vector<LineSegment> getLineSegments() const;
+        std::vector<LineSegment> getLineSegments() const;
 
     private:
         Geometry::Arrangement_2 arr;
