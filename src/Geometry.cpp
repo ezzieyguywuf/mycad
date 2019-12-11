@@ -189,6 +189,21 @@ Arrangement::Arrangement(std::vector<LineSegment> const& segments)
     }
 }
 
+std::vector<LineSegment> Arrangement::getLineSegments() const
+{
+    std::vector<LineSegment> out;
+    for(auto it = arr.edges_begin() ; it != arr.edges_end() ; it++ )
+    {
+        Geometry::Segment_2 seg(it->curve());
+        Geometry::Point source(seg.source().x(), seg.source().y());
+        Geometry::Point target(seg.target().x(), seg.target().y());
+        Geometry::LineSegment line(source, target);
+        out.emplace_back(line);
+    }
+
+    return out;
+}
+
 //=============================================================================
 //                      Free (global) Function Definitions
 //=============================================================================
