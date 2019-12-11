@@ -14,11 +14,14 @@ namespace MyCAD
 {
 namespace Communication
 {
+
+/** A Client knows how to generate Request, send them to Server, and query for a response */
 class Client
 {
 
 };
 
+/** A Request describes an action or a query that we have for the MyCAD Server */
 class Request
 {
     public:
@@ -29,12 +32,18 @@ class Request
         std::string myRequest;
 };
 
+/** A Server knows how to process a Request and do something with it */
 class Server
 {
     public:
         Server();
 
+        /** Process command-line arguments */
         bool processArgs(int argc, char ** argv) const;
+        /** Process a Request
+         *  @returns 0 on success
+         *  @returns -1 on error
+         */
         int processRequest(Request const& request) const;
 
         /** Returns the result of processing the last Request
