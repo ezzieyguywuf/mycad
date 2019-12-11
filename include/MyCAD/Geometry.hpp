@@ -29,7 +29,7 @@ namespace Geometry
 /** @brief The precision for numbers - change as desired/needed.
  */
 typedef int                                Number;
-typedef CGAL::Cartesian<Number>       Kernel;
+typedef CGAL::Cartesian<Number>            Kernel;
 typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef Traits_2::Point_2                  Point_2;
 typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
