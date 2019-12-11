@@ -11,10 +11,13 @@
 
 namespace MyCAD
 {
-    namespace
-    {
-        cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
-    } // namespace
+namespace Communication
+{
+
+namespace
+{
+    cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
+} // namespace
 
 Server::Server()
 {
@@ -43,4 +46,5 @@ bool Server::processArgs(int argc, char ** argv) const
     }
     return true;
 }
+} // Communication
 } // MyCAD
