@@ -37,27 +37,27 @@ Credits
 
 This project makes used of the following open-source projects (thank you!)
 
-- [Catch2][https://github.com/catchorg/Catch2]
-- [cxxopts][https://github.com/jarro2783/cxxopts]
-- [CGAL][https://www.cgal.org/]
-- [gitlab][https://gitlab.com]
-- [doxygen][http://www.doxygen.nl/]
+- [Catch2](https://github.com/catchorg/Catch2)
+- [cxxopts](https://github.com/jarro2783/cxxopts)
+- [CGAL](https://www.cgal.org/)
+- [gitlab](https://gitlab.com)
+- [doxygen](http://www.doxygen.nl/)
 
 The project was developed using the following, also open-source projects (THANK YOU!)
-- [gentoo][https://www.gentoo.org/]
-- [neovim][https://neovim.io/]
-- [firefox][https://www.mozilla.org/en-US/firefox/new/][^1]
-- [st][https://st.suckless.org/] (the humble terminal)
-- [tmux][https://github.com/tmux/tmux] (makes the terminal sligthly cocky)
-- [gdb][https://www.gnu.org/software/gdb/]
-- [clang][https://clang.llvm.org/]
-- [cmake][https://cmake.org/]
-- [gcc][https://gcc.gnu.org/]
+- [gentoo](https://www.gentoo.org/)
+- [neovim](https://neovim.io/)
+- [firefox](https://www.mozilla.org/en-US/firefox/new/)[^1]
+- [st](https://st.suckless.org/) (the humble terminal)
+- [tmux](https://github.com/tmux/tmux) (makes the terminal sligthly cocky)
+- [gdb](https://www.gnu.org/software/gdb/)
+- [clang](https://clang.llvm.org/)
+- [cmake](https://cmake.org/)
+- [gcc](https://gcc.gnu.org/)
 
 This project has also drawn influence and inspiration from:
 
-- [FreeCAD][https://www.freecadweb.org/]
-- [Blender][https://www.blender.org/]
+- [FreeCAD](https://www.freecadweb.org/)
+- [Blender](https://www.blender.org/)
 
 [^1]: Let's be honest - how much do we take browsers for granted? I mean, I learned
   everything I know about programming on the internet. That's not a hyperbole. Literally
