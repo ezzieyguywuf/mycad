@@ -123,6 +123,72 @@ Segment_2 LineSegment::getSegment() const
 }
 
 //=============================================================================
+//                        Arrangement Class Definition
+//=============================================================================
+Arrangement::Arrangement(std::vector<LineSegment> const& segments)
+{
+    Geometry::Halfedge_handle lastEdge(nullptr);
+    for(Geometry::LineSegment const& aLineSegment: lineSegments)
+    {
+        Geometry::Point start = aLineSegment.start();
+        Geometry::Point end = aLineSegment.end();
+
+        Geometry::Point_2 source(start.x(), start.y());
+        Geometry::Point_2 target(end.x(), end.y());
+
+        Geometry::Segment_2 seg(source, target);
+
+        if (lastEdge == Geometry::Halfedge_handle(nullptr))
+        {
+            lastEdge = arr.insert_in_face_interior(seg, arr.unbounded_face());
+            continue;
+        }
+
+        // Find out if they intersect
+        auto v = CGAL::intersection(Geometry::Segment_2(lastEdge->curve()), seg);
+        if(v)
+        {
+            const Geometry::Point_2 *p = boost::get<Geometry::Point_2>(&*v);
+            if(p)
+            {
+                // They intersect at a point. But is it one of the end-points?
+                Geometry::Vertex_handle lastLeft(nullptr);
+                Geometry::Vertex_handle lastRight(nullptr);
+
+                switch(lastEdge->direction())
+                {
+                    case CGAL::ARR_LEFT_TO_RIGHT:
+                    {
+                        lastLeft  = lastEdge->source();
+                        lastRight = lastEdge->target();
+                        break;
+                    }
+                    case CGAL::ARR_RIGHT_TO_LEFT:
+                    {
+                        lastLeft  = lastEdge->target();
+                        lastRight = lastEdge->source();
+                        break;
+                    }
+                    default:
+                    {
+                        throw Exception("I don't know how to handle that Arr_halfedge_direction.");
+                    }
+                }
+                if (seg.min() == lastLeft->point()  or
+                    seg.max() == lastLeft->point()  or
+                    seg.min() == lastRight->point() or
+                    seg.max() == lastRight->point())
+                {
+                    lastEdge = CGAL::insert_non_intersecting_curve(arr, seg);
+                    continue;
+                }
+            }
+        }
+        throw Exception("Each subsquent LineSegment must share only an end-point with the previous.");
+    }
+}
+
+//=============================================================================
 //                      Free (global) Function Definitions
 //=============================================================================
 
