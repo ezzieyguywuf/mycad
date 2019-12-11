@@ -106,5 +106,28 @@ bool Server::processRequest(Request const& request)
     }
     return false;
 }
+
+/** Returns the response from the last succesfully processed Request.
+ *
+ *  @warning Server does not know anything about the last Request at this point, or even
+ *           if we've received a request yet. In other words, the caller must ensure that:
+ *
+ *           1. They have actually sent a Request prior to calling `getResponse`
+ *           2. That the last request was processed succesfully prior to calling
+ *           `getRespons`
+ *
+ *           If these two things are not done, bad things won't happen. But, you'll
+ *           either:
+ *
+ *           1. Get an empty string as a response. The caller __must only__ rely on this
+ *              empty string as a true response iff they did the two things mentioned
+ *              above.
+ *           2. Get the response from the previously succesful processing, which could
+ *              lead to surprising results on your end.
+ */
+std::string Server::getResponse() const
+{
+    return myResponse;
+}
 } // Communication
 } // MyCAD
