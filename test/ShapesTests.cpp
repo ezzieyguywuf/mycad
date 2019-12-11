@@ -53,14 +53,14 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
 
         WHEN("a Wire is made with them")
         {
-            MyCAD::Shapes::Wire wire({l1, l2});
-            THEN("we should be able to retrieve the two intermediate Edge.")
-            {
-                MyCAD::Shapes::Edge e1(l1);
-                MyCAD::Shapes::Edge e2(l2);
-                std::vector<MyCAD::Shapes::Edge> check({e1, e2});
-                REQUIRE_THAT(wire.getEdges(), UnorderedEquals(check));
-            }
+            //MyCAD::Shapes::Wire wire({l1, l2});
+            //THEN("we should be able to retrieve the two intermediate Edge.")
+            //{
+                //MyCAD::Shapes::Edge e1(l1);
+                //MyCAD::Shapes::Edge e2(l2);
+                //std::vector<MyCAD::Shapes::Edge> check({e1, e2});
+                //REQUIRE_THAT(wire.getEdges(), UnorderedEquals(check));
+            //}
         }
     }
 
@@ -78,7 +78,7 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
         {
             THEN("an error should be thrown.")
             {
-                REQUIRE_THROWS_AS(MyCAD::Shapes::Wire({l1, l2}), MyCAD::Exception);
+                //REQUIRE_THROWS_AS(MyCAD::Shapes::Wire({l1, l2}), MyCAD::Exception);
             }
         }
     }
