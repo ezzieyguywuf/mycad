@@ -24,6 +24,12 @@ should be motivated by a Story from this list.
 **I WANT** to create a Primitive Solid \
 **SO THAT** I can use it to describe some physical object \
 
+# Work with groups of topological objects
+**AS A** Designer \
+**I WANT** to group various topological entities in a "Document" \
+**SO THAT** I can work on them iteratively and encapsulate them from other logical groups
+
+
 # Completed Stories
 **AS A** Designer \
 **I WANT** to create lines in space \
