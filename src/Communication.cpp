@@ -9,6 +9,8 @@
 
 #include "cxxopts.hpp"
 
+#include <utility> // for std::move
+
 namespace MyCAD
 {
 namespace Communication
@@ -18,6 +20,12 @@ namespace
 {
     cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
 } // namespace
+//=============================================================================
+//                      Request Class Definition
+//=============================================================================
+Request::Request(std::string aRequest)
+    : myRequest(std::move(aRequest))
+{}
 
 //=============================================================================
 //                       Server Class Definition
