@@ -5,6 +5,7 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
+#include <MyCAD/Exceptions.hpp>
 #include <MyCAD/Geometry.hpp>
 
 #include <CGAL/intersections.h>
@@ -128,7 +129,7 @@ Segment_2 LineSegment::getSegment() const
 Arrangement::Arrangement(std::vector<LineSegment> const& segments)
 {
     Geometry::Halfedge_handle lastEdge(nullptr);
-    for(Geometry::LineSegment const& aLineSegment: lineSegments)
+    for(Geometry::LineSegment const& aLineSegment: segments)
     {
         Geometry::Point start = aLineSegment.start();
         Geometry::Point end = aLineSegment.end();
