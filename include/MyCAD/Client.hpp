@@ -5,4 +5,11 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
+#ifndef MYCAD_CLIENT_HEADER
+#define MYCAD_CLIENT_HEADER
 
+class Client
+{
+
+};
+#endif //MYCAD_CLIENT_HEADER
