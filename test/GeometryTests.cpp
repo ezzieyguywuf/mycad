@@ -8,6 +8,7 @@
 #include "catch.hpp"
 
 #include <MyCAD/Geometry.hpp>
+#include <MyCAD/Exceptions.hpp>
 
 using Point_2 = MyCAD::Geometry::Point_2;
 using Catch::Matchers::UnorderedEquals;
@@ -75,19 +76,29 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
             }
         }
     }
-    GIVEN("two LineSegment with ONE common end-point")
+
+    GIVEN("a LineSegment")
     {
         MyCAD::Geometry::LineSegment s1({0,0}, {10, 10});
-        MyCAD::Geometry::LineSegment s2({10,10}, {15, 5});
-
-        WHEN("An Arrangement is constructed with them")
+        WHEN("a second LineSegment shares an end-point")
         {
-            MyCAD::Geometry::Arrangement arr({s1, s2});
+            MyCAD::Geometry::LineSegment s2({10,10}, {15, 5});
 
-            THEN("We should be able to retrieve the original LineSegment")
+            THEN("we should be able to construct an Arrangement")
             {
+                MyCAD::Geometry::Arrangement arr({s1, s2});
                 std::vector<MyCAD::Geometry::LineSegment> check({s1, s2});
                 REQUIRE_THAT(arr.getLineSegments(), UnorderedEquals(check));
+            }
+        }
+
+        WHEN("a second LineSegment does not share an end-point")
+        {
+            MyCAD::Geometry::LineSegment s2({10,5}, {15, 5});
+
+            THEN("we should NOT be able to construct an Arrangement")
+            {
+                REQUIRE_THROWS_AS(MyCAD::Geometry::Arrangement({s1, s2}), MyCAD::Exception);
             }
         }
     }
