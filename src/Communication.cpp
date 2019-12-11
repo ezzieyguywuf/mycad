@@ -27,6 +27,11 @@ Request::Request(std::string aRequest)
     : myRequest(std::move(aRequest))
 {}
 
+std::string const& Request::get() const
+{
+    return myRequest;
+}
+
 //=============================================================================
 //                       Server Class Definition
 //=============================================================================

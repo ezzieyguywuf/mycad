@@ -23,6 +23,7 @@ class Request
 {
     public:
         Request(std::string request);
+        std::string const& get() const;
 
     private:
         std::string myRequest;
