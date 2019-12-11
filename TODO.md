@@ -42,5 +42,3 @@
 - Update Wire constructor to accept Edge rather than LineSegment?
 
 # GUI
-- Updated test/gui/CMakeLists.txt to properly use `Qt5:Test` in link statement..and get
-  rid of manual include statement.
