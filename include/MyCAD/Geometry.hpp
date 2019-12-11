@@ -92,9 +92,6 @@ class LineSegment
         /** Check if this LineSegment intersects with another*/
         bool intersects(LineSegment const& aLineSegment) const;
 
-        /** Return a copy of the underlying CGAL Segment_2*/
-        Segment_2 getGeometry() const;
-
         /** @name operators*/
         ///@{
         bool operator==(LineSegment const& aLineSegment) const;
@@ -102,6 +99,9 @@ class LineSegment
         ///@}
 
     private:
+        // This simply constructs a Segment_2 from myMonotoneCurve
+        Segment_2 getSegment() const;
+
         MonoCurve_2 myMonotoneCurve;
 };
 

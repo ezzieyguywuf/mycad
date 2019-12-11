@@ -96,25 +96,30 @@ Point LineSegment::max() const
 
 bool LineSegment::intersects(LineSegment const& aLineSegment) const
 {
-    auto ans = intersection(getGeometry(), aLineSegment.getGeometry());
+    auto ans = intersection(getSegment(), aLineSegment.getSegment());
     if(ans)
         return true;
     return false;
 }
 
-Segment_2 LineSegment::getGeometry() const
-{
-    return myMonotoneCurve;
-}
-
 bool LineSegment::operator==(LineSegment const& aLineSegment) const
 {
-    return getGeometry() == aLineSegment.getGeometry();
+    return getSegment() == aLineSegment.getSegment();
 }
 
 bool LineSegment::operator!=(LineSegment const& aLineSegment) const
 {
     return not (*this == aLineSegment);
+}
+
+/** The reason this is needed is because Arrangement_2::Traits_2::X_monotone_curve_2 is
+ * some sort of wrapper around Segment_2 but does not implement the entire Segment_2
+ * interface. It's in the documentation. I don't understand exactly __why__ they did it
+ * this way, I just know that they did....
+ */
+Segment_2 LineSegment::getSegment() const
+{
+    return Segment_2(myMonotoneCurve);
 }
 
 //=============================================================================
