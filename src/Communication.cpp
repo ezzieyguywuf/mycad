@@ -99,7 +99,8 @@ bool Server::processArgs(int argc, char ** argv) const
  */
 bool Server::processRequest(Request const& request)
 {
-    if(request.get() == "version")
+    std::string data = request.get();
+    if(data == "version")
     {
         myResponse = std::string(MYCAD_VERSION);
         return true;
