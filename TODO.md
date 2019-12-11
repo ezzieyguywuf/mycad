@@ -9,8 +9,8 @@
   different for dev vs. release?
 - Figure out how to make groups in member definitions share the same header styling as,
   say "Public Member Functions"
-# Server
-- Code smell? Look at the `static bool first` line in Server.cpp
+# Communication
+- Code smell? Look at the `static bool first` line in Server constructor
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
   the cxxapts::ParseResult
 # Geometry
