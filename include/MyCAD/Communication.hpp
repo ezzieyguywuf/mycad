@@ -29,6 +29,6 @@ class Server
 
         bool processArgs(int argc, char ** argv) const;
 };
-}
-}
+} // namespace Communication
+} // namespace MyCAD
 #endif //MYCAD_COMMUNICATION_HEADER
