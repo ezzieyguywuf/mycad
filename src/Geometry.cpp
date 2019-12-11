@@ -32,22 +32,22 @@ namespace Geometry{
  *  Our geometric classes are all currently strictly 2D. This might change in the future,
  *  which will affect the API.
  */
-Point::Point(Kernel::FT const& x, Kernel::FT const& y)
+Point::Point(Number const& x, Number const& y)
     :myPoint(x, y)
 {}
 
 /** @brief Get the precise x-coordinate.
  */
-Kernel::FT Point::x() const
+Number Point::x() const
 {
-    return CGAL::to_double(myPoint.x());
+    return myPoint.x();
 }
 
 /** @brief Get the precise y-coordinate.
  */
-Kernel::FT Point::y() const
+Number Point::y() const
 {
-    return CGAL::to_double(myPoint.y());
+    return myPoint.y();
 }
 
 bool Point::operator==(Point const& aPoint) const

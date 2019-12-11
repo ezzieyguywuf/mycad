@@ -28,8 +28,8 @@ namespace Geometry
  */
 /** @brief The precision for numbers - change as desired/needed.
  */
-typedef int                                Number_type;
-typedef CGAL::Cartesian<Number_type>       Kernel;
+typedef int                                Number;
+typedef CGAL::Cartesian<Number>       Kernel;
 typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef Traits_2::Point_2                  Point_2;
 typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
@@ -48,17 +48,17 @@ class Point
          *
          *  @param x,y The cartesian coordinates of the point
          */
-        Point(Kernel::FT const& x, Kernel::FT const& y);
+        Point(Number const& x, Number const& y);
 
         /** @name Geometric Coordinate Access
          *
-         *  The precision is entirely dictated by the precision of the Number_type
+         *  The precision is entirely dictated by the precision of the Number
          *  typedef.
          *
          *  @{
          */
-        Kernel::FT x() const;
-        Kernel::FT y() const;
+        Number x() const;
+        Number y() const;
         /** @} */
 
         /** @brief Return a copy of the underlying CGAL Point_2*/
