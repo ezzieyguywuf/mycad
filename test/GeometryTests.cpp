@@ -52,15 +52,11 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
 
     GIVEN("a LineSegment")
     {
-        MyCAD::Geometry::Point p1(0, 0);
-        MyCAD::Geometry::Point p2(10, 10);
-        MyCAD::Geometry::LineSegment s1(p1, p2);
+        MyCAD::Geometry::LineSegment s1({0, 0}, {10, 10});
 
         WHEN("a second, non-overlapping LineSegment is constructed")
         {
-            MyCAD::Geometry::Point p3(15, 15);
-            MyCAD::Geometry::Point p4(20, 20);
-            MyCAD::Geometry::LineSegment s2(p3, p4);
+            MyCAD::Geometry::LineSegment s2({15, 15}, {20, 20});
 
             THEN("the two should not intersect")
             {
