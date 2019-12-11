@@ -7,17 +7,17 @@
 
 #include "catch.hpp"
 
-#include <MyCAD/Server.hpp>
+#include <MyCAD/Communication.hpp>
 
 SCENARIO("A Remote User sends a TCP/IP request to the Server and expects a response")
 {
     GIVEN("an instance of MyCAD::Server")
     {
-        MyCAD::Server server;
+        MyCAD::Communication::Server server;
 
         WHEN("A request for the version is received")
         {
-            MyCAD::Request request("version");
+            MyCAD::Communication::Request request("version");
             THEN("We should get the expected result")
             {
                 REQUIRE(server.processRequest(request) == MYCAD_VERSION);
@@ -30,7 +30,7 @@ SCENARIO("The server should accept and understanding various command-line argume
 {
     GIVEN("an instance of MyCAD::Server")
     {
-        MyCAD::Server server;
+        MyCAD::Communication::Server server;
 
         WHEN("a recognized list of command-line arguments is provided")
         {
