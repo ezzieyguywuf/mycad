@@ -16,6 +16,11 @@ class Client
 {
 
 };
+
+class Request
+{
+
+};
 }
 }
 #endif //MYCAD_COMMUNICATION_HEADER
