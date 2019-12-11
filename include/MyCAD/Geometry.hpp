@@ -13,6 +13,7 @@
 #include <CGAL/Arrangement_2.h>
 
 #include <ostream>
+#include <vector>
 
 /** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
@@ -103,6 +104,23 @@ class LineSegment
         Segment_2 getSegment() const;
 
         MonoCurve_2 myMonotoneCurve;
+};
+
+/** @brief A arrangement of LineSegment, end-to-end*/
+class Arrangement
+{
+    public:
+        /** @brief construct an Arrangement from a list of LineSegment
+         *  @throws MyCAD::Exception if __each succesive__ LineSegment does not share an
+         *          end-point with the previous LineSegment
+         */
+        Arrangement(std::vector<LineSegment> const& segments);
+
+        /** @brief Returns the list of LineSegment that make up this Arrangement */
+        vector<LineSegment> getLineSegments() const;
+
+    private:
+        Geometry::Arrangement_2 arr;
 };
 
 std::ostream& operator<< (std::ostream& ost, Point const& aPoint);
