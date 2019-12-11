@@ -8,8 +8,14 @@
 #ifndef MYCAD_CLIENT_HEADER
 #define MYCAD_CLIENT_HEADER
 
+namespace MyCAD
+{
+namespace Communication
+{
 class Client
 {
 
 };
+}
+}
 #endif //MYCAD_CLIENT_HEADER
