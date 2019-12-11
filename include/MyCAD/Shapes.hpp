@@ -49,8 +49,8 @@ class Edge
 class Wire
 {
     public:
-        /** @brief Construct a Wire from the given LineSegments*/
-        explicit Wire(std::vector<Geometry::LineSegment> const& lineSegments);
+        /** @brief Construct a Wire from the given Edge*/
+        explicit Wire(std::vector<Edge> const& edges);
 
         /** @brief Returns the Edges that make up the Wire*/
         std::vector<Edge> getEdges() const;

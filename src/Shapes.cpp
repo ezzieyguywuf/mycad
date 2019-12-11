@@ -84,7 +84,7 @@ bool Edge::operator!=(Edge const& anEdge) const
  *     of its ends
  *  3. The order in which the LineSegment are provided is important.
  */
-Wire::Wire(std::vector<Geometry::LineSegment> const& /*lineSegments*/)
+Wire::Wire(std::vector<Edge> const& /*edges*/)
 {
 
     //Geometry::Halfedge_handle lastEdge(nullptr);
