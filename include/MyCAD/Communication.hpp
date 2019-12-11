@@ -5,8 +5,8 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#ifndef MYCAD_CLIENT_HEADER
-#define MYCAD_CLIENT_HEADER
+#ifndef MYCAD_COMMUNICATION_HEADER
+#define MYCAD_COMMUNICATION_HEADER
 
 namespace MyCAD
 {
@@ -18,4 +18,4 @@ class Client
 };
 }
 }
-#endif //MYCAD_CLIENT_HEADER
+#endif //MYCAD_COMMUNICATION_HEADER
