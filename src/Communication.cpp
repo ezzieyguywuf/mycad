@@ -105,6 +105,11 @@ bool Server::processRequest(Request const& request)
         myResponse = std::string(MYCAD_VERSION);
         return true;
     }
+    else if(data.find("vertex") == 0)
+    {
+        myResponse = "";
+        return true;
+    }
     return false;
 }
 
