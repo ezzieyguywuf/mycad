@@ -5,7 +5,7 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#include <MyCAD/Server.hpp>
+#include <MyCAD/Communication.hpp>
 
 #include "cxxopts.hpp"
 
