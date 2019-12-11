@@ -8,6 +8,8 @@
 #ifndef MYCAD_COMMUNICATION_HEADER
 #define MYCAD_COMMUNICATION_HEADER
 
+#include <string>
+
 namespace MyCAD
 {
 namespace Communication
@@ -28,6 +30,7 @@ class Server
         Server();
 
         bool processArgs(int argc, char ** argv) const;
+        std::string processRequest(Request const& request) const;
 };
 } // namespace Communication
 } // namespace MyCAD
