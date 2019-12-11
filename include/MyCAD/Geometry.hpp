@@ -61,9 +61,6 @@ class Point
         Number y() const;
         /** @} */
 
-        /** @brief Return a copy of the underlying CGAL Point_2*/
-        Point_2 getGeometry() const;
-
         /** @name Operators
          *  @{
          */

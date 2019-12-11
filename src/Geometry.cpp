@@ -60,11 +60,6 @@ bool Point::operator!=(Point const& aPoint) const
     return not (*this == aPoint);
 }
 
-Point_2 Point::getGeometry() const
-{
-    return myPoint;
-}
-
 //=============================================================================
 //                        LineSegment Class Definition
 //=============================================================================
