@@ -29,6 +29,10 @@ should be motivated by a Story from this list.
 **I WANT** to group various topological entities in a "Document" \
 **SO THAT** I can work on them iteratively and encapsulate them from other logical groups
 
+# Communicate with MyCAD::Communication::Server
+**AS A** Power User \
+**I WANT** to communicate directly with a MyCAD::Server process \
+**SO THAT** I can stop the process
 
 # Completed Stories
 **AS A** Designer \
