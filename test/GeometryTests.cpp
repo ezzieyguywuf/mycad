@@ -10,6 +10,7 @@
 #include <MyCAD/Geometry.hpp>
 
 using Point_2 = MyCAD::Geometry::Point_2;
+using Catch::Matchers::UnorderedEquals;
 
 SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
 {
@@ -70,8 +71,23 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
             MyCAD::Geometry::LineSegment s2({10,0}, {0, 10});
             THEN("the two should intersect")
             {
-
                 REQUIRE(s1.intersects(s2));
+            }
+        }
+    }
+    GIVEN("two LineSegment with ONE common end-point")
+    {
+        MyCAD::Geometry::LineSegment s1({0,0}, {10, 10});
+        MyCAD::Geometry::LineSegment s2({10,10}, {15, 5});
+
+        WHEN("An Arrangement is constructed with them")
+        {
+            MyCAD::Geometry::Arrangement arr({s1, s2});
+
+            THEN("We should be able to retrieve the original LineSegment")
+            {
+                std::vector<MyCAD::Geometry::LineSegment> check({s1, s2});
+                REQUIRE_THAT(arr.getLineSegments(), UnorderedEquals(check));
             }
         }
     }
