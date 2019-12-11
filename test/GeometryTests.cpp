@@ -64,6 +64,16 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
                 REQUIRE_FALSE(s1.intersects(s2));
             }
         }
+
+        WHEN("a second, overlapping LineSegment is constructed")
+        {
+            MyCAD::Geometry::LineSegment s2({10,0}, {0, 10});
+            THEN("the two should intersect")
+            {
+
+                REQUIRE(s1.intersects(s2));
+            }
+        }
     }
 }
 
