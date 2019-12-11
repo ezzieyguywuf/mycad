@@ -18,6 +18,14 @@
 
 #include <QString>
 
+#include <ostream>
+
+std::ostream& operator<<(std::ostream& ost, QString const& string)
+{
+    ost << string.toStdString();
+    return ost;
+}
+
 SCENARIO("We want to test out unit-testing Qt with Catch2", "[GUI]")
 {
     GIVEN("a QString")
