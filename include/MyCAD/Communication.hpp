@@ -21,6 +21,14 @@ class Request
 {
 
 };
+
+class Server
+{
+    public:
+        Server();
+
+        bool processArgs(int argc, char ** argv) const;
+};
 }
 }
 #endif //MYCAD_COMMUNICATION_HEADER
