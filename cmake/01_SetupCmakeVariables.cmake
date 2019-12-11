@@ -3,4 +3,4 @@
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Change to Release to build without debug symbols")
 
 # These are specific to MyCAD
-set(MYCAD_BUILD_GUI OFF CACHE BOOL "Determines whether or not to build the GUI.")
+set(MYCAD_BUILD_GUI ON CACHE BOOL "Determines whether or not to build the GUI.")
