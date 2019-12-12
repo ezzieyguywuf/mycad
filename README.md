@@ -32,6 +32,42 @@ In general, I have some very concrete goals for this project:
 4. Document - my favourite libraries to use are those that are documented well. Therefore
    I want to provide that same opportunity to potential users of MyCAD.
 
+How To Build
+============
+**TODO**: Make this section more better.
+
+MyCAD has a few dependencies. Please install these on your system using whatever means you
+usually employ:
+
+- a c++ compiler
+- cmake
+- qt5-base (we need the headers, so something like `apt get install qt5-base-devel` in
+  ubuntu or something)
+- These are acually dependencies of [CGAL](https://www.cgal.org/). We include the CGAL
+  headers directly (check the src directory) but you'll need to provide your own versions
+  of these
+  - [boost](https://www.boost.org/)
+  - [gmp](https://gmplib.org/manual/C_002b_002b-Interface-General.html)
+  - [mpfr](https://www.mpfr.org/)
+- git (duh)
+
+Optionally, you can install doxygen if you want to build the documentation, but it is
+already hosted [here on gitlab](https://ezzieyguywuf.gitlab.io/mycad) for your viewing pleasure.
+
+Once all that is out of the way, you can build as follows:
+
+```sh
+git clone https://gitlab.com/ezzieyguywuf/mycad
+cd mycad
+mkdir build
+cmake ..
+make
+```
+
+That's all it takes! Now, mind you, this project is still very much a work in progress,
+but check it `./bin/MyCAD_Tests` as well as the test definitions in the `test`
+sub-directory to get an idea of how things work and go together.
+
 Credits
 =======
 
