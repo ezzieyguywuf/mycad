@@ -60,7 +60,6 @@ class Server
         constexpr static const char* EXIT = "EXIT_MAIN_LOOP";
     private:
         std::string myResponse;
-        std::vector<MyCAD::Shapes::Vertex> vertices;
 };
 } // namespace Communication
 } // namespace MyCAD

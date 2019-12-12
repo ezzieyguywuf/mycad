@@ -51,8 +51,22 @@ void RegisterAllCommands();
  *  @{
  *  These are the commands that Server will recognize (if they get registered)
  */
-class Version : public Command{};
-class Add     : public Command{};
+class Version : public Command
+{
+    public:
+        Version();
+        ~Version() override = default;
+
+        void execute(std::string const& data) const override;
+};
+class Add : public Command
+{
+    public:
+        Add();
+        ~Add() override = default;
+
+        void execute(std::string const& data) const override;
+};
 /// @}
 } // namespace Commands
 } // namespace Server

@@ -7,11 +7,13 @@
 
 #include <MyCAD/Exceptions.hpp>
 #include <MyCAD/Geometry.hpp>
+#include <MyCAD/Shapes.hpp>
 
 #include "ServerCommands.hpp"
 
 #include <set>
-#include <memory> // for std::unique_ptr
+#include <memory>  // for std::unique_ptr
+#include <utility> // for std::move
 #include <iostream>
 
 namespace MyCAD
@@ -35,11 +37,14 @@ namespace
 {
     // Will be used to store a set of registered commands.
     std::set<std::unique_ptr<Command>> KNOWN_COMMANDS;
+
+    // Will store all the vertices in ....space
+    std::vector<MyCAD::Shapes::Vertex> VERTICES;
 } // namespace
 
 void RegisterCommand(std::unique_ptr<Command> command)
 {
-    if(command->token().find(' ') != std::npos)
+    if(command->token().find(' ') != std::string::npos)
     {
         throw MyCAD::Exception("A Command token can NOT contain a space.");
     }
@@ -51,8 +56,8 @@ void RegisterCommand(std::unique_ptr<Command> command)
  */
 void RegisterAllCommands()
 {
-    RegisterCommand(new Version);
-    RegisterCommand(new Add);
+    RegisterCommand(std::move(std::unique_ptr<Command>(new Version)));
+    RegisterCommand(std::move(std::unique_ptr<Add>(new Add)));
 }
 
 //=============================================================================
@@ -63,12 +68,12 @@ void RegisterAllCommands()
  *  placed upon the lexography of the `token` at this level, however a later `Register`
  *  function will likely ensure that it does not contain a space.
  */
-Command::Command(std::string token, std::string help="")
+Command::Command(std::string token, std::string help)
     : myToken(std::move(token)), myHelp(std::move(help))
 {}
 
 // Virtual descructor still needs a definition!!!
-virtual ~Command()=0;
+Command::~Command(){}
 
 std::string const& Command::token() const
 {
@@ -92,7 +97,7 @@ Version::Version()
     : Command("version", "Returns the version of the running MyCAD_Server")
 {}
 
-void Version::execute(std::string const& data)
+void Version::execute(std::string const& data) const
 {
     std::cout << "MyCAD©, v" MYCAD_VERSION << std::endl;
 
@@ -107,14 +112,15 @@ Add::Add()
     : Command("add", "Allows users to add various topological entities to....space")
 {}
 
-void Add::execute(std::string const& data)
+void Add::execute(std::string const& data) const
 {
     // Extract the user's targets
+    std::stringstream ss;
+    ss << data;
     MyCAD::Geometry::Number x,y;
     ss >> x >> y;
 
     // Check if there's any trailing data
-    std::stringstream ss;
     std::string remainder;
     std::getline(ss, remainder);
     if(not remainder.empty())
@@ -123,11 +129,11 @@ void Add::execute(std::string const& data)
     }
 
     // Create the vertex
-    vertices.emplace_back(MyCAD::Geometry::Point(x, y));
+    VERTICES.emplace_back(MyCAD::Geometry::Point(x, y));
 
     // Let the user know everything went well.
     std::stringstream oss;
-    oss << "Added vertex at " << vertices.back();
+    oss << "Added vertex at " << VERTICES.back();
 }
 
 } // namespace Commands
