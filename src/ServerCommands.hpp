@@ -36,6 +36,10 @@ class Command
         std::string myToken;
         std::string myHelp;
 }
+
+/** @brief Used to register commands that Server understands */
+void RegisterCommand(std::unique_ptr<Command> command);
+
 } // namespace Commands
 } // namespace Server
 } // namespace MyCAD
