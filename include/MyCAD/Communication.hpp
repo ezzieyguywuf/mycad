@@ -36,6 +36,8 @@ class Request
         std::string myRequest;
 };
 
+// Forward-declare so we can use it in Command::execute....
+class Server;
 /** @brief A Command is an action that Server knows how to perform */
 class Command
 {

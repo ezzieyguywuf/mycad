@@ -22,6 +22,8 @@
 - Extend `Add` command to accept a sub-command which describes what is being added.
 - Now that Server is understanding more and more commands, it's time to use the Command
   design pattern (I think....)
+- Is it ok to forward-declare `Server` in order to use it as a parameter in `Command`? Is
+  this bad coding practice/design?
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
   the cxxapts::ParseResult
 - Is our `Request->Server->Response` design flimsy/faulty? Is it ok to expect the user to
