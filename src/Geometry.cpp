@@ -21,6 +21,15 @@ namespace MyCAD{
  *  different library.
  */
 namespace Geometry{
+namespace
+{
+    MyCAD::Exception CROSSOVER_EXCEPTION(
+            "The segment being added cannot cross over an existing segment.");
+    MyCAD::Exception COINCIDENT_EXCEPTION(
+            "The segment being added coincides with the existing arrangement, and it's not at an end-vertex");
+    MyCAD::Exception NO_END_COINCIDENCE_EXCEPTION(
+            "The segment being added is not coincident with one of the open ends of the arrangement.");
+} // namespace
 //=============================================================================
 //                        Point Class Definition
 //=============================================================================
