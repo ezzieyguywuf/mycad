@@ -8,6 +8,7 @@
 #include <MyCAD/Communication.hpp>
 
 #include <iostream>
+#include <string>  // for std::getline
 
 int main(int argc, char* argv[])
 {
@@ -19,7 +20,7 @@ int main(int argc, char* argv[])
     {
         std::cout << "$> " ;
         std::string input;
-        std::cin >> input;
+        std::getline(std::cin, input);
 
         MyCAD::Communication::Request request(input);
         bool retval = myServer.processRequest(request);
