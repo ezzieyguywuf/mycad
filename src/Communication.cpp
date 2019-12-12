@@ -39,7 +39,7 @@ namespace
                 ;
         }
 
-        MyCAD::Server::Commands::RegisterAllCommands();
+        MyCAD::Commands::RegisterAllCommands();
     }
 } // namespace
 

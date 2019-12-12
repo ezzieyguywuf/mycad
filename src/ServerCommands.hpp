@@ -10,8 +10,6 @@
 
 namespace MyCAD
 {
-namespace Server
-{
 /** @brief Contains all the Commands that Server knows how to execute */
 namespace Commands
 {
@@ -69,7 +67,6 @@ class Add : public Command
 };
 /// @}
 } // namespace Commands
-} // namespace Server
 } // namespace MyCAD
 
 #endif // MYCAD_SERVER_COMMAND

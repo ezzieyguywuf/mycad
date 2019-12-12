@@ -18,8 +18,6 @@
 
 namespace MyCAD
 {
-namespace Server
-{
 /** Please note that this namespace is an implementation detail. Typical users and
  *  developers do not need to know or care about it. Indeed, based on how it is
  *  implemented (note that the header is not distributed), the only place that this
@@ -137,5 +135,4 @@ void Add::execute(std::string const& data) const
 }
 
 } // namespace Commands
-} // namespace Server
 } // namespace MyCAD
