@@ -8,6 +8,8 @@
 #include <MyCAD/Exceptions.hpp>
 #include <MyCAD/Shapes.hpp>
 
+#include <utility> // for std::move
+
 namespace MyCAD{
 /** A Shape is distinct from geometry. Consider a Point (a geometric entity) defined in
  *  2-dimensional euclidian space at \f$x = 5\f$, \f$y = 5\f$, or more conventionally
@@ -113,7 +115,22 @@ std::vector<Face> Box::getFaces() const
 {
     return {Face(), Face(), Face(), Face(), Face(), Face()};
 }
+//=============================================================================
+//                       Space Class Definition
+//=============================================================================
+/** Space allows a user to describe various Topological entities at arbitrary locations.
+ *  There can, of course, be multiple and overlapping Topological objects.
+ */
+void Space::addVertex(Vertex vertex)
+{
+    vertices.emplace_back(std::move(vertex));
+}
 
+/** The index of the Vertex in this list can be used later to modify that same Vertex */
+std::vector<Vertex> const& getVertices() const
+{
+    return vertices;
+}
 //=============================================================================
 //                      Free (global) Function Definitions
 //=============================================================================
