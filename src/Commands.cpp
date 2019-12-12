@@ -32,10 +32,6 @@ namespace MyCAD
 namespace Commands
 {
 
-/** Note to developers: you can and should adjust the lines in this method whenever you
- *  are defining a new command. Further, you can comment out or delete lines that contain
- *  commands that you wish to temporarily (or permanentl!) make Server forget about.
- */
 void RegisterAllCommands()
 {
     RegisterCommand(std::move(std::unique_ptr<Command>(new Version)));
@@ -43,7 +39,7 @@ void RegisterAllCommands()
 }
 
 //=============================================================================
-//                   Definitions For All Known Commands
+//                          The Version Command
 //=============================================================================
 Version::Version()
     : Command("version", "Returns the version of the running MyCAD_Server")
@@ -60,6 +56,9 @@ void Version::execute(std::string const& data) const
     }
 }
 
+//=============================================================================
+//                               The Add Command
+//=============================================================================
 Add::Add()
     : Command("add", "Allows users to add various topological entities to....space")
 {}

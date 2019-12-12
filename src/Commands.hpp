@@ -13,6 +13,7 @@ namespace MyCAD
 /** @brief Contains all the Commands that Server knows how to execute */
 namespace Commands
 {
+
 /** @brief This can be called to register all the commands at runtime */
 void RegisterAllCommands();
 

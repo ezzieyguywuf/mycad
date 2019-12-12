@@ -96,7 +96,7 @@ class Server
         std::set<std::unique_ptr<Command>> known_commands;
 
         // Will store all the vertices in ....space
-        std::vector<MyCAD::Shapes::Vertex> VERTICES;
+        std::vector<MyCAD::Shapes::Vertex> vertices;
 };
 } // namespace Communication
 } // namespace MyCAD
