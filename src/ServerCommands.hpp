@@ -32,6 +32,9 @@ class Command
         /** @brief returns the help documentation */
         void getHelp() const;
 
+        /** @brief The good stuff!!! */
+        virtual void execute() const;
+
     private:
         std::string myToken;
         std::string myHelp;
@@ -41,7 +44,6 @@ class Command
 void RegisterCommand(std::unique_ptr<Command> command);
 /** @brief This can be called to register all the commands at runtime */
 void RegisterAllCommands();
-
 } // namespace Commands
 } // namespace Server
 } // namespace MyCAD
