@@ -26,6 +26,9 @@ class Command
         Command(std::string token, std::string help="");
         virtual ~Command()=0;
 
+        /** @brief returns the identifying token for this Command */
+        std::string const& token() const;
+
         /** @brief returns the help documentation */
         void getHelp() const;
 
