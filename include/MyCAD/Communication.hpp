@@ -43,7 +43,7 @@ class Server
         Server();
 
         /** @brief Process command-line arguments */
-        bool processArgs(int argc, char ** argv) const;
+        bool processArgs(int argc, char ** argv);
 
         /** @brief Process a Request
          *  @returns true on success

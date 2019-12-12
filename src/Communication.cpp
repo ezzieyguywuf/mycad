@@ -5,7 +5,6 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#include <MyCAD/Geometry.hpp>
 #include <MyCAD/Communication.hpp>
 
 #include "cxxopts.hpp"
@@ -87,13 +86,13 @@ Server::Server()
  *  @warning The caller should check the return value and respond appropriately, otherwise
  *           Server will contain an unknown (to the caller) state
  */
-bool Server::processArgs(int argc, char ** argv) const
+bool Server::processArgs(int argc, char ** argv)
 {
     try{
         cxxopts::ParseResult result = OPTIONS.parse(argc, argv);
         if(result.count("version") > 0)
         {
-            std::cout << "MyCAD©, v" MYCAD_VERSION << std::endl;
+            this->processRequest(Version);
         }
     }
     catch (cxxopts::OptionParseException const& e)
@@ -110,36 +109,6 @@ bool Server::processArgs(int argc, char ** argv) const
  */
 bool Server::processRequest(Request const& request)
 {
-    std::string data = request.get();
-    std::stringstream ss(data);
-    std::string command;
-    ss >> command;
-
-    if(command == "version")
-    {
-        myResponse = std::string(MYCAD_VERSION);
-    }
-    else if(command == "vertex")
-    {
-        // Extract the user's targets
-        MyCAD::Geometry::Number x,y;
-        ss >> x >> y;
-
-        // Create the vertex
-        vertices.emplace_back(MyCAD::Geometry::Point(x, y));
-
-        // Let the user know everything went well.
-        std::stringstream oss;
-        oss << "Added vertex at " << vertices.back();
-        myResponse = oss.str();
-    }
-    else if(data == "exit" or data == "quit")
-    {
-        myResponse = EXIT;
-    }
-    else{
-        return false;
-    }
     return true;
 }
 
