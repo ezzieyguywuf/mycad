@@ -37,6 +37,7 @@ typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
 typedef Kernel::Segment_2                  Segment_2;
 typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
 typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
+typedef Arrangement_2::Vertex_handle       Vertex_handle;
 ///@}
 
 
