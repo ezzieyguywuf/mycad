@@ -111,6 +111,14 @@ Server::Server()
     initializeServer();
 }
 
+void Server::RegisterCommand(std::unique_ptr<Command> command)
+{
+    if(command->token().find(' ') != std::string::npos)
+    {
+        throw MyCAD::Exception("A Command token can NOT contain a space.");
+    }
+}
+
 /** This will process the list of provided command-line arguments. If there is an error,
  *  the caller is notified by a return value of false.
  *

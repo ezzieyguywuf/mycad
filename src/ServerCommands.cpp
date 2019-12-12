@@ -32,14 +32,6 @@ namespace MyCAD
 namespace Commands
 {
 
-void RegisterCommand(std::unique_ptr<Command> command)
-{
-    if(command->token().find(' ') != std::string::npos)
-    {
-        throw MyCAD::Exception("A Command token can NOT contain a space.");
-    }
-}
-
 /** Note to developers: you can and should adjust the lines in this method whenever you
  *  are defining a new command. Further, you can comment out or delete lines that contain
  *  commands that you wish to temporarily (or permanentl!) make Server forget about.
