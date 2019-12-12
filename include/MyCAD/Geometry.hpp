@@ -110,12 +110,19 @@ class LineSegment
 class Arrangement
 {
     public:
+        /** @brief constructs an empty Arrangement. */
+        Arrangement() = default;
         /** @brief construct an Arrangement from a list of LineSegment
-         *  @throws MyCAD::Exception if __each succesive__ LineSegment does not share an
-         *          end-point with the previous LineSegment
          */
         Arrangement(std::vector<LineSegment> const& segments);
 
+        /** @brief Add an Edge to the Arrangement.
+         *  @throws MyCAD::Exception if the Edge does not share an end-point with either
+         *          open end in the arrangement
+         *  @throws MyCAD::Exception if the Edge overlaps with an existing Edge anywhere
+         *          other than an end-point
+         */
+        void addSegment(LineSegment const& segment);
         /** @brief Returns the list of LineSegment that make up this Arrangement */
         std::vector<LineSegment> getLineSegments() const;
 

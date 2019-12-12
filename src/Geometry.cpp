@@ -126,6 +126,9 @@ Segment_2 LineSegment::getSegment() const
 //=============================================================================
 //                        Arrangement Class Definition
 //=============================================================================
+/** @note This calls Arrangement::addSegment on each LineSegment in the vector. Please
+ *        note that Arrangement::addSegment may throw an exception
+ */
 Arrangement::Arrangement(std::vector<LineSegment> const& segments)
 {
     Geometry::Halfedge_handle lastEdge(nullptr);
