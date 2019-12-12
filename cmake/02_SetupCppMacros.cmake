@@ -5,5 +5,5 @@
 # can get cumbersome and difficult to do well when we're doing things like using
 # `add_compile_definitions`
 macro(SetupCppMacros)
-    add_compile_definitions(MYCAD_VERSION="${PROJECT_VERSION}")
+    add_definitions('-DMYCAD_VERSION="${PROJECT_VERSION}"')
 endmacro()
