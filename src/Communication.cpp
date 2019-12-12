@@ -92,7 +92,7 @@ bool Server::processArgs(int argc, char ** argv)
         cxxopts::ParseResult result = OPTIONS.parse(argc, argv);
         if(result.count("version") > 0)
         {
-            this->processRequest(Version);
+            this->processRequest(Request("version"));
         }
     }
     catch (cxxopts::OptionParseException const& e)
@@ -107,7 +107,7 @@ bool Server::processArgs(int argc, char ** argv)
  *
  *  A return value of `false` indicates that there was an error processing the request
  */
-bool Server::processRequest(Request const& request)
+bool Server::processRequest(Request const& /*request*/)
 {
     return true;
 }

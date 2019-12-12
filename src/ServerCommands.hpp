@@ -32,18 +32,28 @@ class Command
         /** @brief returns the help documentation */
         void getHelp() const;
 
-        /** @brief The good stuff!!! */
-        virtual void execute() const;
+        /** @brief The good stuff!!! 
+         *  @param data All the information the user passed after the token.
+         */
+        virtual void execute(std::string const& data) const;
 
     private:
         std::string myToken;
         std::string myHelp;
-}
+};
 
 /** @brief Used to register commands that Server understands */
 void RegisterCommand(std::unique_ptr<Command> command);
 /** @brief This can be called to register all the commands at runtime */
 void RegisterAllCommands();
+
+/** @name Commands
+ *  @{
+ *  These are the commands that Server will recognize (if they get registered)
+ */
+class Version : public Command{};
+class Add     : public Command{};
+/// @}
 } // namespace Commands
 } // namespace Server
 } // namespace MyCAD

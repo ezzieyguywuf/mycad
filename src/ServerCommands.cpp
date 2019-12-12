@@ -5,11 +5,14 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#include <MyCAD/Exception.hpp>
+#include <MyCAD/Exceptions.hpp>
+#include <MyCAD/Geometry.hpp>
+
 #include "ServerCommands.hpp"
 
 #include <set>
 #include <memory> // for std::unique_ptr
+#include <iostream>
 
 namespace MyCAD
 {
@@ -47,10 +50,13 @@ void RegisterCommand(std::unique_ptr<Command> command)
  *  commands that you wish to temporarily (or permanentl!) make Server forget about.
  */
 void RegisterAllCommands()
-{}
+{
+    RegisterCommand(new Version);
+    RegisterCommand(new Add);
+}
 
 //=============================================================================
-//                     Commands Class Definition
+//                   Command Abstract Base Class Definition
 //=============================================================================
 /** A Command is an action that the Server will know how to execute. It consists of a
  *  `token`, which is a verb that describes the given Command. There are no restrictions
@@ -78,6 +84,52 @@ void Command::getHelp() const
         out << " does not have any help documentation.";
     }
 }
+
+//=============================================================================
+//                   Definitions For All Known Commands
+//=============================================================================
+Version::Version()
+    : Command("version", "Returns the version of the running MyCAD_Server")
+{}
+
+void Version::execute(std::string const& data)
+{
+    std::cout << "MyCAD©, v" MYCAD_VERSION << std::endl;
+
+    if (not data.empty())
+    {
+        std::clog << "ignored the following input from the user: \"";
+        std::clog << data << "\"" << std::endl;
+    }
+}
+
+Add::Add()
+    : Command("add", "Allows users to add various topological entities to....space")
+{}
+
+void Add::execute(std::string const& data)
+{
+    // Extract the user's targets
+    MyCAD::Geometry::Number x,y;
+    ss >> x >> y;
+
+    // Check if there's any trailing data
+    std::stringstream ss;
+    std::string remainder;
+    std::getline(ss, remainder);
+    if(not remainder.empty())
+    {
+        std::clog << "Ignoring trailing data \"" << remainder << "\"" << std::endl;
+    }
+
+    // Create the vertex
+    vertices.emplace_back(MyCAD::Geometry::Point(x, y));
+
+    // Let the user know everything went well.
+    std::stringstream oss;
+    oss << "Added vertex at " << vertices.back();
+}
+
 } // namespace Commands
 } // namespace Server
 } // namespace MyCAD

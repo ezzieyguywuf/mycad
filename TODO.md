@@ -19,6 +19,7 @@
   set the `state` to something like `EMPTY` prior to running the command - this way, we
   can safely check `state` and always rely on an empty string being the actual response
   from the executed command.
+- Extend `Add` command to accept a sub-command which describes what is being added.
 - Now that Server is understanding more and more commands, it's time to use the Command
   design pattern (I think....)
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
