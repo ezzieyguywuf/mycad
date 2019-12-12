@@ -11,6 +11,7 @@
   say "Public Member Functions" - this is a doxygen thing
 - Can we get rid of boost dependency? Does that mean we can't use CGAL?
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
+- Use readline or similar to make i/o a little more bearable in main loop.
 # Communication
 - Code smell? Look at the `static bool first` line in Server constructor
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
