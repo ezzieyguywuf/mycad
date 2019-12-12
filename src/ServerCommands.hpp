@@ -45,10 +45,7 @@ void RegisterCommand(std::unique_ptr<Command> command);
 /** @brief This can be called to register all the commands at runtime */
 void RegisterAllCommands();
 
-/** @name Commands
- *  @{
- *  These are the commands that Server will recognize (if they get registered)
- */
+/** @brief Get the version of the FreeCAD server */
 class Version : public Command
 {
     public:
@@ -57,6 +54,8 @@ class Version : public Command
 
         void execute(std::string const& data) const override;
 };
+
+/** @brief Perform various additions of topological entities */
 class Add : public Command
 {
     public:
@@ -65,7 +64,6 @@ class Add : public Command
 
         void execute(std::string const& data) const override;
 };
-/// @}
 } // namespace Commands
 } // namespace MyCAD
 
