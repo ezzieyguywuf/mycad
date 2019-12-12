@@ -91,9 +91,6 @@ class Server
 
         constexpr static const char* EXIT = "EXIT_MAIN_LOOP";
     private:
-
-        std::string myResponse;
-
         // Will be used to store a set of registered commands.
         std::set<std::unique_ptr<Command>> known_commands;
 
