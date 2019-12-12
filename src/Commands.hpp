@@ -5,12 +5,14 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#ifndef MYCAD_SERVER_COMMAND
-#define MYCAD_SERVER_COMMAND
+#ifndef MYCAD_COMMANDS_HEADER
+#define MYCAD_COMMANDS_HEADER
+
+#include <MyCAD/Shapes.hpp>
 
 namespace MyCAD
 {
-/** @brief Contains all the Commands that Server knows how to execute */
+/** @brief Contains all the Commands that Server can be registered with*/
 namespace Commands
 {
 
@@ -24,19 +26,19 @@ class Version : public Command
         Version();
         ~Version() override = default;
 
-        std::string execute(std::string const& data, Server& server) const override;
+        std::string execute(std::string const& data, Shapes::Space& space) const override;
 };
 
-/** @brief Perform various additions of topological entities */
+/** @brief Perform various additions of topological entities to Space*/
 class Add : public Command
 {
     public:
         Add();
         ~Add() override = default;
 
-        std::string execute(std::string const& data, Server& server) const override;
+        std::string execute(std::string const& data, Shapes::Space& space) const override;
 };
 } // namespace Commands
 } // namespace MyCAD
 
-#endif // MYCAD_SERVER_COMMAND
+#endif // MYCAD_COMMANDS_HEADER

@@ -45,7 +45,7 @@ Version::Version()
     : Command("version", "Returns the version of the running MyCAD_Server")
 {}
 
-std::string Version::execute(std::string const& data, Server& /*server*/) const
+std::string Version::execute(std::string const& data, Shapes::Space& /*space*/) const
 {
     if (not data.empty())
     {
@@ -63,7 +63,7 @@ Add::Add()
     : Command("add", "Allows users to add various topological entities to....space")
 {}
 
-std::string Add::execute(std::string const& data, Server& server) const
+std::string Add::execute(std::string const& data, Shapes::Space& space) const
 {
     // Extract the user's targets
     std::stringstream ss;

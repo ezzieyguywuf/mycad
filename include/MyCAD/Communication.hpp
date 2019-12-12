@@ -36,9 +36,6 @@ class Request
         std::string myRequest;
 };
 
-// Forward-declare so we can use it in Command::execute....
-class Server;
-
 /** @brief A Command is an action that Server knows how to perform */
 class Command
 {
@@ -58,10 +55,10 @@ class Command
 
         /** @brief This will be called in order to execute the given Command
          *  @param data All the information the user passed after the token.
-         *  @param server The instance of Server against which to execute the command. The
-         *                can and probably will modify \p server in some way.
+         *  @param server The instance of Space against which to execute the command. The
+         *                Command can and probably will modify Space in some way.
          */
-        virtual std::string execute(std::string const& data, Server& server) const;
+        virtual std::string execute(std::string const& data, Shapes::Space& space) const;
 
     private:
         std::string myToken;
@@ -100,8 +97,8 @@ class Server
         // Will be used to store a set of registered commands.
         std::set<std::unique_ptr<Command>> known_commands;
 
-        // Will store all the vertices in ....space
-        std::vector<MyCAD::Shapes::Vertex> vertices;
+        // Will store our....world
+        MyCAD::Shapes::Space space;
 };
 } // namespace Communication
 } // namespace MyCAD
