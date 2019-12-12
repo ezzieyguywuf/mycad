@@ -37,7 +37,6 @@ typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
 typedef Kernel::Segment_2                  Segment_2;
 typedef CGAL::Arrangement_2<Traits_2>      Arrangement_2;
 typedef Arrangement_2::Halfedge_handle     Halfedge_handle;
-typedef Arrangement_2::Vertex_handle       Vertex_handle;
 ///@}
 
 
@@ -127,6 +126,26 @@ class Arrangement
         std::vector<LineSegment> getLineSegments() const;
 
     private:
+        enum class IntersectionType
+        {
+            None,
+            Cross,
+            LeftEnd,
+            RightEnd
+        };
+
+        /** Checks a single end against a segment for proper intersection
+         *  @returns true/false whether we added the segment to our arrangement
+         * */
+        bool checkEnd(Halfedge_handle edge, Segment_2 const& segment);
+        /** Check end edges against a segment for proper intersection
+         *  @returns true/false whether we added the segment to our arrangement
+         * */
+        bool checkEnds(Segment_2 const& segment);
+        /** Makes a CGAL Segment_2 out of a MyCAD::LineSegment */
+        Segment_2 makeSegment(LineSegment const& segment) const;
+        IntersectionType intersects(Segment_2 const& seg1, Segment_2 const& seg2);
+
         Geometry::Arrangement_2 arr;
 };
 
