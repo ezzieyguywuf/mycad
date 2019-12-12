@@ -216,6 +216,120 @@ std::vector<LineSegment> Arrangement::getLineSegments() const
     return out;
 }
 
+bool Arrangement::checkEnd(Halfedge_handle edge, Segment_2 const& segment)
+{
+    Segment_2 endSeg(edge->curve());
+
+    // We need to know which vertex on the edge is lexicographically the left and the
+    // right
+    Vertex_handle leftVertex(nullptr);
+    Vertex_handle rightVertex(nullptr);
+    switch(edge->direction())
+    {
+        case CGAL::Arr_halfedge_direction::ARR_LEFT_TO_RIGHT:
+        {
+            leftVertex = edge->source();
+            rightVertex = edge->target();
+            break;
+        }
+        case CGAL::Arr_halfedge_direction::ARR_RIGHT_TO_LEFT:
+        {
+            leftVertex = edge->target();
+            rightVertex = edge->source();
+            break;
+        }
+    }
+
+    IntersectionType intersection = intersects(endSeg, segment);
+
+    switch(intersection)
+    {
+        case IntersectionType::Cross:
+            throw CROSSOVER_EXCEPTION;
+        case IntersectionType::None:
+        {
+            return false;
+        }
+        case  IntersectionType::LeftEnd:
+        {
+            if(endSeg.min() == segment.max())
+            {
+                arr.insert_from_right_vertex(segment, leftVertex);
+            }
+            else
+            {
+                arr.insert_from_left_vertex(segment, leftVertex);
+            }
+            return true;
+        }
+        case IntersectionType::RightEnd:
+        {
+            if(endSeg.max() == segment.max())
+            {
+                arr.insert_from_right_vertex(segment, rightVertex);
+            }
+            else
+            {
+                arr.insert_from_left_vertex(segment, rightVertex);
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Arrangement::checkEnds(Segment_2 const& segment)
+{
+    if(arr.number_of_edges() == 0)
+    {
+        throw MyCAD::Exception("Must have at least one edge in order to checkEnds");
+    }
+    Arrangement_2::Edge_iterator first = arr.edges_begin();
+    bool ret = checkEnd(first, segment);
+    if(not ret)
+    {
+        Arrangement_2::Edge_iterator end = arr.edges_end();
+        end--;
+        ret = checkEnd(end, segment);
+    }
+    return ret;
+}
+
+Segment_2 Arrangement::makeSegment(LineSegment const& segment) const
+{
+    // To start, we'll build a CGAL Segment_2 from our MyCAD::LineSegment
+    Point start = segment.start();
+    Point end = segment.end();
+
+    Point_2 source(start.x(), start.y());
+    Point_2 target(end.x(), end.y());
+
+    return Segment_2(source, target);
+}
+
+Arrangement::IntersectionType
+Arrangement::intersects(Segment_2 const& seg1, Segment_2 const& seg2)
+{
+    auto v = CGAL::intersection(seg1, seg2);
+    if(v)
+    {
+        if(const Point_2 *p = boost::get<Point_2>(&*v))
+        {
+            if(*p == seg1.min())
+            {
+                return IntersectionType::LeftEnd;
+            }
+            else if(*p == seg1.max())
+            {
+                return IntersectionType::RightEnd;
+            }
+        }
+        return IntersectionType::Cross;
+    }
+    return IntersectionType::None;
+}
+
 //=============================================================================
 //                      Free (global) Function Definitions
 //=============================================================================
