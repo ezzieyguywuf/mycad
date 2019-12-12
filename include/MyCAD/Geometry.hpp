@@ -13,6 +13,7 @@
 #include <CGAL/Arrangement_2.h>
 
 #include <ostream>
+#include <vector>
 
 /** @brief Everything in the MyCAD library is contained in the MyCAD namespace*/
 namespace MyCAD
@@ -28,8 +29,8 @@ namespace Geometry
  */
 /** @brief The precision for numbers - change as desired/needed.
  */
-typedef int                                Number_type;
-typedef CGAL::Cartesian<Number_type>       Kernel;
+typedef int                                Number;
+typedef CGAL::Cartesian<Number>            Kernel;
 typedef CGAL::Arr_segment_traits_2<Kernel> Traits_2;
 typedef Traits_2::Point_2                  Point_2;
 typedef Traits_2::X_monotone_curve_2       MonoCurve_2;
@@ -48,21 +49,18 @@ class Point
          *
          *  @param x,y The cartesian coordinates of the point
          */
-        Point(Kernel::FT const& x, Kernel::FT const& y);
+        Point(Number const& x, Number const& y);
 
         /** @name Geometric Coordinate Access
          *
-         *  The precision is entirely dictated by the precision of the Number_type
+         *  The precision is entirely dictated by the precision of the Number
          *  typedef.
          *
          *  @{
          */
-        Kernel::FT x() const;
-        Kernel::FT y() const;
+        Number x() const;
+        Number y() const;
         /** @} */
-
-        /** @brief Return a copy of the underlying CGAL Point_2*/
-        Point_2 getGeometry() const;
 
         /** @name Operators
          *  @{
@@ -80,7 +78,7 @@ class LineSegment
 {
     public:
         LineSegment(Point const& p1, Point const& p2);
-        LineSegment(Segment_2 const& seg);
+        LineSegment(LineSegment const& seg);
 
         /** Returns the start point of the Segment*/
         Point start() const;
@@ -95,9 +93,6 @@ class LineSegment
         /** Check if this LineSegment intersects with another*/
         bool intersects(LineSegment const& aLineSegment) const;
 
-        /** Return a copy of the underlying CGAL Segment_2*/
-        Segment_2 getGeometry() const;
-
         /** @name operators*/
         ///@{
         bool operator==(LineSegment const& aLineSegment) const;
@@ -105,7 +100,54 @@ class LineSegment
         ///@}
 
     private:
+        // This simply constructs a Segment_2 from myMonotoneCurve
+        Segment_2 getSegment() const;
+
         MonoCurve_2 myMonotoneCurve;
+};
+
+/** @brief A arrangement of LineSegment, end-to-end*/
+class Arrangement
+{
+    public:
+        /** @brief constructs an empty Arrangement. */
+        Arrangement() = default;
+        /** @brief construct an Arrangement from a list of LineSegment
+         */
+        Arrangement(std::vector<LineSegment> const& segments);
+
+        /** @brief Add an Edge to the Arrangement.
+         *  @throws MyCAD::Exception if the Edge does not share an end-point with either
+         *          open end in the arrangement
+         *  @throws MyCAD::Exception if the Edge overlaps with an existing Edge anywhere
+         *          other than an end-point
+         */
+        void addSegment(LineSegment const& segment);
+        /** @brief Returns the list of LineSegment that make up this Arrangement */
+        std::vector<LineSegment> getLineSegments() const;
+
+    private:
+        enum class IntersectionType
+        {
+            None,
+            Cross,
+            LeftEnd,
+            RightEnd
+        };
+
+        /** Checks a single end against a segment for proper intersection
+         *  @returns true/false whether we added the segment to our arrangement
+         * */
+        bool checkEnd(Halfedge_handle edge, Segment_2 const& segment);
+        /** Check end edges against a segment for proper intersection
+         *  @returns true/false whether we added the segment to our arrangement
+         * */
+        bool checkEnds(Segment_2 const& segment);
+        /** Makes a CGAL Segment_2 out of a MyCAD::LineSegment */
+        Segment_2 makeSegment(LineSegment const& segment) const;
+        IntersectionType intersects(Segment_2 const& seg1, Segment_2 const& seg2);
+
+        Geometry::Arrangement_2 arr;
 };
 
 std::ostream& operator<< (std::ostream& ost, Point const& aPoint);

@@ -84,72 +84,13 @@ bool Edge::operator!=(Edge const& anEdge) const
  *     of its ends
  *  3. The order in which the LineSegment are provided is important.
  */
-Wire::Wire(std::vector<Geometry::LineSegment> const& lineSegments)
+Wire::Wire(std::vector<Edge> const& /*edges*/)
 {
-
-    Geometry::Halfedge_handle lastEdge(nullptr);
-    for(Geometry::LineSegment const& aLineSegment: lineSegments)
-    {
-        Geometry::Segment_2 seg = aLineSegment.getGeometry();
-        if (lastEdge == Geometry::Halfedge_handle(nullptr))
-        {
-            lastEdge = arr.insert_in_face_interior(seg, arr.unbounded_face());
-            continue;
-        }
-
-        // Find out if they intersect
-        auto v = CGAL::intersection(Geometry::Segment_2(lastEdge->curve()), seg);
-        if(v)
-        {
-            const Geometry::Point_2 *p = boost::get<Geometry::Point_2>(&*v);
-            if(p)
-            {
-                // They intersect at a point. But is it one of the end-points?
-                Geometry::Vertex_handle lastLeft(nullptr);
-                Geometry::Vertex_handle lastRight(nullptr);
-
-                switch(lastEdge->direction())
-                {
-                    case CGAL::ARR_LEFT_TO_RIGHT:
-                    {
-                        lastLeft  = lastEdge->source();
-                        lastRight = lastEdge->target();
-                        break;
-                    }
-                    case CGAL::ARR_RIGHT_TO_LEFT:
-                    {
-                        lastLeft  = lastEdge->target();
-                        lastRight = lastEdge->source();
-                        break;
-                    }
-                    default:
-                    {
-                        throw Exception("I don't know how to handle that Arr_halfedge_direction.");
-                    }
-                }
-                if (seg.min() == lastLeft->point()  or
-                    seg.max() == lastLeft->point()  or
-                    seg.min() == lastRight->point() or
-                    seg.max() == lastRight->point())
-                {
-                    lastEdge = CGAL::insert_non_intersecting_curve(arr, seg);
-                    continue;
-                }
-            }
-        }
-        throw Exception("Each subsquent LineSegment must share only an end-point with the previous.");
-    }
 }
 
 std::vector<Edge> Wire::getEdges() const
 {
     std::vector<Edge> out;
-    for(auto it = arr.edges_begin() ; it != arr.edges_end() ; it++ )
-    {
-        Geometry::Segment_2 seg(it->curve());
-        Geometry::LineSegment line(seg);
-        out.emplace_back(line);
-    }
     return out;
 }
 

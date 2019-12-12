@@ -7,7 +7,6 @@
 
 #include "catch.hpp"
 
-#include <MyCAD/Exceptions.hpp>
 #include <MyCAD/Shapes.hpp>
 
 using Catch::Matchers::UnorderedEquals;
@@ -38,47 +37,6 @@ SCENARIO("Basic topological entities wrap geometric constructs", "[Shapes]")
             THEN("we should be able to retrive the LineSegment")
             {
                 REQUIRE(edge.getLineSegment() == line);
-            }
-        }
-    }
-
-    GIVEN("two LineSegments with one common Point")
-    {
-        MyCAD::Geometry::Point p1(0,0);
-        MyCAD::Geometry::Point p2(10,10);
-        MyCAD::Geometry::Point p3(0,10);
-
-        MyCAD::Geometry::LineSegment l1(p1, p2);
-        MyCAD::Geometry::LineSegment l2(p2, p3);
-
-        WHEN("a Wire is made with them")
-        {
-            MyCAD::Shapes::Wire wire({l1, l2});
-            THEN("we should be able to retrieve the two intermediate Edge.")
-            {
-                MyCAD::Shapes::Edge e1(l1);
-                MyCAD::Shapes::Edge e2(l2);
-                std::vector<MyCAD::Shapes::Edge> check({e1, e2});
-                REQUIRE_THAT(wire.getEdges(), UnorderedEquals(check));
-            }
-        }
-    }
-
-    GIVEN("two LineSegments without a common Point")
-    {
-        MyCAD::Geometry::Point p1(0,0);
-        MyCAD::Geometry::Point p2(5,5);
-        MyCAD::Geometry::Point p3(10,10);
-        MyCAD::Geometry::Point p4(15,15);
-
-        MyCAD::Geometry::LineSegment l1(p1, p2);
-        MyCAD::Geometry::LineSegment l2(p3, p4);
-        
-        WHEN("we try to make a Wire with them")
-        {
-            THEN("an error should be thrown.")
-            {
-                REQUIRE_THROWS_AS(MyCAD::Shapes::Wire({l1, l2}), MyCAD::Exception);
             }
         }
     }
