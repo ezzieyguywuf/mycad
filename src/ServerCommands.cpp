@@ -31,14 +31,6 @@ namespace MyCAD
  */
 namespace Commands
 {
-namespace
-{
-    // Will be used to store a set of registered commands.
-    std::set<std::unique_ptr<Command>> KNOWN_COMMANDS;
-
-    // Will store all the vertices in ....space
-    std::vector<MyCAD::Shapes::Vertex> VERTICES;
-} // namespace
 
 void RegisterCommand(std::unique_ptr<Command> command)
 {
