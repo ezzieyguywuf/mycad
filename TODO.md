@@ -11,6 +11,7 @@
   say "Public Member Functions" - this is a doxygen thing
 - Can we get rid of boost dependency? Does that mean we can't use CGAL?
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
+- Use readline or similar to make i/o a little more bearable in main loop.
 # Communication
 - Code smell? Look at the `static bool first` line in Server constructor
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
@@ -24,6 +25,7 @@
     wise...
   - This also suggests that we need some sort of ID for each Request. And the Caller would
     need to know about this ID...
+- Move processArgs out of Server...maybe put it directly in main? or in a new header?
 # Geometry
 - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
   our Geometry namespace
