@@ -38,6 +38,7 @@ class Request
 
 // Forward-declare so we can use it in Command::execute....
 class Server;
+
 /** @brief A Command is an action that Server knows how to perform */
 class Command
 {
@@ -55,10 +56,12 @@ class Command
         /** @brief returns the help documentation */
         void getHelp() const;
 
-        /** @brief The good stuff!!!
+        /** @brief This will be called in order to execute the given Command
          *  @param data All the information the user passed after the token.
+         *  @param server The instance of Server against which to execute the command. The
+         *                can and probably will modify \p server in some way.
          */
-        virtual void execute(std::string const& data) const;
+        virtual std::string execute(std::string const& data, Server& server) const;
 
     private:
         std::string myToken;

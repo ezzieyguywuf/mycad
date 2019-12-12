@@ -24,7 +24,7 @@ class Version : public Command
         Version();
         ~Version() override = default;
 
-        void execute(std::string const& data) const override;
+        std::string execute(std::string const& data, Server& server) const override;
 };
 
 /** @brief Perform various additions of topological entities */
@@ -34,7 +34,7 @@ class Add : public Command
         Add();
         ~Add() override = default;
 
-        void execute(std::string const& data) const override;
+        std::string execute(std::string const& data, Server& server) const override;
 };
 } // namespace Commands
 } // namespace MyCAD

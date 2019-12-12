@@ -45,15 +45,15 @@ Version::Version()
     : Command("version", "Returns the version of the running MyCAD_Server")
 {}
 
-void Version::execute(std::string const& data) const
+std::string Version::execute(std::string const& data, Server& /*server*/) const
 {
-    std::cout << "MyCAD©, v" MYCAD_VERSION << std::endl;
-
     if (not data.empty())
     {
         std::clog << "ignored the following input from the user: \"";
         std::clog << data << "\"" << std::endl;
     }
+
+    return "MyCAD©, v" MYCAD_VERSION;
 }
 
 //=============================================================================
@@ -63,7 +63,7 @@ Add::Add()
     : Command("add", "Allows users to add various topological entities to....space")
 {}
 
-void Add::execute(std::string const& data) const
+std::string Add::execute(std::string const& data, Server& server) const
 {
     // Extract the user's targets
     std::stringstream ss;
@@ -80,11 +80,12 @@ void Add::execute(std::string const& data) const
     }
 
     // Create the vertex
-    VERTICES.emplace_back(MyCAD::Geometry::Point(x, y));
+    //VERTICES.emplace_back(MyCAD::Geometry::Point(x, y));
 
     // Let the user know everything went well.
-    std::stringstream oss;
-    oss << "Added vertex at " << VERTICES.back();
+    //std::stringstream oss;
+    //oss << "Added vertex at " << VERTICES.back();
+    return "";
 }
 
 } // namespace Commands
