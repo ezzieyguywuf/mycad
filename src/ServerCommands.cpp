@@ -5,6 +5,7 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
+#include <MyCAD/Exception.hpp>
 #include "ServerCommands.hpp"
 
 #include <set>
@@ -32,6 +33,14 @@ namespace
     // Will be used to store a set of registered commands.
     std::set<std::unique_ptr<Command>> KNOWN_COMMANDS;
 } // namespace
+
+void RegisterCommand(std::unique_ptr<Command> command)
+{
+    if(command->token().find(' ') != std::npos)
+    {
+        throw MyCAD::Exception("A Command token can NOT contain a space.");
+    }
+}
 
 //=============================================================================
 //                     Commands Class Definition
