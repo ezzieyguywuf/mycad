@@ -21,7 +21,6 @@
   from the executed command.
 - Now that Server is understanding more and more commands, it's time to use the Command
   design pattern (I think....)
-- Code smell? Look at the `static bool first` line in Server constructor
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
   the cxxapts::ParseResult
 - Is our `Request->Server->Response` design flimsy/faulty? Is it ok to expect the user to

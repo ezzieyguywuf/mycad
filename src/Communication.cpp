@@ -9,8 +9,10 @@
 #include <MyCAD/Communication.hpp>
 
 #include "cxxopts.hpp"
+#include "ServerCommands.hpp"
 
 #include <utility> // for std::move
+#include <sstream>
 
 namespace MyCAD
 {
@@ -24,7 +26,20 @@ namespace Communication
 
 namespace
 {
+    static bool initialized = false;
+
     cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
+
+    void initializeServer()
+    {
+        if (not initialized)
+        {
+            initialized = true;
+            OPTIONS.add_options()
+                ("v,version", "Return the version of the MyCAD server")
+                ;
+        }
+    }
 } // namespace
 
 //=============================================================================
@@ -61,14 +76,7 @@ std::string const& Request::get() const
  */
 Server::Server()
 {
-    static bool first = true;
-    if (first)
-    {
-        first = false;
-        OPTIONS.add_options()
-            ("v,version", "Return the version of the MyCAD server")
-            ;
-    }
+    initializeServer();
 }
 
 /** This will process the list of provided command-line arguments. If there is an error,
