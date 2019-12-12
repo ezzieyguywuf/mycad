@@ -8,7 +8,10 @@
 #ifndef MYCAD_COMMUNICATION_HEADER
 #define MYCAD_COMMUNICATION_HEADER
 
+#include <MyCAD/Shapes.hpp>
+
 #include <string>
+#include <vector>
 
 namespace MyCAD
 {
@@ -55,6 +58,7 @@ class Server
         constexpr static const char* EXIT = "EXIT_MAIN_LOOP";
     private:
         std::string myResponse;
+        std::vector<MyCAD::Shapes::Vertex> vertices;
 };
 } // namespace Communication
 } // namespace MyCAD
