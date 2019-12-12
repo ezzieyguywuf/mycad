@@ -8,7 +8,7 @@
 - Decide whether or not to keep individual libraries or one monolithic library - maybe
   different for dev vs. release?
 - Figure out how to make groups in member definitions share the same header styling as,
-  say "Public Member Functions"
+  say "Public Member Functions" - this is a doxygen thing
 - Can we get rid of boost dependency? Does that mean we can't use CGAL?
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
 # Communication
