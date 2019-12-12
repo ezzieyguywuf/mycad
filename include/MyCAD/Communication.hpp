@@ -36,6 +36,33 @@ class Request
         std::string myRequest;
 };
 
+/** @brief A Command is an action that Server knows how to perform */
+class Command
+{
+    public:
+        /** @brief token CANNOT contain a space
+         *  @param token a string which represents this Command
+         *  @param help  documentation for the Command.
+         */
+        Command(std::string token, std::string help="");
+        virtual ~Command()=0;
+
+        /** @brief returns the identifying token for this Command */
+        std::string const& token() const;
+
+        /** @brief returns the help documentation */
+        void getHelp() const;
+
+        /** @brief The good stuff!!!
+         *  @param data All the information the user passed after the token.
+         */
+        virtual void execute(std::string const& data) const;
+
+    private:
+        std::string myToken;
+        std::string myHelp;
+};
+
 /** A Server knows how to process a Request and do something with it */
 class Server
 {

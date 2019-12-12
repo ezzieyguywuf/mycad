@@ -51,36 +51,6 @@ void RegisterAllCommands()
 }
 
 //=============================================================================
-//                   Command Abstract Base Class Definition
-//=============================================================================
-/** A Command is an action that the Server will know how to execute. It consists of a
- *  `token`, which is a verb that describes the given Command. There are no restrictions
- *  placed upon the lexography of the `token` at this level, however a later `Register`
- *  function will likely ensure that it does not contain a space.
- */
-Command::Command(std::string token, std::string help)
-    : myToken(std::move(token)), myHelp(std::move(help))
-{}
-
-// Virtual descructor still needs a definition!!!
-Command::~Command(){}
-
-std::string const& Command::token() const
-{
-    return myToken;
-}
-
-void Command::getHelp() const
-{
-    if(myHelp.empty())
-    {
-        std::stringstream out;
-        out << "The command \"" << myToken << "\"";
-        out << " does not have any help documentation.";
-    }
-}
-
-//=============================================================================
 //                   Definitions For All Known Commands
 //=============================================================================
 Version::Version()
