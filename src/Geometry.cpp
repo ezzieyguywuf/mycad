@@ -140,64 +140,49 @@ Segment_2 LineSegment::getSegment() const
  */
 Arrangement::Arrangement(std::vector<LineSegment> const& segments)
 {
-    Geometry::Halfedge_handle lastEdge(nullptr);
     for(Geometry::LineSegment const& aLineSegment: segments)
     {
-        Geometry::Point start = aLineSegment.start();
-        Geometry::Point end = aLineSegment.end();
+        this->addSegment(aLineSegment);
+    }
+}
 
-        Geometry::Point_2 source(start.x(), start.y());
-        Geometry::Point_2 target(end.x(), end.y());
+void Arrangement::addSegment(LineSegment const& segment)
+{
+    // First, turn our LineSegment into a cgal Segment_2
+    Segment_2 addSeg = makeSegment(segment);
 
-        Geometry::Segment_2 seg(source, target);
+    // If we have zero edges, then we need to add the first one using this method. We can
+    // then safely return (nothing left to do)
+    if (arr.is_empty())
+    {
+        arr.insert_in_face_interior(addSeg, arr.unbounded_face());
+        return;
+    }
 
-        if (lastEdge == Geometry::Halfedge_handle(nullptr))
+    if(arr.number_of_edges() > 2)
+    {
+        // Iterate over every edge which is NOT an end, to ensure the added segment does
+        // not intersect
+        Arrangement_2::Edge_iterator it = arr.edges_begin();
+        Arrangement_2::Edge_iterator end =   arr.edges_end();
+        // Skip the first and last one
+        it++;
+        end--;
+        for(; it != end; it++)
         {
-            lastEdge = arr.insert_in_face_interior(seg, arr.unbounded_face());
-            continue;
-        }
-
-        // Find out if they intersect
-        auto v = CGAL::intersection(Geometry::Segment_2(lastEdge->curve()), seg);
-        if(v)
-        {
-            const Geometry::Point_2 *p = boost::get<Geometry::Point_2>(&*v);
-            if(p)
+            if(intersects(Segment_2(it->curve()), addSeg) == IntersectionType::Cross)
             {
-                // They intersect at a point. But is it one of the end-points?
-                Geometry::Vertex_handle lastLeft(nullptr);
-                Geometry::Vertex_handle lastRight(nullptr);
-
-                switch(lastEdge->direction())
-                {
-                    case CGAL::ARR_LEFT_TO_RIGHT:
-                    {
-                        lastLeft  = lastEdge->source();
-                        lastRight = lastEdge->target();
-                        break;
-                    }
-                    case CGAL::ARR_RIGHT_TO_LEFT:
-                    {
-                        lastLeft  = lastEdge->target();
-                        lastRight = lastEdge->source();
-                        break;
-                    }
-                    default:
-                    {
-                        throw Exception("I don't know how to handle that Arr_halfedge_direction.");
-                    }
-                }
-                if (seg.min() == lastLeft->point()  or
-                    seg.max() == lastLeft->point()  or
-                    seg.min() == lastRight->point() or
-                    seg.max() == lastRight->point())
-                {
-                    lastEdge = CGAL::insert_non_intersecting_curve(arr, seg);
-                    continue;
-                }
+                throw COINCIDENT_EXCEPTION;
             }
         }
-        throw Exception("Each subsquent LineSegment must share only an end-point with the previous.");
+
+    }
+
+    // Finally, make sure that the added segment DOES intersect properly with one of our
+    // ends. This actually add the segment to the arrangement, or return false
+    if(not checkEnds(addSeg))
+    {
+        throw NO_END_COINCIDENCE_EXCEPTION;
     }
 }
 
