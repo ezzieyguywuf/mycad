@@ -103,14 +103,19 @@ bool Server::processRequest(Request const& request)
     if(data == "version")
     {
         myResponse = std::string(MYCAD_VERSION);
-        return true;
     }
     else if(data.find("vertex") == 0)
     {
         myResponse = "";
-        return true;
     }
-    return false;
+    else if(data == "exit" or data == "quit")
+    {
+        myResponse = EXIT;
+    }
+    else{
+        return false;
+    }
+    return true;
 }
 
 /** Returns the response from the last succesfully processed Request.
