@@ -14,6 +14,17 @@ namespace MyCAD
 {
 namespace Server
 {
+/** Please note that this namespace is an implementation detail. Typical users and
+ *  developers do not need to know or care about it. Indeed, based on how it is
+ *  implemented (note that the header is not distributed), the only place that this
+ *  namespace can be accessed from is the Server.cpp file - nobody else can access these
+ *  methods/functions (I think).
+ *
+ *  Nonetheless, in keeping with the mission of this project to provide clear and
+ *  meaningful documentation, we will document these classes and allow them to be
+ *  published in the doxygen documentation. This way, it will become easier to maintain
+ *  this portion of the code base.
+ */
 namespace Commands
 {
 namespace

@@ -12,16 +12,21 @@ namespace MyCAD
 {
 namespace Server
 {
+/** @brief Contains all the Commands that Server knows how to execute */
 namespace Commands
 {
-/** A Command is an action that Server knows how to perform */
+/** @brief A Command is an action that Server knows how to perform */
 class Command
 {
     public:
-        /** token CANNOT contain a space */
+        /** @brief token CANNOT contain a space 
+         *  @param token a string which represents this Command
+         *  @param help  documentation for the Command.
+         */
         Command(std::string token, std::string help="");
         virtual ~Command()=0;
 
+        /** @brief returns the help documentation */
         void getHelp() const;
 
     private:
