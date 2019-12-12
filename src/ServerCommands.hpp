@@ -40,11 +40,8 @@ class Command
         std::string myHelp;
 };
 
-/** @brief Used to register commands that Server understands */
-void RegisterCommand(std::unique_ptr<Command> command);
 /** @brief This can be called to register all the commands at runtime */
 void RegisterAllCommands();
-/** @brief Check if we understand this command. If so, do something */
 
 /** @brief Get the version of the FreeCAD server */
 class Version : public Command
