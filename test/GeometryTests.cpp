@@ -80,9 +80,160 @@ SCENARIO("CAD Programs require cartesian geometry", "[Geometry]")
     GIVEN("a LineSegment")
     {
         MyCAD::Geometry::LineSegment s1({0,0}, {10, 10});
-        WHEN("a second LineSegment shares an end-point and goes to the right and up")
+
+        WHEN("a second LineSegment shares a Source end-point and is co-linear and non-overlapping")
         {
-            MyCAD::Geometry::LineSegment s2({10,10}, {15, 5});
+            MyCAD::Geometry::LineSegment s2({10,10}, {15, 15});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Source end-point and is co-linear and overlaps")
+        {
+            MyCAD::Geometry::LineSegment s2({10,10}, {5, 5});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_THROWS_AS(MyCAD::Geometry::Arrangement({s1, s2}), MyCAD::Exception);
+            }
+        }
+
+        WHEN("a second LineSegment shares a Source end-point and is vertical up")
+        {
+            MyCAD::Geometry::LineSegment s2({10,10}, {10, 15});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Source end-point and is vertical down")
+        {
+            MyCAD::Geometry::LineSegment s2({10,10}, {10, 5});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Source end-point and goes to the right and up")
+        {
+            MyCAD::Geometry::LineSegment s2({10,10}, {15, 20});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Source end-point and goes to the left and up")
+        {
+            MyCAD::Geometry::LineSegment s2({10,10}, {5, 20});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Source end-point and goes to the right and down")
+        {
+            MyCAD::Geometry::LineSegment s2({10,10}, {15, 0});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Source end-point and goes to the left and down")
+        {
+            MyCAD::Geometry::LineSegment s2({10,10}, {5, 0});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and is co-linear and does not overlap")
+        {
+            MyCAD::Geometry::LineSegment s2({15,15}, {10, 10});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and is co-linear and overlaps")
+        {
+            MyCAD::Geometry::LineSegment s2({5,5}, {10, 10});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_THROWS_AS(MyCAD::Geometry::Arrangement({s1, s2}), MyCAD::Exception);
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and is vertical up")
+        {
+            MyCAD::Geometry::LineSegment s2({10,0}, {10, 10});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and is vertical down")
+        {
+            MyCAD::Geometry::LineSegment s2({10,15}, {10, 10});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and goes up and right")
+        {
+            MyCAD::Geometry::LineSegment s2({5,0}, {10, 10});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and goes up and left")
+        {
+            MyCAD::Geometry::LineSegment s2({20,0}, {10, 10});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and goes down and right")
+        {
+            MyCAD::Geometry::LineSegment s2({5,20}, {10, 10});
+
+            THEN("we should be able to construct an Arrangement")
+            {
+                REQUIRE_NOTHROW(MyCAD::Geometry::Arrangement({s1, s2}));
+            }
+        }
+
+        WHEN("a second LineSegment shares a Target end-point and goes down and left")
+        {
+            MyCAD::Geometry::LineSegment s2({15,20}, {10, 10});
 
             THEN("we should be able to construct an Arrangement")
             {
