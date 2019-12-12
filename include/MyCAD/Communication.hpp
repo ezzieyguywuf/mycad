@@ -41,8 +41,8 @@ class Server
         /** Process command-line arguments */
         bool processArgs(int argc, char ** argv) const;
         /** Process a Request
-         *  @returns 0 on success
-         *  @returns -1 on error
+         *  @returns true on success
+         *  @returns false on error
          */
         bool processRequest(Request const& request);
 
