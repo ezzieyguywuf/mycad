@@ -51,6 +51,8 @@ class Server
          *  @returns the result of the last Request
          */
         std::string getResponse() const;
+
+        constexpr static const char* EXIT = "EXIT_MAIN_LOOP";
     private:
         std::string myResponse;
 };
