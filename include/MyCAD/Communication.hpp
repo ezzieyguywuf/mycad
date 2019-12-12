@@ -15,6 +15,7 @@
 
 namespace MyCAD
 {
+/** @brief The fundamental user-space utilities of MyCAD */
 namespace Communication
 {
 
@@ -41,15 +42,16 @@ class Server
     public:
         Server();
 
-        /** Process command-line arguments */
+        /** @brief Process command-line arguments */
         bool processArgs(int argc, char ** argv) const;
-        /** Process a Request
+
+        /** @brief Process a Request
          *  @returns true on success
          *  @returns false on error
          */
         bool processRequest(Request const& request);
 
-        /** Returns the result of processing the last Request
+        /** @brief Returns the result of processing the last Request
          *  @returns an empty std::string if there was an error
          *  @returns the result of the last Request
          */

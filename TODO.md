@@ -1,4 +1,5 @@
 # General
+- ADD INTERNATIONALIZATION!!!!
 - Figure out if we can set up a cross-platform (i.e. including windows and mac) automated
   build system
 - Update documentation with examples.
@@ -13,6 +14,13 @@
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
 - Use readline or similar to make i/o a little more bearable in main loop.
 # Communication
+- Make Server::getResponse less fragile. This can probably be done by storing a custom
+  object, say `MyCAD::Communication::Response` which has some sort of `state` enum. We can
+  set the `state` to something like `EMPTY` prior to running the command - this way, we
+  can safely check `state` and always rely on an empty string being the actual response
+  from the executed command.
+- Now that Server is understanding more and more commands, it's time to use the Command
+  design pattern (I think....)
 - Code smell? Look at the `static bool first` line in Server constructor
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
   the cxxapts::ParseResult
