@@ -31,7 +31,7 @@ SCENARIO("A Remote User sends a TCP/IP request to the Server and expects a respo
             THEN("We should end up with a vertex in that location")
             {
                 REQUIRE(server.processRequest(request) == true);
-                REQUIRE(server.getResponse() == "");
+                REQUIRE_FALSE(server.getResponse().empty());
             }
         }
     }
