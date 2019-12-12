@@ -8,7 +8,7 @@
 - Decide whether or not to keep individual libraries or one monolithic library - maybe
   different for dev vs. release?
 - Figure out how to make groups in member definitions share the same header styling as,
-  say "Public Member Functions"
+  say "Public Member Functions" - this is a doxygen thing
 - Can we get rid of boost dependency? Does that mean we can't use CGAL?
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
 # Communication
@@ -24,6 +24,7 @@
     wise...
   - This also suggests that we need some sort of ID for each Request. And the Caller would
     need to know about this ID...
+- Move processArgs out of Server...maybe put it directly in main? or in a new header?
 # Geometry
 - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
   our Geometry namespace
