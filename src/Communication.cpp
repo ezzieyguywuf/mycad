@@ -39,6 +39,8 @@ namespace
                 ("v,version", "Return the version of the MyCAD server")
                 ;
         }
+
+        Commands::RegisterAllCommands();
     }
 } // namespace
 

@@ -39,6 +39,8 @@ class Command
 
 /** @brief Used to register commands that Server understands */
 void RegisterCommand(std::unique_ptr<Command> command);
+/** @brief This can be called to register all the commands at runtime */
+void RegisterAllCommands();
 
 } // namespace Commands
 } // namespace Server
