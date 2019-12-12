@@ -117,6 +117,7 @@ void Server::RegisterCommand(std::unique_ptr<Command> command)
     {
         throw MyCAD::Exception("A Command token can NOT contain a space.");
     }
+    known_commands.emplace_back(std::move(command));
 }
 
 /** This will process the list of provided command-line arguments. If there is an error,
