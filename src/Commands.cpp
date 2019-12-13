@@ -36,7 +36,7 @@ namespace Commands
 //                          The Version Command
 //=============================================================================
 Version::Version()
-    : Command("version", "Returns the version of the running MyCAD_Server")
+    : Communication::Command("version", "Returns the version of the running MyCAD_Server")
 {}
 
 std::string Version::execute(std::string const& data, Shapes::Space& /*space*/)
@@ -54,7 +54,7 @@ std::string Version::execute(std::string const& data, Shapes::Space& /*space*/)
 //                               The Add Command
 //=============================================================================
 Add::Add()
-    : Command("add", "Allows users to add various topological entities to....space")
+    : Communication::Command("add", "Allows users to add various topological entities to....space")
 {}
 
 std::string Add::execute(std::string const& data, Shapes::Space& space)

@@ -8,7 +8,7 @@
 #ifndef MYCAD_COMMANDS_HEADER
 #define MYCAD_COMMANDS_HEADER
 
-#include <MyCAD/Shapes.hpp>
+#include <MyCAD/Communication.hpp>
 
 namespace MyCAD
 {
@@ -17,24 +17,25 @@ namespace Commands
 {
 
 /** @brief Get the version of the FreeCAD server */
-class Version : public Command
+class Version : public MyCAD::Communication::Command
 {
     public:
         Version();
-        ~Version() override = default;
+        ~Version() = default;
 
-        std::string execute(std::string const& data, Shapes::Space& space) const override;
+        std::string execute(std::string const& data, Shapes::Space& space) override;
 };
 
 /** @brief Perform various additions of topological entities to Space*/
-class Add : public Command
+class Add : public MyCAD::Communication::Command
 {
     public:
         Add();
-        ~Add() override = default;
+        ~Add() = default;
 
-        std::string execute(std::string const& data, Shapes::Space& space) const override;
+        std::string execute(std::string const& data, Shapes::Space& space) override;
 };
+
 } // namespace Commands
 } // namespace MyCAD
 

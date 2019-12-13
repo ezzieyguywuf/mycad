@@ -61,12 +61,7 @@ void Command::getHelp() const
  */
 std::string Command::operator()(std::string const& data, Shapes::Space& space)
 {
-    bool ret = this->execute(data, space);
-    if(not ret)
-    {
-        return "There was some sort of error executing your request. You gave us \"" + data + "\"\n";
-    }
-    return this->getResult();
+    return this->execute(data, space);
 }
 
 //=============================================================================
@@ -85,9 +80,6 @@ void Server::RegisterCommand(std::unique_ptr<Command> command)
     {
         throw MyCAD::Exception("A Command token can NOT contain a space.");
     }
-    known_commands.emplace_back(std::move(command));
-}
-
     known_commands.emplace(std::move(command));
 }
 
