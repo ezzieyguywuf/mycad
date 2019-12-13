@@ -44,10 +44,15 @@ features that you care about - i.e., our demo gif should get neater and neater!
 Periodically, though, we'll go back and refactor or rethink parts of the code base, in
 order to make it more manageable to bring you new features.
 
-For example: recently, I went in and implemented a `Command` class. Nobody really cares!
-It was not associated with a Story! But, I did it because there ARE Stories that request
-new commands that MyCAD understands, and I believe that by taking the time now to
-implement a `Command` class, I can ultimately deliver new commands to the User quicker!
+For example: recently ([this commit](73d9764)), I went in and implemented a
+[Command](https://ezzieyguywuf.gitlab.io/mycad/classMyCAD_1_1Communication_1_1Command.html)
+class. Nobody really cares - it's not even part of the public API!  It was not associated
+with a Story! 
+
+I did it because there ARE Stories that request new commands that MyCAD understands, and I
+believe that by taking the time now to implement a `Command` class, I can ultimately
+deliver new commands to the User quicker! Notice how quickly I was able to add the
+[list](03c143d) and [help](f00ca31) commands.
 
 I'm just learning here! See number 1 below!
 
