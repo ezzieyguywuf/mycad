@@ -70,7 +70,8 @@ std::string Add::execute(std::string const& data, Shapes::Space& space)
     std::getline(ss, remainder);
 
     // Create the vertex
-    space.addVertex(MyCAD::Geometry::Point(x, y));
+    MyCAD::Geometry::Point point(x, y);
+    space.addVertex(MyCAD::Shapes::Vertex(point));
 
     // Let the user know everything went well.
     std::stringstream oss;
@@ -81,6 +82,5 @@ std::string Add::execute(std::string const& data, Shapes::Space& space)
     }
     return oss.str();
 }
-
 } // namespace Commands
 } // namespace MyCAD
