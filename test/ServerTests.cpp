@@ -24,12 +24,12 @@ SCENARIO("A Remote User sends a TCP/IP request to the Server and expects a respo
             }
         }
 
-        WHEN("A request to create a Vertex in 2D-space in recieved")
+        WHEN("A request to create a Vertex in 2D-space is recieved")
         {
-            std::string request("vertex 5.0 10.0");
+            server.processRequest("add vertex 10 20");
             THEN("We should end up with a vertex in that location")
             {
-                REQUIRE_FALSE(server.processRequest(request).empty());
+                REQUIRE_FALSE(server.processRequest("list") == "(10,20)");
             }
         }
     }

@@ -113,5 +113,27 @@ std::string AddVertex::execute(std::string const& data, Shapes::Space& space)
     }
     return oss.str();
 }
+
+//=============================================================================
+//                         The ListVertices Command
+//=============================================================================
+ListVertices::ListVertices()
+    : Communication::Command("list", "Allows users to see a list of all Vertices in Space.")
+{}
+
+std::string ListVertices::execute(std::string const& data, Shapes::Space& space)
+{
+    std::stringstream ss;
+    if(not data.empty())
+    {
+        ss << "Warning: extra arguments are being ignored. \"" << data << "\"" << std::endl;
+    }
+
+    for(auto const& vertex : space.getVertices())
+    {
+        ss << vertex << std::endl;
+    }
+    return ss.str();
+}
 } // namespace Commands
 } // namespace MyCAD
