@@ -13,6 +13,7 @@
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
 - Use readline or similar to make i/o a little more bearable in main loop.
 - Move the "MyCAD© v" into main, so that Server can return strictly the version number.
+- Change the default value for `MYCAD_BUILD_GUI` to `OFF`?
 # Communication
 - Improve the shutdown procedure - it's pretty hacked right now.
 - File bug-report or merge request with upstream cxxopts so that we can default-construct

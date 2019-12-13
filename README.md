@@ -77,22 +77,26 @@ How To Build
 **TODO**: Make this section more better.
 
 MyCAD has a few dependencies. Please install these on your system using whatever means you
-usually employ:
+usually employ, such that they are visible to `cmake`:
 
 - a c++ compiler
 - cmake
-- qt5-base (we need the headers, so something like `apt get install qt5-base-devel` in
-  ubuntu or something)
-- These are acually dependencies of [CGAL](https://www.cgal.org/). We include the CGAL
-  headers directly (check the src directory) but you'll need to provide your own versions
-  of these
+- [CGAL](https://www.cgal.org/), which itself has a few dependencies
   - [boost](https://www.boost.org/)
   - [gmp](https://gmplib.org/manual/C_002b_002b-Interface-General.html)
   - [mpfr](https://www.mpfr.org/)
 - git (duh)
 
-Optionally, you can install doxygen if you want to build the documentation, but it is
-already hosted [here on gitlab](https://ezzieyguywuf.gitlab.io/mycad) for your viewing pleasure.
+Optional dependencies:
+
+- doxygen (to build documentation)
+- qt5-base (we need the headers, so something like `apt get install qt5-base-devel` in
+  ubuntu or something)
+
+The documentation is already hosted [here on gitlab](https://ezzieyguywuf.gitlab.io/mycad)
+for your viewing pleasure, so you shouldn't need to mutz around with doxygen.
+
+There is currently no gui, so I wouldn't bother with qt5 stuff
 
 Once all that is out of the way, you can build as follows:
 
@@ -100,7 +104,7 @@ Once all that is out of the way, you can build as follows:
 git clone https://gitlab.com/ezzieyguywuf/mycad
 cd mycad
 mkdir build
-cmake ..
+cmake -DMYCAD_BUILD_GUI=OFF ..
 make
 ```
 
