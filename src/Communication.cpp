@@ -176,7 +176,7 @@ std::string Server::processRequest(std::string const& request)
             return command->operator()(remainder, space);
         }
     }
-    return "I don't understand the command \"" + taken + "\"";
+    return "I don't understand the command \"" + token + "\"";
 }
 } // Communication
 } // MyCAD
