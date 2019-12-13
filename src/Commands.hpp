@@ -16,9 +16,6 @@ namespace MyCAD
 namespace Commands
 {
 
-/** @brief This can be called to register all the commands at runtime */
-void RegisterAllCommands();
-
 /** @brief Get the version of the FreeCAD server */
 class Version : public Command
 {
