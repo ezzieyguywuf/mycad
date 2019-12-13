@@ -32,12 +32,6 @@ namespace MyCAD
 namespace Commands
 {
 
-void RegisterAllCommands()
-{
-    RegisterCommand(std::move(std::unique_ptr<Command>(new Version)));
-    RegisterCommand(std::move(std::unique_ptr<Add>(new Add)));
-}
-
 //=============================================================================
 //                          The Version Command
 //=============================================================================

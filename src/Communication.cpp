@@ -5,9 +5,9 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
+#include "Commands.hpp"
 #include <MyCAD/Communication.hpp>
-
-#include "cxxopts.hpp"
+#include <MyCAD/Exceptions.hpp>
 
 #include <utility> // for std::move
 #include <string>  // for std::getline
@@ -158,5 +158,16 @@ std::string Server::processRequest(std::string const& request)
     }
     return "I don't understand the command \"" + token + "\"";
 }
+
+//=============================================================================
+//                      Free (global) Function Definitions
+//=============================================================================
+
+void RegisterAllCommands(Server& server)
+{
+    server.RegisterCommand(std::move(std::unique_ptr<Commands::Version>(new Commands::Version)));
+    server.RegisterCommand(std::move(std::unique_ptr<Commands::Add>(new Commands::Add)));
+}
+
 } // Communication
 } // MyCAD

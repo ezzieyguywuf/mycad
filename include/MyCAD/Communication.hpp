@@ -85,6 +85,10 @@ class Server
         // Will store our....world
         MyCAD::Shapes::Space space;
 };
+
+/** @brief This can be called to register all the commands at runtime */
+void RegisterAllCommands(Server& server);
+
 } // namespace Communication
 } // namespace MyCAD
 #endif //MYCAD_COMMUNICATION_HEADER
