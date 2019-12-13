@@ -44,6 +44,18 @@ should be motivated by a Story from this list.
 **I WANT** to save my Topological Space as a file on the hard drive \
 **SO THAT** I can recover it later, or share it on the internet, etc.
 
+**AS A** Student of Geometry \
+**I WANT** to get the distance between two points \
+**SO THAT** I can check my homework
+
+**AS A** Student of Geometry \
+**I WANT** to get the angle between two lines \
+**SO THAT** I can check my homework
+
+**AS A** Student of Geometry \
+**I WANT** to get the area of a bounded surface \
+**SO THAT** I can check my homework
+
 ## Communicate with MyCAD::Communication::Server
 **AS A** MyCAD Server Administrator \
 **I WANT** allow a remote User to have a specific login Session \
