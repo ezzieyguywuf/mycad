@@ -50,6 +50,16 @@ class AddVertex : public MyCAD::Communication::Command
         std::string execute(std::string const& data, Shapes::Space& space) override;
 };
 
+/** @brief Returns an indexed list of all the Vertex that exist in Space */
+class ListVertices : public MyCAD::Communication::Command
+{
+    public:
+        ListVertices();
+        ~ListVertices() = default;
+
+        std::string execute(std::string const& data, Shapes::Space& space) override;
+};
+
 } // namespace Commands
 } // namespace MyCAD
 

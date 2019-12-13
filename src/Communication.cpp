@@ -31,6 +31,7 @@ namespace
     {
             KNOWN_COMMANDS.emplace(std::move(std::unique_ptr<Commands::Version>(new Commands::Version)));
             KNOWN_COMMANDS.emplace(std::move(std::unique_ptr<Commands::Add>(new Commands::Add)));
+            KNOWN_COMMANDS.emplace(std::move(std::unique_ptr<Commands::ListVertices>(new Commands::ListVertices)));
     }
 
 } // namespace
