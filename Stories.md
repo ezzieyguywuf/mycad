@@ -3,10 +3,6 @@ should be motivated by a Story from this list.
 
 # Currently active Story(ies)
 
-**AS A** MyCAD Server User \
-**I WANT** to send requests directly to a running server instance locally \
-**SO THAT** I can understand how to interact with the Server
-
 # Stories backlog
 ## Create geometric objects
 **AS A** Desktop User \
@@ -98,3 +94,6 @@ should be motivated by a Story from this list.
 **I WANT** to communicate directly with a MyCAD::Server process \
 **SO THAT** I can stop the process
 
+**AS A** MyCAD Server User \
+**I WANT** to send requests directly to a running server instance locally \
+**SO THAT** I can understand how to interact with the Server
