@@ -20,7 +20,7 @@ SCENARIO("A Remote User sends a TCP/IP request to the Server and expects a respo
             std::string request("version");
             THEN("We should get the expected result")
             {
-                REQUIRE(server.processRequest(request) == MYCAD_VERSION);
+                REQUIRE(server.processRequest(request) == "MyCAD©, v" MYCAD_VERSION);
             }
         }
 

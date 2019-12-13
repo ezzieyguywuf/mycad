@@ -23,6 +23,18 @@ namespace MyCAD
 namespace Communication
 {
 
+namespace
+{
+    // Will be used to store a set of known commands.
+    std::set<std::unique_ptr<Command>> KNOWN_COMMANDS;
+    void initializeCommands()
+    {
+            KNOWN_COMMANDS.emplace(std::move(std::unique_ptr<Commands::Version>(new Commands::Version)));
+            KNOWN_COMMANDS.emplace(std::move(std::unique_ptr<Commands::Add>(new Commands::Add)));
+    }
+
+} // namespace
+
 //=============================================================================
 //                   Command Abstract Base Class Definition
 //=============================================================================
@@ -33,7 +45,12 @@ namespace Communication
  */
 Command::Command(std::string token, std::string help)
     : myToken(std::move(token)), myHelp(std::move(help))
-{}
+{
+    if(this->token().find(' ') != std::string::npos)
+    {
+        throw MyCAD::Exception("A Command token can NOT contain a space.");
+    }
+}
 
 // Virtual descructor still needs a definition!!!
 Command::~Command(){}
@@ -67,22 +84,13 @@ std::string Command::operator()(std::string const& data, Shapes::Space& space)
 //=============================================================================
 //                       Server Class Definition
 //=============================================================================
-/** A Server knows how to process various Request and do something with them. In general,
- *  this will probably mean creating/manipulating/querying topological or geometric
- *  information.
- */
 Server::Server()
-{}
-
-void Server::RegisterCommand(std::unique_ptr<Command> command)
 {
-    if(command->token().find(' ') != std::string::npos)
+    if(KNOWN_COMMANDS.empty())
     {
-        throw MyCAD::Exception("A Command token can NOT contain a space.");
+        initializeCommands();
     }
-    known_commands.emplace(std::move(command));
 }
-
 std::string Server::processRequest(std::string const& request)
 {
     // Parse out the token and the "remainder"
@@ -93,7 +101,7 @@ std::string Server::processRequest(std::string const& request)
     std::getline(ss, remainder);
 
     // Now, figure out if we have a registered Command that matches this token
-    for(const auto& command : known_commands)
+    for(const auto& command : KNOWN_COMMANDS)
     {
         if(command->token() == token)
         {
@@ -102,16 +110,6 @@ std::string Server::processRequest(std::string const& request)
         }
     }
     return "I don't understand the command \"" + token + "\"";
-}
-
-//=============================================================================
-//                      Free (global) Function Definitions
-//=============================================================================
-
-void RegisterAllCommands(Server& server)
-{
-    server.RegisterCommand(std::move(std::unique_ptr<Commands::Version>(new Commands::Version)));
-    server.RegisterCommand(std::move(std::unique_ptr<Commands::Add>(new Commands::Add)));
 }
 
 } // Communication

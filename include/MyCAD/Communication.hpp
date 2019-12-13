@@ -71,13 +71,7 @@ class Server
          */
         std::string processRequest(std::string const& request);
 
-        /** @brief Used to register commands that Server understands */
-        void RegisterCommand(std::unique_ptr<Command> command);
-
     private:
-        // Will be used to store a set of registered commands.
-        std::set<std::unique_ptr<Command>> known_commands;
-
         // Will store our....world
         MyCAD::Shapes::Space space;
 };
