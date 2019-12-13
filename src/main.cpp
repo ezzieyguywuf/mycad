@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>  // for std::getline
 
-bool processCommandLineArguments(MyCAD::Communication::Server& server, int argc, char ** argv)
+bool parseCommandLineArguments(MyCAD::Communication::Server& server, int argc, char ** argv)
 {
     cxxopts::Options options("MyCAD", "A Computer Aided Design program.");
 
