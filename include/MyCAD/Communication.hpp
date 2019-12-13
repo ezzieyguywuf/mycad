@@ -34,7 +34,7 @@ class Command
         std::string const& token() const;
 
         /** @brief returns the help documentation */
-        void getHelp() const;
+        std::string getHelp() const;
 
         /** @brief execute the Command
          *  @param data All the information the user passed after the token.

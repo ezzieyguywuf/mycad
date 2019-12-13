@@ -61,14 +61,16 @@ std::string const& Command::token() const
     return myToken;
 }
 
-void Command::getHelp() const
+std::string Command::getHelp() const
 {
     if(myHelp.empty())
     {
         std::stringstream out;
         out << "The command \"" << myToken << "\"";
         out << " does not have any help documentation.";
+        return out.str();
     }
+    return myHelp;
 }
 
 /** This is an implementation detail, but it is worth noting. We split up the
@@ -107,15 +109,36 @@ std::string Server::processRequest(std::string const& request)
         readyToGoToSleep = true;
         return "Shutting down...";
     }
+
+    // Clear out the stringstream so we can use it to build up the help info if needed.
+    ss.clear();
+    ss.str("");
     // Now, figure out if we have a registered Command that matches this token
     for(const auto& command : KNOWN_COMMANDS)
     {
-        if(command->token() == token)
+        // If they want help, we just need to gather the appropriate data.
+        if(token == "help")
         {
-            // If so, execute the command
-            return command->operator()(remainder, space);
+            ss << "[" << command->token() << "]: ";
+            ss << command->getHelp() << std::endl;
+        }
+        else
+        {
+            // If they didn't ask for help, does the token requested match one of the ones
+            // that are registered?
+            if(command->token() == token)
+            {
+                // If so, execute the command
+                return command->operator()(remainder, space);
+            }
         }
     }
+
+    if(not ss.str().empty())
+    {
+        return ss.str();
+    }
+
     return "I don't understand the command \"" + token + "\"";
 }
 
