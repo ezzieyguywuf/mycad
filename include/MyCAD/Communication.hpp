@@ -71,9 +71,13 @@ class Server
          */
         std::string processRequest(std::string const& request);
 
+        /** @brief Returns true when the Server is ready to shut down */
+        bool shutdown() const;
     private:
         // Will store our....world
         MyCAD::Shapes::Space space;
+
+        bool readyToGoToSleep = false;
 };
 
 /** @brief This can be called to register all the commands at runtime */

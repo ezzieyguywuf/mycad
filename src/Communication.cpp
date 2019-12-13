@@ -101,6 +101,12 @@ std::string Server::processRequest(std::string const& request)
     ss >> token;
     std::getline(ss, remainder);
 
+    // First, check if the user wants to shutdown
+    if (token == "quit")
+    {
+        readyToGoToSleep = true;
+        return "Shutting down...";
+    }
     // Now, figure out if we have a registered Command that matches this token
     for(const auto& command : KNOWN_COMMANDS)
     {
@@ -113,5 +119,9 @@ std::string Server::processRequest(std::string const& request)
     return "I don't understand the command \"" + token + "\"";
 }
 
+bool Server::shutdown() const
+{
+    return readyToGoToSleep;
+}
 } // Communication
 } // MyCAD
