@@ -7,10 +7,12 @@
 
 #include "cxxopts.hpp"
 
+#include <MyCAD/Communication.hpp>
+
 #include <iostream>
 #include <string>  // for std::getline
 
-void processCommandLineArguments(Server& server, int argc, char ** argv)
+bool processCommandLineArguments(MyCAD::Communication::Server& server, int argc, char ** argv)
 {
     cxxopts::Options options("MyCAD", "A Computer Aided Design program.");
 
@@ -23,7 +25,7 @@ void processCommandLineArguments(Server& server, int argc, char ** argv)
         cxxopts::ParseResult result = options.parse(argc, argv);
         if(result.count("version") > 0)
         {
-            this->processRequest(Request("version"));
+            std::cout << server.processRequest("version") << std::endl;
         }
     }
     catch (cxxopts::OptionParseException const& e)
@@ -38,7 +40,13 @@ int main(int argc, char* argv[])
 {
     // Instantiate our server and send it to the command-line parser
     MyCAD::Communication::Server myServer;
-    parseCommandLineArguments(myServer, argc, argv);
+    bool ret = parseCommandLineArguments(myServer, argc, argv);
+
+    if(not ret)
+    {
+        std::cout << "exiting." << std::endl;
+        return 1;
+    }
 
     // Main loop
     while (true)
