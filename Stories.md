@@ -3,6 +3,10 @@ should be motivated by a Story from this list.
 
 # Currently active Story(ies)
 
+**AS A** Designer \
+**I WANT** to create a Face from a collection of Edges \
+**SO THAT** I can eventually use it to make some sort of Solid \
+
 # Stories backlog
 ## Create geometric objects
 **AS A** Desktop User \
@@ -20,10 +24,6 @@ should be motivated by a Story from this list.
 ## Create topological objects
 
 **AS A** Designer \
-**I WANT** to create a Face from a collection of Edges \
-**SO THAT** I can eventually use it to make some sort of Solid \
-
-**AS A** Designer \
 **I WANT** to create a Primitive Solid \
 **SO THAT** I can use it to describe some physical object \
 
@@ -39,14 +39,6 @@ should be motivated by a Story from this list.
 **AS A** Designer \
 **I WANT** to save my Topological Space as a file on the hard drive \
 **SO THAT** I can recover it later, or share it on the internet, etc.
-
-**AS A** Student of Geometry \
-**I WANT** to get the distance between two points \
-**SO THAT** I can check my homework
-
-**AS A** Student of Geometry \
-**I WANT** to get the angle between two lines \
-**SO THAT** I can check my homework
 
 **AS A** Student of Geometry \
 **I WANT** to get the area of a bounded surface \
