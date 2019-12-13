@@ -42,6 +42,9 @@ int main(int argc, char* argv[])
     MyCAD::Communication::Server myServer;
     bool ret = parseCommandLineArguments(myServer, argc, argv);
 
+    // Register the known commands
+    MyCAD::Communication::RegisterAllCommands(myServer);
+
     if(not ret)
     {
         std::cout << "exiting." << std::endl;
@@ -60,7 +63,6 @@ int main(int argc, char* argv[])
             break;
         }
         std::cout << myServer.processRequest(input) << std::endl;
-
     }
     return 0;
 }
