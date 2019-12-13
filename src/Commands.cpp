@@ -9,7 +9,7 @@
 #include <MyCAD/Geometry.hpp>
 #include <MyCAD/Shapes.hpp>
 
-#include "ServerCommands.hpp"
+#include "Commands.hpp"
 
 #include <set>
 #include <memory>  // for std::unique_ptr
@@ -21,7 +21,7 @@ namespace MyCAD
 /** Please note that this namespace is an implementation detail. Typical users and
  *  developers do not need to know or care about it. Indeed, based on how it is
  *  implemented (note that the header is not distributed), the only place that this
- *  namespace can be accessed from is the Server.cpp file - nobody else can access these
+ *  namespace can be accessed from is the main.cpp file - nobody else can access these
  *  methods/functions (I think).
  *
  *  Nonetheless, in keeping with the mission of this project to provide clear and
@@ -45,7 +45,7 @@ Version::Version()
     : Command("version", "Returns the version of the running MyCAD_Server")
 {}
 
-std::string Version::execute(std::string const& data, Shapes::Space& /*space*/) const
+std::string Version::execute(std::string const& data, Shapes::Space& /*space*/)
 {
     if (not data.empty())
     {
@@ -63,7 +63,7 @@ Add::Add()
     : Command("add", "Allows users to add various topological entities to....space")
 {}
 
-std::string Add::execute(std::string const& data, Shapes::Space& space) const
+std::string Add::execute(std::string const& data, Shapes::Space& space)
 {
     // Extract the user's targets
     std::stringstream ss;
@@ -74,18 +74,18 @@ std::string Add::execute(std::string const& data, Shapes::Space& space) const
     // Check if there's any trailing data
     std::string remainder;
     std::getline(ss, remainder);
-    if(not remainder.empty())
-    {
-        std::clog << "Ignoring trailing data \"" << remainder << "\"" << std::endl;
-    }
 
     // Create the vertex
-    //VERTICES.emplace_back(MyCAD::Geometry::Point(x, y));
+    space.addVertex(MyCAD::Geometry::Point(x, y));
 
     // Let the user know everything went well.
-    //std::stringstream oss;
-    //oss << "Added vertex at " << VERTICES.back();
-    return "";
+    std::stringstream oss;
+    oss << "Added vertex at " << space.getVertices().back();
+    if(not remainder.empty())
+    {
+        oss << ". Ignored trailing data \"" << remainder << "\"" << std::endl;
+    }
+    return oss.str();
 }
 
 } // namespace Commands

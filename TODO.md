@@ -19,7 +19,6 @@
   set the `state` to something like `EMPTY` prior to running the command - this way, we
   can safely check `state` and always rely on an empty string being the actual response
   from the executed command.
-- Extend `Add` command to accept a sub-command which describes what is being added.
 - Now that Server is understanding more and more commands, it's time to use the Command
   design pattern (I think....)
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
@@ -34,6 +33,13 @@
   - This also suggests that we need some sort of ID for each Request. And the Caller would
     need to know about this ID...
 - Move processArgs out of Server...maybe put it directly in main? or in a new header?
+# Commands
+- Extend `Add` command to accept a sub-command which describes what is being added.
+- Add more error-checking to commands -> probably at least check for `operator>>` return
+  value?
+- Maybe transition towards a full-blown lexer, like FreeCAD does in places?
+- Maybe split out each command as a standalone executable, like Unix does? Will the
+  inter-process communication be too slow?
 # Geometry
 - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
   our Geometry namespace

@@ -53,12 +53,24 @@ class Command
         /** @brief returns the help documentation */
         void getHelp() const;
 
+        /** @brief execute the Command
+         *  @param data All the information the user passed after the token.
+         *  @param server The instance of Space against which to execute the command. The
+         *                Command can and probably will modify Space in some way.
+         *  @returns A message from the Command letting you know how things went
+         */
+        std::string operator()(std::string const& data, Shapes::Space& space);
+
+    protected:
         /** @brief This will be called in order to execute the given Command
          *  @param data All the information the user passed after the token.
          *  @param server The instance of Space against which to execute the command. The
          *                Command can and probably will modify Space in some way.
+         *  @returns A message from the execute call. Derived classes should use this to
+         *           communicate with the User, for example, whethe or not the command
+         *           succeeded
          */
-        virtual std::string execute(std::string const& data, Shapes::Space& space) const;
+        virtual std::string execute(std::string const& data, Shapes::Space& space) = 0;
 
     private:
         std::string myToken;
@@ -75,16 +87,9 @@ class Server
         bool processArgs(int argc, char ** argv);
 
         /** @brief Process a Request
-         *  @returns true on success
-         *  @returns false on error
+         *  @returns Some sort of message saying how things went
          */
-        bool processRequest(Request const& request);
-
-        /** @brief Returns the result of processing the last Request
-         *  @returns an empty std::string if there was an error
-         *  @returns the result of the last Request
-         */
-        std::string getResponse() const;
+        std::string processRequest(std::string const& request);
 
         /** @brief Used to register commands that Server understands */
         void RegisterCommand(std::unique_ptr<Command> command);

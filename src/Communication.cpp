@@ -8,9 +8,9 @@
 #include <MyCAD/Communication.hpp>
 
 #include "cxxopts.hpp"
-#include "ServerCommands.hpp"
 
 #include <utility> // for std::move
+#include <string>  // for std::getline
 #include <sstream>
 
 namespace MyCAD
@@ -93,6 +93,21 @@ void Command::getHelp() const
     }
 }
 
+/** This is an implementation detail, but it is worth noting. We split up the
+ *  externally-facing `operator()` call, which the User will utilize, from the internal
+ *  `protected` `execute` in order to allow derived classes to do whatever they want while
+ *  still allowing us here in the base class to check how things went and return an
+ *  appropriate response to the user.
+ */
+std::string Command::operator()(std::string const& data, Shapes::Space& space)
+{
+    bool ret = this->execute(data, space);
+    if(not ret)
+    {
+        return "There was some sort of error executing your request. You gave us \"" + data + "\"\n";
+    }
+    return this->getResult();
+}
 
 //=============================================================================
 //                       Server Class Definition
@@ -143,34 +158,25 @@ bool Server::processArgs(int argc, char ** argv)
     return true;
 }
 
-/** Given the Request, perform the requested action.
- *
- *  A return value of `false` indicates that there was an error processing the request
- */
-bool Server::processRequest(Request const& /*request*/)
+std::string Server::processRequest(std::string const& request)
 {
-    return true;
-}
+    // Parse out the token and the "remainder"
+    std::string token, remainder;
+    std::stringstream ss;
+    ss << request;
+    ss >> token;
+    std::getline(ss, remainder);
 
-/** Returns the response from the last succesfully processed Request.
- *
- *  @warning Server does not know anything about the last Request at this point, or even
- *           if we've received a request yet. In other words, the caller must ensure
- *           that:\n
- *           1. They have actually sent a Request prior to calling `getResponse`
- *           2. That the last request was processed succesfully prior to calling
- *           `getResponse`\n\n
- *           If these two things are not done, bad things won't happen. But, you'll
- *           either:\n
- *           1. Get an empty string as a response. The caller __must only__ rely on this
- *              empty string as a true response iff they did the two things mentioned
- *              above.
- *           2. Get the response from the previously succesful processing, which could
- *              lead to surprising results on your end.
- */
-std::string Server::getResponse() const
-{
-    return myResponse;
+    // Now, figure out if we have a registered Command that matches this token
+    for(const auto& command : known_commands)
+    {
+        if(command->token() == token)
+        {
+            // If so, execute the command
+            return command->operator()(remainder, space);
+        }
+    }
+    return "I don't understand the command \"" + taken + "\"";
 }
 } // Communication
 } // MyCAD
