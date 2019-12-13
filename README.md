@@ -52,7 +52,8 @@ with a Story!
 I did it because there ARE Stories that request new commands that MyCAD understands, and I
 believe that by taking the time now to implement a `Command` class, I can ultimately
 deliver new commands to the User quicker! Notice how quickly I was able to add the
-[list](03c143d) and [help](f00ca31) commands.
+[list](03c143d) and [help](f00ca31) commands (ok, fine, you caught me: the `help` feature
+doesn't use the `Command` class....).
 
 I'm just learning here! See number 1 below!
 
