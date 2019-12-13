@@ -23,6 +23,8 @@
 - Maybe transition towards a full-blown lexer, like FreeCAD does in places?
 - Maybe split out each command as a standalone executable, like Unix does? Will the
   inter-process communication be too slow?
+- If we're going to allow commands to have sub-commands, we need to abstract something
+  out. Notice how the Add command is duplicating code that already exists in Server.
 # Geometry
 - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
   our Geometry namespace

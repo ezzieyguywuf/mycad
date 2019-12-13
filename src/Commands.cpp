@@ -55,9 +55,40 @@ std::string Version::execute(std::string const& data, Shapes::Space& /*space*/)
 //=============================================================================
 Add::Add()
     : Communication::Command("add", "Allows users to add various topological entities to....space")
-{}
+{
+    known_commands.emplace(std::move(std::unique_ptr<Commands::AddVertex>(new AddVertex)));
+}
 
 std::string Add::execute(std::string const& data, Shapes::Space& space)
+{
+    // Parse out the token and the "remainder"
+    std::string token, remainder;
+    std::stringstream ss;
+    ss << data;
+    ss >> token;
+    std::getline(ss, remainder);
+
+    // Now, figure out if we have a registered Command that matches this token
+    for(const auto& command : known_commands)
+    {
+        if(command->token() == token)
+        {
+            // If so, execute the command
+            return command->operator()(remainder, space);
+        }
+    }
+
+    return "[add] Unknown sub-command \"" + token + "\"";
+}
+//=============================================================================
+//                               The AddVertex Command
+//=============================================================================
+AddVertex::AddVertex()
+    : Communication::Command("vertex", "Add a vertex at the given x-y location")
+{}
+
+
+std::string AddVertex::execute(std::string const& data, Shapes::Space& space)
 {
     // Extract the user's targets
     std::stringstream ss;

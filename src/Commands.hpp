@@ -34,6 +34,20 @@ class Add : public MyCAD::Communication::Command
         ~Add() = default;
 
         std::string execute(std::string const& data, Shapes::Space& space) override;
+
+    private:
+        // Will be used to store a set of registered sub-commands.
+        std::set<std::unique_ptr<Command>> known_commands;
+};
+
+/** @brief Add a Vertex to tho topological Space */
+class AddVertex : public MyCAD::Communication::Command
+{
+    public:
+        AddVertex();
+        ~AddVertex() = default;
+
+        std::string execute(std::string const& data, Shapes::Space& space) override;
 };
 
 } // namespace Commands
