@@ -127,7 +127,7 @@ void Space::addVertex(Vertex vertex)
 }
 
 /** The index of the Vertex in this list can be used later to modify that same Vertex */
-std::vector<Vertex> const& getVertices() const
+std::vector<Vertex> const& Space::getVertices() const
 {
     return vertices;
 }
