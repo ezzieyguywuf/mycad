@@ -66,9 +66,6 @@ class Server
     public:
         Server();
 
-        /** @brief Process command-line arguments */
-        bool processArgs(int argc, char ** argv);
-
         /** @brief Process a Request
          *  @returns Some sort of message saying how things went
          */
@@ -77,7 +74,6 @@ class Server
         /** @brief Used to register commands that Server understands */
         void RegisterCommand(std::unique_ptr<Command> command);
 
-        constexpr static const char* EXIT = "EXIT_MAIN_LOOP";
     private:
         // Will be used to store a set of registered commands.
         std::set<std::unique_ptr<Command>> known_commands;

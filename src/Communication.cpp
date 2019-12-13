@@ -23,26 +23,6 @@ namespace MyCAD
 namespace Communication
 {
 
-namespace
-{
-    static bool initialized = false;
-
-    cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
-
-    void initializeServer()
-    {
-        if (not initialized)
-        {
-            initialized = true;
-            OPTIONS.add_options()
-                ("v,version", "Return the version of the MyCAD server")
-                ;
-        }
-
-        MyCAD::Commands::RegisterAllCommands();
-    }
-} // namespace
-
 //=============================================================================
 //                   Command Abstract Base Class Definition
 //=============================================================================
@@ -95,16 +75,9 @@ std::string Command::operator()(std::string const& data, Shapes::Space& space)
 /** A Server knows how to process various Request and do something with them. In general,
  *  this will probably mean creating/manipulating/querying topological or geometric
  *  information.
- *
- *  Server understands various command-line arguments which can be used to initialize/set
- *  various internal variables. While Server does not provide a main-loop, it is rather
- *  trivial to create one which leverages Server. Make sure to call Server::processArgs if
- *  you're interested in accepting command-line input from Users.
  */
 Server::Server()
-{
-    initializeServer();
-}
+{}
 
 void Server::RegisterCommand(std::unique_ptr<Command> command)
 {
@@ -115,27 +88,7 @@ void Server::RegisterCommand(std::unique_ptr<Command> command)
     known_commands.emplace_back(std::move(command));
 }
 
-/** This will process the list of provided command-line arguments. If there is an error,
- *  the caller is notified by a return value of false.
- *
- *  @warning The caller should check the return value and respond appropriately, otherwise
- *           Server will contain an unknown (to the caller) state
- */
-bool Server::processArgs(int argc, char ** argv)
-{
-    try{
-        cxxopts::ParseResult result = OPTIONS.parse(argc, argv);
-        if(result.count("version") > 0)
-        {
-            this->processRequest(Request("version"));
-        }
-    }
-    catch (cxxopts::OptionParseException const& e)
-    {
-        std::cout << e.what() << std::endl;
-        return false;
-    }
-    return true;
+    known_commands.emplace(std::move(command));
 }
 
 std::string Server::processRequest(std::string const& request)
