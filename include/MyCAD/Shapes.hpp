@@ -78,6 +78,20 @@ class Box
         std::vector<Face> getFaces() const;
 };
 
+/** @brief Defines a Geometric Space in which Topological Entities can exist */
+class Space
+{
+    public:
+        /** Adds the given Vertex to this Space */
+        void addVertex(Vertex vertex);
+
+        /** Returns a vector of all Vertex that currently exist in this Space */
+        std::vector<Vertex> const& getVertices() const;
+
+    private:
+        std::vector<Vertex> vertices;
+};
+
 std::ostream& operator<< (std::ostream& ost, Vertex const& aVertex);
 std::ostream& operator<< (std::ostream& ost, Edge const& aWire);
 std::ostream& operator<< (std::ostream& ost, Wire const& aWire);

@@ -1,7 +1,7 @@
 # General
+- ADD INTERNATIONALIZATION!!!!
 - Figure out if we can set up a cross-platform (i.e. including windows and mac) automated
   build system
-- Update documentation with examples.
 - Should we explicitly `#include` every header needed, regardless of whether its already
   been included elsewhere?
 - Make a logging facility.
@@ -13,19 +13,20 @@
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
 - Use readline or similar to make i/o a little more bearable in main loop.
 # Communication
-- Code smell? Look at the `static bool first` line in Server constructor
+- Improve the shutdown procedure - it's pretty hacked right now.
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
   the cxxapts::ParseResult
-- Is our `Request->Server->Response` design flimsy/faulty? Is it ok to expect the user to
-  inspect the return-value of `Server::processRequest` before calling
-  `Server::getResponse`?
-- What about the whole notion of storing a response as a member variable in Server? What
-  happens when we get multiple Requests that haven't been queried yet?
-  - I guess keeping a Queue of `Request` with associated `Response` would probably be
-    wise...
-  - This also suggests that we need some sort of ID for each Request. And the Caller would
-    need to know about this ID...
-- Move processArgs out of Server...maybe put it directly in main? or in a new header?
+# Commands
+- Extend `Add` command to accept a sub-command which describes what is being added.
+- Add more error-checking to commands -> probably at least check for `operator>>` return
+  value?
+- Maybe transition towards a full-blown lexer, like FreeCAD does in places?
+- Maybe split out each command as a standalone executable, like Unix does? Will the
+  inter-process communication be too slow?
+- If we're going to allow commands to have sub-commands, we need to abstract something
+  out. Notice how the Add command is duplicating code that already exists in Server.
+- Code smell (?) is back - is there a better/different way to keep a static list of
+  KNOWN_COMMANDS without needing to carry it around as a member variable?
 # Geometry
 - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
   our Geometry namespace

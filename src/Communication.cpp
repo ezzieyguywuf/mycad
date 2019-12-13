@@ -5,12 +5,13 @@
  * https://mozilla.org/MPL/2.0/.
  */
 
-#include <MyCAD/Geometry.hpp>
+#include "Commands.hpp"
 #include <MyCAD/Communication.hpp>
-
-#include "cxxopts.hpp"
+#include <MyCAD/Exceptions.hpp>
 
 #include <utility> // for std::move
+#include <string>  // for std::getline
+#include <sstream>
 
 namespace MyCAD
 {
@@ -24,136 +25,92 @@ namespace Communication
 
 namespace
 {
-    cxxopts::Options OPTIONS("MyCAD", "A Computer Aided Design program.");
+    // Will be used to store a set of known commands.
+    std::set<std::unique_ptr<Command>> KNOWN_COMMANDS;
+    void initializeCommands()
+    {
+            KNOWN_COMMANDS.emplace(std::move(std::unique_ptr<Commands::Version>(new Commands::Version)));
+            KNOWN_COMMANDS.emplace(std::move(std::unique_ptr<Commands::Add>(new Commands::Add)));
+    }
+
 } // namespace
 
 //=============================================================================
-//                      Request Class Definition
+//                   Command Abstract Base Class Definition
 //=============================================================================
-/** A Request is defined as a "command" (currently a simple std::string). A "command" is
- *  something that MyCAD::Server knows how to interpret. Upon receiving this "command",
- *  MyCAD::Server will execute whatever code it needs to and then store a "response" for
- *  the requestor to later query.
- *
- *  In the future, it may be desireable to abstract away this concept of a "command",
- *  perhaps into a Command class.
+/** A Command is an action that the Server will know how to execute. It consists of a
+ *  `token`, which is a verb that describes the given Command. There are no restrictions
+ *  placed upon the lexography of the `token` at this level, however a later `Register`
+ *  function will likely ensure that it does not contain a space.
  */
-Request::Request(std::string aRequest)
-    : myRequest(std::move(aRequest))
-{}
-
-std::string const& Request::get() const
+Command::Command(std::string token, std::string help)
+    : myToken(std::move(token)), myHelp(std::move(help))
 {
-    return myRequest;
+    if(this->token().find(' ') != std::string::npos)
+    {
+        throw MyCAD::Exception("A Command token can NOT contain a space.");
+    }
+}
+
+// Virtual descructor still needs a definition!!!
+Command::~Command(){}
+
+std::string const& Command::token() const
+{
+    return myToken;
+}
+
+void Command::getHelp() const
+{
+    if(myHelp.empty())
+    {
+        std::stringstream out;
+        out << "The command \"" << myToken << "\"";
+        out << " does not have any help documentation.";
+    }
+}
+
+/** This is an implementation detail, but it is worth noting. We split up the
+ *  externally-facing `operator()` call, which the User will utilize, from the internal
+ *  `protected` `execute` in order to allow derived classes to do whatever they want while
+ *  still allowing us here in the base class to check how things went and return an
+ *  appropriate response to the user.
+ */
+std::string Command::operator()(std::string const& data, Shapes::Space& space)
+{
+    return this->execute(data, space);
 }
 
 //=============================================================================
 //                       Server Class Definition
 //=============================================================================
-/** A Server knows how to process various Request and do something with them. In general,
- *  this will probably mean creating/manipulating/querying topological or geometric
- *  information.
- *
- *  Server understands various command-line arguments which can be used to initialize/set
- *  various internal variables. While Server does not provide a main-loop, it is rather
- *  trivial to create one which leverages Server. Make sure to call Server::processArgs if
- *  you're interested in accepting command-line input from Users.
- */
 Server::Server()
 {
-    static bool first = true;
-    if (first)
+    if(KNOWN_COMMANDS.empty())
     {
-        first = false;
-        OPTIONS.add_options()
-            ("v,version", "Return the version of the MyCAD server")
-            ;
+        initializeCommands();
     }
 }
-
-/** This will process the list of provided command-line arguments. If there is an error,
- *  the caller is notified by a return value of false.
- *
- *  @warning The caller should check the return value and respond appropriately, otherwise
- *           Server will contain an unknown (to the caller) state
- */
-bool Server::processArgs(int argc, char ** argv) const
+std::string Server::processRequest(std::string const& request)
 {
-    try{
-        cxxopts::ParseResult result = OPTIONS.parse(argc, argv);
-        if(result.count("version") > 0)
+    // Parse out the token and the "remainder"
+    std::string token, remainder;
+    std::stringstream ss;
+    ss << request;
+    ss >> token;
+    std::getline(ss, remainder);
+
+    // Now, figure out if we have a registered Command that matches this token
+    for(const auto& command : KNOWN_COMMANDS)
+    {
+        if(command->token() == token)
         {
-            std::cout << "MyCAD©, v" MYCAD_VERSION << std::endl;
+            // If so, execute the command
+            return command->operator()(remainder, space);
         }
     }
-    catch (cxxopts::OptionParseException const& e)
-    {
-        std::cout << e.what() << std::endl;
-        return false;
-    }
-    return true;
+    return "I don't understand the command \"" + token + "\"";
 }
 
-/** Given the Request, perform the requested action.
- *
- *  A return value of `false` indicates that there was an error processing the request
- */
-bool Server::processRequest(Request const& request)
-{
-    std::string data = request.get();
-    std::stringstream ss(data);
-    std::string command;
-    ss >> command;
-
-    if(command == "version")
-    {
-        myResponse = std::string(MYCAD_VERSION);
-    }
-    else if(command == "vertex")
-    {
-        // Extract the user's targets
-        MyCAD::Geometry::Number x,y;
-        ss >> x >> y;
-
-        // Create the vertex
-        vertices.emplace_back(MyCAD::Geometry::Point(x, y));
-
-        // Let the user know everything went well.
-        std::stringstream oss;
-        oss << "Added vertex at " << vertices.back();
-        myResponse = oss.str();
-    }
-    else if(data == "exit" or data == "quit")
-    {
-        myResponse = EXIT;
-    }
-    else{
-        return false;
-    }
-    return true;
-}
-
-/** Returns the response from the last succesfully processed Request.
- *
- *  @warning Server does not know anything about the last Request at this point, or even
- *           if we've received a request yet. In other words, the caller must ensure that:
- *
- *           1. They have actually sent a Request prior to calling `getResponse`
- *           2. That the last request was processed succesfully prior to calling
- *           `getRespons`
- *
- *           If these two things are not done, bad things won't happen. But, you'll
- *           either:
- *
- *           1. Get an empty string as a response. The caller __must only__ rely on this
- *              empty string as a true response iff they did the two things mentioned
- *              above.
- *           2. Get the response from the previously succesful processing, which could
- *              lead to surprising results on your end.
- */
-std::string Server::getResponse() const
-{
-    return myResponse;
-}
 } // Communication
 } // MyCAD

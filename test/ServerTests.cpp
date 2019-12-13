@@ -17,49 +17,19 @@ SCENARIO("A Remote User sends a TCP/IP request to the Server and expects a respo
 
         WHEN("A request for the version is received")
         {
-            MyCAD::Communication::Request request("version");
+            std::string request("version");
             THEN("We should get the expected result")
             {
-                REQUIRE(server.processRequest(request) == true);
-                REQUIRE(server.getResponse() == MYCAD_VERSION);
+                REQUIRE(server.processRequest(request) == "MyCAD©, v" MYCAD_VERSION);
             }
         }
 
         WHEN("A request to create a Vertex in 2D-space in recieved")
         {
-            MyCAD::Communication::Request request("vertex 5.0 10.0");
+            std::string request("vertex 5.0 10.0");
             THEN("We should end up with a vertex in that location")
             {
-                REQUIRE(server.processRequest(request) == true);
-                REQUIRE_FALSE(server.getResponse().empty());
-            }
-        }
-    }
-}
-
-SCENARIO("The server should accept and understanding various command-line arguments", "[server]")
-{
-    GIVEN("an instance of MyCAD::Server")
-    {
-        MyCAD::Communication::Server server;
-
-        WHEN("a recognized list of command-line arguments is provided")
-        {
-            char* argv[] = {(char*) "MyCAD", 
-                            (char*) "--version"};
-            THEN("Server should let us know there were no parsing issues")
-            {
-                REQUIRE(server.processArgs(2, argv) == true);
-            }
-        }
-
-        WHEN("an un-recognized flag is provided")
-        {
-            char* argv[] = {(char*) "MyCAD", 
-                            (char*) "--debug"};
-            THEN("Server should inform us that there was a parsing issue")
-            {
-                REQUIRE(server.processArgs(2, argv) == false);
+                REQUIRE_FALSE(server.processRequest(request).empty());
             }
         }
     }
