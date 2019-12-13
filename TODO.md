@@ -2,7 +2,6 @@
 - ADD INTERNATIONALIZATION!!!!
 - Figure out if we can set up a cross-platform (i.e. including windows and mac) automated
   build system
-- Update documentation with examples.
 - Should we explicitly `#include` every header needed, regardless of whether its already
   been included elsewhere?
 - Make a logging facility.
@@ -14,25 +13,9 @@
 - Should we ship mfpr and gmp rather than requiring it as a dependency?
 - Use readline or similar to make i/o a little more bearable in main loop.
 # Communication
-- Make Server::getResponse less fragile. This can probably be done by storing a custom
-  object, say `MyCAD::Communication::Response` which has some sort of `state` enum. We can
-  set the `state` to something like `EMPTY` prior to running the command - this way, we
-  can safely check `state` and always rely on an empty string being the actual response
-  from the executed command.
-- Now that Server is understanding more and more commands, it's time to use the Command
-  design pattern (I think....)
+- Improve the shutdown procedure - it's pretty hacked right now.
 - File bug-report or merge request with upstream cxxopts so that we can default-construct
   the cxxapts::ParseResult
-- Is our `Request->Server->Response` design flimsy/faulty? Is it ok to expect the user to
-  inspect the return-value of `Server::processRequest` before calling
-  `Server::getResponse`?
-- What about the whole notion of storing a response as a member variable in Server? What
-  happens when we get multiple Requests that haven't been queried yet?
-  - I guess keeping a Queue of `Request` with associated `Response` would probably be
-    wise...
-  - This also suggests that we need some sort of ID for each Request. And the Caller would
-    need to know about this ID...
-- Move processArgs out of Server...maybe put it directly in main? or in a new header?
 # Commands
 - Extend `Add` command to accept a sub-command which describes what is being added.
 - Add more error-checking to commands -> probably at least check for `operator>>` return
