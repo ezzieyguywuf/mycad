@@ -44,26 +44,6 @@ namespace
 } // namespace
 
 //=============================================================================
-//                      Request Class Definition
-//=============================================================================
-/** A Request is defined as a "command" (currently a simple std::string). A "command" is
- *  something that MyCAD::Server knows how to interpret. Upon receiving this "command",
- *  MyCAD::Server will execute whatever code it needs to and then store a "response" for
- *  the requestor to later query.
- *
- *  In the future, it may be desireable to abstract away this concept of a "command",
- *  perhaps into a Command class.
- */
-Request::Request(std::string aRequest)
-    : myRequest(std::move(aRequest))
-{}
-
-std::string const& Request::get() const
-{
-    return myRequest;
-}
-
-//=============================================================================
 //                   Command Abstract Base Class Definition
 //=============================================================================
 /** A Command is an action that the Server will know how to execute. It consists of a

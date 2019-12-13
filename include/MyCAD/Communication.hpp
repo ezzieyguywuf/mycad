@@ -19,23 +19,6 @@ namespace MyCAD
 namespace Communication
 {
 
-/** A Client knows how to generate Request, send them to Server, and query for a response */
-class Client
-{
-
-};
-
-/** A Request describes an action or a query that we have for the MyCAD Server */
-class Request
-{
-    public:
-        Request(std::string request);
-        std::string const& get() const;
-
-    private:
-        std::string myRequest;
-};
-
 /** @brief A Command is an action that Server knows how to perform */
 class Command
 {
