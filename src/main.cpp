@@ -55,11 +55,15 @@ int main(int argc, char* argv[])
         std::string input;
         std::getline(std::cin, input);
 
-        if(input.find("shutdown") == 0)
+        std::cout << myServer.processRequest(input);
+        if(input.back() != '\n')
+        {
+            std::cout << std::endl;
+        }
+        if(myServer.shutdown())
         {
             break;
         }
-        std::cout << myServer.processRequest(input) << std::endl;
     }
     return 0;
 }
