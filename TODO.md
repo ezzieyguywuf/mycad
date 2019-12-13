@@ -27,6 +27,7 @@
   out. Notice how the Add command is duplicating code that already exists in Server.
 - Code smell (?) is back - is there a better/different way to keep a static list of
   KNOWN_COMMANDS without needing to carry it around as a member variable?
+- Allow for a "brief" and a "long" help message.
 # Geometry
 - Fully abstract CGAL out of Shapes -> we need to make a wrapper around Arrangement_2 in
   our Geometry namespace
