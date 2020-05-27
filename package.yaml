@@ -24,6 +24,7 @@ dependencies:
 - text
 - QuickCheck
 - containers
+- prettyprinter
 
 library:
   source-dirs: src
