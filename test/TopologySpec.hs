@@ -63,6 +63,8 @@ spec = do
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
+type ModTopo = (T.Topology -> T.Topology)
+
 addEdgeToLoop' :: T.Topology -> T.Topology
 addEdgeToLoop' t =
     let (k, _) = Map.findMax $ T.getEdgeLoops t
@@ -73,7 +75,7 @@ applyNTimes n f val = foldl (\s e -> e s ) val [f | x <- [1..n]]
 
 addXAppendsNToY ::
     (Ord a, Eq b) =>
-        (T.Topology -> T.Topology) -- what is used to append?
+        ModTopo -- what is used to append?
         -> Int -- how many are appended?
         -> (T.Topology -> Map.Map a b) -- what are they appended to?
         -> T.Topology -> Bool -- This is what is left for QuickCheck
@@ -81,8 +83,8 @@ addXAppendsNToY = prepXaddXAppendsNToY id
 
 prepXaddXAppendsNToY ::
     (Ord a, Eq b) =>
-        (T.Topology -> T.Topology) -- what is used to prepare?
-        -> (T.Topology -> T.Topology) -- what is used to append?
+        ModTopo -- what is used to prepare?
+        -> ModTopo -- what is used to append?
         -> Int -- how many are appended?
         -> (T.Topology -> Map.Map a b) -- what are they appended to?
         -> T.Topology -> Bool -- This is what is left for QuickCheck
@@ -95,15 +97,15 @@ prepXaddXAppendsNToY prepX addX n getY t0 =
 
 addXDoesNotModifyY ::
     (Ord a, Eq b) =>
-        (T.Topology -> T.Topology)
+        ModTopo
         -> (T.Topology -> Map.Map a b)
         -> T.Topology -> Bool -- this is what is left for QuickCheck
 addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
 prepXaddXDoesNotModifyY ::
     (Ord a, Eq b) =>
-        (T.Topology -> T.Topology)
-        -> (T.Topology -> T.Topology)
+        ModTopo
+        -> ModTopo
         -> (T.Topology -> Map.Map a b)
         -> T.Topology -> Bool -- this is what is left for QuickCheck
 prepXaddXDoesNotModifyY prepX addX getY t0 =
@@ -113,7 +115,7 @@ prepXaddXDoesNotModifyY prepX addX getY t0 =
 
 addXCreatesXWithYAdjacentZ ::
     (Ord a, Eq b, Ord c, Eq d) =>
-        (T.Topology -> T.Topology)
+        ModTopo
         -> (T.Topology -> Map.Map a b)
         -> Int
         -> (a -> T.Topology -> Maybe (Map.Map c d))
@@ -126,56 +128,44 @@ addXCreatesXWithYAdjacentZ addX getX n getAdjacentZ t =
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
-prop_appendsOneToVertices :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
-prop_appendsOneToVertices addX = addXAppendsNToY addX 1 T.getVertices
+prop_appendsOneToVertices :: ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToVertices f = addXAppendsNToY f 1 T.getVertices
 
-prop_appendsOneToVertices' ::
-    (T.Topology -> T.Topology)
-    -> (T.Topology -> T.Topology)
-    -> (T.Topology -> Bool)
-prop_appendsOneToVertices' prepX addX = prepXaddXAppendsNToY prepX addX 1 T.getVertices
+prop_appendsOneToVertices' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToVertices' p f = prepXaddXAppendsNToY p f 1 T.getVertices
 
-prop_appendsTwoToVertices :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
-prop_appendsTwoToVertices addX = addXAppendsNToY addX 2 T.getVertices
+prop_appendsTwoToVertices :: ModTopo -> (T.Topology -> Bool)
+prop_appendsTwoToVertices f = addXAppendsNToY f 2 T.getVertices
 
-prop_appendsOneToEdges :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
-prop_appendsOneToEdges addX = addXAppendsNToY addX 1 T.getEdges
+prop_appendsOneToEdges :: ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToEdges f = addXAppendsNToY f 1 T.getEdges
 
-prop_appendsOneToEdges' ::
-    (T.Topology -> T.Topology)
-    -> (T.Topology -> T.Topology)
-    -> (T.Topology -> Bool)
-prop_appendsOneToEdges' prepX addX = prepXaddXAppendsNToY prepX addX 1 T.getEdges
+prop_appendsOneToEdges' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToEdges' p f = prepXaddXAppendsNToY p f 1 T.getEdges
 
-prop_appendsOneToFaces :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
-prop_appendsOneToFaces addX = addXAppendsNToY addX 1 T.getFaces
+prop_appendsOneToFaces :: ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToFaces f = addXAppendsNToY f 1 T.getFaces
 
-prop_doesNotModifyEdges :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
+prop_doesNotModifyEdges :: ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
 
-prop_doesNotModifyFaces :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
+prop_doesNotModifyFaces :: ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
 
-prop_doesNotModifyFaces' ::
-    (T.Topology -> T.Topology)
-    -> (T.Topology -> T.Topology)
-    -> (T.Topology -> Bool)
+prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
 
-prop_appendsOneToEdgeLoops :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
-prop_appendsOneToEdgeLoops addX = addXAppendsNToY addX 1 T.getEdgeLoops
+prop_appendsOneToEdgeLoops :: ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToEdgeLoops f = addXAppendsNToY f 1 T.getEdgeLoops
 
-prop_hasOneAdjacentVertex ::
-    (T.Topology -> T.Topology) -> (T.Topology -> Bool)
+prop_hasOneAdjacentVertex :: ModTopo -> (T.Topology -> Bool)
 prop_hasOneAdjacentVertex f =
     addXCreatesXWithYAdjacentZ f T.getEdges 1 T.edgeVertices
 
-prop_hasTwoAdjacentVertices ::
-    (T.Topology -> T.Topology) -> (T.Topology -> Bool)
+prop_hasTwoAdjacentVertices :: ModTopo -> (T.Topology -> Bool)
 prop_hasTwoAdjacentVertices f =
     addXCreatesXWithYAdjacentZ f T.getEdges 2 T.edgeVertices
 
-prop_hasOneAdjacentFace ::
-    (T.Topology -> T.Topology) -> (T.Topology -> Bool)
+prop_hasOneAdjacentFace :: ModTopo -> (T.Topology -> Bool)
 prop_hasOneAdjacentFace f =
     addXCreatesXWithYAdjacentZ f T.getEdges 1 T.edgeFaces
