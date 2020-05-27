@@ -29,6 +29,8 @@ module Topology
 
 import Test.QuickCheck
 import qualified Data.Map as Map
+import Data.Text.Prettyprint.Doc
+
 --import qualified Data.Text as Text
 
 -- ===========================================================================
@@ -211,3 +213,15 @@ instance Arbitrary Topology where
             t2  = addRayEdge t0
             t3  = addLoopEdge t0
         elements [t0, t1, t2, t3]
+
+instance Pretty Vertex where
+    pretty FreeVertex = pretty "FreeVertex"
+    pretty (RayVertex eid) = pretty "RayV" <+> pretty eid
+    pretty (ChordVertex eid) = pretty "ChordV" <+> pretty eid
+    pretty (LoopVertex eid fid) = pretty "ChordV" <+> pretty eid <+> pretty fid
+
+instance Pretty EdgeID where
+    pretty (EdgeID n) = pretty "E" <> pretty n
+
+instance Pretty FaceID where
+    pretty (FaceID n) = pretty "F" <> pretty n
