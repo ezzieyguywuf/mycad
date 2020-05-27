@@ -55,6 +55,10 @@ spec = do
     describe "addEdgeToLoop" $ do
         it "appends one to the existing Vertices" $ do
             property (prop_appendsOneToVertices' T.addOpenEdgeLoop addEdgeToLoop')
+        it "appends one to the existing Edges" $ do
+            property (prop_appendsOneToEdges' T.addOpenEdgeLoop addEdgeToLoop')
+        it "Does not modify Faces" $ do
+            property (prop_doesNotModifyFaces' T.addOpenEdgeLoop addEdgeToLoop')
 
 -- ===========================================================================
 --                            Helper Functions
@@ -94,9 +98,18 @@ addXDoesNotModifyY ::
         (T.Topology -> T.Topology)
         -> (T.Topology -> Map.Map a b)
         -> T.Topology -> Bool -- this is what is left for QuickCheck
-addXDoesNotModifyY addX getY t =
-    let t' = addX t
-     in (getY t) ==  (getY t')
+addXDoesNotModifyY = prepXaddXDoesNotModifyY id
+
+prepXaddXDoesNotModifyY ::
+    (Ord a, Eq b) =>
+        (T.Topology -> T.Topology)
+        -> (T.Topology -> T.Topology)
+        -> (T.Topology -> Map.Map a b)
+        -> T.Topology -> Bool -- this is what is left for QuickCheck
+prepXaddXDoesNotModifyY prepX addX getY t0 =
+    let t  = prepX t
+        t' = addX t
+    in (getY t) ==  (getY t')
 
 addXCreatesXWithYAdjacentZ ::
     (Ord a, Eq b, Ord c, Eq d) =>
@@ -128,6 +141,12 @@ prop_appendsTwoToVertices addX = addXAppendsNToY addX 2 T.getVertices
 prop_appendsOneToEdges :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
 prop_appendsOneToEdges addX = addXAppendsNToY addX 1 T.getEdges
 
+prop_appendsOneToEdges' ::
+    (T.Topology -> T.Topology)
+    -> (T.Topology -> T.Topology)
+    -> (T.Topology -> Bool)
+prop_appendsOneToEdges' prepX addX = prepXaddXAppendsNToY prepX addX 1 T.getEdges
+
 prop_appendsOneToFaces :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
 prop_appendsOneToFaces addX = addXAppendsNToY addX 1 T.getFaces
 
@@ -136,6 +155,12 @@ prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
 
 prop_doesNotModifyFaces :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
 prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
+
+prop_doesNotModifyFaces' ::
+    (T.Topology -> T.Topology)
+    -> (T.Topology -> T.Topology)
+    -> (T.Topology -> Bool)
+prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
 
 prop_appendsOneToEdgeLoops :: (T.Topology -> T.Topology) -> (T.Topology -> Bool)
 prop_appendsOneToEdgeLoops addX = addXAppendsNToY addX 1 T.getEdgeLoops
