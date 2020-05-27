@@ -193,10 +193,11 @@ pprTopo :: Topology -> Doc ann
 pprTopo t =
     case t of
       EmptyTopology -> pretty "EmptyTopology"
-      (Topology vs es fs _) ->
+      (Topology vs es fs els) ->
           (pprVMap "Vertices" vs) <+> line
           <+> (pprEMap "Edges" es) <+> line
-          <+> (pprFMap "Faces" fs)
+          <+> (pprFMap "Faces" fs) <+> line
+          <+> (pprELMap "EdgeLoops" els)
 
 pprVMap :: String -> Map.Map VertexID Vertex -> Doc ann
 pprVMap n m = printMap n m pprVTuple
@@ -207,6 +208,9 @@ pprEMap n m = printMap n m pprETuple
 pprFMap :: String -> Map.Map FaceID Face -> Doc ann
 pprFMap n m = printMap n m pprFTuple
 
+pprELMap :: String -> Map.Map EdgeLoopID EdgeLoop -> Doc ann
+pprELMap n m = printMap n m pprELTuple
+
 pprVTuple :: (VertexID, Vertex) -> Doc ann
 pprVTuple (vid, v) = printTuple vid v pprVID pprVertex
 
@@ -215,6 +219,9 @@ pprETuple (eid, e) = printTuple eid e pprEID pprEdge
 
 pprFTuple :: (FaceID, Face) -> Doc ann
 pprFTuple (fid, f) = printTuple fid f pprFID pprFace
+
+pprELTuple :: (EdgeLoopID, EdgeLoop) -> Doc ann
+pprELTuple (elid, el) = printTuple elid el pprELID pprELoop
 
 pprVertex :: Vertex -> Doc ann
 pprVertex v =
@@ -234,6 +241,9 @@ pprEdge e =
 pprFace :: Face -> Doc ann
 pprFace (LoopFace vid eid) = pretty "LoopF" <+> pprVID vid <+> pprEID eid
 
+pprELoop :: EdgeLoop -> Doc ann
+pprELoop (OpenEdgeLoop vid) = pretty "ELoop" <+> pprVID vid
+
 pprVID :: VertexID -> Doc ann
 pprVID (VertexID n) = printID "V" n
 
@@ -243,8 +253,8 @@ pprEID (EdgeID n) = printID "E" n
 pprFID :: FaceID -> Doc ann
 pprFID (FaceID n) = printID "F" n
 
---pprELID :: EdgeLoopID -> Doc ann
---pprELID (EdgeLoopID n) = printID "EL" n
+pprELID :: EdgeLoopID -> Doc ann
+pprELID (EdgeLoopID n) = printID "EL" n
 
 -- ===========================================================================
 --                       Private Free Functions
