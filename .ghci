@@ -1,0 +1,4 @@
+:set -fwarn-unused-binds -fwarn-unused-imports -fwarn-orphans
+:set -package hspec
+:set -isrc -itest
+:load Geometry Topology
