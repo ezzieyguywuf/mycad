@@ -22,6 +22,7 @@ module Topology
 , vertexEdges
 , edgeVertices
 , edgeFaces
+, pprTopo
 --, printTopology
 --, addEdge
   -- | These come from Type Classes
@@ -187,6 +188,64 @@ edgeFaces eid t = do
     --let (vs, es, fs, els) = getAll t
     --in printMap vs
 
+-- | For pretty printing
+pprTopo :: Topology -> Doc ann
+pprTopo t =
+    case t of
+      EmptyTopology -> pretty "EmptyTopology"
+      (Topology vs es fs _) ->
+          (pprVMap "Vertices" vs) <+> line
+          <+> (pprEMap "Edges" es) <+> line
+          <+> (pprFMap "Faces" fs)
+
+pprVMap :: String -> Map.Map VertexID Vertex -> Doc ann
+pprVMap n m = printMap n m pprVTuple
+
+pprEMap :: String -> Map.Map EdgeID Edge -> Doc ann
+pprEMap n m = printMap n m pprETuple
+
+pprFMap :: String -> Map.Map FaceID Face -> Doc ann
+pprFMap n m = printMap n m pprFTuple
+
+pprVTuple :: (VertexID, Vertex) -> Doc ann
+pprVTuple (vid, v) = printTuple vid v pprVID pprVertex
+
+pprETuple :: (EdgeID, Edge) -> Doc ann
+pprETuple (eid, e) = printTuple eid e pprEID pprEdge
+
+pprFTuple :: (FaceID, Face) -> Doc ann
+pprFTuple (fid, f) = printTuple fid f pprFID pprFace
+
+pprVertex :: Vertex -> Doc ann
+pprVertex v =
+    case v of
+        FreeVertex -> pretty "FreeV"
+        (RayVertex eid) -> pretty "RayV" <+> pprEID eid
+        (ChordVertex eid) -> pretty "ChordV" <+> pprEID eid
+        (LoopVertex eid fid) -> pretty "ChordV" <+> pprEID eid <+> pprFID fid
+
+pprEdge :: Edge -> Doc ann
+pprEdge e =
+    case e of
+        (RayEdge vid) -> pretty "RayE" <+> pprVID vid
+        (LoopEdge vid fid) -> pretty "LoopE" <+> pprVID vid <+> pprFID fid
+        (ChordEdge v1 v2) -> pretty "ChordE" <+> pprVID v1 <+> pprVID v2
+
+pprFace :: Face -> Doc ann
+pprFace (LoopFace vid eid) = pretty "LoopF" <+> pprVID vid <+> pprEID eid
+
+pprVID :: VertexID -> Doc ann
+pprVID (VertexID n) = printID "V" n
+
+pprEID :: EdgeID -> Doc ann
+pprEID (EdgeID n) = printID "E" n
+
+pprFID :: FaceID -> Doc ann
+pprFID (FaceID n) = printID "F" n
+
+--pprELID :: EdgeLoopID -> Doc ann
+--pprELID (EdgeLoopID n) = printID "EL" n
+
 -- ===========================================================================
 --                       Private Free Functions
 -- ===========================================================================
@@ -196,10 +255,19 @@ filterSubMap k m = Map.filterWithKey (\x _ -> x `elem` k) m
 getAll :: Topology -> (Vertices, Edges, Faces, EdgeLoops)
 getAll t = (getVertices t, getEdges t, getFaces t, getEdgeLoops t)
 
---printMap :: (Ord k, Eq a, Show k, Show a) => Map.Map k a -> Text.Text
---printMap m =
-    --let d = Map.assocs m
-        
+printID :: String -> Int -> Doc ann
+printID h n = pretty h <> pretty n
+
+printTuple :: a -> b -> (a -> Doc ann) -> (b -> Doc ann) -> Doc ann
+printTuple a b fa fb = fa a <> pretty ":" <+> fb b
+
+printMap :: (Ord k, Eq a) =>
+        String
+        -> Map.Map k a
+        -> ((k, a) -> Doc ann)
+        -> Doc ann
+printMap n m f = (pretty n) <+> (align . vsep) (map f (Map.assocs m))
+
 -- ===========================================================================
 --                               Type Classes
 -- ===========================================================================
@@ -213,15 +281,3 @@ instance Arbitrary Topology where
             t2  = addRayEdge t0
             t3  = addLoopEdge t0
         elements [t0, t1, t2, t3]
-
-instance Pretty Vertex where
-    pretty FreeVertex = pretty "FreeVertex"
-    pretty (RayVertex eid) = pretty "RayV" <+> pretty eid
-    pretty (ChordVertex eid) = pretty "ChordV" <+> pretty eid
-    pretty (LoopVertex eid fid) = pretty "ChordV" <+> pretty eid <+> pretty fid
-
-instance Pretty EdgeID where
-    pretty (EdgeID n) = pretty "E" <> pretty n
-
-instance Pretty FaceID where
-    pretty (FaceID n) = pretty "F" <> pretty n
