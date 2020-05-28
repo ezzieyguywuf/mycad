@@ -14,8 +14,10 @@ module Topology
 , addRayEdge
 , addLoopEdge
 , addChordEdge
+--, addChordEdgeBetween
 , addOpenEdgeLoop
 , addEdgeToLoop
+--, closeEdgeLoop
 , getVertices
 , getEdges
 , getFaces
@@ -38,6 +40,19 @@ import Data.Text.Prettyprint.Doc
 -- ===========================================================================
 --                               Data Types
 -- ===========================================================================
+-- TODO: I want to redo all of this - I want to move all this "Vertex", "Edge", "Face"
+-- stuff to a separate module (maybe..GeoTopology or something?). In here, I would like to
+-- remain more general.
+--
+-- I think we can define a `data Node a` such that each `Node` can have one or more `data
+-- Bridge b`. We'll define `getNodeValue :: Node a -> a` and `getBridgeValue :: Bridge a
+-- -> a`.
+--
+-- The idea is that a given Node can have one or more Bridge associated with it. Each Bridge
+-- will allow `getOpposite :: Node a -> Bridge b -> Node`.
+--
+-- Additionally, we'll have `getAdjacent :: Node a -> [b]` which will return the value of
+-- all adjacent Bridge that have a type of b
 data Vertex =
      FreeVertex
    | RayVertex EdgeID
@@ -112,12 +127,18 @@ addChordEdge t =
         vid  = VertexID $ length vs
         vid2 = VertexID $ length vs + 1
         eid  = EdgeID $ length es
-        v1   = ChordVertex eid
-        v2   = ChordVertex eid
+        v1   = RayVertex eid
+        v2   = RayVertex eid
         e    = ChordEdge vid vid2
         vs'  = Map.insert vid2 v2 $ Map.insert vid v1 vs
         es'  = Map.insert eid e es
     in Topology vs' es' fs els
+
+--addChordEdgeBetween :: VertexID -> Vertex ID -> Topology -> Topology
+--addChordEdgeBetween vid1 vd2 t =
+    --let (vs, es, fs, els) = getAll t
+        --vs0 = Map.insert v1 (ChordVertex eid) vs
+        --vs' = Map.insert v2 (ChordVertex eid) vs0
 
 addOpenEdgeLoop :: Topology -> Topology
 addOpenEdgeLoop t =
@@ -137,6 +158,10 @@ addEdgeToLoop elid t =
         es' = Map.insert eid (ChordEdge v1 v2) es
         els' = Map.insert elid (OpenEdgeLoop v2) els
     in Topology vs' es' fs els'
+
+--closeEdgeLoop :: EdgeLoopID -> Topology -> Topology
+--closeEdgeLoop elid t =
+    --let (vs, es, fs, els) = getAll t
 
 getVertices :: Topology -> Vertices
 getVertices EmptyTopology = Map.empty
