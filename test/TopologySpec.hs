@@ -43,11 +43,11 @@ spec = do
             property (prop_doesNotModifyFaces T.addChordEdge)
         it "Creates an Edge with two adjacent Vertex" $ do
             property (prop_hasTwoAdjacentVertices T.addChordEdge)
-    describe "addChordEdgeBetween" $ do
-        it "Does not modify Vertices" $ do
-            property (prop_doesNotModifyVertices'
-                      (T.addFreeVertex . T.addFreeVertex)
-                      addChordEdgeBetween')
+    --describe "addChordEdgeBetween" $ do
+        --it "Does not modify Vertices" $ do
+            --property (prop_doesNotModifyVertices'
+                      --(T.addFreeVertex . T.addFreeVertex)
+                      --addChordEdgeBetween')
     describe "addOpenEdgeLoop" $ do
         it "Appends two to the existing Vertices" $ do
             property (prop_appendsTwoToVertices T.addOpenEdgeLoop)
@@ -78,11 +78,11 @@ spec = do
 -- ===========================================================================
 type ModTopo = (T.Topology -> T.Topology)
 
-addChordEdgeBetween' :: T.Topology -> T.Topology
-addChordEdgeBetween' t =
-    let ((v2, _), els) = Map.deleteFindMax $ T.getEdgeLoops t
-        (v1, _) = Map.findMax els
-    in T.addChordEdgeBetween v1 v2
+--addChordEdgeBetween' :: T.Topology -> T.Topology
+--addChordEdgeBetween' t =
+    --let ((v2, _), els) = Map.deleteFindMax $ T.getEdgeLoops t
+        --(v1, _) = Map.findMax els
+    --in T.addChordEdgeBetween v1 v2
 
 addEdgeToLoop' :: T.Topology -> T.Topology
 addEdgeToLoop' t =
@@ -170,8 +170,8 @@ prop_appendsOneToEdges' p f = prepXaddXAppendsNToY p f 1 T.getEdges
 prop_appendsOneToFaces :: ModTopo -> (T.Topology -> Bool)
 prop_appendsOneToFaces f = addXAppendsNToY f 1 T.getFaces
 
-prop_doesNotModifyVertices' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
-prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
+--prop_doesNotModifyVertices' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+--prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
 
 prop_doesNotModifyEdges :: ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
