@@ -59,6 +59,8 @@ spec = do
             property (prop_appendsOneToEdges' T.addOpenEdgeLoop addEdgeToLoop')
         it "Does not modify Faces" $ do
             property (prop_doesNotModifyFaces' T.addOpenEdgeLoop addEdgeToLoop')
+        it "Modifies EdgeLoop to point to newly added Vertex" $ do
+            property (prop_edgeLoopPointsToNewVertex)
 
 -- ===========================================================================
 --                            Helper Functions
@@ -169,3 +171,12 @@ prop_hasTwoAdjacentVertices f =
 prop_hasOneAdjacentFace :: ModTopo -> (T.Topology -> Bool)
 prop_hasOneAdjacentFace f =
     addXCreatesXWithYAdjacentZ f T.getEdges 1 T.edgeFaces
+
+prop_edgeLoopPointsToNewVertex :: T.Topology -> Bool
+prop_edgeLoopPointsToNewVertex t0 =
+    let t  = T.addOpenEdgeLoop t0
+        (el, _) = Map.findMax $ T.getEdgeLoops t
+        t' = T.addEdgeToLoop el t
+        (v, _) = Map.findMax $ T.getVertices t'
+        (_, T.OpenEdgeLoop v') = Map.findMax $ T.getEdgeLoops t'
+    in v == v'

@@ -3,6 +3,7 @@ module Topology
   Vertex(..)
 , Edge(..)
 , Face(..)
+, EdgeLoop(..)
 , Topology(..)
 , VertexID(VertexID)
 , EdgeID(EdgeID)
