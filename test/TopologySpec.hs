@@ -109,7 +109,7 @@ prepXaddXDoesNotModifyY ::
         -> (T.Topology -> Map.Map a b)
         -> T.Topology -> Bool -- this is what is left for QuickCheck
 prepXaddXDoesNotModifyY prepX addX getY t0 =
-    let t  = prepX t
+    let t  = prepX t0
         t' = addX t
     in (getY t) ==  (getY t')
 
