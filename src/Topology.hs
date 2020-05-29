@@ -21,7 +21,7 @@ import Test.QuickCheck (Arbitrary, arbitrary, elements)
 --                               Data Types
 -- ===========================================================================
 newtype Topology =
-    Topology {unTopology :: (Gr NodeLabel BridgeLabel)}
+    Topology {unTopology :: Gr NodeLabel BridgeLabel}
         deriving (Show)
 
 newtype Vertex = Vertex Int deriving (Show, Eq)
@@ -39,7 +39,7 @@ emptyTopology :: Topology
 emptyTopology = Topology Graph.empty
 
 addVertex :: Topology -> Topology
-addVertex g = addNode EVertex g
+addVertex = addNode EVertex
 
 makeEdge :: Vertex -> Vertex -> Topology -> Topology
 makeEdge (Vertex v1) (Vertex v2) t =
