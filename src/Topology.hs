@@ -19,17 +19,17 @@ import Test.QuickCheck (Arbitrary, arbitrary, elements)
 -- ===========================================================================
 --                               Data Types
 -- ===========================================================================
-type NodeLabel = (Element, Int)
-newtype BridgeLabel = BridgeLabel () deriving (Show)
 newtype Topology =
     Topology {unTopology :: (Gr NodeLabel BridgeLabel)}
         deriving (Show)
 
-data Element = EVertex | EEdge | EFace deriving (Show, Eq)
-
 newtype Vertex = Vertex Int deriving (Show, Eq)
 newtype Edge = Edge Int deriving (Show, Eq)
 newtype Face = Face Int deriving (Show, Eq)
+
+type NodeLabel = (Element, Int)
+newtype BridgeLabel = BridgeLabel () deriving (Show)
+data Element = EVertex | EEdge | EFace deriving (Show, Eq)
 
 -- ===========================================================================
 --                               Free Functions
