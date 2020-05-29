@@ -50,8 +50,7 @@ prepMakeEdge t0 = (e, t)
           e  = last $ T.getEdges t'
 
 prepMakeEdge' :: T.Topology -> T.Topology
-prepMakeEdge' t0 = t
-    where (_, t) = prepMakeEdge t0
+prepMakeEdge' t0 = t where (_, t) = prepMakeEdge t0
 
 addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
 addXAppendsNToY = prepXaddXAppendsNToY id
