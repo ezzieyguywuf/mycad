@@ -58,25 +58,25 @@ prepXaddXDoesNotModifyY prepX addX getY t0 = (getY t) == (getY t')
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
-prop_appendsOneToVertices :: ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToVertices :: ModTopo -> TopoProp
 prop_appendsOneToVertices f = addXAppendsNToY f 1 T.getVertices
 
-prop_doesNotModifyEdges :: ModTopo -> (T.Topology -> Bool)
+prop_doesNotModifyEdges :: ModTopo -> TopoProp
 prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
 
-prop_doesNotModifyFaces :: ModTopo -> (T.Topology -> Bool)
+prop_doesNotModifyFaces :: ModTopo -> TopoProp
 prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
 
-prop_appendsOneToEdges' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToEdges' :: ModTopo -> ModTopo -> TopoProp
 prop_appendsOneToEdges' p f = prepXaddXAppendsNToY p f 1 T.getEdges
 
-prop_doesNotModifyVertices' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+prop_doesNotModifyVertices' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
 
-prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
 
---prop_edgeHasTwoMoreAdjacentVertex :: T.Topology -> Bool
+--prop_edgeHasTwoMoreAdjacentVertex :: TopoProp
 --prop_edgeHasTwoMoreAdjacentVertex t
     -- | length T.getVertices t >= 2 =
     -- | otherwise = 
