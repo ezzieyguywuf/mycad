@@ -37,6 +37,9 @@ makeEdge' :: T.Topology -> T.Topology
 makeEdge' t = T.makeEdge v1 v2 t
     where n  = length vs
           vs = T.getVertices t
+          -- This is safe because we prep the topology with addTwoVertices.
+          -- You'll get a runtime error if you forget to do this
+          -- (this is a good thing, thank you haskell.)
           [v1, v2] = drop (n - 2) vs
 
 addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
