@@ -13,11 +13,13 @@ module Topology
 , getVertices
 , getEdges
 , getFaces
+, prettyPrintTopology
 )where
 
 import qualified Data.Graph.Inductive.Graph as Graph
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
+import qualified Data.Text as Text
 
 -- ===========================================================================
 --                               Data Types
@@ -58,6 +60,9 @@ adjEdgeToVert :: Vertex -> Topology -> [Edge]
 adjEdgeToVert (Vertex n) t = map Edge ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
+
+prettyPrintTopology :: Topology -> Text.Text
+prettyPrintTopology t = Text.pack $ Graph.prettify $ unTopology t
 
 getVertices :: Topology -> [Vertex]
 getVertices t = map Vertex $ getNodes isVertex t
