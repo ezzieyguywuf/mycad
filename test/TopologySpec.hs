@@ -45,10 +45,11 @@ makeEdge' t = T.makeEdge v1 v2 t
           [v1, v2] = drop (n - 2) vs
 
 prepMakeEdge :: T.Topology -> (T.Edge, T.Topology)
-prepMakeEdge t0 = (e, t, t')
+prepMakeEdge t0 = (e, t)
     where t | length (T.getVertices t0) == 0 = (T.addVertex . T.addVertex) t0
             | length (T.getVertices t0) == 1 = T.addVertex t0 
             | otherwise = t0
+          t' = makeEdge' t
           e  = last $ T.getEdges t'
 
 addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
@@ -99,14 +100,13 @@ prop_edgeHasTwoAdjacentVertex t0 = length (T.adjVertToEdge e t') == 2
           t' = makeEdge' t
 
 prop_vertexHasOneMoreAdjacentEdge :: TopoProp
-prop_vertexHasOneMoreAdjacentEdge t0 = and $ map (== 0) [dv1, dv2]
+prop_vertexHasOneMoreAdjacentEdge t0 = and $ map (== 1) [dv1, dv2]
     where (e, t) = prepMakeEdge t0
           t' = makeEdge' t
-          [v1, v2] = T.adjVertToEdge e
-          f = lengeth . T.adjEdgeToVert
+          [v1, v2] = T.adjVertToEdge e t'
           n1v1 = length $ T.adjEdgeToVert v1 t
           n1v2 = length $ T.adjEdgeToVert v2 t
           n2v1 = length $ T.adjEdgeToVert v1 t'
           n2v2 = length $ T.adjEdgeToVert v2 t'
-          dv1  = (f v1 t') - (f v1 t)
-          dv2  = (f v2 t') - (f v2 t)
+          dv1  = n2v1 - n1v1
+          dv2  = n2v2 - n1v2 

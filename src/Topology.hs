@@ -9,6 +9,7 @@ module Topology
 , addVertex
 , makeEdge
 , adjVertToEdge
+, adjEdgeToVert
 , getVertices
 , getEdges
 , getFaces
@@ -46,10 +47,15 @@ makeEdge :: Vertex -> Vertex -> Topology -> Topology
 makeEdge (Vertex v1) (Vertex v2) t =
     let t' = addNode EEdge t
         (Edge e)  = last $ getEdges t'
-    in foldr connectNodes t' [(v1, e), (e, v1)]
+    in foldr connectNodes t' [(v1, e), (e, v2)]
 
 adjVertToEdge :: Edge -> Topology -> [Vertex]
 adjVertToEdge (Edge n) t = map Vertex ns
+    where t' = unTopology $ getSubGraph (not . isFace) t
+          ns = Graph.neighbors t' n
+
+adjEdgeToVert :: Vertex -> Topology -> [Edge]
+adjEdgeToVert (Vertex n) t = map Edge ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
 
