@@ -104,9 +104,6 @@ prop_vertexHasOneMoreAdjacentEdge t0 = and $ map (== 1) [dv1, dv2]
     where (e, t) = prepMakeEdge t0
           t' = makeEdge' t
           [v1, v2] = T.adjVertToEdge e t'
-          n1v1 = length $ T.adjEdgeToVert v1 t
-          n1v2 = length $ T.adjEdgeToVert v2 t
-          n2v1 = length $ T.adjEdgeToVert v1 t'
-          n2v2 = length $ T.adjEdgeToVert v2 t'
-          dv1  = n2v1 - n1v1
-          dv2  = n2v2 - n1v2 
+          f = (length .) . T.adjEdgeToVert
+          dv1  = (f v1 t') - (f v1 t)
+          dv2  = (f v2 t') - (f v2 t)
