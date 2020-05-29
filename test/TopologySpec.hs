@@ -13,11 +13,17 @@ spec = do
             property (prop_doesNotModifyEdges T.addVertex)
         it "Does not modify the Faces" $ do
             property (prop_doesNotModifyFaces T.addVertex)
+    --describe "makeEdge" $ do
+        --it "Does not modify the Vertices" $ do
+            --property (prop_doesNotModifyVertices' addTwoVertices T.makeEdge')
 
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
 type ModTopo = (T.Topology -> T.Topology)
+
+--addTwoVertices :: T.Topology -> T.Topology
+--addTwoVertices t = T.addVertex $ T.addVertex t
 
 addXAppendsNToY ::
     ModTopo -- what is used to append?
@@ -66,3 +72,6 @@ prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
 
 prop_doesNotModifyFaces :: ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
+
+--prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+--prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
