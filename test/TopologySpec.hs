@@ -15,11 +15,11 @@ spec = do
             property (prop_doesNotModifyFaces T.addVertex)
     describe "makeEdge" $ do
         it "Does not modify the Vertices" $
-            property (prop_doesNotModifyVertices' addTwoVertices makeEdge')
+            property (prop_doesNotModifyVertices' prepMakeEdge' makeEdge')
         it "Appends one to the existing Edges" $
-            property (prop_appendsOneToEdges' addTwoVertices makeEdge')
+            property (prop_appendsOneToEdges' prepMakeEdge' makeEdge')
         it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces' addTwoVertices makeEdge')
+            property (prop_doesNotModifyFaces' prepMakeEdge' makeEdge')
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex)
         it "Adjacent Vertices have one additional adjacent Edge" $
@@ -31,9 +31,6 @@ spec = do
 type ModTopo = (T.Topology -> T.Topology)
 -- This is what QuickCheck expects
 type TopoProp = (T.Topology -> Bool)
-
-addTwoVertices :: T.Topology -> T.Topology
-addTwoVertices t = T.addVertex $ T.addVertex t
 
 makeEdge' :: T.Topology -> T.Topology
 makeEdge' t = T.makeEdge v1 v2 t
@@ -51,6 +48,10 @@ prepMakeEdge t0 = (e, t)
             | otherwise = t0
           t' = makeEdge' t
           e  = last $ T.getEdges t'
+
+prepMakeEdge' :: T.Topology -> T.Topology
+prepMakeEdge' t0 = t
+    where (_, t) = prepMakeEdge t0
 
 addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
 addXAppendsNToY = prepXaddXAppendsNToY id
