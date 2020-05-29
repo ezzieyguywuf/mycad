@@ -6,13 +6,13 @@ import qualified Topology as T
 
 spec :: Spec
 spec = do
-    describe "addFreeVertex" $ do
+    describe "addVertex" $ do
         it "Appends one to the existing Vertices" $ do
             property (prop_appendsOneToVertices T.addVertex)
         it "Does not modify the Edges" $ do
             property (prop_doesNotModifyEdges T.addVertex)
         it "Does not modify the Faces" $ do
-            property (prop_doesNotModifyFaces T.addFreeVertex)
+            property (prop_doesNotModifyFaces T.addVertex)
     --describe "addRayEdge" $ do
         --it "Appends one to the existing Vertices" $ do
             --property (prop_appendsOneToVertices T.addRayEdge)

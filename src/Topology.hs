@@ -7,6 +7,7 @@ module Topology
 , addVertex
 , getVertices
 , getEdges
+, getFaces
 )where
 
 import qualified Data.Graph.Inductive.Graph as Graph
@@ -42,6 +43,9 @@ getVertices t = getData isVertex t
 
 getEdges :: Topology -> [Element]
 getEdges t = getData isEdge t
+
+getFaces :: Topology -> [Element]
+getFaces t = getData isFace t
 -- ===========================================================================
 --                        Private Free Functions
 -- ===========================================================================
@@ -62,6 +66,10 @@ isVertex _ = False
 isEdge :: NodeLabel -> Bool
 isEdge (Edge _, _) = True
 isEdge _ = False
+
+isFace :: NodeLabel -> Bool
+isFace (Face _, _) = True
+isFace _ = False
 
 getData :: (NodeLabel -> Bool) -> Topology -> [Element]
 getData p t =
