@@ -6,6 +6,7 @@ module Topology
 , emptyTopology
 , addVertex
 , getVertices
+, getEdges
 )where
 
 import qualified Data.Graph.Inductive.Graph as Graph
@@ -38,6 +39,9 @@ addVertex g = addNode Vertex g
 
 getVertices :: Topology -> [Element]
 getVertices t = getData isVertex t
+
+getEdges :: Topology -> [Element]
+getEdges t = getData isEdge t
 -- ===========================================================================
 --                        Private Free Functions
 -- ===========================================================================
@@ -54,6 +58,10 @@ countNode p t = length . Graph.nodes $ Graph.labfilter p $ unTopology t
 isVertex :: NodeLabel -> Bool
 isVertex (Vertex _, _) = True
 isVertex _ = False
+
+isEdge :: NodeLabel -> Bool
+isEdge (Edge _, _) = True
+isEdge _ = False
 
 getData :: (NodeLabel -> Bool) -> Topology -> [Element]
 getData p t =

@@ -117,18 +117,16 @@ prepXaddXAppendsNToY prepX addX n getY t0 =
      in xs == take (length xs' - n) xs'
 
 addXDoesNotModifyY ::
-    (Ord a, Eq b) =>
-        ModTopo
-         -> (T.Topology -> [T.Element])
-         -> T.Topology -> Bool -- this is what is left for QuickCheck
+    ModTopo
+     -> (T.Topology -> [T.Element])
+     -> T.Topology -> Bool -- this is what is left for QuickCheck
 addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
 prepXaddXDoesNotModifyY ::
-    (Ord a, Eq b) =>
-        ModTopo
-         -> ModTopo
-         -> (T.Topology -> [T.Element])
-         -> T.Topology -> Bool -- this is what is left for QuickCheck
+    ModTopo
+     -> ModTopo
+     -> (T.Topology -> [T.Element])
+     -> T.Topology -> Bool -- this is what is left for QuickCheck
 prepXaddXDoesNotModifyY prepX addX getY t0 =
     let t  = prepX t0
         t' = addX t
