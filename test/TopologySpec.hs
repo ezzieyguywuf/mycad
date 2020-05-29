@@ -24,13 +24,16 @@ spec = do
             property (prop_edgeHasTwoAdjacentVertex)
         it "Adjacent Vertices have one additional adjacent Edge" $
             property (prop_vertexHasOneMoreAdjacentEdge)
+        it "Creates an Edge with zero adjacent Face" $
+            property (prop_edgeHasZeroAdjacentFace prepMakeEdge' makeEdge') 
 
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
-type ModTopo = (T.Topology -> T.Topology)
+type ModTopo = T.Topology -> T.Topology
+type GetElem a = T.Topology -> [a]
 -- This is what QuickCheck expects
-type TopoProp = (T.Topology -> Bool)
+type TopoProp = T.Topology -> Bool
 
 makeEdge' :: T.Topology -> T.Topology
 makeEdge' t = T.makeEdge v1 v2 t
@@ -52,26 +55,30 @@ prepMakeEdge t0 = (e, t)
 prepMakeEdge' :: T.Topology -> T.Topology
 prepMakeEdge' t0 = t where (_, t) = prepMakeEdge t0
 
-addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
+addXAppendsNToY :: Eq a => ModTopo -> Int -> GetElem a -> TopoProp
 addXAppendsNToY = prepXaddXAppendsNToY id
 
-prepXaddXAppendsNToY 
-    :: Eq a => ModTopo -> ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
-prepXaddXAppendsNToY prepX addX n getY t0 =
-    xs == take (length xs' - n) xs'
-    where t   = prepX t0
-          t'  = addX t
-          xs  = getY t
-          xs' = getY t'
+prepXaddXAppendsNToY :: Eq a => ModTopo -> ModTopo -> Int -> GetElem a -> TopoProp
+prepXaddXAppendsNToY p f n g t0 = xs == xs''
+    where t   = p t0
+          t'  = f t
+          xs  = g t
+          xs' = g t'
+          xs'' = take (length xs' - n) $ g t'
 
-addXDoesNotModifyY :: Eq a => ModTopo -> (T.Topology -> [a]) -> TopoProp
+addXDoesNotModifyY :: Eq a => ModTopo -> GetElem a -> TopoProp
 addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
-prepXaddXDoesNotModifyY 
-    :: Eq a => ModTopo -> ModTopo -> (T.Topology -> [a]) -> TopoProp
+prepXaddXDoesNotModifyY :: Eq a => ModTopo -> ModTopo -> GetElem a -> TopoProp
 prepXaddXDoesNotModifyY prepX addX getY t0 = getY t == getY t'
     where t  = prepX t0
           t' = addX t
+
+prepXMakeXHasNAdjacentY :: Eq a => ModTopo -> ModTopo -> Int -> GetElem a -> TopoProp
+prepXMakeXHasNAdjacentY p f n g t0 = (length xs') == n
+    where t  = p t0
+          t' = f t
+          xs' = g t'
 
 -- ===========================================================================
 --                            Properties
@@ -107,3 +114,6 @@ prop_vertexHasOneMoreAdjacentEdge t0 = and $ map (== 1) [dv1, dv2]
           f a b = length (T.adjEdgeToVert a b)
           dv1  = (f v1 t') - (f v1 t)
           dv2  = (f v2 t') - (f v2 t)
+
+prop_edgeHasZeroAdjacentFace :: ModTopo -> ModTopo -> TopoProp
+prop_edgeHasZeroAdjacentFace p f = prepXMakeXHasNAdjacentY p f 0 T.getFaces
