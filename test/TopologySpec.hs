@@ -13,10 +13,6 @@ spec = do
             property (prop_doesNotModifyEdges T.addVertex)
         it "Does not modify the Faces" $ do
             property (prop_doesNotModifyFaces T.addVertex)
-    describe "getLastVertex" $ do
-        it "returns Nothing if there are no Vertices" $ do
-            T.getLastVertex T.emptyTopology `shouldBe` Nothing
-
     --describe "makeEdge" $ do
         --it "Does not modify the Vertices" $ do
             --property (prop_doesNotModifyVertices' addTwoVertices T.makeEdge')
