@@ -7,6 +7,8 @@ module Topology
   -- | Exported functions
 , emptyTopology
 , addVertex
+, makeEdge
+, makeEdge'
 , getVertices
 , getEdges
 , getFaces
@@ -40,6 +42,21 @@ emptyTopology = Topology Graph.empty
 addVertex :: Topology -> Topology
 addVertex g = addNode EVertex g
 
+makeEdge :: Vertex -> Vertex -> Topology -> Topology
+makeEdge (Vertex v1) (Vertex v2) t =
+    let t' = addNode EEdge t
+        (Edge e)  = last $ getEdges t'
+    in foldr connectNodes t' [(v1, e), (e, v1)]
+
+makeEdge' :: Topology -> Maybe Topology
+makeEdge' t =
+    let vs = getVertices t
+        n  = length vs
+    in case compare n 0 of
+         LT -> Nothing
+         _  -> let [v1, v2] = drop (n - 2) vs
+               in Just $ makeEdge v1 v2 t
+
 getVertices :: Topology -> [Vertex]
 getVertices t = map Vertex $ getData isVertex t
 
@@ -57,6 +74,9 @@ addNode e t = Topology $ Graph.insNode (n, e') t'
           n  = length $ Graph.nodes t'
           e' = (e, n')
           n' = countNode isVertex t
+
+connectNodes :: (Int, Int) -> Topology -> Topology
+connectNodes = undefined
 
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
 countNode p t = length . Graph.nodes $ Graph.labfilter p $ unTopology t

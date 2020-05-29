@@ -3,6 +3,7 @@ module TopologySpec (spec) where
 import Test.Hspec
 import Test.QuickCheck
 import qualified Topology as T
+import Data.Maybe
 
 spec :: Spec
 spec = do
@@ -15,7 +16,9 @@ spec = do
             property (prop_doesNotModifyFaces T.addVertex)
     describe "makeEdge" $ do
         it "Does not modify the Vertices" $ do
-            property (prop_doesNotModifyVertices' addTwoVertices T.makeEdge')
+            property (prop_doesNotModifyVertices'
+                      addTwoVertices
+                      (fromJust .T.makeEdge'))
 
 -- ===========================================================================
 --                            Helper Functions
