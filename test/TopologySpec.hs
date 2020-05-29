@@ -20,8 +20,10 @@ spec = do
             property (prop_appendsOneToEdges' addTwoVertices makeEdge')
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces' addTwoVertices makeEdge')
-        it "Creates an Edge with two adjacent Vertex" $ do
+        it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex)
+        --it "Adjacent Vertices have one additional adjacent Edge" $
+            --property (prop_vertexHasOneMoreAdjacentEdge)
 
 -- ===========================================================================
 --                            Helper Functions
@@ -41,6 +43,17 @@ makeEdge' t = T.makeEdge v1 v2 t
           -- You'll get a runtime error if you forget to do this
           -- (this is a good thing, thank you haskell.)
           [v1, v2] = drop (n - 2) vs
+
+prepMakeEdge :: T.Topology -> (T.Edge, T.Topology, T.Topology)
+prepMakeEdge t0 = (e, t, t')
+    where t | length (T.getVertices t0) == 0 = (T.addVertex . T.addVertex) t0
+            | length (T.getVertices t0) == 1 = T.addVertex t0 
+            | otherwise = t0
+          vs = T.getVertices t
+          n  = length vs
+          [v1, v2] = drop (n - 2) vs
+          t' = T.makeEdge v1 v2 t
+          e  = last $ T.getEdges t'
 
 addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
 addXAppendsNToY = prepXaddXAppendsNToY id
@@ -86,11 +99,8 @@ prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
 
 prop_edgeHasTwoAdjacentVertex :: TopoProp
 prop_edgeHasTwoAdjacentVertex t0 = length (T.adjVertToEdge e t') == 2
-    where t | length (T.getVertices t0) == 0 = (T.addVertex . T.addVertex) t0
-            | length (T.getVertices t0) == 1 = T.addVertex t0 
-            | otherwise = t0
-          vs = T.getVertices t
-          n  = length vs
-          [v1, v2] = drop (n - 2) vs
-          t' = T.makeEdge v1 v2 t
-          e  = last $ T.getEdges t'
+    where (e, _, t') = prepMakeEdge t0
+
+--prop_vertexHasOneMoreAdjacentEdge :: TopoProp
+--prop_vertexHasOneMoreAdjacentEdge t0 = and [dv1, dv2]
+    --where
