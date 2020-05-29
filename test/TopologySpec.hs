@@ -7,18 +7,18 @@ import qualified Topology as T
 spec :: Spec
 spec = do
     describe "addVertex" $ do
-        it "Appends one to the existing Vertices" $ do
+        it "Appends one to the existing Vertices" $
             property (prop_appendsOneToVertices T.addVertex)
-        it "Does not modify the Edges" $ do
+        it "Does not modify the Edges" $
             property (prop_doesNotModifyEdges T.addVertex)
-        it "Does not modify the Faces" $ do
+        it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addVertex)
     describe "makeEdge" $ do
-        it "Does not modify the Vertices" $ do
+        it "Does not modify the Vertices" $
             property (prop_doesNotModifyVertices' addTwoVertices makeEdge')
-        it "Appends one to the existing Edges" $ do
+        it "Appends one to the existing Edges" $
             property (prop_appendsOneToEdges' addTwoVertices makeEdge')
-        it "Does not modify the Faces" $ do
+        it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces' addTwoVertices makeEdge')
         --it "Creates an Edge with two additonal adjacent Vertex" $ do
             --property (prop_edgeHasTwoMoreAdjacentVertex)
@@ -59,7 +59,7 @@ addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
 prepXaddXDoesNotModifyY 
     :: Eq a => ModTopo -> ModTopo -> (T.Topology -> [a]) -> TopoProp
-prepXaddXDoesNotModifyY prepX addX getY t0 = (getY t) == (getY t')
+prepXaddXDoesNotModifyY prepX addX getY t0 = getY t == getY t'
     where t  = prepX t0
           t' = addX t
 

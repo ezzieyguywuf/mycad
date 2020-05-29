@@ -8,7 +8,6 @@ module Topology
 , emptyTopology
 , addVertex
 , makeEdge
-, makeEdge'
 , getVertices
 , getEdges
 , getFaces
@@ -47,15 +46,6 @@ makeEdge (Vertex v1) (Vertex v2) t =
     let t' = addNode EEdge t
         (Edge e)  = last $ getEdges t'
     in foldr connectNodes t' [(v1, e), (e, v1)]
-
-makeEdge' :: Topology -> Maybe Topology
-makeEdge' t =
-    let vs = getVertices t
-        n  = length vs
-    in case compare n 0 of
-         LT -> Nothing
-         _  -> let [v1, v2] = drop (n - 2) vs
-               in Just $ makeEdge v1 v2 t
 
 getVertices :: Topology -> [Vertex]
 getVertices t = map Vertex $ getData isVertex t
