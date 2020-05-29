@@ -1,2 +1,2 @@
 --command="stack-bin ghci test/Spec.hs"
---test="hspec spec --failure-report .hspec-failures --rerun --rerun-all-on-success"
+--test=":main -m Topology"
