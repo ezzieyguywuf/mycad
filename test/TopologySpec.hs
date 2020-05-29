@@ -85,11 +85,12 @@ prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
 
 prop_edgeHasTwoMoreAdjacentVertex :: TopoProp
-prop_edgeHasTwoMoreAdjacentVertex t0 = length $ T.adjVertToEdge e
-    where t | length vs == 0 = (T.addVertex . T.addVertex) t0
-            | length vs == 1 = T.addVertex t0 
+prop_edgeHasTwoMoreAdjacentVertex t0 = length (T.adjVertToEdge e t') == 2
+    where t | length (T.getVertices t0) == 0 = (T.addVertex . T.addVertex) t0
+            | length (T.getVertices t0) == 1 = T.addVertex t0 
             | otherwise = t0
-          vs = T.getVertices t0
+          vs = T.getVertices t
+          n  = length vs
           [v1, v2] = drop (n - 2) vs
           t' = T.makeEdge v1 v2 t
           e  = last $ T.getEdges t'
