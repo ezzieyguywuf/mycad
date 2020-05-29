@@ -49,7 +49,9 @@ makeEdge (Vertex v1) (Vertex v2) t =
     in foldr connectNodes t' [(v1, e), (e, v1)]
 
 adjVertToEdge :: Edge -> Topology -> [Vertex]
-adjVertToEdge e t = undefined
+adjVertToEdge (Edge n) t = map Vertex ns
+    where t' = unTopology $ getSubGraph (not . isFace) t
+          ns = Graph.neighbors t' n
 
 getVertices :: Topology -> [Vertex]
 getVertices t = map Vertex $ getNodes isVertex t
@@ -88,10 +90,11 @@ isFace :: NodeLabel -> Bool
 isFace (EFace, _) = True
 isFace _ = False
 
+getSubGraph :: (NodeLabel -> Bool) -> Topology -> Topology
+getSubGraph p t = Topology $ Graph.labfilter p $ unTopology t
+
 getNodes :: (NodeLabel -> Bool) -> Topology -> [Int]
-getNodes p t =
-    let t' = Graph.labfilter p $ unTopology t
-    in Graph.nodes t'
+getNodes p t = Graph.nodes $ unTopology $ getSubGraph p t
 
 -- ===========================================================================
 --                            Instances
