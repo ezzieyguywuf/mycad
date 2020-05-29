@@ -11,8 +11,8 @@ spec = do
             property (prop_appendsOneToVertices T.addVertex)
         it "Does not modify the Edges" $ do
             property (prop_doesNotModifyEdges T.addVertex)
-        --it "Does not modify the Faces" $ do
-            --property (prop_doesNotModifyFaces T.addFreeVertex)
+        it "Does not modify the Faces" $ do
+            property (prop_doesNotModifyFaces T.addFreeVertex)
     --describe "addRayEdge" $ do
         --it "Appends one to the existing Vertices" $ do
             --property (prop_appendsOneToVertices T.addRayEdge)
@@ -171,8 +171,8 @@ prop_appendsOneToVertices f = addXAppendsNToY f 1 T.getVertices
 prop_doesNotModifyEdges :: ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
 
---prop_doesNotModifyFaces :: ModTopo -> (T.Topology -> Bool)
---prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
+prop_doesNotModifyFaces :: ModTopo -> (T.Topology -> Bool)
+prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
 
 --prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
 --prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
