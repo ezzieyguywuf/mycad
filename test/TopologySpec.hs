@@ -13,11 +13,9 @@ spec = do
             property (prop_doesNotModifyEdges T.addVertex)
         it "Does not modify the Faces" $ do
             property (prop_doesNotModifyFaces T.addVertex)
-    describe "getFreeVertex" $ do
-        it "Appends a Vertex if there are zero FreeVertex" $ do
-            let t  = T.emptyTopology
-                t' = T.getFreeVertex t
-            t `shouldBe` t'
+    describe "getLastVertex" $ do
+        it "returns Nothing if there are no Vertices" $ do
+            T.getLastVertex T.emptyTopology `shouldBe` Nothing
 
     --describe "makeEdge" $ do
         --it "Does not modify the Vertices" $ do
