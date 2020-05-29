@@ -21,54 +21,39 @@ spec = do
             property (prop_appendsOneToEdges' addTwoVertices (fromJust .T.makeEdge'))
         it "Does not modify the Faces" $ do
             property (prop_doesNotModifyFaces' addTwoVertices (fromJust .T.makeEdge'))
+        --it "Creates an Edge with two additonal adjacent Vertex" $ do
+            --property (prop_edgeHasTwoMoreAdjacentVertex)
 
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
 type ModTopo = (T.Topology -> T.Topology)
+-- This is what QuickCheck expects
+type TopoProp = (T.Topology -> Bool)
 
 addTwoVertices :: T.Topology -> T.Topology
 addTwoVertices t = T.addVertex $ T.addVertex t
 
-addXAppendsNToY ::
-    (Eq a) =>
-        ModTopo -- what is used to append?
-        -> Int -- how many are appended?
-        -> (T.Topology -> [a]) -- what are they appended to?
-        -> T.Topology -> Bool -- This is what is left for QuickCheck
+addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
 addXAppendsNToY = prepXaddXAppendsNToY id
 
-prepXaddXAppendsNToY ::
-    (Eq a) =>
-        ModTopo -- what is used to prepare?
-        -> ModTopo -- what is used to append?
-        -> Int -- how many are appended?
-        -> (T.Topology -> [a]) -- what are they appended to?
-        -> T.Topology -> Bool -- This is what is left for QuickCheck
+prepXaddXAppendsNToY 
+    :: Eq a => ModTopo -> ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
 prepXaddXAppendsNToY prepX addX n getY t0 =
-    let t     = prepX t0
-        t'    = addX t
-        xs    = getY t
-        xs'   = getY t'
-     in xs == take (length xs' - n) xs'
+    xs == take (length xs' - n) xs'
+    where t   = prepX t0
+          t'  = addX t
+          xs  = getY t
+          xs' = getY t'
 
-addXDoesNotModifyY ::
-    (Eq a) =>
-        ModTopo
-         -> (T.Topology -> [a])
-         -> T.Topology -> Bool -- this is what is left for QuickCheck
+addXDoesNotModifyY :: Eq a => ModTopo -> (T.Topology -> [a]) -> TopoProp
 addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
-prepXaddXDoesNotModifyY ::
-    (Eq a) =>
-        ModTopo
-         -> ModTopo
-         -> (T.Topology -> [a])
-         -> T.Topology -> Bool -- this is what is left for QuickCheck
-prepXaddXDoesNotModifyY prepX addX getY t0 =
-    let t  = prepX t0
-        t' = addX t
-    in (getY t) == (getY t')
+prepXaddXDoesNotModifyY 
+    :: Eq a => ModTopo -> ModTopo -> (T.Topology -> [a]) -> TopoProp
+prepXaddXDoesNotModifyY prepX addX getY t0 = (getY t) == (getY t')
+    where t  = prepX t0
+          t' = addX t
 
 -- ===========================================================================
 --                            Properties
@@ -90,3 +75,8 @@ prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
 
 prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
+
+--prop_edgeHasTwoMoreAdjacentVertex :: T.Topology -> Bool
+--prop_edgeHasTwoMoreAdjacentVertex t
+    -- | length T.getVertices t >= 2 =
+    -- | otherwise = 
