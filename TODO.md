@@ -1,0 +1,1 @@
+- run hlint on Geometry and GeometrySpec
