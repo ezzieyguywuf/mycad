@@ -26,18 +26,20 @@ type ModTopo = (T.Topology -> T.Topology)
 --addTwoVertices t = T.addVertex $ T.addVertex t
 
 addXAppendsNToY ::
-    ModTopo -- what is used to append?
-    -> Int -- how many are appended?
-    -> (T.Topology -> [T.Element]) -- what are they appended to?
-    -> T.Topology -> Bool -- This is what is left for QuickCheck
+    (Eq a) =>
+        ModTopo -- what is used to append?
+        -> Int -- how many are appended?
+        -> (T.Topology -> [a]) -- what are they appended to?
+        -> T.Topology -> Bool -- This is what is left for QuickCheck
 addXAppendsNToY = prepXaddXAppendsNToY id
 
 prepXaddXAppendsNToY ::
-    ModTopo -- what is used to prepare?
-    -> ModTopo -- what is used to append?
-    -> Int -- how many are appended?
-    -> (T.Topology -> [T.Element]) -- what are they appended to?
-    -> T.Topology -> Bool -- This is what is left for QuickCheck
+    (Eq a) =>
+        ModTopo -- what is used to prepare?
+        -> ModTopo -- what is used to append?
+        -> Int -- how many are appended?
+        -> (T.Topology -> [a]) -- what are they appended to?
+        -> T.Topology -> Bool -- This is what is left for QuickCheck
 prepXaddXAppendsNToY prepX addX n getY t0 =
     let t     = prepX t0
         t'    = addX t
@@ -46,16 +48,18 @@ prepXaddXAppendsNToY prepX addX n getY t0 =
      in xs == take (length xs' - n) xs'
 
 addXDoesNotModifyY ::
-    ModTopo
-     -> (T.Topology -> [T.Element])
-     -> T.Topology -> Bool -- this is what is left for QuickCheck
+    (Eq a) =>
+        ModTopo
+         -> (T.Topology -> [a])
+         -> T.Topology -> Bool -- this is what is left for QuickCheck
 addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
 prepXaddXDoesNotModifyY ::
-    ModTopo
-     -> ModTopo
-     -> (T.Topology -> [T.Element])
-     -> T.Topology -> Bool -- this is what is left for QuickCheck
+    (Eq a) =>
+        ModTopo
+         -> ModTopo
+         -> (T.Topology -> [a])
+         -> T.Topology -> Bool -- this is what is left for QuickCheck
 prepXaddXDoesNotModifyY prepX addX getY t0 =
     let t  = prepX t0
         t' = addX t
