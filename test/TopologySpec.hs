@@ -20,8 +20,8 @@ spec = do
             property (prop_appendsOneToEdges' addTwoVertices makeEdge')
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces' addTwoVertices makeEdge')
-        it "Creates an Edge with two additonal adjacent Vertex" $ do
-            property (prop_edgeHasTwoMoreAdjacentVertex)
+        it "Creates an Edge with two adjacent Vertex" $ do
+            property (prop_edgeHasTwoAdjacentVertex)
 
 -- ===========================================================================
 --                            Helper Functions
@@ -84,8 +84,8 @@ prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
 prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
 
-prop_edgeHasTwoMoreAdjacentVertex :: TopoProp
-prop_edgeHasTwoMoreAdjacentVertex t0 = length (T.adjVertToEdge e t') == 2
+prop_edgeHasTwoAdjacentVertex :: TopoProp
+prop_edgeHasTwoAdjacentVertex t0 = length (T.adjVertToEdge e t') == 2
     where t | length (T.getVertices t0) == 0 = (T.addVertex . T.addVertex) t0
             | length (T.getVertices t0) == 1 = T.addVertex t0 
             | otherwise = t0
