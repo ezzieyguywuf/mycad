@@ -19,6 +19,8 @@ spec = do
             property (prop_doesNotModifyVertices' addTwoVertices (fromJust .T.makeEdge'))
         it "Appends one to the existing Edges" $ do
             property (prop_appendsOneToEdges' addTwoVertices (fromJust .T.makeEdge'))
+        it "Does not modify the Faces" $ do
+            property (prop_doesNotModifyFaces' addTwoVertices (fromJust .T.makeEdge'))
 
 -- ===========================================================================
 --                            Helper Functions
@@ -80,8 +82,11 @@ prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
 prop_doesNotModifyFaces :: ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
 
+prop_appendsOneToEdges' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+prop_appendsOneToEdges' p f = prepXaddXAppendsNToY p f 1 T.getEdges
+
 prop_doesNotModifyVertices' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
 prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
 
-prop_appendsOneToEdges' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
-prop_appendsOneToEdges' p f = prepXaddXAppendsNToY p f 1 T.getEdges
+prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> (T.Topology -> Bool)
+prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
