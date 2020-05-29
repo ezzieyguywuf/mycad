@@ -8,6 +8,7 @@ module Topology
 , emptyTopology
 , addVertex
 , makeEdge
+, adjVertToEdge
 , getVertices
 , getEdges
 , getFaces
@@ -47,14 +48,17 @@ makeEdge (Vertex v1) (Vertex v2) t =
         (Edge e)  = last $ getEdges t'
     in foldr connectNodes t' [(v1, e), (e, v1)]
 
+adjVertToEdge :: Edge -> Topology -> [Vertex]
+adjVertToEdge e t = undefined
+
 getVertices :: Topology -> [Vertex]
-getVertices t = map Vertex $ getData isVertex t
+getVertices t = map Vertex $ getNodes isVertex t
 
 getEdges :: Topology -> [Edge]
-getEdges t = map Edge $ getData isEdge t
+getEdges t = map Edge $ getNodes isEdge t
 
 getFaces :: Topology -> [Face]
-getFaces t = map Face $ getData isFace t
+getFaces t = map Face $ getNodes isFace t
 -- ===========================================================================
 --                        Private Free Functions
 -- ===========================================================================
@@ -84,8 +88,8 @@ isFace :: NodeLabel -> Bool
 isFace (EFace, _) = True
 isFace _ = False
 
-getData :: (NodeLabel -> Bool) -> Topology -> [Int]
-getData p t =
+getNodes :: (NodeLabel -> Bool) -> Topology -> [Int]
+getNodes p t =
     let t' = Graph.labfilter p $ unTopology t
     in Graph.nodes t'
 
