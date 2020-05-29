@@ -76,7 +76,8 @@ addNode e t = Topology $ Graph.insNode (n, e') t'
           n' = countNode isVertex t
 
 connectNodes :: (Int, Int) -> Topology -> Topology
-connectNodes = undefined
+connectNodes (a, b) t =
+    Topology $ Graph.insEdge (a, b, BridgeLabel ()) $ unTopology t
 
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
 countNode p t = length . Graph.nodes $ Graph.labfilter p $ unTopology t
