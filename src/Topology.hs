@@ -106,6 +106,9 @@ getNodes p t = Graph.nodes $ unTopology $ getSubGraph p t
 --                            Instances
 -- ===========================================================================
 instance Arbitrary Topology where
-    arbitrary = do
-        let t0  = emptyTopology
-        elements [t0]
+    arbitrary = elements [t0, t1, t2, t3, t4]
+        where t0 = emptyTopology
+              t1 = addVertex emptyTopology
+              t2 = addVertex t1
+              t3 = makeEdge (Vertex 0) (Vertex 1) t2
+              t4 = addVertex $ addVertex t3
