@@ -55,29 +55,32 @@ prepMakeEdge t0 = (e, t)
 prepMakeEdge' :: T.Topology -> T.Topology
 prepMakeEdge' t0 = t where (_, t) = prepMakeEdge t0
 
+makeTopo :: ModTopo -> ModTopo -> GetElem a -> T.Topology -> ([a], T.Topology)
+makeTopo p f g t0 = (as, t')
+    where t  = p t0
+          t' = f t
+          as =  g t
+
 addXAppendsNToY :: Eq a => ModTopo -> Int -> GetElem a -> TopoProp
 addXAppendsNToY = prepXaddXAppendsNToY id
 
 prepXaddXAppendsNToY :: Eq a => ModTopo -> ModTopo -> Int -> GetElem a -> TopoProp
-prepXaddXAppendsNToY p f n g t0 = xs == xs''
-    where t   = p t0
-          t'  = f t
-          xs  = g t
-          xs' = g t'
-          xs'' = take (length xs' - n) $ g t'
+prepXaddXAppendsNToY p f n g t0 = xs == xs'
+    where (xs, t') = makeTopo p f g t0
+          xs_all = g t'
+          xs' = take (length xs_all - n) xs_all
 
 addXDoesNotModifyY :: Eq a => ModTopo -> GetElem a -> TopoProp
 addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
 prepXaddXDoesNotModifyY :: Eq a => ModTopo -> ModTopo -> GetElem a -> TopoProp
-prepXaddXDoesNotModifyY prepX addX getY t0 = getY t == getY t'
-    where t  = prepX t0
-          t' = addX t
+prepXaddXDoesNotModifyY p f g t0 = xs == xs'
+    where (xs, t') = makeTopo p f g t0
+          xs' = g t'
 
 prepXMakeXHasNAdjacentY :: Eq a => ModTopo -> ModTopo -> Int -> GetElem a -> TopoProp
 prepXMakeXHasNAdjacentY p f n g t0 = (length xs') == n
-    where t  = p t0
-          t' = f t
+    where (_, t') = makeTopo p f g t0
           xs' = g t'
 
 -- ===========================================================================
