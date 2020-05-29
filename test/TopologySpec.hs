@@ -3,7 +3,6 @@ module TopologySpec (spec) where
 import Test.Hspec
 import Test.QuickCheck
 import qualified Topology as T
-import Data.Maybe
 
 spec :: Spec
 spec = do
@@ -16,11 +15,11 @@ spec = do
             property (prop_doesNotModifyFaces T.addVertex)
     describe "makeEdge" $ do
         it "Does not modify the Vertices" $ do
-            property (prop_doesNotModifyVertices' addTwoVertices (fromJust .T.makeEdge'))
+            property (prop_doesNotModifyVertices' addTwoVertices makeEdge')
         it "Appends one to the existing Edges" $ do
-            property (prop_appendsOneToEdges' addTwoVertices (fromJust .T.makeEdge'))
+            property (prop_appendsOneToEdges' addTwoVertices makeEdge')
         it "Does not modify the Faces" $ do
-            property (prop_doesNotModifyFaces' addTwoVertices (fromJust .T.makeEdge'))
+            property (prop_doesNotModifyFaces' addTwoVertices makeEdge')
         --it "Creates an Edge with two additonal adjacent Vertex" $ do
             --property (prop_edgeHasTwoMoreAdjacentVertex)
 
@@ -33,6 +32,12 @@ type TopoProp = (T.Topology -> Bool)
 
 addTwoVertices :: T.Topology -> T.Topology
 addTwoVertices t = T.addVertex $ T.addVertex t
+
+makeEdge' :: T.Topology -> T.Topology
+makeEdge' t = T.makeEdge v1 v2 t
+    where n  = length vs
+          vs = T.getVertices t
+          [v1, v2] = drop (n - 2) vs
 
 addXAppendsNToY :: Eq a => ModTopo -> Int -> (T.Topology -> [a]) -> TopoProp
 addXAppendsNToY = prepXaddXAppendsNToY id
