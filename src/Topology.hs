@@ -107,8 +107,10 @@ addNode :: Element -> Topology -> Topology
 addNode e t = Topology $ Graph.insNode (n, e') t'
     where t' = unTopology t
           n  = length $ Graph.nodes t'
-          e' = (e, n')
-          n' = countNode isVertex t
+          e' = (e, countNode f t)
+          f | e == EVertex = isVertex
+            | e == EEdge   = isEdge
+            | e == EFace   = isFace
 
 connectNodes :: (Int, Int) -> Topology -> Topology
 connectNodes (a, b) t =
