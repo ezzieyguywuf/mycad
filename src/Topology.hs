@@ -13,6 +13,7 @@ module Topology
 , getVertices
 , getEdges
 , getFaces
+, prettyPrintVertex
 , prettyPrintTopology
 )where
 
@@ -60,6 +61,9 @@ adjEdgeToVert :: Vertex -> Topology -> [Edge]
 adjEdgeToVert (Vertex n) t = map Edge ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
+
+prettyPrintVertex :: Vertex -> Topology -> Text.Text
+prettyPrintVertex (Vertex i) t = Text.pack $ "V" ++ show i
 
 prettyPrintTopology :: Topology -> Text.Text
 prettyPrintTopology t = Text.pack $ Graph.prettify $ unTopology t
