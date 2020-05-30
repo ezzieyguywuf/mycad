@@ -14,13 +14,15 @@ module Topology
 , getEdges
 , getFaces
 , prettyPrintVertex
+, prettyPrintVertices
 , prettyPrintTopology
 )where
 
+import Data.Maybe (mapMaybe)
 import qualified Data.Graph.Inductive.Graph as Graph
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
-import qualified Data.Text as Text
+import Data.Text.Prettyprint.Doc
 
 -- ===========================================================================
 --                               Data Types
@@ -62,11 +64,15 @@ adjEdgeToVert (Vertex n) t = map Edge ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
 
-prettyPrintVertex :: Vertex -> Topology -> Text.Text
-prettyPrintVertex (Vertex i) t = Text.pack $ "V" ++ show i
+prettyPrintVertex :: Topology -> Vertex -> Doc ann
+prettyPrintVertex t (Vertex i) = pretty "V" <> pretty i <> pretty ":" <+> ns
+    where ns = prettyPrintNeighbors i t
 
-prettyPrintTopology :: Topology -> Text.Text
-prettyPrintTopology t = Text.pack $ Graph.prettify $ unTopology t
+prettyPrintVertices :: Topology -> Doc ann
+prettyPrintVertices t = vsep $ map (prettyPrintVertex t) $ getVertices t
+
+prettyPrintTopology :: Topology -> Doc ann
+prettyPrintTopology t = pretty $ Graph.prettify $ unTopology t
 
 getVertices :: Topology -> [Vertex]
 getVertices t = map Vertex $ getNodes isVertex t
@@ -110,6 +116,30 @@ getSubGraph p t = Topology $ Graph.labfilter p $ unTopology t
 
 getNodes :: (NodeLabel -> Bool) -> Topology -> [Int]
 getNodes p t = Graph.nodes $ unTopology $ getSubGraph p t
+
+prettyPrintNeighbors :: Int -> Topology -> Doc ann
+prettyPrintNeighbors i t = align doc
+    where pns = Graph.pre t' i
+          sns = Graph.suc t' i
+          t'  = unTopology t
+          doc | (length pns) == (length sns) = pretty "Free"
+              | otherwise = pre <> line <> suc
+              where pre = prettyPrintNodes "<-" pns t
+                    suc = prettyPrintNodes "->" sns t
+
+prettyPrintNodes :: String -> [Int] -> Topology -> Doc ann
+prettyPrintNodes h ns t = pretty h <+> (align . vsep) ns'
+    where ns' | length ns == 0 = [pretty "None"]
+              | otherwise = map prettyPrintNodeLabel $ mapMaybe (Graph.lab t') ns
+          t' = unTopology t
+
+prettyPrintNodeLabel :: NodeLabel -> Doc ann
+prettyPrintNodeLabel (e, n) = prettyPrintElement e <> pretty n
+
+prettyPrintElement :: Element -> Doc ann
+prettyPrintElement EVertex = pretty "V"
+prettyPrintElement EEdge   = pretty "E"
+prettyPrintElement EFace   = pretty "F"
 
 -- ===========================================================================
 --                            Instances
