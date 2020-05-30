@@ -22,7 +22,7 @@ module Topology
 , prettyPrintTopology
 )where
 
-import Data.Maybe (mapMaybe)
+import Data.Maybe (mapMaybe, fromJust)
 import qualified Data.Graph.Inductive.Graph as Graph
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
@@ -69,28 +69,28 @@ adjEdgeToVert (Vertex n) t = map Edge ns
           ns = Graph.neighbors t' n
 
 prettyPrintVertex :: Topology -> Vertex -> Doc ann
-prettyPrintVertex t (Vertex i) = pretty "V" <> pretty i <> pretty ":" <+> ns
-    where ns = prettyPrintNeighbors i t
+prettyPrintVertex t (Vertex i) = prettyPrintNodeWithNeighbors t i
 
 prettyPrintVertices :: Topology -> Doc ann
 prettyPrintVertices t = vsep $ map (prettyPrintVertex t) $ getVertices t
 
 prettyPrintEdge :: Topology -> Edge -> Doc ann
-prettyPrintEdge t (Edge i) = pretty "E" <> pretty i <> pretty ":" <+> ns
-    where ns = prettyPrintNeighbors i t
+prettyPrintEdge t (Edge i) = prettyPrintNodeWithNeighbors t i
 
 prettyPrintEdges :: Topology -> Doc ann
 prettyPrintEdges t = vsep $ map (prettyPrintEdge t) $ getEdges t
 
 prettyPrintFace :: Topology -> Face -> Doc ann
-prettyPrintFace t (Face i) = pretty "F" <> pretty i <> pretty ":" <+> ns
-    where ns = prettyPrintNeighbors i t
+prettyPrintFace t (Face i) = prettyPrintNodeWithNeighbors t i
 
 prettyPrintFaces :: Topology -> Doc ann
 prettyPrintFaces t = vsep $ map (prettyPrintFace t) $ getFaces t
 
 prettyPrintTopology :: Topology -> Doc ann
-prettyPrintTopology t = pretty $ Graph.prettify $ unTopology t
+prettyPrintTopology t = vs <> line <> es <> line <> fs
+    where vs = prettyPrintVertices t
+          es = prettyPrintEdges t
+          fs = prettyPrintFaces t
 
 getVertices :: Topology -> [Vertex]
 getVertices t = map Vertex $ getNodes isVertex t
@@ -136,6 +136,13 @@ getSubGraph p t = Topology $ Graph.labfilter p $ unTopology t
 
 getNodes :: (NodeLabel -> Bool) -> Topology -> [Int]
 getNodes p t = Graph.nodes $ unTopology $ getSubGraph p t
+
+prettyPrintNodeWithNeighbors :: Topology -> Int -> Doc ann
+prettyPrintNodeWithNeighbors t i = h <> pretty ":" <+> ns
+    where h   = prettyPrintNodeLabel lab
+          lab = fromJust $ Graph.lab t' i
+          ns  = prettyPrintNeighbors i t
+          t'  = unTopology t
 
 prettyPrintNeighbors :: Int -> Topology -> Doc ann
 prettyPrintNeighbors i t = align doc
