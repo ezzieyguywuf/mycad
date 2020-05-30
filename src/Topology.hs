@@ -152,8 +152,9 @@ prettyPrintNeighbors :: Int -> Topology -> Doc ann
 prettyPrintNeighbors i t = align doc
     where pns = Graph.pre t' i
           sns = Graph.suc t' i
+          lns = [length pns, length sns]
           t'  = unTopology t
-          doc | (length pns) == (length sns) = pretty "Free"
+          doc | all (== 0) lns = pretty "Free"
               | otherwise = pre <> line <> suc
               where pre = prettyPrintNodes "<-" pns t
                     suc = prettyPrintNodes "->" sns t
