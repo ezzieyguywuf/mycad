@@ -72,19 +72,19 @@ prettyPrintVertex :: Topology -> Vertex -> Doc ann
 prettyPrintVertex t (Vertex i) = prettyPrintNodeWithNeighbors t i
 
 prettyPrintVertices :: Topology -> Doc ann
-prettyPrintVertices t = vsep $ map (prettyPrintVertex t) $ getVertices t
+prettyPrintVertices t = prettyPrintMany t prettyPrintVertex getVertices
 
 prettyPrintEdge :: Topology -> Edge -> Doc ann
 prettyPrintEdge t (Edge i) = prettyPrintNodeWithNeighbors t i
 
 prettyPrintEdges :: Topology -> Doc ann
-prettyPrintEdges t = vsep $ map (prettyPrintEdge t) $ getEdges t
+prettyPrintEdges t = prettyPrintMany t prettyPrintEdge getEdges
 
 prettyPrintFace :: Topology -> Face -> Doc ann
 prettyPrintFace t (Face i) = prettyPrintNodeWithNeighbors t i
 
 prettyPrintFaces :: Topology -> Doc ann
-prettyPrintFaces t = vsep $ map (prettyPrintFace t) $ getFaces t
+prettyPrintFaces t = prettyPrintMany t prettyPrintFace getFaces
 
 prettyPrintTopology :: Topology -> Doc ann
 prettyPrintTopology t = vs <> line <> es <> line <> fs
@@ -143,6 +143,10 @@ prettyPrintNodeWithNeighbors t i = h <> pretty ":" <+> ns
           lab = fromJust $ Graph.lab t' i
           ns  = prettyPrintNeighbors i t
           t'  = unTopology t
+
+prettyPrintMany ::
+    Topology -> (Topology -> a -> Doc ann) -> (Topology -> [a]) -> Doc ann
+prettyPrintMany t f g = vsep $ map (f t) $ g t
 
 prettyPrintNeighbors :: Int -> Topology -> Doc ann
 prettyPrintNeighbors i t = align doc
