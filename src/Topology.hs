@@ -15,6 +15,10 @@ module Topology
 , getFaces
 , prettyPrintVertex
 , prettyPrintVertices
+, prettyPrintEdge
+, prettyPrintEdges
+, prettyPrintFace
+, prettyPrintFaces
 , prettyPrintTopology
 )where
 
@@ -70,6 +74,20 @@ prettyPrintVertex t (Vertex i) = pretty "V" <> pretty i <> pretty ":" <+> ns
 
 prettyPrintVertices :: Topology -> Doc ann
 prettyPrintVertices t = vsep $ map (prettyPrintVertex t) $ getVertices t
+
+prettyPrintEdge :: Topology -> Edge -> Doc ann
+prettyPrintEdge t (Edge i) = pretty "E" <> pretty i <> pretty ":" <+> ns
+    where ns = prettyPrintNeighbors i t
+
+prettyPrintEdges :: Topology -> Doc ann
+prettyPrintEdges t = vsep $ map (prettyPrintEdge t) $ getEdges t
+
+prettyPrintFace :: Topology -> Face -> Doc ann
+prettyPrintFace t (Face i) = pretty "F" <> pretty i <> pretty ":" <+> ns
+    where ns = prettyPrintNeighbors i t
+
+prettyPrintFaces :: Topology -> Doc ann
+prettyPrintFaces t = vsep $ map (prettyPrintFace t) $ getFaces t
 
 prettyPrintTopology :: Topology -> Doc ann
 prettyPrintTopology t = pretty $ Graph.prettify $ unTopology t
