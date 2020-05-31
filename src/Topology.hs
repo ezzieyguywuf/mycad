@@ -75,6 +75,44 @@ data Element = EVertex | EEdge | EFace deriving (Show, Eq)
 -- ===========================================================================
 --                               Free Functions
 -- ===========================================================================
+-- TODO notes to self - I want to try to do the "vertex one" instead of the
+-- half-edge/winged-edge one. This shouldn't be too hard - I'll have to add anothing value
+-- to my Vertex type, maybe call it VertexCluster or something, and rename the Vertex
+-- value to PartialVertex.
+--
+-- Probably also rename the Edge value to HalfEdge.
+--
+-- Now: any HalfEdge can __only__ connect __from__ a single PartialVertex __to__ a second
+-- (or the same) PartialVertex. This can be chained to form a loop - you know you have a
+-- loop when you're back at your starting point.
+--
+-- That's all a HalfEdge is allowed to do!
+-- 
+-- The PartialVertex is given a bit more "yum" - it can als link to a VertexCluster. This
+-- link is bi-directional.
+--
+-- Now, any time we give the user a Vertex, we will __only__ give them a VertexCluster
+-- (they won't know!! but we do!). This way, any number of PartialVertex can be added to
+-- this "cluster" and the user will be none the wiser.
+--
+-- Now, let's say the user creates a 2-d planar loop. That's nothing but a bunch of
+-- HalfEdge and PartialVertex.
+--
+-- Now, they select one of these "Edge" (notice the quotes) and start to create a new
+-- loop. Wellll since WE know that this is actually a HalfEdge we can add a new
+-- PartialVertex no the respective VertexCluster, and create a new HalfEdge between these
+-- new PartialVertex.
+--
+-- The link between these twe VertexCluster is now "complete". No more Edges between these
+-- two is supported - only one in each direction.
+--
+-- Thus, for a given pair VertexCluster, the maximum number of PartialVertex needed to
+-- identify a full adjacency is 4. Not so bad.
+--
+-- Finally, we may want to add a RootPartialVertex value to Vertex. This "Root" value can
+-- bee used as the starting point for a Loop, and can also (maybe) be used as the "jump
+-- off" point to an adjacent Face.
+
 -- | The EmptyTopology is the starting point for any 'Topology'. As no
 --   constructors for 'Topology' are exported, this is the only way to create
 --   one.
