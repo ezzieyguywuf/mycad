@@ -311,9 +311,11 @@ hasAny search (x:xs) = if x `elem` search then True else hasAny search xs
 --                            Instances
 -- ===========================================================================
 instance Arbitrary Topology where
-    arbitrary = elements [t0, t1, t2, t3, t4]
+    arbitrary = elements [t0, t1, t2, t3, t4, t5, t6]
         where t0 = emptyTopology
               t1 = addVertex emptyTopology
               t2 = addVertex t1
-              t3 = makeEdge (Vertex 0) (Vertex 1) t2
+              t3 = addEdge t0
               t4 = addVertex $ addVertex t3
+              t5 = addEdge t4
+              t6 = addEdge t2
