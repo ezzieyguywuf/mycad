@@ -154,6 +154,28 @@ prettyPrintTopology t = vs <> line <> es <> line <> fs
 -- ===========================================================================
 --                        Private Free Functions
 -- ===========================================================================
+-- | The 'Node' is the basic building blocks of a 'Graph'. Any given Node can
+--   have zero or more adjacencies.
+--
+--   While it may be tempting to call these nodes our topological \"Vertex", and
+--   the adjacencies between them our topological \"Edge", this ends up muddying
+--   things up. That's because, the concept of \"Vertex" and \"Edge" as it
+--   pertains to graph theory are very distinct from those related to geometry
+--   and CAD.
+--
+--   Therefore, to keep things straight, we're calling them Nodes and
+--   \"Connections".
+--
+--   Any given Node can reperesent any of our Topological entities - namely, a
+--   'Vertex', 'Edge' or 'Face'. The Connections between these will form the
+--   necessary adjacency relationships to establish the information needed for
+--   doing CAD stuff.
+--
+--   Please note that it is very important to control the exported API here -
+--   using this system, it is possible to do anything. A 'Vertex' can be
+--   connectiod to another 'Vertex' and a 'Face', or maybe two 'Face' and all
+--   kinds of things that don't really make sense (or maybe they do make sense
+--   but they're a real pain to deal with).
 addNode :: Element -> Topology -> Topology
 addNode e t = Topology $ Graph.insNode (n, e') t'
     where t' = unTopology t
@@ -163,21 +185,27 @@ addNode e t = Topology $ Graph.insNode (n, e') t'
             | e == EEdge   = isEdge
             | e == EFace   = isFace
 
+-- | This relationship is directional - i.e. this will establish a relationship
+-- __from__ @a@ __to__ @b@
 connectNodes :: (Int, Int) -> Topology -> Topology
 connectNodes (a, b) t =
     Topology $ Graph.insEdge (a, b, BridgeLabel ()) $ unTopology t
 
+-- | How many nodes are in the Topology matching this predicate?
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
 countNode p t = length . Graph.nodes $ Graph.labfilter p $ unTopology t
 
+-- | Predicate, useful for countNode, and probably others
 isVertex :: NodeLabel -> Bool
 isVertex (EVertex, _) = True
 isVertex _ = False
 
+-- | Predicate, useful for countNode, and probably others
 isEdge :: NodeLabel -> Bool
 isEdge (EEdge, _) = True
 isEdge _ = False
 
+-- | Predicate, useful for countNode, and probably others
 isFace :: NodeLabel -> Bool
 isFace (EFace, _) = True
 isFace _ = False
