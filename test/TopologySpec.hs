@@ -34,6 +34,9 @@ spec = do
             context "we try to make an Edge from v2 to v1" $
                 it "Appends one to the existing Edges" $
                     property (prop_appendsOneToEdges' prep makeEdge'2)
+    describe "addEdge" $ do
+        it "is the same as calling makeEdge with two Vertex added using addVertex" $
+            property prop_addEdgeUsesMakeEdgeAndAddVertex
 
 -- ===========================================================================
 --                            Helper Functions
@@ -137,3 +140,11 @@ prop_vertexHasOneMoreAdjacentEdge t0 = and $ map (== 1) [dv1, dv2]
 
 prop_edgeHasZeroAdjacentFace :: ModTopo -> ModTopo -> TopoProp
 prop_edgeHasZeroAdjacentFace p f = prepXMakeXHasNAdjacentY p f 0 T.getFaces
+
+prop_addEdgeUsesMakeEdgeAndAddVertex :: TopoProp
+prop_addEdgeUsesMakeEdgeAndAddVertex t0 = t == t'
+    where t   = T.addEdge t
+          t'  = T.makeEdge v1 v2 t'0
+          t'0 = T.addVertex . T.addVertex $ t
+          vs  = T.getVertices t'0
+          [v1, v2] = drop (n - 2) vs
