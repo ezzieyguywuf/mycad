@@ -49,9 +49,7 @@ makeEdge' t = T.makeEdge v1 v2 t
 
 prepMakeEdge :: T.Topology -> (T.Edge, T.Topology)
 prepMakeEdge t0 = (e, t)
-    where t | length (T.getVertices t0) == 0 = (T.addVertex . T.addVertex) t0
-            | length (T.getVertices t0) == 1 = T.addVertex t0 
-            | otherwise = t0
+    where t  = T.addVertex . T.addVertex $ t0
           t' = makeEdge' t
           e  = last $ T.getEdges t'
 
