@@ -25,7 +25,10 @@ spec = do
         it "Adjacent Vertices have one additional adjacent Edge" $
             property (prop_vertexHasOneMoreAdjacentEdge)
         it "Creates an Edge with zero adjacent Face" $
-            property (prop_edgeHasZeroAdjacentFace prepMakeEdge' makeEdge') 
+            property (prop_edgeHasZeroAdjacentFace prepMakeEdge' makeEdge')
+        context "an Edge already exists" $
+            it "Does not modify the Edges" $
+                property (prop_doesNotModifyEdges' (prepMakeEdge' . makeEdge') makeEdge')
 
 -- ===========================================================================
 --                            Helper Functions
@@ -100,6 +103,9 @@ prop_appendsOneToEdges' p f = prepXaddXAppendsNToY p f 1 T.getEdges
 
 prop_doesNotModifyVertices' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
+
+prop_doesNotModifyEdges' :: ModTopo -> ModTopo -> TopoProp
+prop_doesNotModifyEdges' p f = prepXaddXDoesNotModifyY p f T.getEdges
 
 prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
