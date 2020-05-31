@@ -1,18 +1,46 @@
+{-|
+Module      : Topology
+Description : Adjacency relationships for geometric data.
+Copyright   : (c) Wolfgang E. Sanyer, 2020
+License     : MPL2
+Maintainer  : WolfgangESanyer@Gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module describes a 'Topology' which can be used to manage and introspect the
+relationship between geometric entities, specifically Vertices, Edges, and Faces. The
+Topology itself is not aware of any geometry - you could use this to model any similar
+relationships.
+
+It was written, however, with the intent it be used in a CAD system.
+-}
 module Topology
-( -- | Exported types
+( -- * Exported types
+  -- | Constructors for these are not exported, therefore you must use the
+  --   functions herein to create any of these
   Topology
 , Vertex
 , Face
 , Edge
-  -- | Exported functions
+  -- * Mutating functions
 , emptyTopology
 , addVertex
 , makeEdge
+  -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
 , getVertices
 , getEdges
 , getFaces
+  -- * Pretty printing
+  -- | In the output, '->' means "out of" and '<-' means "in to". Therefore:
+  --
+  -- >>> prettyPrintVertex v t
+  -- V0: <- None
+  --     -> E0
+  --
+  -- Means that the 'Vertex' @V0@ has __no__ entities ('Edge' or otherwise)
+  -- pointing in to it, and a single 'Edge' named @E0@ pointing out of it.
 , prettyPrintVertex
 , prettyPrintVertices
 , prettyPrintEdge
@@ -46,12 +74,25 @@ data Element = EVertex | EEdge | EFace deriving (Show, Eq)
 -- ===========================================================================
 --                               Free Functions
 -- ===========================================================================
+-- | The EmptyTopology is the starting point for any 'Topology'. As no
+--   constructors for 'Topology' are exported, this is the only way to create
+--   one.
 emptyTopology :: Topology
 emptyTopology = Topology Graph.empty
 
+-- | Adds a single "free" 'Vertex' to the 'Topology'. In this context, "free"
+--   means that it is does not have any entities adjacent to it.
 addVertex :: Topology -> Topology
 addVertex = addNode EVertex
 
+-- | An 'Edge' is always created between two 'Vertex'.
+--   Any given 'Edge' is directional - therefore, an Edge can be created from v1
+--   to v2 and from v2 to v1.
+--
+--   However, multiple Edges cannot be created in the same direction between two
+--   Vertex - if this is attempted, an unmodified 'Topology' is returned.
+--
+--   Because of this, the maximum number of Edge between any two Vertex is 2.
 makeEdge :: Vertex -> Vertex -> Topology -> Topology
 makeEdge v1@(Vertex v1') v2@(Vertex v2') t
     | hasAny es1 es2 = t
@@ -61,15 +102,31 @@ makeEdge v1@(Vertex v1') v2@(Vertex v2') t
           es1 = adjEdgeToVert v1 t
           es2 = adjEdgeToVert v2 t
 
+-- | Which 'Vertex' are adjacent to this 'Edge'?
+--   Results in an error if the Edge does not exist in the Topology
 adjVertToEdge :: Edge -> Topology -> [Vertex]
 adjVertToEdge (Edge n) t = map Vertex ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
 
+-- | Which 'Edge are adjacent to this 'Vertex'?
+--   Results in an error if the Vertex does not exist in the Topology
 adjEdgeToVert :: Vertex -> Topology -> [Edge]
 adjEdgeToVert (Vertex n) t = map Edge ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
+
+-- | Returns all the 'Vertex' in the 'Topology'
+getVertices :: Topology -> [Vertex]
+getVertices t = map Vertex $ getNodes isVertex t
+
+-- | Returns all the 'Edge' in the 'Topology'
+getEdges :: Topology -> [Edge]
+getEdges t = map Edge $ getNodes isEdge t
+
+-- | Returns all the 'Face' in the 'Topology'
+getFaces :: Topology -> [Face]
+getFaces t = map Face $ getNodes isFace t
 
 prettyPrintVertex :: Topology -> Vertex -> Doc ann
 prettyPrintVertex t (Vertex i) = prettyPrintNodeWithNeighbors t i
@@ -94,15 +151,6 @@ prettyPrintTopology t = vs <> line <> es <> line <> fs
     where vs = prettyPrintVertices t
           es = prettyPrintEdges t
           fs = prettyPrintFaces t
-
-getVertices :: Topology -> [Vertex]
-getVertices t = map Vertex $ getNodes isVertex t
-
-getEdges :: Topology -> [Edge]
-getEdges t = map Edge $ getNodes isEdge t
-
-getFaces :: Topology -> [Face]
-getFaces t = map Face $ getNodes isFace t
 -- ===========================================================================
 --                        Private Free Functions
 -- ===========================================================================
