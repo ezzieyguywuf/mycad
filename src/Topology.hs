@@ -53,10 +53,13 @@ addVertex :: Topology -> Topology
 addVertex = addNode EVertex
 
 makeEdge :: Vertex -> Vertex -> Topology -> Topology
-makeEdge (Vertex v1) (Vertex v2) t =
-    let t' = addNode EEdge t
-        (Edge e)  = last $ getEdges t'
-    in foldr connectNodes t' [(v1, e), (e, v2)]
+makeEdge v1@(Vertex v1') v2@(Vertex v2') t
+    | hasAny es1 es2 = t
+    | otherwise = foldr connectNodes t' [(v1', e), (e, v2')]
+    where t' = addNode EEdge t
+          (Edge e)  = last $ getEdges t'
+          es1 = adjEdgeToVert v1 t
+          es2 = adjEdgeToVert v2 t
 
 adjVertToEdge :: Edge -> Topology -> [Vertex]
 adjVertToEdge (Edge n) t = map Vertex ns
@@ -172,6 +175,16 @@ prettyPrintElement :: Element -> Doc ann
 prettyPrintElement EVertex = pretty "V"
 prettyPrintElement EEdge   = pretty "E"
 prettyPrintElement EFace   = pretty "F"
+
+-- stolen from https://hackage.haskell.org/package/MissingH-1.4.3.0/docs/Data-List-Utils.html#v:hasAny
+{- | Returns true if the given list contains any of the elements in the search
+list. -}
+hasAny :: Eq a => [a]           -- ^ List of elements to look for
+       -> [a]                   -- ^ List to search
+       -> Bool                  -- ^ Result
+hasAny [] _          = False             -- An empty search list: always false
+hasAny _ []          = False             -- An empty list to scan: always false
+hasAny search (x:xs) = if x `elem` search then True else hasAny search xs
 
 -- ===========================================================================
 --                            Instances
