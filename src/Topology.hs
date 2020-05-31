@@ -86,23 +86,10 @@ emptyTopology = Topology Graph.empty
 addVertex :: Topology -> Topology
 addVertex = addNode EVertex
 
--- | Adds an 'Edge' and two 'Vertex' to the 'Topology'. These three entities are
--- related as:
+-- | This is a convenience function for 'makeEdge' : it adds two 'Vertex' to the
+--   'Topology' using 'addVertex' and then creates an 'Edge' from the first to the
+--   second.
 --
--- >>> let t = addEdge emptyTopology
--- >>> prettyPrintEdge t (getEdges t !! 0)
--- V0: <- None
---     -> E0
--- V1: <- E0
---     -> None
--- E0: <- V0
---     -> V1
---
--- In other words, the relationships go __from__ @V0@ __to__ @E0@, and finally
--- __from__ @E0@ __to__ @V1@.
---
--- Some might call this a \"Half-Edge", as there is still room to go back the
--- other way from @V1@ to @V0@ by way of @E0@
 addEdge :: Topology -> Topology
 addEdge t0 = makeEdge v0 v1 t
     where t  = addVertex . addVertex $ t0
@@ -118,6 +105,40 @@ addEdge t0 = makeEdge v0 v1 t
 --   Vertex - if this is attempted, an unmodified 'Topology' is returned.
 --
 --   Because of this, the maximum number of Edge between any two Vertex is 2.
+
+--  Note
+--  ====
+--  This is implementation stuff, that's why it's not in the exported
+--  documentation. Feel free to skip this if you're just perusing.
+--
+--  Implementation stuff
+--  ====================
+--   Here's what it looks like after creating an Edge on an empty 'Topology'
+--   using 'addEdge'
+--
+-- >>> let t = addEdge emptyTopology
+-- >>> prettyPrintEdge t (getEdges t !! 0)
+-- V0: <- None
+--     -> E0
+-- V1: <- E0
+--     -> None
+-- E0: <- V0
+--     -> V1
+--
+-- In other words, the relationships go __from__ @V0@ __to__ @E0@, and finally
+-- __from__ @E0@ __to__ @V1@.
+--
+-- Some might call this a \"Half-Edge" (others a \"Winged Edge""), as there is
+-- still room to go back the other way from @V1@ to @V0@ by way of @E0@. Either
+-- way, the Edge cannot really be considered "complete" until it has it's
+-- sibling going the other way.
+--
+-- Why, then, not build it this way when 'makeEdge' is called?
+--
+-- Because (I think) doing it like this will allow for a user to create a
+-- standalone 2-dimensional 'Face' surrounded by a loop of 'Edge', and then
+-- later weave this 'Face' into a solib by attaching other 'Face' along the
+-- half-edges.
 makeEdge :: Vertex -> Vertex -> Topology -> Topology
 makeEdge v1@(Vertex v1') v2@(Vertex v2') t
     | hasAny es1 es2 = t
