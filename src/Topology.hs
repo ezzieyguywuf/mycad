@@ -99,20 +99,19 @@ makeEdge v1@(Vertex v1') v2@(Vertex v2') t
     | otherwise = foldr connectNodes t' [(v1', e), (e, v2')]
     where t' = addNode EEdge t
           (Edge e)  = last $ getEdges t'
-          es1 = adjEdgeToVert v1 t
-          es2 = adjEdgeToVert v2 t
+          [es1, es2] = map (adjEdgeToVert t) [v1, v2]
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
-adjVertToEdge :: Edge -> Topology -> [Vertex]
-adjVertToEdge (Edge n) t = map Vertex ns
+adjVertToEdge :: Topology -> Edge -> [Vertex]
+adjVertToEdge t (Edge n) = map Vertex ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
 
 -- | Which 'Edge are adjacent to this 'Vertex'?
 --   Results in an error if the Vertex does not exist in the Topology
-adjEdgeToVert :: Vertex -> Topology -> [Edge]
-adjEdgeToVert (Vertex n) t = map Edge ns
+adjEdgeToVert :: Topology -> Vertex -> [Edge]
+adjEdgeToVert t (Vertex n) = map Edge ns
     where t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
 
