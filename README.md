@@ -1,7 +1,7 @@
 # HaskellCAD
 
 Don't worry, I plan to fill this out. Check out
-[mycad](https://gitlab.com/ezziegyuwuf/mycad), that's where this whole thing
+[mycad](https://gitlab.com/ezzieyguywuf/mycad), that's where this whole thing
 started. I have to figure out if I'm going to migrate that project here, or
 vice-versa, or merge them, or what.
 
