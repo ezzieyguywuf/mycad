@@ -24,7 +24,7 @@ spec = do
             property (prop_doesNotModifyFaces' prep make)
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex)
-        it "Adjacent Vertices have one additional adjacent Edge" $
+        it "Target Vertices have one additional adjacent Edge" $
             property (prop_vertexHasOneMoreAdjacentEdge)
         it "Creates an Edge with zero adjacent Face" $
             property (prop_edgeHasZeroAdjacentFace prep make)
