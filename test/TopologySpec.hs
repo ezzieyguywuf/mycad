@@ -26,9 +26,12 @@ spec = do
             property (prop_vertexHasOneMoreAdjacentEdge)
         it "Creates an Edge with zero adjacent Face" $
             property (prop_edgeHasZeroAdjacentFace prepMakeEdge' makeEdge')
-        context "an Edge already exists" $
+        context "an Edge already exists" $ do
             it "Does not modify the Edges" $
                 property (prop_doesNotModifyEdges' (makeEdge' . prepMakeEdge') makeEdge')
+            context "we try to make an Edge from v2 to v1" $
+                it "Appends one to the existing Edges" $
+                    property (prop_appendsOneToEdges' prepMakeEdge' makeEdge'2)
 
 -- ===========================================================================
 --                            Helper Functions
@@ -39,7 +42,15 @@ type GetElem a = T.Topology -> [a]
 type TopoProp = T.Topology -> Bool
 
 makeEdge' :: T.Topology -> T.Topology
-makeEdge' t = T.makeEdge v1 v2 t
+makeEdge' t = makeEdgeHelper True t
+
+makeEdge'2 :: T.Topology -> T.Topology
+makeEdge'2 t = makeEdgeHelper False t
+
+makeEdgeHelper :: Bool -> T.Topology -> T.Topology
+makeEdgeHelper b t
+    | b         = T.makeEdge v1 v2 t
+    | otherwise = T.makeEdge v2 v1 t
     where n  = length vs
           vs = T.getVertices t
           -- This is safe because we prep the topology with addTwoVertices.
