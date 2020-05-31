@@ -1,1 +1,2 @@
 - run hlint on Geometry and GeometrySpec
+- use Set as appropriate in Topology. We can then get rid of hasAny
