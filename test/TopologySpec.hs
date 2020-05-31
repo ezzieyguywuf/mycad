@@ -28,7 +28,7 @@ spec = do
             property (prop_edgeHasZeroAdjacentFace prepMakeEdge' makeEdge')
         context "an Edge already exists" $
             it "Does not modify the Edges" $
-                property (prop_doesNotModifyEdges' (prepMakeEdge' . makeEdge') makeEdge')
+                property (prop_doesNotModifyEdges' (makeEdge' . prepMakeEdge') makeEdge')
 
 -- ===========================================================================
 --                            Helper Functions
