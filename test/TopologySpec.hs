@@ -14,7 +14,7 @@ spec = do
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addVertex)
     describe "makeEdge" $ do
-        let prep = prepMakeEdge' 
+        let prep = prepMakeEdge'
             make = makeEdge'
         it "Does not modify the Vertices" $
             property (prop_doesNotModifyVertices' prep make)
@@ -146,5 +146,6 @@ prop_addEdgeUsesMakeEdgeAndAddVertex t0 = t == t'
     where t   = T.addEdge t
           t'  = T.makeEdge v1 v2 t'0
           t'0 = T.addVertex . T.addVertex $ t
+          n   = length vs
           vs  = T.getVertices t'0
           [v1, v2] = drop (n - 2) vs

@@ -26,6 +26,7 @@ module Topology
 , emptyTopology
 , addVertex
 , makeEdge
+, addEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -61,14 +62,14 @@ import Data.Text.Prettyprint.Doc
 -- ===========================================================================
 newtype Topology =
     Topology {unTopology :: Gr NodeLabel BridgeLabel}
-        deriving (Show)
+        deriving (Show, Eq)
 
 newtype Vertex = Vertex Int deriving (Show, Eq)
 newtype Edge = Edge Int deriving (Show, Eq)
 newtype Face = Face Int deriving (Show, Eq)
 
 type NodeLabel = (Element, Int)
-newtype BridgeLabel = BridgeLabel () deriving (Show)
+newtype BridgeLabel = BridgeLabel () deriving (Show, Ord, Eq)
 data Element = EVertex | EEdge | EFace deriving (Show, Eq)
 
 -- ===========================================================================
@@ -84,6 +85,30 @@ emptyTopology = Topology Graph.empty
 --   means that it is does not have any entities adjacent to it.
 addVertex :: Topology -> Topology
 addVertex = addNode EVertex
+
+-- | Adds an 'Edge' and two 'Vertex' to the 'Topology'. These three entities are
+-- related as:
+--
+-- >>> let t = addEdge emptyTopology
+-- >>> prettyPrintEdge t (getEdges t !! 0)
+-- V0: <- None
+--     -> E0
+-- V1: <- E0
+--     -> None
+-- E0: <- V0
+--     -> V1
+--
+-- In other words, the relationships go __from__ @V0@ __to__ @E0@, and finally
+-- __from__ @E0@ __to__ @V1@.
+--
+-- Some might call this a \"Half-Edge", as there is still room to go back the
+-- other way from @V1@ to @V0@ by way of @E0@
+addEdge :: Topology -> Topology
+addEdge t0 = makeEdge v0 v1 t
+    where t  = addVertex . addVertex $ t0
+          [v0, v1] = drop (n - 2) vs
+          n = length vs
+          vs = getVertices t
 
 -- | An 'Edge' is always created between two 'Vertex'.
 --   Any given 'Edge' is directional - therefore, an Edge can be created from v1
