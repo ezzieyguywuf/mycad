@@ -1,3 +1,4 @@
 - run hlint on Geometry and GeometrySpec
 - use Set as appropriate in Topology. We can then get rid of hasAny
 - move pretty printing to it's own module
+- re-evaluate if Geometry needs typeclasses
