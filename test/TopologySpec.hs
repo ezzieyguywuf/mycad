@@ -14,24 +14,26 @@ spec = do
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addVertex)
     describe "makeEdge" $ do
+        let prep = prepMakeEdge' 
+            make = makeEdge'
         it "Does not modify the Vertices" $
-            property (prop_doesNotModifyVertices' prepMakeEdge' makeEdge')
+            property (prop_doesNotModifyVertices' prep make)
         it "Appends one to the existing Edges" $
-            property (prop_appendsOneToEdges' prepMakeEdge' makeEdge')
+            property (prop_appendsOneToEdges' prep make)
         it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces' prepMakeEdge' makeEdge')
+            property (prop_doesNotModifyFaces' prep make)
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex)
         it "Adjacent Vertices have one additional adjacent Edge" $
             property (prop_vertexHasOneMoreAdjacentEdge)
         it "Creates an Edge with zero adjacent Face" $
-            property (prop_edgeHasZeroAdjacentFace prepMakeEdge' makeEdge')
+            property (prop_edgeHasZeroAdjacentFace prep make)
         context "an Edge already exists" $ do
             it "Does not modify the Edges" $
-                property (prop_doesNotModifyEdges' (makeEdge' . prepMakeEdge') makeEdge')
+                property (prop_doesNotModifyEdges' (make . prep) make)
             context "we try to make an Edge from v2 to v1" $
                 it "Appends one to the existing Edges" $
-                    property (prop_appendsOneToEdges' prepMakeEdge' makeEdge'2)
+                    property (prop_appendsOneToEdges' prep makeEdge'2)
 
 -- ===========================================================================
 --                            Helper Functions
