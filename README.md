@@ -1,3 +1,17 @@
+>>>
+NOTE
+====
+
+Focus in currently centered on [HaskellCAD](https://gitlab.com/ezzieyguywuf/haskellcad).
+This is a Haskell implementation of the MyCAD "backend" - I've been interested in Haskell
+for a while and thought this may be a good opportunity to kick the tires on it a bit.
+
+I do plan to eventually merge the two projects or put them under a common umbrella or
+something. So don't worry that you don't see any commits on this repository (although,
+check the [haskell branch](https://gitlab.com/ezzieyguywuf/mycad/-/tree/haskell) and
+you'll notice I haven't been entirely inactive).
+>>>
+
 MyCAD
 =====
 
