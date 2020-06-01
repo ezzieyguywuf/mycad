@@ -6,7 +6,7 @@ import qualified Entity as E
 spec :: Spec
 spec = do
     describe "emptyWorkspace" $ do
-        it "Creates a WorkSpace with zero entities" $
+        it "Creates an Entity with zero sub-components" $
             (subCount E.nullEntity) `shouldBe` 0
 
 -- ===========================================================================
