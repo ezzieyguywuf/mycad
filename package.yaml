@@ -26,9 +26,6 @@ dependencies:
 - containers
 - prettyprinter
 - fgl
-- process
-- haskeline >= 0.8.0.0
-- repline >= 0.3.0.0
 
 library:
   source-dirs: src
@@ -43,6 +40,9 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - HaskellCAD
+    - process
+    - haskeline >= 0.8.0.0
+    - repline >= 0.3.0.0
 
 tests:
   HaskellCAD-test:
