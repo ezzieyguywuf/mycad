@@ -13,7 +13,7 @@ spec = do
 --                            Helper Functions
 -- ===========================================================================
 
-subCount :: E.Entity -> Int
+subCount :: E.Entity a -> Int
 subCount ws = vs + es
     where vs = (length . E.getVertices) ws
           es = (length . E.getEdges) ws

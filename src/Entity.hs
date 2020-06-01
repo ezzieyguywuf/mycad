@@ -43,17 +43,17 @@ data Glue g t = Glue { getGeo :: g
                      }
                       deriving (Show, Eq)
 
-type Vertex = Glue (Geo.Point Int) Topo.Vertex
-type Edge   = Glue (Geo.Line Int) Topo.Edge
+type Vertex a = Glue (Geo.Point a) Topo.Vertex
+type Edge   a = Glue (Geo.Line a) Topo.Edge
 
-data Entity = Entity { getVertices :: [Vertex]
-                     , getEdges :: [Edge]
-                     }
+data Entity a = Entity { getVertices :: [Vertex a]
+                       , getEdges :: [Edge a]
+                       }
 
 -- ===========================================================================
 --                       Exported Free Functions
 -- ===========================================================================
 
 
-nullEntity :: Entity
+nullEntity :: Entity a
 nullEntity = Entity [] []
