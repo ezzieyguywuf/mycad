@@ -26,20 +26,23 @@ dependencies:
 - containers
 - prettyprinter
 - fgl
+- process
+- haskeline >= 0.8.0.0
+- repline >= 0.3.0.0
 
 library:
   source-dirs: src
 
-#executables:
-  #HaskellCAD-exe:
-    #main:                Main.hs
-    #source-dirs:         app
-    #ghc-options:
-    #- -threaded
-    #- -rtsopts
-    #- -with-rtsopts=-N
-    #dependencies:
-    #- HaskellCAD
+executables:
+  HaskellCAD-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - HaskellCAD
 
 tests:
   HaskellCAD-test:
