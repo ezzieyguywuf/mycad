@@ -16,10 +16,12 @@ module WorkSpace
   --   "glue" that connects a given Topology to a piece of Geometry.
   Vertex
 , Edge
+, WorkSpace
   -- * Creation
 , emptyWorkSpace
   -- * Inspection
-, entityCount
+, getVertices
+, getEdges
 ) where
 
 import qualified Geometry as Geo
@@ -46,8 +48,3 @@ data WorkSpace = WorkSpace { getVertices :: [Vertex]
 
 emptyWorkSpace :: WorkSpace
 emptyWorkSpace = WorkSpace [] []
-
-entityCount :: WorkSpace -> Int
-entityCount ws = vs + es
-    where vs = (length . getVertices) ws
-          es = (length . getEdges) ws
