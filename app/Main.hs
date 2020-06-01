@@ -9,15 +9,19 @@ type Command = (String, Repl ())
 
 -- Evaluation : handle each line user inputs
 cmd :: String -> Repl ()
-cmd input = liftIO $ print input
+cmd input = liftIO $ print msg
+    where msg = case splitCommand input of
+                    Just (h, _) -> "I know about the command '" <> h <> "'!"
+                    _ -> "Sorry, I'm not familiar with '" <> input <> "'"
+
+splitCommand :: String -> Maybe (String, [String])
+splitCommand s = do
+    (h, t) <- uncons $ words s
+    case filterKnown h of
+        [h'] -> Just (h', t)
+        _    -> Nothing -- non-unique command prefix
 
 -- Tab Completion: return a completion for partial words entered
-uniquePrefix :: String -> Maybe String
-uniquePrefix s = out
-    where vals = filterKnown s
-          out | length vals == 1 = Just $ head vals
-              | otherwise = Nothing
-
 filterKnown :: String -> [String]
 filterKnown s = filter (isPrefixOf s) names
     where names = ["add", "delete", "connect"]
