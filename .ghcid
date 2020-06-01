@@ -1,2 +1,2 @@
 --command="stack-bin ghci test/Spec.hs"
---test=":main -m Topology"
+--test=":main -m WorkSpace"
