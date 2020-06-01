@@ -5,6 +5,6 @@ import qualified WorkSpace as WS
 
 spec :: Spec
 spec = do
-    describe "emptyWorkspace"
+    describe "emptyWorkspace" $ do
         it "Creates a WorkSpace with zero entities" $
-            (length . WS.entities) WS.emptyWorkspace `shouldBe` 0
+            (WS.entityCount WS.emptyWorkSpace) `shouldBe` 0
