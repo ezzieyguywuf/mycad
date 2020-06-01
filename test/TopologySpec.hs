@@ -144,8 +144,8 @@ prop_edgeHasZeroAdjacentFace p f = prepXMakeXHasNAdjacentY p f 0 T.getFaces
 prop_addEdgeUsesMakeEdgeAndAddVertex :: TopoProp
 prop_addEdgeUsesMakeEdgeAndAddVertex t0 = t == t'
     where t   = T.addEdge t0
+          t'0 = T.addVertex . T.addVertex $ t0
           t'  = T.makeEdge v1 v2 t'0
-          t'0 = T.addVertex . T.addVertex $ t
           n   = length vs
           vs  = T.getVertices t'0
           [v1, v2] = drop (n - 2) vs
