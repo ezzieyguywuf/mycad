@@ -1,19 +1,19 @@
-module WorkSpaceSpec (spec) where
+module EntitySpec (spec) where
 
 import Test.Hspec
-import qualified WorkSpace as WS
+import qualified Entity as E
 
 spec :: Spec
 spec = do
     describe "emptyWorkspace" $ do
         it "Creates a WorkSpace with zero entities" $
-            (entityCount WS.emptyWorkSpace) `shouldBe` 0
+            (subCount E.nullEntity) `shouldBe` 0
 
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
 
-entityCount :: WS.WorkSpace -> Int
-entityCount ws = vs + es
-    where vs = (length . WS.getVertices) ws
-          es = (length . WS.getEdges) ws
+subCount :: E.Entity -> Int
+subCount ws = vs + es
+    where vs = (length . E.getVertices) ws
+          es = (length . E.getEdges) ws
