@@ -25,8 +25,9 @@ module Entity
   Vertex
 , Edge
 , Entity
-  -- * Creation
+  -- * Creation and Modification
 , nullEntity
+, addVertex
   -- * Inspection
 , getVertices
 , getEdges
@@ -57,3 +58,6 @@ data Entity a = Entity { getVertices :: [Vertex a]
 
 nullEntity :: Entity a
 nullEntity = Entity [] []
+
+addVertex :: Entity a -> Entity a
+addVertex e = e
