@@ -1,2 +1,2 @@
 --command="stack-bin ghci test/Spec.hs"
---test=":main -m WorkSpace"
+--test=":main -m Entity"
