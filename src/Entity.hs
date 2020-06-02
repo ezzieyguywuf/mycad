@@ -28,14 +28,16 @@ module Entity
   -- * Creation and Modification
 , nullEntity
 , addVertex
-, getPoint
   -- * Inspection
+, getPoint
+, getVertex
 , getVertices
 , getEdges
 ) where
 
 import qualified Geometry as Geo
 import qualified Topology as Topo
+import Data.List (find)
 
 -- ===========================================================================
 --                               Data Types
@@ -69,3 +71,7 @@ addVertex (Entity vs es t) p = Entity vs' es t'
 
 getPoint :: Vertex a -> Geo.Point a
 getPoint v = getGeo v
+
+getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
+getVertex e p = find f (getVertices e)
+    where f x = (getGeo x) == p
