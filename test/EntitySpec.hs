@@ -21,6 +21,6 @@ spec = do
         it "Adds a single Vertex to the Entity" $
             (length $ E.getVertices e) `shouldBe` 1
         it "Creates a Vertex at the given Geometry" $
-            E.getPoint v `shouldBe` p
+            E.getPoint e v `shouldBe` Just p
         it "allows Vertex to be retrieved using Geometry" $
             E.getVertex e p `shouldBe` Just v
