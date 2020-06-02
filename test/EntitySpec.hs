@@ -34,3 +34,7 @@ spec = do
             (length $ E.getEdges e) `shouldBe` 1
         it "Adds a single Vertex to Entity" $
             (length $ E.getVertices e) `shouldBe` 2
+        it "Creates a line from v1 to the newly created Vertex" $
+            let line = Geo.makeLine p1 p2
+                v    = last . E.getVertices $ e
+            in (E.getCurve e v) `shouldBe` line
