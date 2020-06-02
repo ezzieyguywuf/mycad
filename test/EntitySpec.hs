@@ -15,11 +15,12 @@ spec = do
                 es = (length . E.getEdges) nullE
             in (vs + es) `shouldBe` 0
     describe "addVertex" $ do
+        let e' = E.addVertex nullE p
+            p  = Geo.makePoint 10 20 0
+            v  = last . E.getVertices $ e'
         it "Adds a single Vertex to the Entity" $
-            let vs = E.getVertices $ E.addVertex nullE p
-                p  = Geo.makePoint 0 0 0
-            in length vs `shouldBe` 1
+            (length $ E.getVertices e') `shouldBe` 1
         it "Creates a Vertex at the given Geometry" $
-            let p = Geo.makePoint 10 20 0
-                v = last . E.getVertices $ E.addVertex nullE p
-            in E.getPoint v `shouldBe` p
+            E.getPoint v `shouldBe` p
+        it "allows Vertex to be retrieved using Geometry" $
+            E.getVertex e p `shouldBe` v
