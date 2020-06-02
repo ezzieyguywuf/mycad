@@ -40,7 +40,7 @@ spec = do
             in (E.getCurve e ed) `shouldBe` Just line
     describe "oppositeVertex" $ do
         let e  = E.addEdge (E.addVertex nullE p1) v1 p2
-            [v1,v2] = E.getVertices e
+            [v2,v1] = E.getVertices e
             [ed] = E.getEdges e
             p1 = Geo.makePoint 10 20 30
             p2 = Geo.makePoint 5 10 5
