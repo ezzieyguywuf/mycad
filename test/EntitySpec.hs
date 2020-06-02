@@ -21,8 +21,8 @@ spec = do
             in (xs' - xs)  `shouldBe` 1
         it "Creates a Vertex at the given Geometry" $
             E.getPoint v `shouldBe` p
-                where p       = Geo.makePoint 10 20 0
-                      v       = last . E.getVertices $ E.addVertex nullE
+                where p = Geo.makePoint 10 20 0
+                      v = last . E.getVertices $ E.addVertex nullE p
 
 -- ===========================================================================
 --                            Helper Functions
