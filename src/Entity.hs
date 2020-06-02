@@ -28,6 +28,7 @@ module Entity
   -- * Creation and Modification
 , nullEntity
 , addVertex
+, getComponents
   -- * Inspection
 , getVertices
 , getEdges
@@ -49,6 +50,7 @@ type Edge   a = Glue (Geo.Line a) Topo.Edge
 
 data Entity a = Entity { getVertices :: [Vertex a]
                        , getEdges :: [Edge a]
+                       , _getTopology :: Topo.Topology
                        }
 
 -- ===========================================================================
@@ -57,7 +59,16 @@ data Entity a = Entity { getVertices :: [Vertex a]
 
 
 nullEntity :: Entity a
-nullEntity = Entity [] []
+nullEntity = Entity [] [] Topo.emptyTopology
 
-addVertex :: Entity a -> Entity a
-addVertex e = e
+addVertex :: Fractional a => Entity a -> a -> a -> a -> Entity a
+addVertex (Entity vs es t) x y z = Entity vs' es t'
+    where p   = Geo.makePoint x y z
+          t'  = Topo.addVertex $ t
+          v   = last $ Topo.getVertices t'
+          vs' = (Glue p v) : vs
+
+getComponents :: Vertex a -> (a, a, a)
+getComponents v = (x, y, z)
+    where p = getGeo v
+          [x, y, z] = Geo.getComponents p
