@@ -38,6 +38,7 @@ module Entity
 , oppositeVertex
   -- * Pretty Printing
 , prettyPrintVertex
+, prettyPrintVertices
 ) where
 
 import qualified Geometry as Geo
@@ -114,9 +115,13 @@ oppositeVertex e@(Entity _ _ t) (Glue _ v1) (Glue _ ed) = v2
 
 prettyPrintVertex :: Show a => Entity a -> Vertex a -> Doc ann
 prettyPrintVertex (Entity _ _ t) (Glue p v) = doc
-    where doc = p' <+> v'
+    where doc = p' <> line <> v'
           p'  = pretty $ map show (Geo.getComponents p)
           v'  = Topo.prettyPrintVertex t v
+
+prettyPrintVertices :: Show a => Entity a -> Doc ann
+prettyPrintVertices e = vsep $ reverse vs
+    where vs = map (prettyPrintVertex e) $ getVertices e
 
 -- ===========================================================================
 --                       Private Free Functions
