@@ -27,8 +27,10 @@ spec = do
     describe "addEdge" $ do
         let e  = E.addEdge e0 v1 p2
             e0 = E.addVertex nullE p1
-            v1 = last . E.getVertices $ e
+            v1 = last . E.getVertices $ e0
             p1 = Geo.makePoint 10 10 10
             p2 = Geo.makePoint 20 20 20
         it "Adds a single Edge to the Entity" $
             (length $ E.getEdges e) `shouldBe` 1
+        it "Adds a single Vertex to Entity" $
+            (length $ E.getVertices e) `shouldBe` 2
