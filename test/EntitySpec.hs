@@ -24,3 +24,10 @@ spec = do
             E.getPoint e v `shouldBe` Just p
         it "allows Vertex to be retrieved using Geometry" $
             E.getVertex e p `shouldBe` Just v
+    describe "addEdge" $ do
+        let e  = E.addEdge p2
+            e0 = E.addVertex nullE p1
+            p1 = Geo.makePoint 10 10 10
+            p2 = Geo.makePoint 20 20 20
+        it "Adds a singe Edge to the Entity" $
+            (length $ E.getEdges e) `shouldBe` 1
