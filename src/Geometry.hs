@@ -39,7 +39,7 @@ data Vector a = Vector a a a deriving (Show)
 -- | A wrapper to distinguish a Point from a Vector
 data Point a = Point (Vector a) deriving (Show, Eq)
 
-data Line a = Line (Point a) (Point a) deriving (Show)
+data Line a = Line (Point a) (Point a) deriving (Show, Eq)
 
 data Plane a = Plane (Point a) (Point a) (Point a)
 

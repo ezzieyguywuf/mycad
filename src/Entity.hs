@@ -31,6 +31,7 @@ module Entity
 , addEdge
   -- * Inspection
 , getPoint
+, getCurve
 , getVertex
 , getVertices
 , getEdges
@@ -90,3 +91,8 @@ getPoint e (Glue _ v) = do
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
 getVertex e p = find f (getVertices e)
     where f x = (getGeo x) == p
+
+getCurve :: Entity a -> Edge a -> Maybe (Geo.Line a)
+getCurve ent (Glue c e) = do
+    find f (getEdges ent) >>= \_ -> return c
+    where f x = (getTopo x) == e
