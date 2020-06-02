@@ -114,7 +114,7 @@ oppositeVertex e@(Entity _ _ t) (Glue _ v1) (Glue _ ed) = v2
 
 prettyPrintVertex :: Show a => Entity a -> Vertex a -> Doc ann
 prettyPrintVertex (Entity _ _ t) (Glue p v) = doc
-    where doc = p' <> v'
+    where doc = p' <+> v'
           p'  = pretty $ map show (Geo.getComponents p)
           v'  = Topo.prettyPrintVertex t v
 
