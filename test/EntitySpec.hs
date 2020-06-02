@@ -2,6 +2,7 @@ module EntitySpec (spec) where
 
 import Test.Hspec
 import qualified Entity as E
+import qualified Geometry as Geo
 
 nullE :: E.Entity Float
 nullE = E.nullEntity
@@ -16,13 +17,12 @@ spec = do
             let f   = length . E.getVertices
                 e   = nullE
                 xs  = f e
-                xs' = f $ E.addVertex e 0 0 0
+                xs' = f $ E.addVertex e (Geo.makePoint 0 0 0)
             in (xs' - xs)  `shouldBe` 1
         it "Creates a Vertex at the given Geometry" $
-            E.getComponents v `shouldBe` (x, y, z)
-                where (x,y,z) = (10, 20, 0)
-                      e       = E.addVertex nullE x y z
-                      v       = last $ E.getVertices e
+            E.getPoint v `shouldBe` p
+                where p       = Geo.makePoint 10 20 0
+                      v       = last . E.getVertices $ E.addVertex nullE
 
 -- ===========================================================================
 --                            Helper Functions
