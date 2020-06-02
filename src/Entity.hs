@@ -30,11 +30,12 @@ module Entity
 , addVertex
 , addEdge
   -- * Inspection
-, getPoint
-, getCurve
-, getVertex
 , getVertices
 , getEdges
+, getPoint
+, getVertex
+, getCurve
+, oppositeVertex
 ) where
 
 import qualified Geometry as Geo
@@ -96,3 +97,20 @@ getCurve :: Entity a -> Edge a -> Maybe (Geo.Line a)
 getCurve ent (Glue c e) = do
     find f (getEdges ent) >>= \_ -> return c
     where f x = (getTopo x) == e
+
+oppositeVertex :: Eq a => Entity a -> Vertex a -> Edge a -> Maybe (Vertex a)
+oppositeVertex e@(Entity _ _ t) (Glue _ v1) (Glue _ ed) = v2
+    where xs = Topo.adjVertToEdge t ed
+          v2 | (length xs) /= 2 = Nothing
+             | a == v1        = getVertex' e b
+             | b == v1        = getVertex' e a
+             | otherwise      = Nothing
+             where a = xs !! 0
+                   b = xs !! 1
+
+-- ===========================================================================
+--                       Private Free Functions
+-- ===========================================================================
+getVertex' :: Eq a => Entity a -> Topo.Vertex -> Maybe (Vertex a)
+getVertex' (Entity vs _ _) v = find f vs
+    where f x = (getTopo x) == v
