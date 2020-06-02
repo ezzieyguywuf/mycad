@@ -36,10 +36,13 @@ module Entity
 , getVertex
 , getCurve
 , oppositeVertex
+  -- * Pretty Printing
+, prettyPrintVertex
 ) where
 
 import qualified Geometry as Geo
 import qualified Topology as Topo
+import Data.Text.Prettyprint.Doc
 import Data.List (find)
 
 -- ===========================================================================
@@ -56,7 +59,7 @@ type Edge   a = Glue (Geo.Line a) Topo.Edge
 data Entity a = Entity { getVertices :: [Vertex a]
                        , getEdges :: [Edge a]
                        , _getTopology :: Topo.Topology
-                       }
+                       } deriving (Show)
 
 -- ===========================================================================
 --                       Exported Free Functions
@@ -73,14 +76,15 @@ addVertex (Entity vs es t) p = Entity vs' es t'
           vs' = (Glue p v) : vs
 
 addEdge :: Fractional a => Entity a -> Vertex a -> Geo.Point a -> Entity a
-addEdge (Entity vs es t) v p2 = Entity vs' es' t'
-    where t'  = Topo.makeEdge v1 v2 (Topo.addVertex t)
+addEdge (Entity vs es t) v p2 = Entity vs' es' t''
+    where t'  = Topo.addVertex t
           v1  = getTopo v
           v2  = last $ Topo.getVertices t'
-          vs' = (Glue p2 v2) : vs
           p1  = getGeo v
           c   = Geo.makeLine p1 p2
-          e   = last $ Topo.getEdges t'
+          t'' = Topo.makeEdge v1 v2 t'
+          e   = last $ Topo.getEdges t''
+          vs' = (Glue p2 v2) : vs
           es' = (Glue c e) : es
 
 getPoint :: Entity a -> Vertex a -> Maybe (Geo.Point a)
@@ -107,6 +111,12 @@ oppositeVertex e@(Entity _ _ t) (Glue _ v1) (Glue _ ed) = v2
              | otherwise      = Nothing
              where a = xs !! 0
                    b = xs !! 1
+
+prettyPrintVertex :: Show a => Entity a -> Vertex a -> Doc ann
+prettyPrintVertex (Entity _ _ t) (Glue p v) = doc
+    where doc = p' <> v'
+          p'  = pretty $ map show (Geo.getComponents p)
+          v'  = Topo.prettyPrintVertex t v
 
 -- ===========================================================================
 --                       Private Free Functions
