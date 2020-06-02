@@ -69,8 +69,11 @@ addVertex (Entity vs es t) p = Entity vs' es t'
           v   = last . Topo.getVertices $ t'
           vs' = (Glue p v) : vs
 
-getPoint :: Vertex a -> Geo.Point a
-getPoint v = getGeo v
+getPoint :: Entity a -> Vertex a -> Maybe (Geo.Point a)
+getPoint e (Glue _ v) = do
+    p <- find f (getVertices e)
+    return $ getGeo p
+    where f x = (getTopo x) == v
 
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
 getVertex e p = find f (getVertices e)
