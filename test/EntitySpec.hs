@@ -14,6 +14,11 @@ spec = do
     describe "addVertex" $ do
         it "Adds a single Vertex to the Entity" $
             (getDelta E.addVertex E.getVertices nullE) `shouldBe` 0
+        it "Creates a Vertex at the given Geometry" $
+            let (x,y,z) = (10, 20, 0)
+                e     = E.addVertex nullE x y z
+                v     = E.getVertex e -1
+            E.getComponents v `shouldBe` (x, y, z)
 
 -- ===========================================================================
 --                            Helper Functions
