@@ -37,8 +37,11 @@ module Entity
 , getCurve
 , oppositeVertex
   -- * Pretty Printing
+, prettyPrintEntity
 , prettyPrintVertex
 , prettyPrintVertices
+, prettyPrintEdge
+, prettyPrintEdges
 ) where
 
 import qualified Geometry as Geo
@@ -122,6 +125,18 @@ prettyPrintVertex (Entity _ _ t) (Glue p v) = doc
 prettyPrintVertices :: Show a => Entity a -> Doc ann
 prettyPrintVertices e = vsep $ reverse vs
     where vs = map (prettyPrintVertex e) $ getVertices e
+
+prettyPrintEdge :: Show a => Entity a -> Edge a -> Doc ann
+prettyPrintEdge (Entity _ _ t) (Glue _ e) = Topo.prettyPrintEdge t e
+
+prettyPrintEdges :: Show a => Entity a -> Doc ann
+prettyPrintEdges e = vsep $ reverse es
+    where es = map (prettyPrintEdge e) $ getEdges e
+
+prettyPrintEntity :: Show a => Entity a -> Doc ann
+prettyPrintEntity e = vs <> line <> es
+    where vs = prettyPrintVertices e
+          es = prettyPrintEdges e
 
 -- ===========================================================================
 --                       Private Free Functions
