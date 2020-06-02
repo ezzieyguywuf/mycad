@@ -28,6 +28,7 @@ module Entity
   -- * Creation and Modification
 , nullEntity
 , addVertex
+, addEdge
   -- * Inspection
 , getPoint
 , getVertex
@@ -68,6 +69,17 @@ addVertex (Entity vs es t) p = Entity vs' es t'
     where t'  = Topo.addVertex $ t
           v   = last . Topo.getVertices $ t'
           vs' = (Glue p v) : vs
+
+addEdge :: Fractional a => Entity a -> Vertex a -> Geo.Point a -> Entity a
+addEdge (Entity vs es t) v p2 = Entity vs' es' t'
+    where t'  = Topo.makeEdge v1 v2 (Topo.addVertex t)
+          v1  = getTopo v
+          v2  = last $ Topo.getVertices t'
+          vs' = (Glue p2 v2) : vs
+          p1  = getGeo v
+          c   = Geo.makeLine p1 p2
+          e   = last $ Topo.getEdges t'
+          es' = (Glue c e) : es
 
 getPoint :: Entity a -> Vertex a -> Maybe (Geo.Point a)
 getPoint e (Glue _ v) = do
