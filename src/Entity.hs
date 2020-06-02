@@ -117,9 +117,8 @@ oppositeVertex e@(Entity _ _ t) (Glue _ v1) (Glue _ ed) = v2
                    b = xs !! 1
 
 prettyPrintVertex :: Show a => Entity a -> Vertex a -> Doc ann
-prettyPrintVertex (Entity _ _ t) (Glue p v) = doc
-    where doc = p' <> line <> v'
-          p'  = pretty $ map show (Geo.getComponents p)
+prettyPrintVertex (Entity _ _ t) (Glue p v) = nest 4 $ vsep [v', p']
+    where p'  = pretty $ map show (Geo.getComponents p)
           v'  = Topo.prettyPrintVertex t v
 
 prettyPrintVertices :: Show a => Entity a -> Doc ann
@@ -127,7 +126,9 @@ prettyPrintVertices e = vsep $ reverse vs
     where vs = map (prettyPrintVertex e) $ getVertices e
 
 prettyPrintEdge :: Show a => Entity a -> Edge a -> Doc ann
-prettyPrintEdge (Entity _ _ t) (Glue _ e) = Topo.prettyPrintEdge t e
+prettyPrintEdge (Entity _ _ t) (Glue _ e) =
+    nest 4 $ vsep [e', pretty "Line"]
+    where e' = Topo.prettyPrintEdge t e
 
 prettyPrintEdges :: Show a => Entity a -> Doc ann
 prettyPrintEdges e = vsep $ reverse es
