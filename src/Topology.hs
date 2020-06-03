@@ -28,6 +28,7 @@ module Topology
 , addVertex
 , addVertex'
 , makeEdge
+, makeEdge'
 , addEdge
   -- * Inspection functions
 , adjVertToEdge
@@ -195,6 +196,16 @@ makeEdge v1@(Vertex v1') v2@(Vertex v2') t
     where t' = addNode EEdge t
           (Edge e)  = last $ getEdges t'
           [es1, es2] = map (adjEdgeToVert t) [v1, v2]
+
+makeEdge' :: TopoState Edge
+makeEdge' = do
+    (Vertex v1) <- addVertex'
+    (Vertex v2) <- addVertex'
+    e  <- addNode' EEdge
+    t  <- get
+    let t' = foldr connectNodes t [(v1, e), (e, v2)]
+    put t'
+    return $ Edge e
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
