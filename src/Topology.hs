@@ -27,7 +27,7 @@ module Topology
 , emptyTopology
 , addVertex
 , addFreeVertex
-, addEdge
+, addFreeEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -137,8 +137,8 @@ addFreeVertex = do
 -- | Adds a single "free" 'Edge' to the 'Topology'. In this context, "free" means that the
 --   'Vertex' bounding the 'Edge' are only adjacent to the 'Edge' itself, and the 'Edge'
 --   is not adjacent to anything but its two 'Vertex'
-addEdge :: TopoState Edge
-addEdge = do
+addFreeEdge :: TopoState Edge
+addFreeEdge = do
     (Vertex v1) <- addFreeVertex
     (Vertex v2) <- addFreeVertex
     e  <- addNode' EEdge
