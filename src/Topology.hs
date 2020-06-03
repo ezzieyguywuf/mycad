@@ -29,7 +29,6 @@ module Topology
 , addVertex'
 , makeEdge
 , makeEdge'
-, addEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -135,17 +134,6 @@ addVertex' :: TopoState Vertex
 addVertex' = do
     n <- addNode' EVertex
     return $ Vertex n
-
--- | This is a convenience function for 'makeEdge' : it adds two 'Vertex' to the
---   'Topology' using 'addVertex' and then creates an 'Edge' from the first to the
---   second.
---
-addEdge :: Topology -> Topology
-addEdge t0 = makeEdge v0 v1 t
-    where t  = addVertex . addVertex $ t0
-          [v0, v1] = drop (n - 2) vs
-          n = length vs
-          vs = getVertices t
 
 -- | An 'Edge' is always created between two 'Vertex'.
 --   Any given 'Edge' is directional - therefore, an Edge can be created from v1
@@ -383,11 +371,11 @@ hasAny search (x:xs) = if x `elem` search then True else hasAny search xs
 --                            Instances
 -- ===========================================================================
 instance Arbitrary Topology where
-    arbitrary = elements [t0, t1, t2, t3, t4, t5, t6]
+    arbitrary = elements [t0, t1, t2, t4] --, t3, t4, t5, t6]
         where t0 = emptyTopology
               t1 = addVertex emptyTopology    -- Single free vertex
               t2 = addVertex t1               -- Two free vertex
-              t3 = addEdge t0                 -- Single 'free' Edge
+              --t3 = addEdge t0                 -- Single 'free' Edge
               t4 = addVertex $ addVertex t2   -- free Edge plus two free Vertex
-              t5 = addEdge t2                 -- two free Edge
-              t6 = addEdge t4                 -- two free Edge, two free Vertex
+              --t5 = addEdge t2                 -- two free Edge
+              --t6 = addEdge t4                 -- two free Edge, two free Vertex
