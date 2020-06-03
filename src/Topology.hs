@@ -26,6 +26,7 @@ module Topology
   -- * Mutating functions
 , emptyTopology
 , addVertex
+, addVertex'
 , makeEdge
 , addEdge
   -- * Inspection functions
@@ -127,6 +128,12 @@ emptyTopology = Topology Graph.empty
 --   means that it is does not have any entities adjacent to it.
 addVertex :: Topology -> Topology
 addVertex = addNode EVertex
+
+-- | Uses TopoState to add a Vertex and return the added Vertex
+addVertex' :: TopoState Vertex
+addVertex' = do
+    n <- addNode' EVertex
+    return $ Vertex n
 
 -- | This is a convenience function for 'makeEdge' : it adds two 'Vertex' to the
 --   'Topology' using 'addVertex' and then creates an 'Edge' from the first to the
@@ -271,6 +278,18 @@ addNode e t = Topology $ Graph.insNode (n, e') t'
           f | e == EVertex = isVertex
             | e == EEdge   = isEdge
             | e == EFace   = isFace
+
+addNode' :: Element -> TopoState Int
+addNode' e = do
+    t <- get
+    let t' = unTopology t
+        n  = length $ Graph.nodes t'
+        e' = (e, countNode f t)
+        f | e == EVertex = isVertex
+          | e == EEdge   = isEdge
+          | e == EFace   = isFace
+    put $ Topology $ Graph.insNode (n, e') t'
+    return n
 
 -- | This relationship is directional - i.e. this will establish a relationship
 -- __from__ @a@ __to__ @b@
