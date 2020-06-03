@@ -19,13 +19,13 @@ spec = do
             property (prop_addsTwoVertices T.makeEdge')
         it "Creates one new Edge" $
             property (prop_addsOneEdge T.makeEdge')
+        it "Does not modify the Faces" $
+            property (prop_doesNotModifyFaces'' T.makeEdge')
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex' T.makeEdge')
     describe "makeEdge" $ do
         let prep = prepMakeEdge'
             make = makeEdge'
-        it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces' prep make)
         it "Target Vertices have one additional adjacent Edge" $
             property (prop_vertexHasOneMoreAdjacentEdge)
         it "Creates an Edge with zero adjacent Face" $
@@ -129,9 +129,6 @@ prop_addsOneEdge s t = (es' - es) == 1
 
 prop_doesNotModifyEdges' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyEdges' p f = prepXaddXDoesNotModifyY p f T.getEdges
-
-prop_doesNotModifyFaces' :: ModTopo -> ModTopo -> TopoProp
-prop_doesNotModifyFaces' p f = prepXaddXDoesNotModifyY p f T.getFaces
 
 prop_edgeHasTwoAdjacentVertex' :: T.TopoState T.Edge -> T.Topology -> Bool
 prop_edgeHasTwoAdjacentVertex' s t = length (T.adjVertToEdge t' e) == 2
