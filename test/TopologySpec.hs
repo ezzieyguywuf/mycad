@@ -21,8 +21,6 @@ spec = do
             property (prop_addsOneEdge T.addFreeEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeEdge)
-        it "Creates an Edge with two adjacent Vertex" $
-            property (prop_edgeHasTwoAdjacentVertex T.addFreeEdge)
 
 -- ===========================================================================
 --                            Helper Functions
@@ -54,7 +52,3 @@ prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge s t = (es' - es) == 1
     where es = length $ T.getEdges t
           es' = length $ T.getEdges $ execState s t
-
-prop_edgeHasTwoAdjacentVertex :: T.TopoState T.Edge -> T.Topology -> Bool
-prop_edgeHasTwoAdjacentVertex s t = length (T.adjVertToEdge t' e) == 2
-    where (e, t') = runState s t
