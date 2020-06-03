@@ -19,6 +19,7 @@ module Topology
   -- | Constructors for these are not exported, therefore you must use the
   --   functions herein to create any of these
   Topology
+, TopoState
 , Vertex
 , Face
 , Edge
@@ -56,6 +57,7 @@ import qualified Data.Graph.Inductive.Graph as Graph
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
 import Data.Text.Prettyprint.Doc
+import Control.Monad.State as St
 
 -- ===========================================================================
 --                               Data Types
@@ -63,6 +65,8 @@ import Data.Text.Prettyprint.Doc
 newtype Topology =
     Topology {unTopology :: Gr NodeLabel BridgeLabel}
         deriving (Show, Eq)
+
+type TopoState a = St.State Topology a
 
 newtype Vertex = Vertex Int deriving (Show, Eq)
 newtype Edge = Edge Int deriving (Show, Eq)
