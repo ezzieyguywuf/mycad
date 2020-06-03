@@ -15,8 +15,8 @@ spec = do
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeVertex)
     describe "addFreeEdge" $ do
-        it "Creates two new Vertices" $
-            property (prop_addsTwoVertices T.addFreeEdge)
+        it "Does not modify Vertices" $
+            property (prop_doesNotModifyVertices T.addFreeEdge)
         it "Creates one new Edge" $
             property (prop_addsOneEdge T.addFreeEdge)
         it "Does not modify the Faces" $
@@ -35,10 +35,10 @@ prop_addsOneVertex s t = (vs' - vs) == 1
     where vs = length $ T.getVertices t
           vs' = length $ T.getVertices $ execState s t
 
-prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
-prop_addsTwoVertices s t = (vs' - vs) == 2
-    where vs = length $ T.getVertices t
-          vs' = length $ T.getVertices $ execState s t
+prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
+prop_doesNotModifyVertices s t = vs == vs'
+    where vs  = T.getVertices t
+          vs' = T.getVertices $ execState s t
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges s t = es == es'
