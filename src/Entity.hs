@@ -48,6 +48,7 @@ import qualified Geometry as Geo
 import qualified Topology as Topo
 import Data.Text.Prettyprint.Doc
 import Data.List (find)
+import Control.Monad.State
 
 -- ===========================================================================
 --                               Data Types
@@ -75,13 +76,13 @@ nullEntity = Entity [] [] Topo.emptyTopology
 
 addVertex :: Fractional a => Entity a -> Geo.Point a -> Entity a
 addVertex (Entity vs es t) p = Entity vs' es t'
-    where t'  = Topo.addVertex $ t
+    where t'  = execState Topo.addFreeVertex t
           v   = last . Topo.getVertices $ t'
           vs' = (Glue p v) : vs
 
 addEdge :: Fractional a => Entity a -> Vertex a -> Geo.Point a -> Entity a
 addEdge (Entity vs es t) v p2 = Entity vs' es' t''
-    where t'  = Topo.addVertex t
+    where t'  = execState Topo.addFreeVertex t
           _v1  = getTopo v
           v2  = last $ Topo.getVertices t'
           p1  = getGeo v
