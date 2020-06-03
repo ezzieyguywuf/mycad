@@ -17,13 +17,6 @@ spec = do
     describe "makeEdge'" $ do
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex' T.makeEdge')
-    describe "addVertex" $ do
-        it "Appends one to the existing Vertices" $
-            property (prop_appendsOneToVertices T.addVertex)
-        it "Does not modify the Edges" $
-            property (prop_doesNotModifyEdges T.addVertex)
-        it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces T.addVertex)
     describe "makeEdge" $ do
         let prep = prepMakeEdge'
             make = makeEdge'
@@ -89,17 +82,11 @@ makeTopo p f g t0 = (as, t')
           t' = f t
           as =  g t
 
-addXAppendsNToY :: Eq a => ModTopo -> Int -> GetElem a -> TopoProp
-addXAppendsNToY = prepXaddXAppendsNToY id
-
 prepXaddXAppendsNToY :: Eq a => ModTopo -> ModTopo -> Int -> GetElem a -> TopoProp
 prepXaddXAppendsNToY p f n g t0 = xs == xs'
     where (xs, t') = makeTopo p f g t0
           xs_all = g t'
           xs' = take (length xs_all - n) xs_all
-
-addXDoesNotModifyY :: Eq a => ModTopo -> GetElem a -> TopoProp
-addXDoesNotModifyY = prepXaddXDoesNotModifyY id
 
 prepXaddXDoesNotModifyY :: Eq a => ModTopo -> ModTopo -> GetElem a -> TopoProp
 prepXaddXDoesNotModifyY p f g t0 = xs == xs'
@@ -114,24 +101,15 @@ prepXMakeXHasNAdjacentY p f n g t0 = (length xs') == n
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
-prop_appendsOneToVertices :: ModTopo -> TopoProp
-prop_appendsOneToVertices f = addXAppendsNToY f 1 T.getVertices
-
 prop_appendsOneToVertices' :: T.TopoState T.Vertex -> T.Topology -> Bool
 prop_appendsOneToVertices' s t = (vs' - vs) == 1
     where vs = length $ T.getVertices t
           vs' = length $ T.getVertices $ execState s t
 
-prop_doesNotModifyEdges :: ModTopo -> TopoProp
-prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
-
 prop_doesNotModifyEdges'' :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges'' s t = es == es'
     where es  = T.getEdges t
           es' = T.getEdges $ execState s t
-
-prop_doesNotModifyFaces :: ModTopo -> TopoProp
-prop_doesNotModifyFaces f = addXDoesNotModifyY f T.getFaces
 
 prop_doesNotModifyFaces'' :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyFaces'' s t = es == es'
