@@ -7,11 +7,15 @@ import Control.Monad.State
 
 spec :: Spec
 spec = do
+    describe "addVertex'" $ do
+        it "Appends one to the existing Vertices" $
+            property (prop_appendsOneToVertices' T.addVertex')
+    describe "makeEdge'" $ do
+        it "Creates an Edge with two adjacent Vertex" $
+            property (prop_edgeHasTwoAdjacentVertex' T.makeEdge')
     describe "addVertex" $ do
         it "Appends one to the existing Vertices" $
             property (prop_appendsOneToVertices T.addVertex)
-        it "Appends one to the existing Vertices" $
-            property (prop_appendsOneToVertices' T.addVertex')
         it "Does not modify the Edges" $
             property (prop_doesNotModifyEdges T.addVertex)
         it "Does not modify the Faces" $
@@ -27,8 +31,6 @@ spec = do
             property (prop_doesNotModifyFaces' prep make)
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex)
-        it "Creates an Edge with two adjacent Vertex" $
-            property (prop_edgeHasTwoAdjacentVertex' T.makeEdge')
         it "Target Vertices have one additional adjacent Edge" $
             property (prop_vertexHasOneMoreAdjacentEdge)
         it "Creates an Edge with zero adjacent Face" $
