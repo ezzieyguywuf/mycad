@@ -299,11 +299,11 @@ prettyPrintElement EFace   = pretty "F"
 --                            Instances
 -- ===========================================================================
 instance Arbitrary Topology where
-    arbitrary = elements [t0, t1, t2, t4] --, t3, t4, t5, t6]
+    arbitrary = elements [t0, t1, t2, t3, t4, t5, t6]
         where t0 = emptyTopology
-              t1 = execState addFreeVertex emptyTopology    -- Single free vertex
-              t2 = execState addFreeVertex t1               -- Two free vertex
-              --t3 = addEdge t0                 -- Single 'free' Edge
-              t4 = execState addFreeVertex t2   -- free Edge plus two free Vertex
-              --t5 = addEdge t2                 -- two free Edge
-              --t6 = addEdge t4                 -- two free Edge, two free Vertex
+              t1 = execState addFreeVertex emptyTopology -- Single free vertex
+              t2 = execState addFreeVertex t1            -- Two free vertex
+              t3 = execState addFreeEdge t0              -- Single 'free' Edge
+              t4 = execState addFreeVertex t2            -- free Edge plus two free Vertex
+              t5 = execState addFreeEdge t3              -- two free Edge
+              t6 = execState addFreeEdge t4              -- two free Edge, two free Vertex
