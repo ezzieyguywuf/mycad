@@ -352,16 +352,6 @@ prettyPrintElement EVertex = pretty "V"
 prettyPrintElement EEdge   = pretty "E"
 prettyPrintElement EFace   = pretty "F"
 
--- stolen from https://hackage.haskell.org/package/MissingH-1.4.3.0/docs/Data-List-Utils.html#v:hasAny
-{- | Returns true if the given list contains any of the elements in the search
-list. -}
-hasAny :: Eq a => [a]           -- ^ List of elements to look for
-       -> [a]                   -- ^ List to search
-       -> Bool                  -- ^ Result
-hasAny [] _          = False             -- An empty search list: always false
-hasAny _ []          = False             -- An empty list to scan: always false
-hasAny search (x:xs) = if x `elem` search then True else hasAny search xs
-
 -- ===========================================================================
 --                            Instances
 -- ===========================================================================
