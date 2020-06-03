@@ -15,6 +15,10 @@ spec = do
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces'' T.addVertex')
     describe "makeEdge'" $ do
+        it "Creates two new Vertices" $
+            property (prop_addsTwoVertices T.makeEdge')
+        it "Creates one new Edge" $
+            property (prop_addsOneEdge T.makeEdge')
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex' T.makeEdge')
     describe "makeEdge" $ do
@@ -106,6 +110,11 @@ prop_appendsOneToVertices' s t = (vs' - vs) == 1
     where vs = length $ T.getVertices t
           vs' = length $ T.getVertices $ execState s t
 
+prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
+prop_addsTwoVertices s t = (vs' - vs) == 2
+    where vs = length $ T.getVertices t
+          vs' = length $ T.getVertices $ execState s t
+
 prop_doesNotModifyEdges'' :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges'' s t = es == es'
     where es  = T.getEdges t
@@ -118,6 +127,11 @@ prop_doesNotModifyFaces'' s t = es == es'
 
 prop_appendsOneToEdges' :: ModTopo -> ModTopo -> TopoProp
 prop_appendsOneToEdges' p f = prepXaddXAppendsNToY p f 1 T.getEdges
+
+prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
+prop_addsOneEdge s t = (es' - es) == 1
+    where es = length $ T.getEdges t
+          es' = length $ T.getEdges $ execState s t
 
 prop_doesNotModifyVertices' :: ModTopo -> ModTopo -> TopoProp
 prop_doesNotModifyVertices' p f = prepXaddXDoesNotModifyY p f T.getVertices
