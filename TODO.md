@@ -5,3 +5,4 @@
 - update topo functions to return added value, or add a prime version of such functions
 - update Geometry.getComponents to return a tuple.
 - Figure out better way to get "last X" from Topology or even Entity.
+- refactor Entity to use State monad better.
