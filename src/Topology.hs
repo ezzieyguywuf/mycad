@@ -25,7 +25,6 @@ module Topology
 , Edge
   -- * Mutating functions
 , emptyTopology
-, addVertex
 , addFreeVertex
 , addFreeEdge
   -- * Inspection functions
@@ -125,10 +124,6 @@ emptyTopology = Topology Graph.empty
 
 -- | Adds a single "free" 'Vertex' to the 'Topology'. In this context, "free"
 --   means that it is does not have any entities adjacent to it.
-addVertex :: Topology -> Topology
-addVertex = addNode EVertex
-
--- | Uses TopoState to add a Vertex and return the added Vertex
 addFreeVertex :: TopoState Vertex
 addFreeVertex = do
     n <- addNode' EVertex
