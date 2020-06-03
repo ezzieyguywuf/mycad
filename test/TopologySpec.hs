@@ -8,7 +8,7 @@ spec :: Spec
 spec = do
     describe "addVertex" $ do
         it "Appends one to the existing Vertices" $
-            property (prop_appendsOneToVertices T.addVertex)
+            property (prop_appendsOneToVertices' T.addVertex')
         it "Does not modify the Edges" $
             property (prop_doesNotModifyEdges T.addVertex)
         it "Does not modify the Faces" $
@@ -105,6 +105,11 @@ prepXMakeXHasNAdjacentY p f n g t0 = (length xs') == n
 -- ===========================================================================
 prop_appendsOneToVertices :: ModTopo -> TopoProp
 prop_appendsOneToVertices f = addXAppendsNToY f 1 T.getVertices
+
+prop_appendsOneToVertices' :: T.TopoState T.Vertex -> T.Topology -> Bool
+prop_appendsOneToVertices' s t = (vs' - vs) == 1
+    where vs = length $ T.getVertices t
+          vs' = length $ T.getVertices $ execState s t
 
 prop_doesNotModifyEdges :: ModTopo -> TopoProp
 prop_doesNotModifyEdges f = addXDoesNotModifyY f T.getEdges
