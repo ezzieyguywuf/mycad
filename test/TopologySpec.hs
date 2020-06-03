@@ -8,8 +8,8 @@ import Control.Monad.State
 spec :: Spec
 spec = do
     describe "addFreeVertex" $ do
-        it "Appends one to the existing Vertices" $
-            property (prop_appendsOneToVertices T.addFreeVertex)
+        it "Creates one new Vertex" $
+            property (prop_addsOneVertex T.addFreeVertex)
         it "Does not modify the Edges" $
             property (prop_doesNotModifyEdges T.addFreeVertex)
         it "Does not modify the Faces" $
@@ -30,8 +30,8 @@ spec = do
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
-prop_appendsOneToVertices :: T.TopoState a -> T.Topology -> Bool
-prop_appendsOneToVertices s t = (vs' - vs) == 1
+prop_addsOneVertex :: T.TopoState a -> T.Topology -> Bool
+prop_addsOneVertex s t = (vs' - vs) == 1
     where vs = length $ T.getVertices t
           vs' = length $ T.getVertices $ execState s t
 
