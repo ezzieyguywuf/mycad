@@ -130,17 +130,11 @@ addFreeVertex = do
     return $ Vertex n
 
 -- | Adds a single "free" 'Edge' to the 'Topology'. In this context, "free" means that the
---   'Vertex' bounding the 'Edge' are only adjacent to the 'Edge' itself, and the 'Edge'
---   is not adjacent to anything but its two 'Vertex'
+--   'Edge' created must be "infinite", because it is not bounded by any 'Vertex'
 addFreeEdge :: TopoState Edge
 addFreeEdge = do
-    (Vertex v1) <- addFreeVertex
-    (Vertex v2) <- addFreeVertex
-    e  <- addNode EEdge
-    t  <- get
-    let t' = foldr connectNodes t [(v1, e), (e, v2)]
-    put t'
-    return $ Edge e
+    n  <- addNode EEdge
+    return $ Edge n
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
@@ -230,8 +224,8 @@ addNode e = do
 
 -- | This relationship is directional - i.e. this will establish a relationship
 -- __from__ @a@ __to__ @b@
-connectNodes :: (Int, Int) -> Topology -> Topology
-connectNodes (a, b) t =
+_connectNodes :: (Int, Int) -> Topology -> Topology
+_connectNodes (a, b) t =
     Topology $ Graph.insEdge (a, b, BridgeLabel ()) $ unTopology t
 
 -- | How many nodes are in the Topology matching this predicate?
