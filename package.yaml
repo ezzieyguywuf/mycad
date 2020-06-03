@@ -26,6 +26,7 @@ dependencies:
 - containers
 - prettyprinter
 - fgl
+- mtl
 
 library:
   source-dirs: src
