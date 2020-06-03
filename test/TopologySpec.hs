@@ -21,6 +21,14 @@ spec = do
             property (prop_addsOneEdge T.addFreeEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeEdge)
+    describe "boundFreeEdge" $ do
+        let s = T.addFreeEdge >>= T.boundFreeEdge
+        it "Creates one new Vertex" $
+            property (prop_addsOneVertex s)
+        it "Does not add or delete Edges" $
+            property (prop_doesNotAddOrDeleteEdges s)
+        it "Does not modify Faces" $
+            property (prop_doesNotModifyFaces s)
 
 -- ===========================================================================
 --                            Helper Functions
@@ -47,6 +55,11 @@ prop_doesNotModifyFaces :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyFaces s t = es == es'
     where es  = T.getFaces t
           es' = T.getFaces $ execState s t
+
+prop_doesNotAddOrDeleteEdges :: T.TopoState a -> T.Topology -> Bool
+prop_doesNotAddOrDeleteEdges s t = (es' - es) == 0
+    where es = length $ T.getEdges t
+          es' = length $ T.getEdges $ execState s t
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge s t = (es' - es) == 1
