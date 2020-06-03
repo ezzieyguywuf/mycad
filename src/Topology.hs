@@ -126,7 +126,7 @@ emptyTopology = Topology Graph.empty
 --   means that it is does not have any entities adjacent to it.
 addFreeVertex :: TopoState Vertex
 addFreeVertex = do
-    n <- addNode' EVertex
+    n <- addNode EVertex
     return $ Vertex n
 
 -- | Adds a single "free" 'Edge' to the 'Topology'. In this context, "free" means that the
@@ -136,7 +136,7 @@ addFreeEdge :: TopoState Edge
 addFreeEdge = do
     (Vertex v1) <- addFreeVertex
     (Vertex v2) <- addFreeVertex
-    e  <- addNode' EEdge
+    e  <- addNode EEdge
     t  <- get
     let t' = foldr connectNodes t [(v1, e), (e, v2)]
     put t'
@@ -216,17 +216,8 @@ prettyPrintTopology t = vs <> line <> es <> line <> fs
 --   connectiod to another 'Vertex' and a 'Face', or maybe two 'Face' and all
 --   kinds of things that don't really make sense (or maybe they do make sense
 --   but they're a real pain to deal with).
-addNode :: Element -> Topology -> Topology
-addNode e t = Topology $ Graph.insNode (n, e') t'
-    where t' = unTopology t
-          n  = length $ Graph.nodes t'
-          e' = (e, countNode f t)
-          f | e == EVertex = isVertex
-            | e == EEdge   = isEdge
-            | e == EFace   = isFace
-
-addNode' :: Element -> TopoState Int
-addNode' e = do
+addNode :: Element -> TopoState Int
+addNode e = do
     t <- get
     let t' = unTopology t
         n  = length $ Graph.nodes t'
