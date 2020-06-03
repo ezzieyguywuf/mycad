@@ -7,13 +7,13 @@ import Control.Monad.State
 
 spec :: Spec
 spec = do
-    describe "addVertex'" $ do
+    describe "addFreeVertex" $ do
         it "Appends one to the existing Vertices" $
-            property (prop_appendsOneToVertices T.addVertex')
+            property (prop_appendsOneToVertices T.addFreeVertex)
         it "Does not modify the Edges" $
-            property (prop_doesNotModifyEdges T.addVertex')
+            property (prop_doesNotModifyEdges T.addFreeVertex)
         it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces T.addVertex')
+            property (prop_doesNotModifyFaces T.addFreeVertex)
     describe "addEdge" $ do
         it "Creates two new Vertices" $
             property (prop_addsTwoVertices T.addEdge)

@@ -26,7 +26,7 @@ module Topology
   -- * Mutating functions
 , emptyTopology
 , addVertex
-, addVertex'
+, addFreeVertex
 , addEdge
   -- * Inspection functions
 , adjVertToEdge
@@ -129,8 +129,8 @@ addVertex :: Topology -> Topology
 addVertex = addNode EVertex
 
 -- | Uses TopoState to add a Vertex and return the added Vertex
-addVertex' :: TopoState Vertex
-addVertex' = do
+addFreeVertex :: TopoState Vertex
+addFreeVertex = do
     n <- addNode' EVertex
     return $ Vertex n
 
@@ -139,8 +139,8 @@ addVertex' = do
 --   is not adjacent to anything but its two 'Vertex'
 addEdge :: TopoState Edge
 addEdge = do
-    (Vertex v1) <- addVertex'
-    (Vertex v2) <- addVertex'
+    (Vertex v1) <- addFreeVertex
+    (Vertex v2) <- addFreeVertex
     e  <- addNode' EEdge
     t  <- get
     let t' = foldr connectNodes t [(v1, e), (e, v2)]
