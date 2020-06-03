@@ -27,7 +27,6 @@ module Topology
 , emptyTopology
 , addVertex
 , addVertex'
-, makeEdge
 , addEdge
   -- * Inspection functions
 , adjVertToEdge
@@ -177,13 +176,6 @@ addVertex' = do
 -- standalone 2-dimensional 'Face' surrounded by a loop of 'Edge', and then
 -- later weave this 'Face' into a solib by attaching other 'Face' along the
 -- half-edges.
-makeEdge :: Vertex -> Vertex -> Topology -> Topology
-makeEdge v1@(Vertex v1') v2@(Vertex v2') t
-    | hasAny es1 es2 = t
-    | otherwise = foldr connectNodes t' [(v1', e), (e, v2')]
-    where t' = addNode EEdge t
-          (Edge e)  = last $ getEdges t'
-          [es1, es2] = map (adjEdgeToVert t) [v1, v2]
 
 -- | Adds a single "free" 'Edge' to the 'Topology'. In this context, "free" means that the
 --   'Vertex' bounding the 'Edge' are only adjacent to the 'Edge' itself, and the 'Edge'
