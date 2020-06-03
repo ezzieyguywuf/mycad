@@ -1,2 +1,2 @@
 --command="stack-bin ghci test/Spec.hs"
---test=":main"
+--test=":main -m Topology/addVertex"
