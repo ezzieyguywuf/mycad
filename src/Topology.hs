@@ -28,7 +28,7 @@ module Topology
 , addVertex
 , addVertex'
 , makeEdge
-, makeEdge'
+, addEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -185,8 +185,11 @@ makeEdge v1@(Vertex v1') v2@(Vertex v2') t
           (Edge e)  = last $ getEdges t'
           [es1, es2] = map (adjEdgeToVert t) [v1, v2]
 
-makeEdge' :: TopoState Edge
-makeEdge' = do
+-- | Adds a single "free" 'Edge' to the 'Topology'. In this context, "free" means that the
+--   'Vertex' bounding the 'Edge' are only adjacent to the 'Edge' itself, and the 'Edge'
+--   is not adjacent to anything but its two 'Vertex'
+addEdge :: TopoState Edge
+addEdge = do
     (Vertex v1) <- addVertex'
     (Vertex v2) <- addVertex'
     e  <- addNode' EEdge

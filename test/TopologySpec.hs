@@ -14,15 +14,15 @@ spec = do
             property (prop_doesNotModifyEdges T.addVertex')
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addVertex')
-    describe "makeEdge'" $ do
+    describe "addEdge" $ do
         it "Creates two new Vertices" $
-            property (prop_addsTwoVertices T.makeEdge')
+            property (prop_addsTwoVertices T.addEdge)
         it "Creates one new Edge" $
-            property (prop_addsOneEdge T.makeEdge')
+            property (prop_addsOneEdge T.addEdge)
         it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces T.makeEdge')
+            property (prop_doesNotModifyFaces T.addEdge)
         it "Creates an Edge with two adjacent Vertex" $
-            property (prop_edgeHasTwoAdjacentVertex T.makeEdge')
+            property (prop_edgeHasTwoAdjacentVertex T.addEdge)
 
 -- ===========================================================================
 --                            Helper Functions
