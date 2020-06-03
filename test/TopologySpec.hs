@@ -27,6 +27,8 @@ spec = do
             property (prop_doesNotModifyFaces' prep make)
         it "Creates an Edge with two adjacent Vertex" $
             property (prop_edgeHasTwoAdjacentVertex)
+        it "Creates an Edge with two adjacent Vertex" $
+            property (prop_edgeHasTwoAdjacentVertex' T.makeEdge')
         it "Target Vertices have one additional adjacent Edge" $
             property (prop_vertexHasOneMoreAdjacentEdge)
         it "Creates an Edge with zero adjacent Face" $
@@ -136,6 +138,10 @@ prop_edgeHasTwoAdjacentVertex :: TopoProp
 prop_edgeHasTwoAdjacentVertex t0 = length (T.adjVertToEdge t' e) == 2
     where (e, t) = prepMakeEdge t0
           t' = makeEdge' t
+
+prop_edgeHasTwoAdjacentVertex' :: T.TopoState T.Edge -> T.Topology -> Bool
+prop_edgeHasTwoAdjacentVertex' s t = length (T.adjVertToEdge t' e) == 2
+    where (e, t') = runState s t
 
 prop_vertexHasOneMoreAdjacentEdge :: TopoProp
 prop_vertexHasOneMoreAdjacentEdge t0 = and $ map (== 1) [dv1, dv2]
