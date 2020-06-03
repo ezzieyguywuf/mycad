@@ -3,10 +3,13 @@ module TopologySpec (spec) where
 import Test.Hspec
 import Test.QuickCheck
 import qualified Topology as T
+import Control.Monad.State
 
 spec :: Spec
 spec = do
     describe "addVertex" $ do
+        it "Appends one to the existing Vertices" $
+            property (prop_appendsOneToVertices T.addVertex)
         it "Appends one to the existing Vertices" $
             property (prop_appendsOneToVertices' T.addVertex')
         it "Does not modify the Edges" $
