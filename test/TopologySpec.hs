@@ -14,13 +14,13 @@ spec = do
             property (prop_doesNotModifyEdges T.addFreeVertex)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeVertex)
-    describe "addFreeEdge" $ do
-        it "Does not modify Vertices" $
-            property (prop_doesNotModifyVertices T.addFreeEdge)
+    describe "addEdge" $ do
+        it "Adds two vertices" $
+            property (prop_addsTwoVertices T.addEdge)
         it "Creates one new Edge" $
-            property (prop_addsOneEdge T.addFreeEdge)
+            property (prop_addsOneEdge T.addEdge)
         it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces T.addFreeEdge)
+            property (prop_doesNotModifyFaces T.addEdge)
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
@@ -32,13 +32,13 @@ prop_addsOneVertex s t = (vs' - vs) == 1
     where vs = length $ T.getVertices t
           vs' = length $ T.getVertices $ execState s t
 
-prop_addsTwoVertex :: T.TopoState a -> T.Topology -> Bool
-prop_addsTwoVertex s t = (vs' - vs) == 2
+prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
+prop_addsTwoVertices s t = (vs' - vs) == 2
     where vs = length $ T.getVertices t
           vs' = length $ T.getVertices $ execState s t
 
-prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
-prop_doesNotModifyVertices s t = vs == vs'
+_prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
+_prop_doesNotModifyVertices s t = vs == vs'
     where vs  = T.getVertices t
           vs' = T.getVertices $ execState s t
 
@@ -52,8 +52,8 @@ prop_doesNotModifyFaces s t = es == es'
     where es  = T.getFaces t
           es' = T.getFaces $ execState s t
 
-prop_doesNotAddOrDeleteEdges :: T.TopoState T.Edge -> (T.Edge -> T.TopoState a) -> T.Topology -> Bool
-prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
+_prop_doesNotAddOrDeleteEdges :: T.TopoState T.Edge -> (T.Edge -> T.TopoState a) -> T.Topology -> Bool
+_prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
     where test = do
             t <- prep
             es <- (length . T.getEdges) <$> get
@@ -66,8 +66,8 @@ prop_addsOneEdge s t = (es' - es) == 1
     where es = length $ T.getEdges t
           es' = length $ T.getEdges $ execState s t
 
-prop_vertexHasOneAdjacentEdge :: T.TopoState T.Vertex -> T.Topology -> Bool
-prop_vertexHasOneAdjacentEdge s t = evalState test t
+_prop_vertexHasOneAdjacentEdge :: T.TopoState T.Vertex -> T.Topology -> Bool
+_prop_vertexHasOneAdjacentEdge s t = evalState test t
     where test = do
             v <- s
             adj <- gets (flip T.adjEdgeToVert v)
