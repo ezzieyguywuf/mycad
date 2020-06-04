@@ -27,6 +27,7 @@ module Topology
 , emptyTopology
 , addFreeVertex
 , addEdge
+, addEdgeToVertex
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -143,6 +144,15 @@ addEdge = do
     connectNodes (v1, e)
     connectNodes (e, v1)
     return $ HalfEdge (Vertex v1) (Vertex v2) e
+
+-- | Adds an 'Edge' to an existing 'Vertex'.
+--
+--   Returns 'Nothing' if 'Vertex' does not exist
+--
+--   'Edge' will have a 'Vertex' on the other side, for a total of two adjacent 'Vertex',
+--   including the one it was added it.
+addEdgeToVertex :: Vertex -> TopoState (Maybe Edge)
+addEdgeToVertex v = undefined
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology

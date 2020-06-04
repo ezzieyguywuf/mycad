@@ -23,9 +23,9 @@ spec = do
             property (prop_EdgeHasTwoAdjacentVertices T.addEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addEdge)
-    describe "appendEdge" $ do
+    describe "addEdgeToVertex" $ do
         it "Adds a single Vertex" $
-            property (prop_addsOneVertex' T.addEdge T.appendEdge)
+            property (prop_addsOneVertex' T.addFreeVertex T.addEdgeToVertex)
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
@@ -44,7 +44,7 @@ prop_addsOneVertex' prep run t = evalState test t
             vs <- gets (length . T.getVertices)
             run a
             vs' <- gets (length . T.getVertices)
-            pure (vs1 == vs)
+            pure (vs' - vs == 1)
 
 prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
 prop_addsTwoVertices s t = (vs' - vs) == 2
