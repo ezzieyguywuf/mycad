@@ -138,9 +138,10 @@ addFreeEdge = do
     return $ Edge n
 
 boundFreeEdge :: Edge -> TopoState Vertex
-boundFreeEdge e = do
-    n <- addNode EVertex
-    return $ Vertex n
+boundFreeEdge (Edge e) = do
+    v <- addNode EVertex
+    connectNodes (v, e)
+    return $ Vertex v
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
@@ -230,9 +231,10 @@ addNode e = do
 
 -- | This relationship is directional - i.e. this will establish a relationship
 -- __from__ @a@ __to__ @b@
-_connectNodes :: (Int, Int) -> Topology -> Topology
-_connectNodes (a, b) t =
-    Topology $ Graph.insEdge (a, b, BridgeLabel ()) $ unTopology t
+connectNodes :: (Int, Int) -> TopoState ()
+connectNodes (a, b) = do
+    t <- gets unTopology
+    put $ Topology $ Graph.insEdge (a, b, BridgeLabel ()) t
 
 -- | How many nodes are in the Topology matching this predicate?
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
