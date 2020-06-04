@@ -27,6 +27,8 @@ spec = do
             property (prop_addsOneVertex s)
         it "Does not add or delete Edges" $
             property (prop_doesNotAddOrDeleteEdges T.addFreeEdge T.boundFreeEdge)
+        it "Creates a single adjacent Vertex to the Edge" $
+            property (prop_vertexHasOneAdjacentEdge s)
         it "Does not modify Faces" $
             property (prop_doesNotModifyFaces s)
 
@@ -69,3 +71,10 @@ prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge s t = (es' - es) == 1
     where es = length $ T.getEdges t
           es' = length $ T.getEdges $ execState s t
+
+prop_vertexHasOneAdjacentEdge :: T.TopoState T.Vertex -> T.Topology -> Bool
+prop_vertexHasOneAdjacentEdge s t = evalState test t
+    where test = do
+            v <- s
+            adj <- gets (flip T.adjEdgeToVert v)
+            pure ((length adj) == 1)
