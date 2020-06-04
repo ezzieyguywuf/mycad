@@ -57,11 +57,13 @@ prop_doesNotModifyFaces s t = es == es'
           es' = T.getFaces $ execState s t
 
 prop_doesNotAddOrDeleteEdges :: T.TopoState T.Edge -> (T.Edge -> T.TopoState a) -> T.Topology -> Bool
-prop_doesNotAddOrDeleteEdges prep run t0 = es == es'
-    where t  = execState prep t0
-          t' = execState (prep >>= run) t0
-          es = length $ T.getEdges t
-          es' = length $ T.getEdges t'
+prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
+    where test = do
+            t <- prep
+            es <- (length . T.getEdges) <$> get
+            run t
+            es' <- (length . T.getEdges) <$> get
+            pure (es == es')
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge s t = (es' - es) == 1
