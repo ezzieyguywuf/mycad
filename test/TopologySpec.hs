@@ -19,7 +19,7 @@ spec = do
             property (prop_addsTwoVertices T.addHalfEdge)
         it "Creates one new Edge" $
             property (prop_addsOneEdge T.addHalfEdge)
-        it "Creates an Edge with two adjacent Vertices"
+        it "Creates an Edge with two adjacent Vertices" $
             property (prop_halfEdgeHasTwoAdjacentVertices T.addHalfEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addHalfEdge)
