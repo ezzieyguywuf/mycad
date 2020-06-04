@@ -26,7 +26,7 @@ module Topology
   -- * Mutating functions
 , emptyTopology
 , addFreeVertex
-, addFreeEdge
+, addEdge
 , boundFreeEdge
   -- * Inspection functions
 , adjVertToEdge
@@ -130,12 +130,16 @@ addFreeVertex = do
     n <- addNode EVertex
     return $ Vertex n
 
--- | Adds a single "free" 'Edge' to the 'Topology'. In this context, "free" means that the
---   'Edge' created must be "infinite", because it is not bounded by any 'Vertex'
-addFreeEdge :: TopoState Edge
-addFreeEdge = do
-    n  <- addNode EEdge
-    return $ Edge n
+-- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
+--   it's "head" and one at its "tail"
+addEdge :: TopoState Edge
+addEdge = do
+    v1 <- addNode EVertex
+    v2 <- addNode EVertex
+    e  <- addNode EEdge
+    connectNodes (v1, e)
+    connectNodes (e, v1)
+    return $ Edge e
 
 boundFreeEdge :: Edge -> TopoState Vertex
 boundFreeEdge (Edge e) = do
@@ -305,7 +309,7 @@ instance Arbitrary Topology where
         where t0 = emptyTopology
               t1 = execState addFreeVertex emptyTopology -- Single free vertex
               t2 = execState addFreeVertex t1            -- Two free vertex
-              t3 = execState addFreeEdge t0              -- Single 'free' Edge
-              t4 = execState addFreeVertex t2            -- free Edge plus two free Vertex
-              t5 = execState addFreeEdge t3              -- two free Edge
-              t6 = execState addFreeEdge t4              -- two free Edge, two free Vertex
+              t3 = execState addEdge t0                  -- Single Edge
+              t4 = execState addFreeVertex t2            -- Edge plus two free Vertex
+              t5 = execState addEdge t3                  -- Two independent Edge
+              t6 = execState addEdge t4                  -- two independent Edge, two free Vertex
