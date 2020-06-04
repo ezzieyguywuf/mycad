@@ -27,7 +27,6 @@ module Topology
 , emptyTopology
 , addFreeVertex
 , addEdge
-, boundFreeEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -140,12 +139,6 @@ addEdge = do
     connectNodes (v1, e)
     connectNodes (e, v1)
     return $ Edge e
-
-boundFreeEdge :: Edge -> TopoState Vertex
-boundFreeEdge (Edge e) = do
-    v <- addNode EVertex
-    connectNodes (v, e)
-    return $ Vertex v
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
