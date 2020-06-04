@@ -26,7 +26,7 @@ spec = do
         it "Creates one new Vertex" $
             property (prop_addsOneVertex s)
         it "Does not add or delete Edges" $
-            property (prop_doesNotAddOrDeleteEdges T.boundFreeEdge)
+            property (prop_doesNotAddOrDeleteEdges T.addFreeEdge T.boundFreeEdge)
         it "Does not modify Faces" $
             property (prop_doesNotModifyFaces s)
 
@@ -56,10 +56,12 @@ prop_doesNotModifyFaces s t = es == es'
     where es  = T.getFaces t
           es' = T.getFaces $ execState s t
 
-prop_doesNotAddOrDeleteEdges :: T.TopoState T.Edge -> T.Topology -> Bool
-prop_doesNotAddOrDeleteEdges s t = (es' - es) == 0
-    where es = length $ T.getEdges t
-          es' = length $ T.getEdges $ execState s t
+prop_doesNotAddOrDeleteEdges :: T.TopoState T.Edge -> (T.Edge -> T.TopoState a) -> T.Topology -> Bool
+prop_doesNotAddOrDeleteEdges prep run t0 = es == es'
+    where t  = execState prep t0
+          t' = execState (prep >>= run) t0
+          es = length $ T.getEdges t
+          es' = length $ T.getEdges t'
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge s t = (es' - es) == 1
