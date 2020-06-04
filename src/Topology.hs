@@ -22,7 +22,6 @@ module Topology
 , TopoState
 , Vertex
 , Face
-, HalfEdge
 , Edge
   -- * Mutating functions
 , emptyTopology
@@ -69,11 +68,11 @@ newtype Topology =
 type TopoState a = St.State Topology a
 
 newtype Vertex = Vertex Int deriving (Show, Eq)
-data HalfEdge = HalfEdge { head :: Vertex
-                         , tail :: Vertex
-                         , id   :: Edge}
-                         deriving (Show, Eq)
-newtype Edge = Edge Int deriving (Show, Eq)
+data Edge = HalfEdge { head :: Vertex
+                     , tail :: Vertex
+                     , id   :: Edge}
+          | Edge Int
+          deriving (Show, Eq)
 newtype Face = Face Int deriving (Show, Eq)
 
 type NodeLabel = (Element, Int)
@@ -137,7 +136,7 @@ addFreeVertex = do
 -- | Adds a single 'HalfEdge' to the 'Topology'. This 'HalfEdge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail". It is refered to as "half" of an Edge because it
 --   only goes in one direction - from "head" to "tail".
-addHalfEdge :: TopoState HalfEdge
+addHalfEdge :: TopoState Edge
 addHalfEdge = do
     v1 <- addNode EVertex
     v2 <- addNode EVertex

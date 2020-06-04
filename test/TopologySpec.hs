@@ -68,7 +68,7 @@ prop_addsOneEdge s t = (es' - es) == 1
     where es = length $ T.getEdges t
           es' = length $ T.getEdges $ execState s t
 
-prop_halfEdgeHasTwoAdjacentVertices :: T.TopoState T.HalfEdge -> T.Topology -> Bool
+prop_halfEdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
 prop_halfEdgeHasTwoAdjacentVertices s t = evalState test t
     where test = do
             e <- s
