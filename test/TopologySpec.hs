@@ -21,17 +21,6 @@ spec = do
             property (prop_addsOneEdge T.addFreeEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeEdge)
-    describe "boundFreeEdge" $ do
-        let s = T.addFreeEdge >>= T.boundFreeEdge
-        it "Creates two new Vertices" $
-            property (prop_addsTwoVertex s)
-        it "Does not add or delete Edges" $
-            property (prop_doesNotAddOrDeleteEdges T.addFreeEdge T.boundFreeEdge)
-        it "Creates a single adjacent Vertex to the Edge" $
-            property (prop_vertexHasOneAdjacentEdge s)
-        it "Does not modify Faces" $
-            property (prop_doesNotModifyFaces s)
-
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
