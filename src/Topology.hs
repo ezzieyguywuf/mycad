@@ -22,6 +22,7 @@ module Topology
 , TopoState
 , Vertex
 , Face
+, HalfEdge
 , Edge
   -- * Mutating functions
 , emptyTopology
