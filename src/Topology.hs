@@ -26,7 +26,7 @@ module Topology
   -- * Mutating functions
 , emptyTopology
 , addFreeVertex
-, addEdge
+, addHalfEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -68,6 +68,10 @@ newtype Topology =
 type TopoState a = St.State Topology a
 
 newtype Vertex = Vertex Int deriving (Show, Eq)
+data HalfEdge = HalfEdge { head :: Vertex
+                         , tail :: Vertex
+                         , id   :: Edge}
+                         deriving (Show, Eq)
 newtype Edge = Edge Int deriving (Show, Eq)
 newtype Face = Face Int deriving (Show, Eq)
 
@@ -129,16 +133,17 @@ addFreeVertex = do
     n <- addNode EVertex
     return $ Vertex n
 
--- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
---   it's "head" and one at its "tail"
-addEdge :: TopoState Edge
-addEdge = do
+-- | Adds a single 'HalfEdge' to the 'Topology'. This 'HalfEdge' will have two 'Vertex', one at
+--   it's "head" and one at its "tail". It is refered to as "half" of an Edge because it
+--   only goes in one direction - from "head" to "tail".
+addHalfEdge :: TopoState HalfEdge
+addHalfEdge = do
     v1 <- addNode EVertex
     v2 <- addNode EVertex
     e  <- addNode EEdge
     connectNodes (v1, e)
     connectNodes (e, v1)
-    return $ Edge e
+    return $ HalfEdge (Vertex v1) (Vertex v2) (Edge e)
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
@@ -302,7 +307,7 @@ instance Arbitrary Topology where
         where t0 = emptyTopology
               t1 = execState addFreeVertex emptyTopology -- Single free vertex
               t2 = execState addFreeVertex t1            -- Two free vertex
-              t3 = execState addEdge t0                  -- Single Edge
-              t4 = execState addFreeVertex t2            -- Edge plus two free Vertex
-              t5 = execState addEdge t3                  -- Two independent Edge
-              t6 = execState addEdge t4                  -- two independent Edge, two free Vertex
+              t3 = execState addHalfEdge t0              -- Single HalfEdge
+              t4 = execState addFreeVertex t2            -- HalfEdge plus two free Vertex
+              t5 = execState addHalfEdge t3              -- Two independent HalfEdge
+              t6 = execState addHalfEdge t4              -- two independent HalfEdge, two free Vertex
