@@ -52,7 +52,7 @@ module Topology
 , prettyPrintTopology
 )where
 
-import Data.Maybe (mapMaybe, fromJust)
+import Data.Maybe (mapMaybe, fromJust, isJust)
 import qualified Data.Graph.Inductive.Graph as Graph
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
@@ -141,8 +141,10 @@ addEdge = do
     v1 <- addNode EVertex
     v2 <- addNode EVertex
     e  <- addNode EEdge
-    connectNodes (v1, e)
-    connectNodes (e, v1)
+    t  <- get
+    -- fromJust should be safe here since we just added v1 and v2
+    let t' = fromJust $ connectNodes (v1, e) t
+    put $ fromJust $ connectNodes (e, v2) t'
     return $ HalfEdge (Vertex v1) (Vertex v2) e
 
 -- | Adds an 'Edge' to an existing 'Vertex'.
@@ -152,7 +154,15 @@ addEdge = do
 --   'Edge' will have a 'Vertex' on the other side, for a total of two adjacent 'Vertex',
 --   including the one it was added it.
 addEdgeToVertex :: Vertex -> TopoState (Maybe Edge)
-addEdgeToVertex v = undefined
+addEdgeToVertex (Vertex v1) = do
+    v2 <- addNode EVertex
+    e  <- addNode EEdge
+    t <- get
+    let t' = do
+        (connectNodes (v1, e) t) >>= (connectNodes (e, v2))
+    case (isJust t') of
+        True  -> pure $ Just (HalfEdge (Vertex v1) (Vertex v2) e)
+        False -> pure Nothing
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
@@ -243,10 +253,10 @@ addNode e = do
 
 -- | This relationship is directional - i.e. this will establish a relationship
 -- __from__ @a@ __to__ @b@
-connectNodes :: (Int, Int) -> TopoState ()
-connectNodes (a, b) = do
-    t <- gets unTopology
-    put $ Topology $ Graph.insEdge (a, b, BridgeLabel ()) t
+connectNodes :: (Int, Int) -> Topology -> Maybe Topology
+connectNodes (a, b) t = do
+    let t' = unTopology t
+    Just $ Topology $ Graph.insEdge (a, b, BridgeLabel ()) t'
 
 -- | How many nodes are in the Topology matching this predicate?
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
