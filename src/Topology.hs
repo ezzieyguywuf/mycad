@@ -26,7 +26,7 @@ module Topology
   -- * Mutating functions
 , emptyTopology
 , addFreeVertex
-, addHalfEdge
+, addEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -133,11 +133,10 @@ addFreeVertex = do
     n <- addNode EVertex
     return $ Vertex n
 
--- | Adds a single 'HalfEdge' to the 'Topology'. This 'HalfEdge' will have two 'Vertex', one at
---   it's "head" and one at its "tail". It is refered to as "half" of an Edge because it
---   only goes in one direction - from "head" to "tail".
-addHalfEdge :: TopoState Edge
-addHalfEdge = do
+-- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
+--   it's "head" and one at its "tail".
+addEdge :: TopoState Edge
+addEdge = do
     v1 <- addNode EVertex
     v2 <- addNode EVertex
     e  <- addNode EEdge
@@ -308,7 +307,7 @@ instance Arbitrary Topology where
         where t0 = emptyTopology
               t1 = execState addFreeVertex emptyTopology -- Single free vertex
               t2 = execState addFreeVertex t1            -- Two free vertex
-              t3 = execState addHalfEdge t0              -- Single HalfEdge
+              t3 = execState addEdge t0                  -- Single HalfEdge
               t4 = execState addFreeVertex t2            -- HalfEdge plus two free Vertex
-              t5 = execState addHalfEdge t3              -- Two independent HalfEdge
-              t6 = execState addHalfEdge t4              -- two independent HalfEdge, two free Vertex
+              t5 = execState addEdge t3                  -- Two independent HalfEdge
+              t6 = execState addEdge t4                  -- two independent HalfEdge, two free Vertex

@@ -14,15 +14,15 @@ spec = do
             property (prop_doesNotModifyEdges T.addFreeVertex)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeVertex)
-    describe "addHalfEdge" $ do
+    describe "addEdge" $ do
         it "Adds two vertices" $
-            property (prop_addsTwoVertices T.addHalfEdge)
+            property (prop_addsTwoVertices T.addEdge)
         it "Creates one new Edge" $
-            property (prop_addsOneEdge T.addHalfEdge)
+            property (prop_addsOneEdge T.addEdge)
         it "Creates an Edge with two adjacent Vertices" $
-            property (prop_halfEdgeHasTwoAdjacentVertices T.addHalfEdge)
+            property (prop_EdgeHasTwoAdjacentVertices T.addEdge)
         it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces T.addHalfEdge)
+            property (prop_doesNotModifyFaces T.addEdge)
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
@@ -68,9 +68,10 @@ prop_addsOneEdge s t = (es' - es) == 1
     where es = length $ T.getEdges t
           es' = length $ T.getEdges $ execState s t
 
-prop_halfEdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
-prop_halfEdgeHasTwoAdjacentVertices s t = evalState test t
+prop_EdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
+prop_EdgeHasTwoAdjacentVertices s t = evalState test t
     where test = do
             e <- s
             vs <- gets (flip T.adjVertToEdge e)
             pure ((length vs) == 2)
+
