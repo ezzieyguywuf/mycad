@@ -70,8 +70,8 @@ type TopoState a = St.State Topology a
 newtype Vertex = Vertex Int deriving (Show, Eq)
 data Edge = HalfEdge { head :: Vertex
                      , tail :: Vertex
-                     , id   :: Edge}
-          | Edge Int
+                     , getEdgeID   :: Int}
+          | Edge {getEdgeID :: Int}
           deriving (Show, Eq)
 newtype Face = Face Int deriving (Show, Eq)
 
@@ -143,13 +143,14 @@ addHalfEdge = do
     e  <- addNode EEdge
     connectNodes (v1, e)
     connectNodes (e, v1)
-    return $ HalfEdge (Vertex v1) (Vertex v2) (Edge e)
+    return $ HalfEdge (Vertex v1) (Vertex v2) e
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
 adjVertToEdge :: Topology -> Edge -> [Vertex]
-adjVertToEdge t (Edge n) = map Vertex ns
-    where t' = unTopology $ getSubGraph (not . isFace) t
+adjVertToEdge t e = map Vertex ns
+    where n  = getEdgeID e
+          t' = unTopology $ getSubGraph (not . isFace) t
           ns = Graph.neighbors t' n
 
 -- | Which 'Edge are adjacent to this 'Vertex'?
