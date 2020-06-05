@@ -27,8 +27,10 @@ spec = do
         it "Adds a single Vertex" $
             property (prop_addsOneVertex' T.addFreeVertex T.addEdgeToVertex)
         it "Adds a single Edge" $
+            -- Note, we've already tested that addFreeVertex does not modify Edge
             property (prop_addsOneEdge (T.addFreeVertex >>= T.addEdgeToVertex))
         it "Does not modify Faces" $
+            -- Note, we've already tested that addFreeVertex does not modify Face
             property (prop_doesNotModifyFaces (T.addFreeVertex >>= T.addEdgeToVertex))
 -- ===========================================================================
 --                            Properties
