@@ -29,25 +29,6 @@ spec = do
         it "Adds a single Edge" $
             property (prop_addsOneEdge' T.addFreeVertex T.addEdgeToVertex)
 -- ===========================================================================
---                            Helper Functions
--- ===========================================================================
-type TopoGetter a = T.Topology -> [a]
-type TopoMod a b = a -> T.TopoState b
-deltaXIsN :: TopoGetter b -> Int -> T.TopoState a -> T.Topology -> Bool
-deltaXIsN getter n run initial = prep_deltaXIsN getter n noPrep run' initial
-    where noPrep = pure id
-          run'  = \_ -> run
-
-prep_deltaXIsN :: TopoGetter a -> Int -> T.TopoState b -> TopoMod b c -> T.Topology -> Bool
-prep_deltaXIsN getter n prep mod initial = evalState test initial
-    where test = do
-            b <- prep
-            xs <- gets (length . getter)
-            mod b
-            xs' <- gets (length . getter)
-            pure (xs' - xs == n)
-
--- ===========================================================================
 --                            Properties
 -- ===========================================================================
 prop_addsOneVertex :: T.TopoState a -> T.Topology -> Bool
@@ -93,4 +74,23 @@ prop_EdgeHasTwoAdjacentVertices s t = evalState test t
             e <- s
             vs <- gets (flip T.adjVertToEdge e)
             pure ((length vs) == 2)
+
+-- ===========================================================================
+--                            Helper Functions
+-- ===========================================================================
+type TopoGetter a = T.Topology -> [a]
+type TopoMod a b = a -> T.TopoState b
+deltaXIsN :: TopoGetter b -> Int -> T.TopoState a -> T.Topology -> Bool
+deltaXIsN getter n run initial = prep_deltaXIsN getter n noPrep run' initial
+    where noPrep = pure id
+          run'  = \_ -> run
+
+prep_deltaXIsN :: TopoGetter a -> Int -> T.TopoState b -> TopoMod b c -> T.Topology -> Bool
+prep_deltaXIsN getter n prep mod initial = evalState test initial
+    where test = do
+            b <- prep
+            xs <- gets (length . getter)
+            mod b
+            xs' <- gets (length . getter)
+            pure (xs' - xs == n)
 
