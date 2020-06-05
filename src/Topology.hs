@@ -158,8 +158,7 @@ addEdgeToVertex (Vertex v1) = do
     v2 <- addNode EVertex
     e  <- addNode EEdge
     t <- get
-    let m = do
-        (connectNodes (v1, e) t) >>= (connectNodes (e, v2))
+    let m = (connectNodes (v1, e) t) >>= (connectNodes (e, v2))
     case m of
         Just t' -> do put t'
                       pure $ Just (HalfEdge (Vertex v1) (Vertex v2) e)
