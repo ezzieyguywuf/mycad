@@ -97,7 +97,7 @@ data Element = EVertex | EEdge | EFace deriving (Show, Eq)
 -- loop when you're back at your starting point.
 --
 -- That's all a HalfEdge is allowed to do!
--- 
+--
 -- The PartialVertex is given a bit more "yum" - it can als link to a VertexCluster. This
 -- link is bi-directional.
 --
@@ -137,6 +137,20 @@ addFreeVertex = do
     pure $ Vertex n
 
 -- | If the Vertex does not exist, this does nothing
+--
+--   __WARNING__
+--   This does __not__ check for any "hanging" adjacencies. In other words, if there was
+--   something that
+--
+--      1. /was/ adjacent to this 'Vertex'
+--      2. now it's not ajacent to /anything/
+--
+--   it will still be in the Topology.
+--
+--   This allows for the following identity to hold true for any given starting state @t@:
+--
+--   >>> execState (addFreeVertex >>= removeVertex) t == t
+--   True
 removeVertex :: Vertex -> TopoState ()
 removeVertex (Vertex n) = do
     t <- gets unTopology
@@ -156,6 +170,21 @@ addEdge = do
     put $ fromJust $ connectNodes (e, v2) t'
     pure $ HalfEdge (Vertex v1) (Vertex v2) e
 
+-- | If the Edge does not exist, does nothing.
+--
+--   __WARNING__
+--   This __will__ delete any "hanging" adjacencies. In other words, if there was
+--   something that:
+--
+--      1. /was/ adjacent to this Edge
+--      2. now is not adjacent to /anything/
+--
+--   then it will also be deleted.
+--
+--   This allows for the following identity to hold true for any given starting state @t@:
+--
+--   >>> execState (addEdge >> removeEdge) t == t
+--   True
 removeEdge :: Edge -> TopoState ()
 removeEdge e = do
     let n = getEdgeID e

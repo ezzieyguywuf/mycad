@@ -23,10 +23,22 @@ spec = do
             property (prop_addsTwoVertices T.addEdge)
         it "Creates one new Edge" $
             property (prop_addsOneEdge T.addEdge)
-        it "Creates an Edge with two adjacent Vertices" $
-            property (prop_EdgeHasTwoAdjacentVertices T.addEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addEdge)
+        it "Creates an Edge with two adjacent Vertices" $
+            -- Since we know that:
+            --
+            --     1. It only adds two vertices
+            --     2. It only adds one Edge
+            --     3. Does not modify Faces
+            --     4. It can be inversed using removeEdge - taking with the three above,
+            --        this means that the function did not modify any of the existing
+            --        Topology. Otherwise, the remove operation would result in the same
+            --        number of topological entities as before, but a different topology.
+            --
+            -- Then it is logical to infer that the Edge with two adjacent Vertices *must*
+            -- be the same as the Edge which was added.
+            property (prop_EdgeHasTwoAdjacentVertices T.addEdge)
     describe "addEdgeToVertex" $ do
         it "Adds a single Vertex" $
             property (prop_addsOneVertex' T.addFreeVertex T.addEdgeToVertex)
