@@ -29,6 +29,7 @@ module Topology
 , addFreeEdge
 , addEdge
 , makeRayEdge
+, makeRayEdge'
 , addEdgeToVertex
 , removeVertex
 , removeEdge
@@ -176,6 +177,13 @@ makeRayEdge (Edge e)= do
         Just t' -> do put t'
                       pure $ Just (Vertex v)
         Nothing -> pure Nothing
+
+-- | This is a convenience - if you're confident that the 'Edge' is actually a part of this
+--   'Topology', you should be ok. But it will crash if this is not true.
+--
+--   > makeRayEdge' e = makeRayEdge e >>= (pure . fromJust)
+makeRayEdge' :: Edge -> TopoState Vertex
+makeRayEdge' e = makeRayEdge e >>= (pure . fromJust)
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
