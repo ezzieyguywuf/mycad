@@ -52,7 +52,7 @@ module Topology
 , prettyPrintTopology
 )where
 
-import Data.Maybe (mapMaybe, fromJust, isJust)
+import Data.Maybe (mapMaybe, fromJust)
 import qualified Data.Graph.Inductive.Graph as Graph
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
@@ -158,11 +158,12 @@ addEdgeToVertex (Vertex v1) = do
     v2 <- addNode EVertex
     e  <- addNode EEdge
     t <- get
-    let t' = do
+    let m = do
         (connectNodes (v1, e) t) >>= (connectNodes (e, v2))
-    case (isJust t') of
-        True  -> pure $ Just (HalfEdge (Vertex v1) (Vertex v2) e)
-        False -> pure Nothing
+    case m of
+        Just t' -> do put t'
+                      pure $ Just (HalfEdge (Vertex v1) (Vertex v2) e)
+        Nothing -> pure Nothing
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology

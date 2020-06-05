@@ -76,11 +76,13 @@ prop_EdgeHasTwoAdjacentVertices s t = evalState test t
             pure ((length vs) == 2)
 
 prop_EdgeHasTwoAdjacentVertices' :: T.TopoState (Maybe T.Edge) -> T.Topology -> Bool
-prop_EdgeHasTwoAdjacentVertices' s t = undefined --evalState test t
-    --where test = do
-            --e <- s
-            --vs <- gets (flip T.adjVertToEdge e)
-            --pure ((length vs) == 2)
+prop_EdgeHasTwoAdjacentVertices' s t = evalState test t
+    where test = do
+            m <- s
+            case m of
+                Just e -> do vs <- gets (flip T.adjVertToEdge e)
+                             pure ((length vs) == 2)
+                Nothing -> pure False
 
 -- ===========================================================================
 --                            Helper Functions
