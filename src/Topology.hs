@@ -160,7 +160,10 @@ removeEdge :: Edge -> TopoState ()
 removeEdge e = do
     let n = getEdgeID e
     t <- gets unTopology
-    put $ Topology $ Graph.delNode n t
+    let vs = Graph.neighbors t n
+        t' = Graph.delNode n t
+        ns = filter ((== 0) . length . (Graph.neighbors t')) vs
+    put $ Topology $ foldr Graph.delNode t' ns
     pure ()
 
 -- | Adds an 'Edge' to an existing 'Vertex'.
