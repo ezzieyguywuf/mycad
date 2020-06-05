@@ -29,8 +29,13 @@ spec = do
     describe "makeRayEdge" $ do
         let prep  = T.addFreeEdge
             run a = (T.makeRayEdge a) >>= (pure . fromJust) >>= T.removeVertex
+            run'  = T.addFreeEdge >>= T.makeRayEdge >>= (pure . fromJust)
         it "Is inversed by removeVertex, resulting in the originial state" $
             property (prop_addRemoveIdentity' prep run)
+        it "Adds one vertex" $
+            property (prop_addsOneVertex run')
+        it "Does not modify the Faces" $
+            property (prop_doesNotModifyFaces run')
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
