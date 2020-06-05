@@ -29,13 +29,17 @@ spec = do
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
+deltaXIsN :: (T.Topology -> [b]) -> Int -> T.TopoState a -> T.Topology -> Bool
+deltaXIsN getter n state initial = evalState test initial
+    where test = do
+            xs <- gets getter
+            xs' <- state >> gets getter
+            pure (length xs' - length xs == n)
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
 prop_addsOneVertex :: T.TopoState a -> T.Topology -> Bool
-prop_addsOneVertex s t = (vs' - vs) == 1
-    where vs = length $ T.getVertices t
-          vs' = length $ T.getVertices $ execState s t
+prop_addsOneVertex = deltaXIsN T.getVertices 1
 
 prop_addsOneVertex' :: T.TopoState a -> (a -> T.TopoState b) -> T.Topology -> Bool
 prop_addsOneVertex' prep run t = evalState test t
@@ -47,14 +51,10 @@ prop_addsOneVertex' prep run t = evalState test t
             pure (vs' - vs == 1)
 
 prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
-prop_addsTwoVertices s t = (vs' - vs) == 2
-    where vs = length $ T.getVertices t
-          vs' = length $ T.getVertices $ execState s t
+prop_addsTwoVertices = deltaXIsN T.getVertices 2
 
 _prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
-_prop_doesNotModifyVertices s t = vs == vs'
-    where vs  = T.getVertices t
-          vs' = T.getVertices $ execState s t
+_prop_doesNotModifyVertices = deltaXIsN T.getVertices 0
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges s t = es == es'
@@ -76,9 +76,7 @@ _prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
             pure (es == es')
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
-prop_addsOneEdge s t = (es' - es) == 1
-    where es = length $ T.getEdges t
-          es' = length $ T.getEdges $ execState s t
+prop_addsOneEdge = deltaXIsN T.getEdges 1
 
 prop_EdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
 prop_EdgeHasTwoAdjacentVertices s t = evalState test t
