@@ -20,6 +20,12 @@ spec = do
     describe "addFreeEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addFreeEdge >>= T.removeEdge))
+        it "Does not modify the Vertices" $
+            property (prop_doesNotModifyVertices T.addFreeEdge)
+        it "Adds a single new Edge" $
+            property (prop_addsOneEdge T.addFreeEdge)
+        it "Does not modify the Faces" $
+            property (prop_doesNotModifyFaces T.addFreeEdge)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
@@ -82,8 +88,8 @@ prop_addsTwoVertices = deltaXIsN T.getVertices 2
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
 
-_prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
-_prop_doesNotModifyVertices = deltaXIsN T.getVertices 0
+prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
+prop_doesNotModifyVertices = doesNotModifyX T.getVertices
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges = doesNotModifyX T.getEdges
