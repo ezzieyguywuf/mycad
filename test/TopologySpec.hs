@@ -27,7 +27,7 @@ spec = do
         it "Adds a single Vertex" $
             property (prop_addsOneVertex' T.addFreeVertex T.addEdgeToVertex)
         it "Adds a single Edge" $
-            property (prop_addsOneEdge' T.addFreeVertex T.addEdgeToVertex)
+            property (prop_addsOneEdge (T.addFreeVertex >>= T.addEdgeToVertex))
         it "Does not modify Faces" $
             property (prop_doesNotModifyFaces (T.addFreeVertex >>= T.addEdgeToVertex))
 -- ===========================================================================
@@ -44,9 +44,6 @@ prop_addsTwoVertices = deltaXIsN T.getVertices 2
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
-
-prop_addsOneEdge' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_addsOneEdge' = prep_deltaXIsN T.getEdges 1
 
 _prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 _prop_doesNotModifyVertices = deltaXIsN T.getVertices 0
