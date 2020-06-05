@@ -174,11 +174,14 @@ makeRayEdge :: Edge -> TopoState (Maybe Vertex)
 makeRayEdge (Edge e)= do
     v <- addNode EVertex
     t <- get
-    let m = (connectNodes (v, e) t)
-    case m of
-        Just t' -> do put t'
-                      pure $ Just (Vertex v)
-        Nothing -> pure Nothing
+    case (/= 0) . length . (Graph.neighbors (unTopology t)) $ e of
+        True -> (pure Nothing)
+        False -> do
+            let m = (connectNodes (v, e) t)
+            case m of
+                Just t' -> do put t'
+                              pure $ Just (Vertex v)
+                Nothing -> pure Nothing
 
 -- | This is a convenience - if you're confident that the 'Edge' is actually a part of this
 --   'Topology', you should be ok. But it will crash if this is not true.
