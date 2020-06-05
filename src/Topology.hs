@@ -73,13 +73,8 @@ newtype Topology =
 type TopoState a = St.State Topology a
 
 newtype Vertex = Vertex Int deriving (Show, Eq)
-data Edge = RayEdge {  head :: Vertex
-                     , getEdgeID :: Int}
-          | HalfEdge { head :: Vertex
-                     , tail :: Vertex
-                     , getEdgeID   :: Int}
-          | Edge {getEdgeID :: Int}
-          deriving (Show, Eq)
+data Edge = Edge {getEdgeID :: Int}
+            deriving (Show, Eq)
 newtype Face = Face Int deriving (Show, Eq)
 
 type NodeLabel = (Element, Int)
@@ -175,7 +170,6 @@ makeRayEdge (Edge e)= do
         Just t' -> do put t'
                       pure $ Just (Vertex v)
         Nothing -> pure Nothing
-makeRayEdge _ = pure Nothing
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
@@ -188,7 +182,7 @@ addEdge = do
     -- fromJust should be safe here since we just added v1 and v2
     let t' = fromJust $ connectNodes (v1, e) t
     put $ fromJust $ connectNodes (e, v2) t'
-    pure $ HalfEdge (Vertex v1) (Vertex v2) e
+    pure $ Edge e
 
 -- | If the Edge does not exist, does nothing.
 --
@@ -229,7 +223,7 @@ addEdgeToVertex (Vertex v1) = do
     let m = (connectNodes (v1, e) t) >>= (connectNodes (e, v2))
     case m of
         Just t' -> do put t'
-                      pure $ Just (HalfEdge (Vertex v1) (Vertex v2) e)
+                      pure $ Just (Edge e)
         Nothing -> pure Nothing
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
