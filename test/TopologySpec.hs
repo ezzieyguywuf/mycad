@@ -133,8 +133,8 @@ prop_addAdjacencyToEdge :: T.TopoState T.Edge -> TopoMod T.Edge T.Vertex -> T.To
 prop_addAdjacencyToEdge prep run initial = evalState test initial
     where test = do
             e <- prep
-            t <- get
             v <- run e
+            t <- get
             pure $ elem v $ T.edgeAdjacentVertices t e
 
 prop_EdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
