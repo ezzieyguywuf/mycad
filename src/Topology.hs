@@ -26,6 +26,7 @@ module Topology
   -- * Mutating functions
 , emptyTopology
 , addFreeVertex
+, addFreeEdge
 , addEdge
 , addEdgeToVertex
 , removeVertex
@@ -156,6 +157,9 @@ removeVertex (Vertex n) = do
     t <- gets unTopology
     put $ Topology $ Graph.delNode n t
     pure ()
+
+addFreeEdge :: TopoState Edge
+addFreeEdge = undefined
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
