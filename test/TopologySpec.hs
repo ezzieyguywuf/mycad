@@ -17,6 +17,8 @@ spec = do
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeVertex)
     describe "addEdge" $ do
+        it "Is inversed by removeEdge, resulting in the original state" $
+            property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
         it "Adds two vertices" $
             property (prop_addsTwoVertices T.addEdge)
         it "Creates one new Edge" $

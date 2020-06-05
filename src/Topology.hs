@@ -29,6 +29,7 @@ module Topology
 , addEdge
 , addEdgeToVertex
 , removeVertex
+, removeEdge
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -153,6 +154,9 @@ addEdge = do
     let t' = fromJust $ connectNodes (v1, e) t
     put $ fromJust $ connectNodes (e, v2) t'
     pure $ HalfEdge (Vertex v1) (Vertex v2) e
+
+removeEdge :: Edge -> TopoState ()
+removeEdge = undefined
 
 -- | Adds an 'Edge' to an existing 'Vertex'.
 --
