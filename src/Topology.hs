@@ -157,7 +157,11 @@ addEdge = do
     pure $ HalfEdge (Vertex v1) (Vertex v2) e
 
 removeEdge :: Edge -> TopoState ()
-removeEdge = undefined
+removeEdge e = do
+    let n = getEdgeID e
+    t <- gets unTopology
+    put $ Topology $ Graph.delNode n t
+    pure ()
 
 -- | Adds an 'Edge' to an existing 'Vertex'.
 --
