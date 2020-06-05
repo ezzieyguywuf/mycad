@@ -159,7 +159,9 @@ removeVertex (Vertex n) = do
     pure ()
 
 addFreeEdge :: TopoState Edge
-addFreeEdge = undefined
+addFreeEdge = do
+    e <- addNode EEdge
+    pure $ Edge e
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
