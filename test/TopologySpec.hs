@@ -32,6 +32,9 @@ spec = do
         it "Does not modify Faces" $
             -- Note, we've already tested that addFreeVertex does not modify Face
             property (prop_doesNotModifyFaces (T.addFreeVertex >>= T.addEdgeToVertex))
+        it "Creates an Edge with two adjacent Vertices" $
+            property (prop_EdgeHasTwoAdjacentVertices' (T.addFreeVertex >>= T.addEdgeToVertex))
+
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
@@ -71,6 +74,13 @@ prop_EdgeHasTwoAdjacentVertices s t = evalState test t
             e <- s
             vs <- gets (flip T.adjVertToEdge e)
             pure ((length vs) == 2)
+
+prop_EdgeHasTwoAdjacentVertices' :: T.TopoState (Maybe T.Edge) -> T.Topology -> Bool
+prop_EdgeHasTwoAdjacentVertices' s t = undefined --evalState test t
+    --where test = do
+            --e <- s
+            --vs <- gets (flip T.adjVertToEdge e)
+            --pure ((length vs) == 2)
 
 -- ===========================================================================
 --                            Helper Functions
