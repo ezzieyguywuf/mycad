@@ -55,6 +55,18 @@ prop_addsOneVertex' prep run t = evalState test t
 prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
 prop_addsTwoVertices = deltaXIsN T.getVertices 2
 
+prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
+prop_addsOneEdge = deltaXIsN T.getEdges 1
+
+prop_addsOneEdge' :: T.TopoState a -> (a -> T.TopoState b) -> T.Topology -> Bool
+prop_addsOneEdge' prep run t = evalState test t
+    where test = do
+            a <- prep
+            es <- gets (length . T.getEdges)
+            run a
+            es' <- gets (length . T.getEdges)
+            pure (es' - es == 1)
+
 _prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 _prop_doesNotModifyVertices = deltaXIsN T.getVertices 0
 
@@ -76,18 +88,6 @@ _prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
             run t
             es' <- (length . T.getEdges) <$> get
             pure (es == es')
-
-prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
-prop_addsOneEdge = deltaXIsN T.getEdges 1
-
-prop_addsOneEdge' :: T.TopoState a -> (a -> T.TopoState b) -> T.Topology -> Bool
-prop_addsOneEdge' prep run t = evalState test t
-    where test = do
-            a <- prep
-            es <- gets (length . T.getEdges)
-            run a
-            es' <- gets (length . T.getEdges)
-            pure (es' - es == 1)
 
 prop_EdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
 prop_EdgeHasTwoAdjacentVertices s t = evalState test t
