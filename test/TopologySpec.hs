@@ -26,6 +26,8 @@ spec = do
     describe "addEdgeToVertex" $ do
         it "Adds a single Vertex" $
             property (prop_addsOneVertex' T.addFreeVertex T.addEdgeToVertex)
+        it "Adds a single Edge" $
+            property (prop_addsOneEdge' T.addFreeVertex T.addEdgeToVertex)
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
@@ -77,6 +79,15 @@ _prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
+
+prop_addsOneEdge' :: T.TopoState a -> (a -> T.TopoState b) -> T.Topology -> Bool
+prop_addsOneEdge' prep run t = evalState test t
+    where test = do
+            a <- prep
+            es <- gets (length . T.getEdges)
+            run a
+            es' <- gets (length . T.getEdges)
+            pure (es' - es == 1)
 
 prop_EdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
 prop_EdgeHasTwoAdjacentVertices s t = evalState test t
