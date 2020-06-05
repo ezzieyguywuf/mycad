@@ -28,6 +28,7 @@ module Topology
 , addFreeVertex
 , addEdge
 , addEdgeToVertex
+, removeVertex
   -- * Inspection functions
 , adjVertToEdge
 , adjEdgeToVert
@@ -133,6 +134,9 @@ addFreeVertex :: TopoState Vertex
 addFreeVertex = do
     n <- addNode EVertex
     return $ Vertex n
+
+removeVertex :: Vertex -> TopoState ()
+removeVertex = undefined
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".

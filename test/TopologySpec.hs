@@ -8,6 +8,8 @@ import Control.Monad.State
 spec :: Spec
 spec = do
     describe "addFreeVertex" $ do
+        it "Is inversed by removeVertex, resulting in original state" $
+            property (prop_addRemoveIdentity (T.addFreeVertex >>= T.removeVertex))
         it "Creates one new Vertex" $
             property (prop_addsOneVertex T.addFreeVertex)
         it "Does not modify the Edges" $
@@ -38,6 +40,13 @@ spec = do
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
+prop_addRemoveIdentity :: T.TopoState a -> T.Topology -> Bool
+prop_addRemoveIdentity run t = evalState test t
+    where test = do
+            s  <- get
+            s' <- run >> get
+            pure $ s == s'
+
 prop_addsOneVertex :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneVertex = deltaXIsN T.getVertices 1
 
