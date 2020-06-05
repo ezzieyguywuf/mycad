@@ -32,6 +32,7 @@ spec = do
 --                            Helper Functions
 -- ===========================================================================
 type TopoGetter a = T.Topology -> [a]
+type TopoMod a b = a -> T.TopoState b
 deltaXIsN :: TopoGetter b -> Int -> T.TopoState a -> T.Topology -> Bool
 deltaXIsN getter n state initial = evalState test initial
     where test = do
@@ -39,7 +40,7 @@ deltaXIsN getter n state initial = evalState test initial
             xs' <- state >> gets getter
             pure (length xs' - length xs == n)
 
-prep_deltaXIsN :: (T.Topology -> [a]) -> Int -> T.TopoState a -> T.Topology -> Bool
+prep_deltaXIsN :: TopoGetter a -> Int -> T.TopoState b -> TopoMod c d -> T.Topology -> Bool
 prep_deltaXIsN = undefined
 -- ===========================================================================
 --                            Properties
