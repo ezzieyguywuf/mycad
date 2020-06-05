@@ -242,7 +242,8 @@ addEdgeToVertex (Vertex v1) = do
         Nothing -> pure Nothing
 
 edgeAdjacentVertices :: Topology -> Edge -> [Vertex]
-edgeAdjacentVertices = undefined
+edgeAdjacentVertices t e = map Vertex vs
+    where vs = getNodes isVertex t
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
