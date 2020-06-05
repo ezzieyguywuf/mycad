@@ -40,8 +40,15 @@ deltaXIsN getter n state initial = evalState test initial
             xs' <- state >> gets getter
             pure (length xs' - length xs == n)
 
-prep_deltaXIsN :: TopoGetter a -> Int -> T.TopoState b -> TopoMod c d -> T.Topology -> Bool
-prep_deltaXIsN = undefined
+prep_deltaXIsN :: TopoGetter a -> Int -> T.TopoState b -> TopoMod b c -> T.Topology -> Bool
+prep_deltaXIsN getter n prep mod initial = evalState test initial
+    where test = do
+            b <- prep
+            xs <- gets (length . getter)
+            mod b
+            xs' <- gets (length . getter)
+            pure (xs' - xs == n)
+
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
