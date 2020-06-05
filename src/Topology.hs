@@ -73,7 +73,9 @@ newtype Topology =
 type TopoState a = St.State Topology a
 
 newtype Vertex = Vertex Int deriving (Show, Eq)
-data Edge = HalfEdge { head :: Vertex
+data Edge = RayEdge {  head :: Vertex
+                     , getEdgeID :: Int}
+          | HalfEdge { head :: Vertex
                      , tail :: Vertex
                      , getEdgeID   :: Int}
           | Edge {getEdgeID :: Int}
@@ -165,7 +167,15 @@ addFreeEdge = do
     pure $ Edge e
 
 makeRayEdge :: Edge -> TopoState (Maybe Vertex)
-makeRayEdge = undefined
+makeRayEdge (Edge e)= do
+    v <- addNode EVertex
+    t <- get
+    let m = (connectNodes (v, e) t)
+    case m of
+        Just t' -> do put t'
+                      pure $ Just (Vertex v)
+        Nothing -> pure Nothing
+makeRayEdge _ = pure Nothing
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
