@@ -30,12 +30,14 @@ spec = do
         let prep  = T.addFreeEdge
             run a = (T.makeRayEdge' a) >>= T.removeVertex
             run'  = T.addFreeEdge >>= T.makeRayEdge'
-        it "Is inversed by removeVertex, resulting in the originial state" $
+        it "Is inversed by removeVertex, resulting in the original state" $
             property (prop_addRemoveIdentity' prep run)
         it "Adds one vertex" $
             property (prop_addsOneVertex run')
         it "Makes the Edge adjacent to the added Vertex" $
             property (prop_addAdjacencyToEdge prep T.makeRayEdge')
+        it "Does not add or subtract any Edges" $
+            property (prop_doesNotAddOrRemoveEdges prep T.makeRayEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces run')
     describe "addEdge" $ do
@@ -110,6 +112,9 @@ prop_addsTwoVertices = deltaXIsN T.getVertices 2
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
+
+prop_doesNotAddOrRemoveEdges :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prop_doesNotAddOrRemoveEdges = prep_deltaXIsN T.getEdges 0
 
 prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyVertices = doesNotModifyX T.getVertices
