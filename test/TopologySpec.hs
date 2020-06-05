@@ -37,6 +37,9 @@ deltaXIsN getter n state initial = evalState test initial
             xs <- gets getter
             xs' <- state >> gets getter
             pure (length xs' - length xs == n)
+
+prep_deltaXIsN :: (T.Topology -> [a]) -> Int -> T.TopoState a -> T.Topology -> Bool
+prep_deltaXIsN = undefined
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
