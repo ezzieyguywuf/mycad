@@ -35,6 +35,7 @@ module Topology
 , removeEdge
   -- * Inspection functions
 , edgeAdjacentVertices
+, vertexAdjacentEdges
 , adjVertToEdge
 , adjEdgeToVert
 , getVertices
@@ -240,6 +241,10 @@ addEdgeToVertex (Vertex v1) = do
         Just t' -> do put t'
                       pure $ Just (Edge e)
         Nothing -> pure Nothing
+
+vertexAdjacentEdges :: Topology -> Vertex -> [Edge]
+vertexAdjacentEdges t v = map Edge es
+    where es = getNodes isEdge t
 
 edgeAdjacentVertices :: Topology -> Edge -> [Vertex]
 edgeAdjacentVertices t e = map Vertex vs

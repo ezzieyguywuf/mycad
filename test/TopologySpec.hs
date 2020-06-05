@@ -4,7 +4,7 @@ import Test.Hspec
 import Test.QuickCheck
 import qualified Topology as T
 import Control.Monad.State
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isNothing)
 
 spec :: Spec
 spec = do
@@ -40,6 +40,9 @@ spec = do
             property (prop_doesNotAddOrRemoveEdges prep T.makeRayEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces run')
+        it "returns Nothing if given an Edge that is not a FreeEdge" $ do
+            let run = prep >>= T.makeRayEdge' >>= vertToAdjEdge >>= T.makeRayEdge
+            property (prop_returnsNothing run)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
@@ -83,6 +86,12 @@ spec = do
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
+prop_returnsNothing :: T.TopoState (Maybe a) -> T.Topology -> Bool
+prop_returnsNothing s t = evalState test t
+    where test = do
+            m <- s
+            pure $ isNothing m
+
 prop_addRemoveIdentity :: T.TopoState a -> T.Topology -> Bool
 --prop_addRemoveIdentity = prop_addRemoveIdentity' noPrep
     --where noPrep = pure id
@@ -183,3 +192,8 @@ doesNotModifyX getter run initial = evalState test initial
             xs <- gets getter
             xs' <- run >> gets getter
             pure (xs' == xs)
+
+vertToAdjEdge :: T.Vertex -> T.TopoState T.Edge
+vertToAdjEdge v = do
+    t <- get
+    pure . head $ T.vertexAdjacentEdges t v
