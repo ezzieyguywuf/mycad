@@ -26,6 +26,11 @@ spec = do
             property (prop_addsOneEdge T.addFreeEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeEdge)
+    describe "makeRayEdge" $ do
+        let prep  = T.addFreeEdge
+            run a = (T.makeRayEdge a) >>= (pure . fromJust) >>= T.removeVertex
+        it "Is inversed by removeVertex, resulting in the originial state" $
+            property (prop_addRemoveIdentity' prep run)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
@@ -70,10 +75,21 @@ spec = do
 --                            Properties
 -- ===========================================================================
 prop_addRemoveIdentity :: T.TopoState a -> T.Topology -> Bool
+--prop_addRemoveIdentity = prop_addRemoveIdentity' noPrep
+    --where noPrep = pure id
+          --run'  = \_ -> run
 prop_addRemoveIdentity run t = evalState test t
     where test = do
             s  <- get
             s' <- run >> get
+            pure $ s == s'
+
+prop_addRemoveIdentity' :: T.TopoState a -> TopoMod a b-> T.Topology -> Bool
+prop_addRemoveIdentity' prep run t = evalState test t
+    where test = do
+            a <- prep
+            s <- get
+            s'<- (run a) >> get
             pure $ s == s'
 
 prop_addsOneVertex :: T.TopoState a -> T.Topology -> Bool

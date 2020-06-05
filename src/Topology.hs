@@ -28,6 +28,7 @@ module Topology
 , addFreeVertex
 , addFreeEdge
 , addEdge
+, makeRayEdge
 , addEdgeToVertex
 , removeVertex
 , removeEdge
@@ -162,6 +163,9 @@ addFreeEdge :: TopoState Edge
 addFreeEdge = do
     e <- addNode EEdge
     pure $ Edge e
+
+makeRayEdge :: Edge -> TopoState (Maybe Vertex)
+makeRayEdge = undefined
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
