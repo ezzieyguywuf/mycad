@@ -133,7 +133,7 @@ emptyTopology = Topology Graph.empty
 addFreeVertex :: TopoState Vertex
 addFreeVertex = do
     n <- addNode EVertex
-    return $ Vertex n
+    pure $ Vertex n
 
 removeVertex :: Vertex -> TopoState ()
 removeVertex (Vertex n) = do
@@ -152,7 +152,7 @@ addEdge = do
     -- fromJust should be safe here since we just added v1 and v2
     let t' = fromJust $ connectNodes (v1, e) t
     put $ fromJust $ connectNodes (e, v2) t'
-    return $ HalfEdge (Vertex v1) (Vertex v2) e
+    pure $ HalfEdge (Vertex v1) (Vertex v2) e
 
 -- | Adds an 'Edge' to an existing 'Vertex'.
 --
@@ -256,7 +256,7 @@ addNode e = do
           | e == EEdge   = isEdge
           | e == EFace   = isFace
     put $ Topology $ Graph.insNode (n, e') t'
-    return n
+    pure n
 
 -- | This relationship is directional - i.e. this will establish a relationship
 -- __from__ @a@ __to__ @b@
