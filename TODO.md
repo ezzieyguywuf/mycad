@@ -6,3 +6,4 @@
 - update Geometry.getComponents to return a tuple.
 - Figure out better way to get "last X" from Topology or even Entity.
 - refactor Entity to use State monad better.
+- Add test for "If removeXXX called with non-existent XXX, nothing happens"
