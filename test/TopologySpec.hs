@@ -31,7 +31,8 @@ spec = do
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
-deltaXIsN :: (T.Topology -> [b]) -> Int -> T.TopoState a -> T.Topology -> Bool
+type TopoGetter a = T.Topology -> [a]
+deltaXIsN :: TopoGetter b -> Int -> T.TopoState a -> T.Topology -> Bool
 deltaXIsN getter n state initial = evalState test initial
     where test = do
             xs <- gets getter
