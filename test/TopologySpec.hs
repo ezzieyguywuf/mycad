@@ -55,14 +55,8 @@ prep_deltaXIsN getter n prep mod initial = evalState test initial
 prop_addsOneVertex :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneVertex = deltaXIsN T.getVertices 1
 
-prop_addsOneVertex' :: T.TopoState a -> (a -> T.TopoState b) -> T.Topology -> Bool
-prop_addsOneVertex' prep run t = evalState test t
-    where test = do
-            a <- prep
-            vs <- gets (length . T.getVertices)
-            run a
-            vs' <- gets (length . T.getVertices)
-            pure (vs' - vs == 1)
+prop_addsOneVertex' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prop_addsOneVertex' = prep_deltaXIsN T.getVertices 1
 
 prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
 prop_addsTwoVertices = deltaXIsN T.getVertices 2
@@ -70,14 +64,8 @@ prop_addsTwoVertices = deltaXIsN T.getVertices 2
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
 
-prop_addsOneEdge' :: T.TopoState a -> (a -> T.TopoState b) -> T.Topology -> Bool
-prop_addsOneEdge' prep run t = evalState test t
-    where test = do
-            a <- prep
-            es <- gets (length . T.getEdges)
-            run a
-            es' <- gets (length . T.getEdges)
-            pure (es' - es == 1)
+prop_addsOneEdge' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prop_addsOneEdge' = prep_deltaXIsN T.getEdges 1
 
 _prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 _prop_doesNotModifyVertices = deltaXIsN T.getVertices 0
