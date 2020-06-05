@@ -4,6 +4,7 @@ import Test.Hspec
 import Test.QuickCheck
 import qualified Topology as T
 import Control.Monad.State
+import Data.Maybe (fromJust)
 
 spec :: Spec
 spec = do
@@ -40,6 +41,11 @@ spec = do
             -- be the same as the Edge which was added.
             property (prop_EdgeHasTwoAdjacentVertices T.addEdge)
     describe "addEdgeToVertex" $ do
+        it "Is inversed by removeEdge, resulting in the original state" $ do
+            -- "fromJust" should be safe because we'ne adding the Vertex before adding the
+            -- Edge to it
+            let run = T.addFreeVertex >>= T.addEdgeToVertex >>= (pure . fromJust)>>= T.removeEdge
+            property (prop_addRemoveIdentity run)
         it "Adds a single Vertex" $
             property (prop_addsOneVertex' T.addFreeVertex T.addEdgeToVertex)
         it "Adds a single Edge" $
