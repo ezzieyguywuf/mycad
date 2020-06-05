@@ -136,7 +136,10 @@ addFreeVertex = do
     return $ Vertex n
 
 removeVertex :: Vertex -> TopoState ()
-removeVertex = undefined
+removeVertex (Vertex n) = do
+    t <- gets unTopology
+    put $ Topology $ Graph.delNode n t
+    pure ()
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
