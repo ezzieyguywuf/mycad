@@ -136,6 +136,7 @@ addFreeVertex = do
     n <- addNode EVertex
     pure $ Vertex n
 
+-- | If the Vertex does not exist, this does nothing
 removeVertex :: Vertex -> TopoState ()
 removeVertex (Vertex n) = do
     t <- gets unTopology
