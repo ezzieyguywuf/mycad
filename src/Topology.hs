@@ -34,6 +34,7 @@ module Topology
 , removeVertex
 , removeEdge
   -- * Inspection functions
+, edgeAdjacentVertices
 , adjVertToEdge
 , adjEdgeToVert
 , getVertices
@@ -239,6 +240,9 @@ addEdgeToVertex (Vertex v1) = do
         Just t' -> do put t'
                       pure $ Just (Edge e)
         Nothing -> pure Nothing
+
+edgeAdjacentVertices :: Topology -> Edge -> [Vertex]
+edgeAdjacentVertices = undefined
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology

@@ -34,6 +34,8 @@ spec = do
             property (prop_addRemoveIdentity' prep run)
         it "Adds one vertex" $
             property (prop_addsOneVertex run')
+        it "Makes the Edge adjacent to the added Vertex" $
+            property (prop_addAdjacencyToEdge prep T.makeRayEdge')
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces run')
     describe "addEdge" $ do
@@ -126,6 +128,14 @@ _prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
             run t
             es' <- (length . T.getEdges) <$> get
             pure (es == es')
+
+prop_addAdjacencyToEdge :: T.TopoState T.Edge -> TopoMod T.Edge T.Vertex -> T.Topology -> Bool
+prop_addAdjacencyToEdge prep run initial = evalState test initial
+    where test = do
+            e <- prep
+            t <- get
+            v <- run e
+            pure $ elem v $ T.edgeAdjacentVertices t e
 
 prop_EdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
 prop_EdgeHasTwoAdjacentVertices s t = evalState test t
