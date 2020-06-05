@@ -161,6 +161,12 @@ addFreeEdge = do
     e <- addNode EEdge
     pure $ Edge e
 
+-- | Takes a "free" 'Edge' - that is, one with zero adjacencies - and creates a new
+--   'Vertex' that it is adajacent to
+--
+--   We call it a "Ray Edge" because we can conceptually visualize the relationship of an
+--   'Edge' with a single 'Vertex' as a "ray" that has a starting point but goes on
+--   forever.
 makeRayEdge :: Edge -> TopoState (Maybe Vertex)
 makeRayEdge (Edge e)= do
     v <- addNode EVertex
