@@ -34,11 +34,9 @@ spec = do
 type TopoGetter a = T.Topology -> [a]
 type TopoMod a b = a -> T.TopoState b
 deltaXIsN :: TopoGetter b -> Int -> T.TopoState a -> T.Topology -> Bool
-deltaXIsN getter n state initial = evalState test initial
-    where test = do
-            xs <- gets getter
-            xs' <- state >> gets getter
-            pure (length xs' - length xs == n)
+deltaXIsN getter n run initial = prep_deltaXIsN getter n noPrep run' initial
+    where noPrep = pure id
+          run'  = \_ -> run
 
 prep_deltaXIsN :: TopoGetter a -> Int -> T.TopoState b -> TopoMod b c -> T.Topology -> Bool
 prep_deltaXIsN getter n prep mod initial = evalState test initial
