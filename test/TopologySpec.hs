@@ -50,14 +50,10 @@ _prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 _prop_doesNotModifyVertices = deltaXIsN T.getVertices 0
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
-prop_doesNotModifyEdges s t = es == es'
-    where es  = T.getEdges t
-          es' = T.getEdges $ execState s t
+prop_doesNotModifyEdges = doesNotModifyX T.getEdges
 
 prop_doesNotModifyFaces :: T.TopoState a -> T.Topology -> Bool
-prop_doesNotModifyFaces s t = es == es'
-    where es  = T.getFaces t
-          es' = T.getFaces $ execState s t
+prop_doesNotModifyFaces = doesNotModifyX T.getFaces
 
 _prop_doesNotAddOrDeleteEdges :: T.TopoState T.Edge -> (T.Edge -> T.TopoState a) -> T.Topology -> Bool
 _prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
@@ -94,3 +90,9 @@ prep_deltaXIsN getter n prep mod initial = evalState test initial
             xs' <- gets (length . getter)
             pure (xs' - xs == n)
 
+doesNotModifyX :: Eq a => TopoGetter a -> T.TopoState b -> T.Topology -> Bool
+doesNotModifyX getter run initial = evalState test initial
+    where test = do
+            xs <- gets getter
+            xs' <- run >> gets getter
+            pure (xs' == xs)
