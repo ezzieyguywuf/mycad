@@ -173,17 +173,21 @@ addFreeEdge = do
 makeRayEdge :: Edge -> TopoState (Maybe Vertex)
 makeRayEdge (Edge e)= do
     t <- get
-    let ns = (/= 0) . length . (Graph.neighbors (unTopology t)) $ e
-    case ns of
-        True -> (pure Nothing)
-        False -> do
-            v <- addNode EVertex
-            t <- get
-            let m = (connectNodes (v, e) t)
-            case m of
-                Just t' -> do put t'
-                              pure $ Just (Vertex v)
-                Nothing -> pure Nothing
+    if (isValidNode t e)
+       then
+       if (not $ hasNeighbors t e)
+          then do
+              v <- addNode EVertex
+              t <- get
+              let m = (connectNodes (v, e) t)
+              case m of
+                  Just t' -> do put t'
+                                pure $ Just (Vertex v)
+                  Nothing -> pure Nothing
+          else
+              pure Nothing
+    else
+        pure Nothing
 
 -- | This is a convenience - if you're confident that the 'Edge' is actually a part of this
 --   'Topology', you should be ok. But it will crash if this is not true.
@@ -348,6 +352,12 @@ connectNodes :: (Int, Int) -> Topology -> Maybe Topology
 connectNodes (a, b) t = do
     let t' = unTopology t
     Just $ Topology $ Graph.insEdge (a, b, BridgeLabel ()) t'
+
+isValidNode :: Topology -> Int -> Bool
+isValidNode (Topology g) n = Graph.gelem n g
+
+hasNeighbors :: Topology -> Int -> Bool
+hasNeighbors (Topology g) n = (not . null) $ Graph.neighbors g n
 
 -- | How many nodes are in the Topology matching this predicate?
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
