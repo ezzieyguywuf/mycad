@@ -133,13 +133,8 @@ prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyVertices = doesNotModifyX T.getVertices
 
 prop_doesNotModifyVertices' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyVertices' run mod initial = evalState test prepped
+prop_doesNotModifyVertices' run mod initial = doesNotModifyX T.getVertices (mod a) prepped
     where (a, prepped) = runState run initial
-          test = do
-              xs  <- gets T.getVertices
-              mod a
-              xs' <- gets T.getVertices
-              pure (xs' == xs)
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges = doesNotModifyX T.getEdges
