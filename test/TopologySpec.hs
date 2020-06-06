@@ -51,6 +51,15 @@ spec = do
                 property (prop_doesNotModifyEdges' prep' run)
             it "does not modify the Faces" $
                 property (prop_doesNotModifyFaces' prep' run)
+        context "an invalid Edge is provided" $ do
+            let prep' = do
+                    t <- get
+                    a <-prep
+                    put t
+                    pure a
+                run = T.makeRayEdge
+            it "returns Nothing" $
+                property (prop_returnsNothing $ prep' >>= run)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
