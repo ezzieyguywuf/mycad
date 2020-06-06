@@ -194,7 +194,19 @@ makeRayEdge' :: Edge -> TopoState Vertex
 makeRayEdge' e = fmap fromJust (makeRayEdge e)
 
 closeRayEdge :: Edge -> TopoState (Maybe Vertex)
-closeRayEdge = undefined
+closeRayEdge (Edge e) = do
+    t <- get
+    if isValidNode t e && ((length (Graph.neighbors (unTopology t) e)) == 1)
+        then do
+            v <- addNode EVertex
+            t <- get
+            let m = connectNodes (e, v) t
+            case m of
+                Just t' -> do put t'
+                              pure $ Just (Vertex v)
+                Nothing -> pure Nothing
+        else
+            pure Nothing
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
@@ -252,12 +264,12 @@ addEdgeToVertex (Vertex v1) = do
         Nothing -> pure Nothing
 
 vertexAdjacentEdges :: Topology -> Vertex -> [Edge]
-vertexAdjacentEdges t v = map Edge es
-    where es = getNodes isEdge t
+vertexAdjacentEdges (Topology g) (Vertex n) = map Edge es
+    where es = Graph.neighbors g n
 
 edgeAdjacentVertices :: Topology -> Edge -> [Vertex]
-edgeAdjacentVertices t e = map Vertex vs
-    where vs = getNodes isVertex t
+edgeAdjacentVertices (Topology g) (Edge n) = map Vertex vs
+    where vs = Graph.neighbors g n
 
 -- | Which 'Vertex' are adjacent to this 'Edge'?
 --   Results in an error if the Edge does not exist in the Topology
