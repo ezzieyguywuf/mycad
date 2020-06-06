@@ -7,3 +7,4 @@
 - Figure out better way to get "last X" from Topology or even Entity.
 - refactor Entity to use State monad better.
 - Add test for "If removeXXX called with non-existent XXX, nothing happens"
+- check out 'boxes' for prettyprinter using 'columns'
