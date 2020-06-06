@@ -357,7 +357,7 @@ hasNeighbors (Topology g) n = (not . null) $ Graph.neighbors g n
 
 -- | How many nodes are in the Topology matching this predicate?
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
-countNode p t = length . Graph.nodes $ Graph.labfilter p $ unTopology t
+countNode p = length . Graph.nodes . Graph.labfilter p . unTopology
 
 -- | Predicate, useful for countNode, and probably others
 isVertex :: NodeLabel -> Bool
