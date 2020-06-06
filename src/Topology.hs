@@ -173,7 +173,7 @@ addFreeEdge = do
 makeRayEdge :: Edge -> TopoState (Maybe Vertex)
 makeRayEdge (Edge e)= do
     t <- get
-    if (isValidNode t e) && not (hasNeighbors t e)
+    if isValidNode t e && not (hasNeighbors t e)
         then do
             v <- addNode EVertex
             t <- get
