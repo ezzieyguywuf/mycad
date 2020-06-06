@@ -172,11 +172,13 @@ addFreeEdge = do
 --   forever.
 makeRayEdge :: Edge -> TopoState (Maybe Vertex)
 makeRayEdge (Edge e)= do
-    v <- addNode EVertex
     t <- get
-    case (/= 0) . length . (Graph.neighbors (unTopology t)) $ e of
+    let ns = (/= 0) . length . (Graph.neighbors (unTopology t)) $ e
+    case ns of
         True -> (pure Nothing)
         False -> do
+            v <- addNode EVertex
+            t <- get
             let m = (connectNodes (v, e) t)
             case m of
                 Just t' -> do put t'
