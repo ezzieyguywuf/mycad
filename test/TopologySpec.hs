@@ -137,13 +137,13 @@ prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyVertices = doesNotModifyX T.getVertices
 
 prop_doesNotModifyVertices' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyVertices' = doesNotModifyX' T.getVertices
+prop_doesNotModifyVertices' = prep_doesNotModifyX T.getVertices
 
 prop_doesNotModifyEdges' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyEdges' = doesNotModifyX' T.getEdges
+prop_doesNotModifyEdges' = prep_doesNotModifyX T.getEdges
 
 prop_doesNotModifyFaces' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyFaces' = doesNotModifyX' T.getFaces
+prop_doesNotModifyFaces' = prep_doesNotModifyX T.getFaces
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges = doesNotModifyX T.getEdges
@@ -195,12 +195,11 @@ deltaXIsN getter n run initial = prep_deltaXIsN getter n noPrep run' initial
           run'  = \_ -> run
 
 prep_deltaXIsN :: TopoGetter a -> Int -> T.TopoState b -> TopoMod b c -> T.Topology -> Bool
-prep_deltaXIsN getter n prep mod initial = evalState test initial
+prep_deltaXIsN getter n prep run initial = evalState test initial
     where test = do
             b <- prep
             xs <- gets (length . getter)
-            mod b
-            xs' <- gets (length . getter)
+            xs' <- run b >> gets (length . getter)
             pure (xs' - xs == n)
 
 doesNotModifyX :: Eq a => TopoGetter a -> T.TopoState b -> T.Topology -> Bool
@@ -210,8 +209,8 @@ doesNotModifyX getter run initial = evalState test initial
             xs' <- run >> gets getter
             pure (xs' == xs)
 
-doesNotModifyX' :: Eq c => TopoGetter c -> T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-doesNotModifyX' getter prep run initial = evalState test initial
+prep_doesNotModifyX :: Eq c => TopoGetter c -> T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prep_doesNotModifyX getter prep run initial = evalState test initial
     where test = do
             a <- prep
             xs  <- gets getter
