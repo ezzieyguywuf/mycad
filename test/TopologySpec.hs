@@ -71,7 +71,7 @@ spec = do
             run  = T.closeRayEdge
             remove' = T.removeVertex . fromJust
         it "Is inversed by removeVertex, resulting in the orignal state" $
-            property (prop_addRemoveIdentity $ prep >>= run >>= remove')
+            property (prop_addRemoveIdentity'  prep (run >=> remove'))
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
