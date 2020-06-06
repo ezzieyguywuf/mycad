@@ -173,21 +173,17 @@ addFreeEdge = do
 makeRayEdge :: Edge -> TopoState (Maybe Vertex)
 makeRayEdge (Edge e)= do
     t <- get
-    if (isValidNode t e)
-       then
-       if (not $ hasNeighbors t e)
-          then do
-              v <- addNode EVertex
-              t <- get
-              let m = (connectNodes (v, e) t)
-              case m of
-                  Just t' -> do put t'
-                                pure $ Just (Vertex v)
-                  Nothing -> pure Nothing
-          else
-              pure Nothing
-    else
-        pure Nothing
+    if (isValidNode t e) && (not $ hasNeighbors t e)
+        then do
+            v <- addNode EVertex
+            t <- get
+            let m = connectNodes (v, e) t
+            case m of
+                Just t' -> do put t'
+                              pure $ Just (Vertex v)
+                Nothing -> pure Nothing
+        else
+            pure Nothing
 
 -- | This is a convenience - if you're confident that the 'Edge' is actually a part of this
 --   'Topology', you should be ok. But it will crash if this is not true.
