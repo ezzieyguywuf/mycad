@@ -66,6 +66,12 @@ spec = do
                 property (prop_doesNotModifyEdges $ prep' >>= run)
             it "does not modify the Faces" $
                 property (prop_doesNotModifyFaces $ prep' >>= run)
+    describe "closeRayEdge" $ do
+        let prep = T.addFreeEdge >>= T.makeRayEdge' >>= vertToAdjEdge
+            run  = T.closeRayEdge
+            remove' = T.removeVertex . fromJust
+        it "Is inversed by removeVertex, resulting in the orignal state" $
+            property (prop_addRemoveIdentity $ prep >>= run >>= remove')
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))

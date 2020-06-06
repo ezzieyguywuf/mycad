@@ -30,6 +30,7 @@ module Topology
 , addEdge
 , makeRayEdge
 , makeRayEdge'
+, closeRayEdge
 , addEdgeToVertex
 , removeVertex
 , removeEdge
@@ -191,6 +192,9 @@ makeRayEdge (Edge e)= do
 --   > makeRayEdge' e = makeRayEdge e >>= (pure . fromJust)
 makeRayEdge' :: Edge -> TopoState Vertex
 makeRayEdge' e = fmap fromJust (makeRayEdge e)
+
+closeRayEdge :: Edge -> TopoState (Maybe Vertex)
+closeRayEdge = undefined
 
 -- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
 --   it's "head" and one at its "tail".
