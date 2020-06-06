@@ -137,16 +137,13 @@ prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyVertices = doesNotModifyX T.getVertices
 
 prop_doesNotModifyVertices' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyVertices' run mod initial = doesNotModifyX T.getVertices (mod a) prepped
-    where (a, prepped) = runState run initial
+prop_doesNotModifyVertices' = doesNotModifyX' T.getVertices
 
 prop_doesNotModifyEdges' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyEdges' run mod initial = doesNotModifyX T.getEdges (mod a) prepped
-    where (a, prepped) = runState run initial
+prop_doesNotModifyEdges' = doesNotModifyX' T.getEdges
 
 prop_doesNotModifyFaces' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyFaces' run mod initial = doesNotModifyX T.getFaces (mod a) prepped
-    where (a, prepped) = runState run initial
+prop_doesNotModifyFaces' = doesNotModifyX' T.getFaces
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges = doesNotModifyX T.getEdges
@@ -212,6 +209,14 @@ doesNotModifyX getter run initial = evalState test initial
             xs <- gets getter
             xs' <- run >> gets getter
             pure (xs' == xs)
+
+doesNotModifyX' :: Eq c => TopoGetter c -> T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+doesNotModifyX' getter prep run initial = evalState test initial
+    where test = do
+            a <- prep
+            xs  <- gets getter
+            xs' <- run a >> gets getter
+            pure (xs == xs')
 
 vertToAdjEdge :: T.Vertex -> T.TopoState T.Edge
 vertToAdjEdge v = do
