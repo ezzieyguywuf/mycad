@@ -47,6 +47,10 @@ spec = do
                 property (prop_returnsNothing $ prep' >>= run)
             it "does not modify the Vertices" $
                 property (prop_doesNotModifyVertices' prep' run)
+            it "does not modify the Edges" $
+                property (prop_doesNotModifyEdges' prep' run)
+            it "does not modify the Faces" $
+                property (prop_doesNotModifyFaces' prep' run)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
@@ -134,6 +138,14 @@ prop_doesNotModifyVertices = doesNotModifyX T.getVertices
 
 prop_doesNotModifyVertices' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
 prop_doesNotModifyVertices' run mod initial = doesNotModifyX T.getVertices (mod a) prepped
+    where (a, prepped) = runState run initial
+
+prop_doesNotModifyEdges' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prop_doesNotModifyEdges' run mod initial = doesNotModifyX T.getEdges (mod a) prepped
+    where (a, prepped) = runState run initial
+
+prop_doesNotModifyFaces' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prop_doesNotModifyFaces' run mod initial = doesNotModifyX T.getFaces (mod a) prepped
     where (a, prepped) = runState run initial
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
