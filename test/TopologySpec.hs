@@ -41,11 +41,12 @@ spec = do
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces run')
         context "an Edge that is not a 'Free' Edge is provided'" $ do
-            let run = prep >>= T.makeRayEdge' >>= vertToAdjEdge >>= T.makeRayEdge
+            let prep' = prep >>= T.makeRayEdge' >>= vertToAdjEdge
+                run = T.makeRayEdge
             it "returns Nothing" $
-                property (prop_returnsNothing run)
+                property (prop_returnsNothing $ prep' >>= run)
             it "does not modify the Vertices" $
-                property (prop_doesNotModifyVertices run)
+                property (prop_doesNotModifyVertices' prep' run)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
@@ -130,6 +131,15 @@ prop_doesNotAddOrRemoveEdges = prep_deltaXIsN T.getEdges 0
 
 prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyVertices = doesNotModifyX T.getVertices
+
+prop_doesNotModifyVertices' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prop_doesNotModifyVertices' run mod initial = evalState test prepped
+    where (a, prepped) = runState run initial
+          test = do
+              xs  <- gets T.getVertices
+              mod a
+              xs' <- gets T.getVertices
+              pure (xs' == xs)
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges = doesNotModifyX T.getEdges
