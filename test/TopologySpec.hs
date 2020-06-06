@@ -40,9 +40,12 @@ spec = do
             property (prop_doesNotAddOrRemoveEdges prep T.makeRayEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces run')
-        it "returns Nothing if given an Edge that is not a FreeEdge" $ do
+        context "an Edge that is not a 'Free' Edge is provided'" $ do
             let run = prep >>= T.makeRayEdge' >>= vertToAdjEdge >>= T.makeRayEdge
-            property (prop_returnsNothing run)
+            it "returns Nothing" $
+                property (prop_returnsNothing run)
+            it "does not modify the Vertices" $
+                property (prop_doesNotModifyVertices run)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
