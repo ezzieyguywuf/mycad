@@ -91,9 +91,6 @@ prop_returnsNothing s t = evalState test t
             pure $ isNothing m
 
 prop_addRemoveIdentity :: T.TopoState a -> T.Topology -> Bool
---prop_addRemoveIdentity = prop_addRemoveIdentity' noPrep
-    --where noPrep = pure id
-          --run'  = \_ -> run
 prop_addRemoveIdentity run t = evalState test t
     where test = do
             s  <- get
