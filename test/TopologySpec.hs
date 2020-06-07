@@ -81,29 +81,6 @@ spec = do
             property (prop_addAdjacencyToEdge prep run')
         it "does not modify the Faces" $
             property (prop_doesNotModifyFaces $ prep >>= run)
-    describe "addEdge" $ do
-        it "Is inversed by removeEdge, resulting in the original state" $
-            property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
-        it "Adds two vertices" $
-            property (prop_addsTwoVertices T.addEdge)
-        it "Creates one new Edge" $
-            property (prop_addsOneEdge T.addEdge)
-        it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces T.addEdge)
-        it "Creates an Edge with two adjacent Vertices" $
-            -- Since we know that:
-            --
-            --     1. It only adds two vertices
-            --     2. It only adds one Edge
-            --     3. Does not modify Faces
-            --     4. It can be inversed using removeEdge - taking with the three above,
-            --        this means that the function did not modify any of the existing
-            --        Topology. Otherwise, the remove operation would result in the same
-            --        number of topological entities as before, but a different topology.
-            --
-            -- Then it is logical to infer that the Edge with two adjacent Vertices *must*
-            -- be the same as the Edge which was added.
-            property (prop_EdgeHasTwoAdjacentVertices T.addEdge)
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
@@ -136,9 +113,6 @@ prop_addsOneVertex = deltaXIsN T.getVertices 1
 
 prop_addsOneVertex' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
 prop_addsOneVertex' = prep_deltaXIsN T.getVertices 1
-
-prop_addsTwoVertices :: T.TopoState a -> T.Topology -> Bool
-prop_addsTwoVertices = deltaXIsN T.getVertices 2
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
@@ -180,13 +154,6 @@ prop_addAdjacencyToEdge prep run initial = evalState test initial
             v <- run e
             t <- get
             pure $ elem v $ T.edgeAdjacentVertices t e
-
-prop_EdgeHasTwoAdjacentVertices :: T.TopoState T.Edge -> T.Topology -> Bool
-prop_EdgeHasTwoAdjacentVertices s t = evalState test t
-    where test = do
-            e <- s
-            vs <- gets (flip T.adjVertToEdge e)
-            pure ((length vs) == 2)
 
 -- ===========================================================================
 --                            Helper Functions

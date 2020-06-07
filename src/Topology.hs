@@ -27,7 +27,6 @@ module Topology
 , emptyTopology
 , addFreeVertex
 , addFreeEdge
-, addEdge
 , makeRayEdge
 , closeRayEdge
 , removeVertex
@@ -199,19 +198,6 @@ closeRayEdge (Edge e) = do
         else
             pure Nothing
 
--- | Adds a single 'Edge' to the 'Topology'. This 'Edge' will have two 'Vertex', one at
---   it's "head" and one at its "tail".
-addEdge :: TopoState Edge
-addEdge = do
-    v1 <- addNode EVertex
-    v2 <- addNode EVertex
-    e  <- addNode EEdge
-    t  <- get
-    -- fromJust should be safe here since we just added v1 and v2
-    let t' = fromJust $ connectNodes (v1, e) t
-    put $ fromJust $ connectNodes (e, v2) t'
-    pure $ Edge e
-
 -- | If the Edge does not exist, does nothing.
 --
 --   __WARNING__
@@ -225,7 +211,7 @@ addEdge = do
 --
 --   This allows for the following identity to hold true for any given starting state @t@:
 --
---   >>> execState (addEdge >> removeEdge) t == t
+--   >>> execState (addFreeEdge >> removeEdge) t == t
 --   True
 removeEdge :: Edge -> TopoState ()
 removeEdge e = do
@@ -418,3 +404,7 @@ instance Arbitrary Topology where
               t4 = execState addFreeVertex t2            -- HalfEdge plus two free Vertex
               t5 = execState addEdge t3                  -- Two independent HalfEdge
               t6 = execState addEdge t4                  -- two independent HalfEdge, two free Vertex
+              addEdge = addFreeEdge >>= makeRayEdge' >>= closeRayEdge
+              makeRayEdge' e = do
+                    makeRayEdge e
+                    pure e
