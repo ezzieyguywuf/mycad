@@ -27,6 +27,7 @@ module Topology
 , emptyTopology
 , addFreeVertex
 , addFreeEdge
+, addRayEdge
 , makeRayEdge
 , closeRayEdge
 , removeVertex
@@ -161,6 +162,9 @@ addFreeEdge :: TopoState Edge
 addFreeEdge = do
     e <- addNode EEdge
     pure $ Edge e
+
+addRayEdge :: Vertex -> TopoState (Maybe Edge)
+addRayEdge = undefined
 
 -- | Takes a "free" 'Edge' - that is, one with zero adjacencies - and creates a new
 --   'Vertex' that it is adajacent to

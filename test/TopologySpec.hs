@@ -80,6 +80,12 @@ spec = do
             property (prop_addAdjacencyToEdge prep run')
         it "does not modify the Faces" $
             property (prop_doesNotModifyFaces $ prep >>= run)
+    describe "addRayEdge" $ do
+        let prep   = T.addFreeVertex
+            run    = T.addRayEdge
+            remove = T.removeEdge
+        it "Is inversed by removeEdge, resulting in the orignal state" $
+            property (prop_addRemoveIdentity'  prep (run >=> (remove . fromJust)))
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
