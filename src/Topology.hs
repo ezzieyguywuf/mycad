@@ -138,20 +138,6 @@ addFreeVertex = do
     pure $ Vertex n
 
 -- | If the Vertex does not exist, this does nothing
---
---   __WARNING__
---   This does __not__ check for any "hanging" adjacencies. In other words, if there was
---   something that
---
---      1. /was/ adjacent to this 'Vertex'
---      2. now it's not ajacent to /anything/
---
---   it will still be in the Topology.
---
---   This allows for the following identity to hold true for any given starting state @t@:
---
---   >>> execState (addFreeVertex >>= removeVertex) t == t
---   True
 removeVertex :: Vertex -> TopoState ()
 removeVertex (Vertex n) = do
     t <- gets unTopology
