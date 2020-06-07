@@ -172,7 +172,7 @@ prop_addAdjacencyToVertex prep run initial = evalState test initial
             v <- prep
             e <- run v
             t <- get
-            pure $ elem v $ T.edgeAdjacentVertices t e
+            pure $ elem e $ T.vertexAdjacentEdges t v
 
 -- ===========================================================================
 --                            Helper Functions
