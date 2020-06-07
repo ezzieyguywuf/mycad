@@ -95,6 +95,20 @@ spec = do
             property (prop_addAdjacencyToVertex prep run')
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces' prep run)
+        context "an invalid Edge is provided" $ do
+            let prep' = do
+                    t <- get
+                    a <-prep
+                    put t
+                    pure a
+            it "returns Nothing" $
+                property (prop_returnsNothing $ prep' >>= run)
+            it "does not modify the Vertices" $
+                property (prop_doesNotModifyVertices $ prep' >>= run)
+            it "does not modify the Edges" $
+                property (prop_doesNotModifyEdges $ prep' >>= run)
+            it "does not modify the Faces" $
+                property (prop_doesNotModifyFaces $ prep' >>= run)
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
