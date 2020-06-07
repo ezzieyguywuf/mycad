@@ -83,9 +83,18 @@ spec = do
     describe "addRayEdge" $ do
         let prep   = T.addFreeVertex
             run    = T.addRayEdge
+            run'   = T.addRayEdge >=> (pure . fromJust)
             remove = T.removeEdge
         it "Is inversed by removeEdge, resulting in the orignal state" $
             property (prop_addRemoveIdentity'  prep (run >=> (remove . fromJust)))
+        it "Does not modify the Vertices" $
+            property (prop_doesNotModifyVertices' prep run)
+        it "Adds a single Edge" $
+            property (prop_addsOneEdge (prep >>= run))
+        it "Makes the Vertex adjacent to the added Edge" $
+            property (prop_addAdjacencyToVertex prep run')
+        it "Does not modify the Faces" $
+            property (prop_doesNotModifyFaces' prep run)
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
@@ -154,6 +163,14 @@ prop_addAdjacencyToEdge prep run initial = evalState test initial
     where test = do
             e <- prep
             v <- run e
+            t <- get
+            pure $ elem v $ T.edgeAdjacentVertices t e
+
+prop_addAdjacencyToVertex :: T.TopoState T.Vertex -> TopoMod T.Vertex T.Edge -> T.Topology -> Bool
+prop_addAdjacencyToVertex prep run initial = evalState test initial
+    where test = do
+            v <- prep
+            e <- run v
             t <- get
             pure $ elem v $ T.edgeAdjacentVertices t e
 
