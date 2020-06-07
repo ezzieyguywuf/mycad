@@ -164,7 +164,13 @@ addFreeEdge = do
     pure $ Edge e
 
 addRayEdge :: Vertex -> TopoState (Maybe Edge)
-addRayEdge = undefined
+addRayEdge (Vertex n) = do
+    e <- addNode EEdge
+    t <- get
+    let m = connectNodes (n, e) t
+    case m of
+        Just t' -> put t' >> pure (Just (Edge e))
+        Nothing -> pure Nothing
 
 -- | Takes a "free" 'Edge' - that is, one with zero adjacencies - and creates a new
 --   'Vertex' that it is adajacent to
@@ -203,28 +209,10 @@ closeRayEdge (Edge e) = do
             pure Nothing
 
 -- | If the Edge does not exist, does nothing.
---
---   __WARNING__
---   This __will__ delete any "hanging" adjacencies. In other words, if there was
---   something that:
---
---      1. /was/ adjacent to this Edge
---      2. now is not adjacent to /anything/
---
---   then it will also be deleted.
---
---   This allows for the following identity to hold true for any given starting state @t@:
---
---   >>> execState (addFreeEdge >> removeEdge) t == t
---   True
 removeEdge :: Edge -> TopoState ()
-removeEdge e = do
-    let n = getEdgeID e
+removeEdge (Edge n) = do
     t <- gets unTopology
-    let vs = Graph.neighbors t n
-        t' = Graph.delNode n t
-        ns = filter ((== 0) . length . (Graph.neighbors t')) vs
-    put $ Topology $ foldr Graph.delNode t' ns
+    put (Topology $ Graph.delNode n t)
     pure ()
 
 vertexAdjacentEdges :: Topology -> Vertex -> [Edge]
