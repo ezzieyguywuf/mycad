@@ -30,7 +30,6 @@ module Topology
 , addEdge
 , makeRayEdge
 , closeRayEdge
-, addEdgeToVertex
 , removeVertex
 , removeEdge
   -- * Inspection functions
@@ -237,23 +236,6 @@ removeEdge e = do
         ns = filter ((== 0) . length . (Graph.neighbors t')) vs
     put $ Topology $ foldr Graph.delNode t' ns
     pure ()
-
--- | Adds an 'Edge' to an existing 'Vertex'.
---
---   Returns 'Nothing' if 'Vertex' does not exist
---
---   'Edge' will have a 'Vertex' on the other side, for a total of two adjacent 'Vertex',
---   including the one it was added it.
-addEdgeToVertex :: Vertex -> TopoState (Maybe Edge)
-addEdgeToVertex (Vertex v1) = do
-    v2 <- addNode EVertex
-    e  <- addNode EEdge
-    t <- get
-    let m = (connectNodes (v1, e) t) >>= (connectNodes (e, v2))
-    case m of
-        Just t' -> do put t'
-                      pure $ Just (Edge e)
-        Nothing -> pure Nothing
 
 vertexAdjacentEdges :: Topology -> Vertex -> [Edge]
 vertexAdjacentEdges (Topology g) (Vertex n) = map Edge es

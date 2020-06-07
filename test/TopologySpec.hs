@@ -104,23 +104,6 @@ spec = do
             -- Then it is logical to infer that the Edge with two adjacent Vertices *must*
             -- be the same as the Edge which was added.
             property (prop_EdgeHasTwoAdjacentVertices T.addEdge)
-    describe "addEdgeToVertex" $ do
-        it "Is inversed by removeEdge, resulting in the original state" $ do
-            -- "fromJust" should be safe because we'ne adding the Vertex before adding the
-            -- Edge to it
-            let run = T.addFreeVertex >>= T.addEdgeToVertex >>= (pure . fromJust)>>= T.removeEdge
-            property (prop_addRemoveIdentity run)
-        it "Adds a single Vertex" $
-            property (prop_addsOneVertex' T.addFreeVertex T.addEdgeToVertex)
-        it "Adds a single Edge" $
-            -- Note, we've already tested that addFreeVertex does not modify Edge
-            property (prop_addsOneEdge (T.addFreeVertex >>= T.addEdgeToVertex))
-        it "Does not modify Faces" $
-            -- Note, we've already tested that addFreeVertex does not modify Face
-            property (prop_doesNotModifyFaces (T.addFreeVertex >>= T.addEdgeToVertex))
-        it "Creates an Edge with two adjacent Vertices" $
-            property (prop_EdgeHasTwoAdjacentVertices' (T.addFreeVertex >>= T.addEdgeToVertex))
-
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
@@ -204,15 +187,6 @@ prop_EdgeHasTwoAdjacentVertices s t = evalState test t
             e <- s
             vs <- gets (flip T.adjVertToEdge e)
             pure ((length vs) == 2)
-
-prop_EdgeHasTwoAdjacentVertices' :: T.TopoState (Maybe T.Edge) -> T.Topology -> Bool
-prop_EdgeHasTwoAdjacentVertices' s t = evalState test t
-    where test = do
-            m <- s
-            case m of
-                Just e -> do vs <- gets (flip T.adjVertToEdge e)
-                             pure ((length vs) == 2)
-                Nothing -> pure False
 
 -- ===========================================================================
 --                            Helper Functions
