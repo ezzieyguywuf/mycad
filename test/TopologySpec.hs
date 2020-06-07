@@ -70,8 +70,15 @@ spec = do
         let prep = T.addFreeEdge >>= T.makeRayEdge' >>= vertToAdjEdge
             run  = T.closeRayEdge
             remove' = T.removeVertex . fromJust
+            run' e = fmap fromJust (T.closeRayEdge e)
         it "Is inversed by removeVertex, resulting in the orignal state" $
             property (prop_addRemoveIdentity'  prep (run >=> remove'))
+        it "Adds one vertex" $
+            property (prop_addsOneVertex' prep run)
+        it "Makes the Edge adjacent to the added Vertex" $
+            property (prop_addAdjacencyToEdge prep run')
+        it "does not modify the Faces" $
+            property (prop_doesNotModifyFaces $ prep >>= run)
     describe "addEdge" $ do
         it "Is inversed by removeEdge, resulting in the original state" $
             property (prop_addRemoveIdentity (T.addEdge >>= T.removeEdge))
