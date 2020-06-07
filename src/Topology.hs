@@ -29,7 +29,6 @@ module Topology
 , addFreeEdge
 , addEdge
 , makeRayEdge
-, makeRayEdge'
 , closeRayEdge
 , addEdgeToVertex
 , removeVertex
@@ -185,13 +184,6 @@ makeRayEdge (Edge e)= do
                 Nothing -> pure Nothing
         else
             pure Nothing
-
--- | This is a convenience - if you're confident that the 'Edge' is actually a part of this
---   'Topology', you should be ok. But it will crash if this is not true.
---
---   > makeRayEdge' e = makeRayEdge e >>= (pure . fromJust)
-makeRayEdge' :: Edge -> TopoState Vertex
-makeRayEdge' e = fmap fromJust (makeRayEdge e)
 
 closeRayEdge :: Edge -> TopoState (Maybe Vertex)
 closeRayEdge (Edge e) = do

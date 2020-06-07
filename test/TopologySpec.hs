@@ -6,6 +6,8 @@ import qualified Topology as T
 import Control.Monad.State
 import Data.Maybe (fromJust, isNothing)
 
+makeRayEdge' e = fmap fromJust (T.makeRayEdge e)
+
 spec :: Spec
 spec = do
     describe "addFreeVertex" $ do
@@ -28,20 +30,20 @@ spec = do
             property (prop_doesNotModifyFaces T.addFreeEdge)
     describe "makeRayEdge" $ do
         let prep  = T.addFreeEdge
-            run = T.makeRayEdge' >=> T.removeVertex
-            run'  = T.addFreeEdge >>= T.makeRayEdge'
+            run = makeRayEdge' >=> T.removeVertex
+            run'  = T.addFreeEdge >>= makeRayEdge'
         it "Is inversed by removeVertex, resulting in the original state" $
             property (prop_addRemoveIdentity' prep run)
         it "Adds one vertex" $
             property (prop_addsOneVertex run')
         it "Makes the Edge adjacent to the added Vertex" $
-            property (prop_addAdjacencyToEdge prep T.makeRayEdge')
+            property (prop_addAdjacencyToEdge prep makeRayEdge')
         it "Does not add or subtract any Edges" $
             property (prop_doesNotAddOrRemoveEdges prep T.makeRayEdge)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces run')
         context "an Edge that is not a 'Free' Edge is provided'" $ do
-            let prep' = prep >>= T.makeRayEdge' >>= vertToAdjEdge
+            let prep' = prep >>= makeRayEdge' >>= vertToAdjEdge
                 run = T.makeRayEdge
             it "returns Nothing" $
                 property (prop_returnsNothing $ prep' >>= run)
@@ -67,7 +69,7 @@ spec = do
             it "does not modify the Faces" $
                 property (prop_doesNotModifyFaces $ prep' >>= run)
     describe "closeRayEdge" $ do
-        let prep = T.addFreeEdge >>= T.makeRayEdge' >>= vertToAdjEdge
+        let prep = T.addFreeEdge >>= makeRayEdge' >>= vertToAdjEdge
             run  = T.closeRayEdge
             remove' = T.removeVertex . fromJust
             run' e = fmap fromJust (T.closeRayEdge e)
