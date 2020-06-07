@@ -6,10 +6,9 @@ import qualified Topology as T
 import Control.Monad.State
 import Data.Maybe (fromJust, isNothing)
 
-makeRayEdge' e = fmap fromJust (T.makeRayEdge e)
-
 spec :: Spec
 spec = do
+    let makeRayEdge' e = fmap fromJust (T.makeRayEdge e)
     describe "addFreeVertex" $ do
         it "Is inversed by removeVertex, resulting in original state" $
             property (prop_addRemoveIdentity (T.addFreeVertex >>= T.removeVertex))
