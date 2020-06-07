@@ -151,12 +151,17 @@ addFreeEdge = do
 
 addRayEdge :: Vertex -> TopoState (Maybe Edge)
 addRayEdge (Vertex n) = do
-    e <- addNode EEdge
     t <- get
-    let m = connectNodes (n, e) t
-    case m of
-        Just t' -> put t' >> pure (Just (Edge e))
-        Nothing -> pure Nothing
+    if isValidNode t n
+        then do
+            e <- addNode EEdge
+            t <- get
+            let m = connectNodes (n, e) t
+            case m of
+                Just t' -> put t' >> pure (Just (Edge e))
+                Nothing -> pure Nothing
+        else
+            pure Nothing
 
 -- | Takes a "free" 'Edge' - that is, one with zero adjacencies - and creates a new
 --   'Vertex' that it is adajacent to
