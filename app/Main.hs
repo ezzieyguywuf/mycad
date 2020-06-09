@@ -88,10 +88,20 @@ act = do
             -- Wireframe mode
             {-glPolygonMode GL_FRONT_AND_BACK GL_LINE-}
 
-            -- An openGL-compatible string containing the name of our Uniform
+            -- An openGL-compatible string containing the name of our Uniforms
             ourColor <- newCString "ourColor"
+            texture0 <- newCString "texture0"
+            texture1 <- newCString "texture1"
 
-            texture <- loadTexture "res/container.jpg"
+            texture0_id <- loadTexture "res/container.jpg"
+            texture1_id <- loadTexture "res/awesomeface.png"
+
+            -- Tell openGL about our Uniforms
+            loc0 <- glGetUniformLocation shaderProgram texture0
+            loc1 <- glGetUniformLocation shaderProgram texture1
+            glUniform1i loc0 0
+            glUniform1i loc1 1
+
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -107,7 +117,7 @@ act = do
                         glUseProgram shaderProgram
 
                         -- Bind the texture we want to use
-                        glBindTexture GL_TEXTURE_2D texture
+                        glBindTexture GL_TEXTURE_2D texture0_id
                         -- draw the triangle.
                         glBindVertexArray vao
                         glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr
