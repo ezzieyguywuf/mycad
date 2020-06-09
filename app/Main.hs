@@ -13,7 +13,7 @@ import Foreign
 import Foreign.C.String (withCAStringLen, newCString)
 
 -- For loading images
-import Codec.Picture ( readImage 
+import Codec.Picture ( readImage
                      , generateImage
                      , convertRGB8
                      , DynamicImage(..)
@@ -89,8 +89,9 @@ act = do
             {-glPolygonMode GL_FRONT_AND_BACK GL_LINE-}
 
             -- An openGL-compatible string containing the name of our Uniform
-
             ourColor <- newCString "ourColor"
+
+            texture <- loadTexture "res/container.jpg"
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -105,6 +106,8 @@ act = do
                         -- Use our program
                         glUseProgram sProg1
 
+                        -- Bind the texture we want to use
+                        glBindTexture GL_TEXTURE_2D texture
                         -- draw the triangle.
                         glBindVertexArray vao
                         glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr
