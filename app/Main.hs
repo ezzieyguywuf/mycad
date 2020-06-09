@@ -41,7 +41,9 @@ act = do
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
     maybeWindow <- GLFW.createWindow winWidth winHeight winTitle Nothing Nothing
     case maybeWindow of
-        Nothing -> putStrLn "Failed to create a GLFW window!"
+        Nothing -> putStrLn "Failed to create a GLFW window!" >>
+                   putStrLn "  are you sure glfw is installed?" >>
+                   putStrLn "  if you're using Intel, you may need to enable software rendering"
         Just window -> do
             -- enable keys
             GLFW.setKeyCallback window (Just keypressed )
@@ -85,6 +87,9 @@ act = do
                            ] :: [GLuint]
 
             vao <- makeVertices vertices indices
+
+            -- Wireframe mode
+            glPolygonMode GL_FRONT_AND_BACK GL_LINE
 
             -- enter our main loop
             let loop = do
