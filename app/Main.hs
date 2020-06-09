@@ -77,14 +77,15 @@ act = do
             glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE threeFloats nullPtr
             glEnableVertexAttribArray 0
 
-            let vertices = [  0.5,  0.5, 0.0 -- Top-Right
-                           ,  0.5, -0.5, 0.0 -- Bottom-Right
-                           , -0.5, -0.5, 0.0 -- Bottom-Left
-                           , -0.5,  0.5, 0.0 -- Top-Left
+            let vertices = [  0.5,  0.5, 0.0 
+                           ,  0.75, 0.0, 0.0
+                           ,  0.0,  0.0, 0.0
+                           , -0.5,  0.5, 0.0
+                           , -0.75,  0.0, 0.0
                            ] :: [GLfloat]
 
             let indices  = [ 0, 1, 2
-                           , 2, 0, 3
+                           , 2, 3, 4
                            ] :: [GLuint]
 
             vao <- makeVertices vertices indices
