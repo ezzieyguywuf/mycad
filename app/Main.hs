@@ -12,6 +12,17 @@ import Foreign
 -- Converts Haskell strings to C-strings
 import Foreign.C.String (withCAStringLen, newCString)
 
+-- For loading images
+import Codec.Picture ( readImage 
+                     , generateImage
+                     , convertRGB8
+                     , DynamicImage(..)
+                     , Image(..)
+                     , PixelRGB8(..))
+-- For doing silly things with vector pointers
+import qualified Data.Vector.Storable as VS
+
+
 winWidth = 800
 
 winHeight = 600
@@ -62,13 +73,15 @@ act = do
             glDeleteShader vs
             glDeleteShader fs
 
-            --          positions           colors
-            let vs = [ -0.5, -0.5, 0.0, 1.0, 0.0, 0.0
-                     ,  0.5, -0.5, 0.0, 0.0, 1.0, 0.0
-                     ,  0.0,  0.5, 0.0, 0.0, 0.0, 1.0
+            --          positions           colors    Texture Coords
+            let vs = [  0.5,  0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0  -- top right
+                     ,  0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0  -- bottom right
+                     , -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0  -- bottom left
+                     , -0.5,  0.5, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0  -- top left
                      ] :: [GLfloat]
 
-            let inds  = [0, 1, 2] :: [GLuint]
+            let inds  = [ 0, 1, 2
+                        , 2, 3, 0] :: [GLuint]
 
             vao <- makeVertices vs inds
 
@@ -94,7 +107,7 @@ act = do
 
                         -- draw the triangle.
                         glBindVertexArray vao
-                        glDrawElements GL_TRIANGLES 3 GL_UNSIGNED_INT nullPtr
+                        glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
                         -- swap buffers and go again
                         GLFW.swapBuffers window
@@ -150,15 +163,22 @@ makeVertices vertices indices = do
     glBufferData GL_ARRAY_BUFFER verticesSize (castPtr verticesP) GL_STATIC_DRAW
     -- 3. Next, set our vertex attribute pointers
     let floatSize = fromIntegral $ sizeOf (0.0::GLfloat) :: GLsizei
+        nData     = 8
 
     -- position attribute
-    glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE (floatSize * 6) nullPtr
+    glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE (nData * floatSize) nullPtr
     glEnableVertexAttribArray 0
 
     -- color attribute
     let offset = castPtr $ plusPtr nullPtr (fromIntegral $ 3*floatSize)
-    glVertexAttribPointer 1 3 GL_FLOAT GL_FALSE (floatSize * 6) offset
+    glVertexAttribPointer 1 3 GL_FLOAT GL_FALSE (nData * floatSize) offset
     glEnableVertexAttribArray 1
+
+    -- texture attribute
+    let sixFloatOffset = castPtr $ plusPtr nullPtr (fromIntegral $ 6*floatSize)
+    glVertexAttribPointer 2 2 GL_FLOAT GL_FALSE (nData * floatSize) sixFloatOffset
+    glEnableVertexAttribArray 2
+
 
     -- Prep the indices for use in the EBO
     let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * (length indices)
@@ -258,3 +278,38 @@ loadShader shaderType source = do
             putStrLn $ prefix ++ " Shader Error:" ++
                         (map (toEnum.fromEnum) logBytes)
             pure 0
+
+generateGradient :: DynamicImage
+generateGradient = ImageRGB8 $ generateImage renderer 800 600
+    where renderer x y = PixelRGB8 (fromIntegral x) (fromIntegral y) 128
+
+getDynImage :: String -> IO DynamicImage
+getDynImage fname = do
+    check <- readImage fname
+    case check of
+        Left msg -> pure generateGradient
+        Right rawData -> pure rawData
+
+loadTexture :: String -> IO GLuint
+loadTexture fname = do
+    dynImage <- getDynImage fname
+    let ipixelrgb8 = convertRGB8 dynImage
+        iWidth = fromIntegral $ imageWidth ipixelrgb8
+        iHeight = fromIntegral $ imageHeight ipixelrgb8
+        iData = imageData ipixelrgb8
+
+    VS.unsafeWith iData (makeOpenGLTexture iWidth iHeight)
+
+makeOpenGLTexture :: GLsizei -> GLsizei -> Ptr a -> IO GLuint
+makeOpenGLTexture  w h ptr = do
+    textureP <- malloc
+    glGenTextures 1 textureP
+    texture <- peek textureP
+
+    glBindTexture GL_TEXTURE_2D texture
+    glTexImage2D GL_TEXTURE_2D 0 GL_RGB w h 0 GL_RGB GL_UNSIGNED_BYTE (castPtr ptr)
+
+    glGenerateMipmap GL_TEXTURE_2D
+    glBindTexture GL_TEXTURE_2D 0
+
+    pure texture
