@@ -54,16 +54,13 @@ act = do
             glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
             vs <- vertexShaderSource >>= loadShader GL_VERTEX_SHADER
-            fs1 <- loadShader GL_FRAGMENT_SHADER $ fragmentShaderSource "(1.0f, 0.5f, 0.2f, 1.0f)"
-            fs2 <- loadShader GL_FRAGMENT_SHADER $ fragmentShaderSource "(1.0f, 1.0f, 0.5f, 1.0f)"
+            fs <- fragmentShaderSource >>= loadShader GL_FRAGMENT_SHADER
 
-            sProg1 <- linkShadersToProgram vs fs1
-            sProg2 <- linkShadersToProgram vs fs2
+            sProg1 <- linkShadersToProgram vs fs
 
             -- I guess these aren't needed any more?
             glDeleteShader vs
-            glDeleteShader fs1
-            glDeleteShader fs2
+            glDeleteShader fs
 
             -- Tell openGL how to interpret the vertex data we're going to send
             --   size of each data block
@@ -114,7 +111,6 @@ act = do
                         glDrawElements GL_TRIANGLES 3 GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
 
-                        glUseProgram sProg2
                         glBindVertexArray va2
                         glDrawElements GL_TRIANGLES 3 GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
@@ -195,16 +191,8 @@ makeVertices vertices indices = do
 vertexShaderSource :: IO String
 vertexShaderSource = readFile "./src/VertexShader.glsl"
 
-fragmentShaderSource :: String -> String
-fragmentShaderSource values = unlines
-    [
-      "#version 330 core"
-    , "out vec4 FragColor;"
-    , "void main()"
-    , "{"
-    , "    FragColor = vec4"<> values <> ";"
-    , "}"
-    ]
+fragmentShaderSource :: IO String
+fragmentShaderSource = readFile "./src/FragmentShader.glsl"
 
 linkShadersToProgram :: GLuint -> GLuint -> IO GLuint
 linkShadersToProgram shader1 shader2 = do
