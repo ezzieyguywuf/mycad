@@ -93,15 +93,22 @@ act = do
             texture0 <- newCString "texture0"
             texture1 <- newCString "texture1"
 
+            -- Load the texture information into opengl
             texture0_id <- loadTexture "res/container.jpg"
             texture1_id <- loadTexture "res/awesomeface.png"
 
-            -- Tell openGL about our Uniforms
+            -- Find out where in the program the uniforms are located
             loc0 <- glGetUniformLocation shaderProgram texture0
             loc1 <- glGetUniformLocation shaderProgram texture1
+
+            -- We must call UseProgram before glUniformX, otherwise it won't
+            -- know which program to put it in!
+            glUseProgram shaderProgram
+
+            -- Bind the texture locations to the indices we want them
+            -- associated with in the fragment shader
             glUniform1i loc0 0
             glUniform1i loc1 1
-
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -117,8 +124,10 @@ act = do
                         glUseProgram shaderProgram
 
                         -- Bind the texture we want to use
+                        -- Tell openGL about our Uniforms
                         glActiveTexture GL_TEXTURE0
                         glBindTexture GL_TEXTURE_2D texture0_id
+
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D texture1_id
 
