@@ -53,14 +53,17 @@ act = do
             (x,y) <- GLFW.getFramebufferSize window
             glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
-            vs <- loadShader GL_VERTEX_SHADER vertexShaderSource
-            fs <- loadShader GL_FRAGMENT_SHADER fragmentShaderSource
+            vs <- vertexShaderSource >>= loadShader GL_VERTEX_SHADER
+            fs1 <- loadShader GL_FRAGMENT_SHADER $ fragmentShaderSource "(1.0f, 0.5f, 0.2f, 1.0f)"
+            fs2 <- loadShader GL_FRAGMENT_SHADER $ fragmentShaderSource "(1.0f, 1.0f, 0.5f, 1.0f)"
 
-            shaderProgram <- linkShadersToProgram vs fs
+            sProg1 <- linkShadersToProgram vs fs1
+            sProg2 <- linkShadersToProgram vs fs2
 
             -- I guess these aren't needed any more?
             glDeleteShader vs
-            glDeleteShader fs
+            glDeleteShader fs1
+            glDeleteShader fs2
 
             -- Tell openGL how to interpret the vertex data we're going to send
             --   size of each data block
@@ -77,21 +80,22 @@ act = do
             glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE threeFloats nullPtr
             glEnableVertexAttribArray 0
 
-            let vertices = [  0.5,  0.5, 0.0 
-                           ,  0.75, 0.0, 0.0
-                           ,  0.0,  0.0, 0.0
-                           , -0.5,  0.5, 0.0
-                           , -0.75,  0.0, 0.0
-                           ] :: [GLfloat]
+            let vs1 = [  0.5,  0.5, 0.0
+                      ,  0.75, 0.0, 0.0
+                      ,  0.25,  0.0, 0.0
+                      ] :: [GLfloat]
+            let vs2 = [ -0.25,  0.0, 0.0
+                      , -0.5,  0.5, 0.0
+                      , -0.75,  0.0, 0.0
+                      ] :: [GLfloat]
 
-            let indices  = [ 0, 1, 2
-                           , 2, 3, 4
-                           ] :: [GLuint]
+            let inds  = [0, 1, 2] :: [GLuint]
 
-            vao <- makeVertices vertices indices
+            va1 <- makeVertices vs1 inds
+            va2 <- makeVertices vs2 inds
 
             -- Wireframe mode
-            glPolygonMode GL_FRONT_AND_BACK GL_LINE
+            {-glPolygonMode GL_FRONT_AND_BACK GL_LINE-}
 
             -- enter our main loop
             let loop = do
@@ -105,9 +109,14 @@ act = do
                         glClear GL_COLOR_BUFFER_BIT
 
                         -- Step 4: draw the triangle.
-                        glUseProgram shaderProgram
-                        glBindVertexArray vao
-                        glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr
+                        glUseProgram sProg1
+                        glBindVertexArray va1
+                        glDrawElements GL_TRIANGLES 3 GL_UNSIGNED_INT nullPtr
+                        glBindVertexArray 0
+
+                        glUseProgram sProg2
+                        glBindVertexArray va2
+                        glDrawElements GL_TRIANGLES 3 GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
 
                         -- swap buffers and go again
@@ -140,7 +149,7 @@ makeVertices vertices indices = do
     -- Now we can "bind" the buffer. This allows us to write to it. In C, this
     -- was:
     --
-    --     glBindBuffer(GL_ARRAY_BUFFER, VBO);  
+    --     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     --     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBindBuffer GL_ARRAY_BUFFER vbo
     glBufferData GL_ARRAY_BUFFER verticesSize (castPtr verticesP) GL_STATIC_DRAW
@@ -183,24 +192,17 @@ makeVertices vertices indices = do
     -- 4. (in the loop) draw the object (see :main)
     pure vao
 
-vertexShaderSource :: String
-vertexShaderSource = unlines [
-      "#version 330 core"
-    , "layout (location = 0) in vec3 position;"
-    , "void main()"
-    , "{"
-    , "    gl_Position = vec4(position.x, position.y, position.z, 1.0);"
-    , "}"
-    ]
+vertexShaderSource :: IO String
+vertexShaderSource = readFile "./src/VertexShader.glsl"
 
-fragmentShaderSource :: String
-fragmentShaderSource = unlines 
+fragmentShaderSource :: String -> String
+fragmentShaderSource values = unlines
     [
       "#version 330 core"
     , "out vec4 FragColor;"
     , "void main()"
     , "{"
-    , "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);"
+    , "    FragColor = vec4"<> values <> ";"
     , "}"
     ]
 
