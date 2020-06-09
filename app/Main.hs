@@ -10,7 +10,7 @@ import Graphics.GL.Types
 -- This is for the Foreign Function Interface, ffi. This calls C-code
 import Foreign
 -- Converts Haskell strings to C-strings
-import Foreign.C.String (withCAStringLen)
+import Foreign.C.String (withCAStringLen, newCString)
 
 winWidth = 800
 
@@ -62,38 +62,22 @@ act = do
             glDeleteShader vs
             glDeleteShader fs
 
-            -- Tell openGL how to interpret the vertex data we're going to send
-            --   size of each data block
-            let threeFloats = fromIntegral $ sizeOf (0.0::GLfloat) * 3
-            --   0 = which vertex attribute. We defined this in the Vertex Shader code
-            --   3 = the size of the vertex attribute (how many)
-            --   GL_FLOAT = vertex attribute data type
-            --   GL_FALSE = something about normalizing the value
-            --   threeFloats = the "stride". Since we've only provided position
-            --                  data this is trivial, but if there was more
-            --                  data, this would allow us to jump from position
-            --                  data to next position data
-            --  nullPtr = offset from the beginning to start reading data.
-            glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE threeFloats nullPtr
-            glEnableVertexAttribArray 0
-
-            let vs1 = [  0.5,  0.5, 0.0
-                      ,  0.75, 0.0, 0.0
-                      ,  0.25,  0.0, 0.0
-                      ] :: [GLfloat]
-            let vs2 = [ -0.25,  0.0, 0.0
-                      , -0.5,  0.5, 0.0
-                      , -0.75,  0.0, 0.0
-                      ] :: [GLfloat]
+            --          positions           colors
+            let vs = [ -0.5, -0.5, 0.0, 1.0, 0.0, 0.0
+                     ,  0.5, -0.5, 0.0, 0.0, 1.0, 0.0
+                     ,  0.0,  0.5, 0.0, 0.0, 0.0, 1.0
+                     ] :: [GLfloat]
 
             let inds  = [0, 1, 2] :: [GLuint]
 
-            va1 <- makeVertices vs1 inds
-            va2 <- makeVertices vs2 inds
+            vao <- makeVertices vs inds
 
             -- Wireframe mode
             {-glPolygonMode GL_FRONT_AND_BACK GL_LINE-}
 
+            -- An openGL-compatible string containing the name of our Uniform
+
+            ourColor <- newCString "ourColor"
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -105,21 +89,23 @@ act = do
                         glClearColor 0.2 0.3 0.3 1.0
                         glClear GL_COLOR_BUFFER_BIT
 
-                        -- Step 4: draw the triangle.
+                        -- Use our program
                         glUseProgram sProg1
-                        glBindVertexArray va1
+
+                        -- draw the triangle.
+                        glBindVertexArray vao
                         glDrawElements GL_TRIANGLES 3 GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
-
-                        glBindVertexArray va2
-                        glDrawElements GL_TRIANGLES 3 GL_UNSIGNED_INT nullPtr
-                        glBindVertexArray 0
-
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop
             loop
     GLFW.terminate
+
+getColor :: IO GLfloat
+getColor = do
+    timeValue <- maybe 0 realToFrac <$> GLFW.getTime
+    pure $ sin timeValue / 2 + 0.5
 
 makeVertices:: [GLfloat] -> [GLuint] -> IO GLuint
 makeVertices vertices indices = do
@@ -163,9 +149,16 @@ makeVertices vertices indices = do
     glBindBuffer GL_ARRAY_BUFFER vbo
     glBufferData GL_ARRAY_BUFFER verticesSize (castPtr verticesP) GL_STATIC_DRAW
     -- 3. Next, set our vertex attribute pointers
-    let threeFloats = fromIntegral $ sizeOf (0.0::GLfloat) * 3
-    glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE threeFloats nullPtr
+    let floatSize = fromIntegral $ sizeOf (0.0::GLfloat) :: GLsizei
+
+    -- position attribute
+    glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE (floatSize * 6) nullPtr
     glEnableVertexAttribArray 0
+
+    -- color attribute
+    let offset = castPtr $ plusPtr nullPtr (fromIntegral $ 3*floatSize)
+    glVertexAttribPointer 1 3 GL_FLOAT GL_FALSE (floatSize * 6) offset
+    glEnableVertexAttribArray 1
 
     -- Prep the indices for use in the EBO
     let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * (length indices)
