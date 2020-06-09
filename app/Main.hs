@@ -67,7 +67,7 @@ act = do
             vs <- vertexShaderSource >>= loadShader GL_VERTEX_SHADER
             fs <- fragmentShaderSource >>= loadShader GL_FRAGMENT_SHADER
 
-            sProg1 <- linkShadersToProgram vs fs
+            shaderProgram <- linkShadersToProgram vs fs
 
             -- I guess these aren't needed any more?
             glDeleteShader vs
@@ -104,7 +104,7 @@ act = do
                         glClear GL_COLOR_BUFFER_BIT
 
                         -- Use our program
-                        glUseProgram sProg1
+                        glUseProgram shaderProgram
 
                         -- Bind the texture we want to use
                         glBindTexture GL_TEXTURE_2D texture
