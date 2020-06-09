@@ -10,7 +10,7 @@ import Graphics.GL.Types
 -- This is for the Foreign Function Interface, ffi. This calls C-code
 import Foreign
 -- Converts Haskell strings to C-strings
-import Foreign.C.String (newCAStringLen)
+import Foreign.C.String (withCAStringLen)
 
 winWidth = 800
 
@@ -53,8 +53,9 @@ act = do
             (x,y) <- GLFW.getFramebufferSize window
             glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
-            vs <- compileVertexShader
-            fs <- compileFragmentShader
+            vs <- loadShader GL_VERTEX_SHADER vertexShaderSource
+            fs <- loadShader GL_FRAGMENT_SHADER fragmentShaderSource
+
             shaderProgram <- linkShadersToProgram vs fs
 
             -- I guess these aren't needed any more?
@@ -202,82 +203,6 @@ fragmentShaderSource = unlines
     , "}"
     ]
 
-compileVertexShader :: IO GLuint
-compileVertexShader = do
-    -- No malloc needed this time, since glCreateShader doesn't require a
-    -- pointer.
-    --
-    --     unsigned int vertexShader;
-    --     vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    vertexShader <- glCreateShader GL_VERTEX_SHADER
-
-    -- This attaches our shader source code to the shader we created
-    -- C-equivalent:
-    --
-    --     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    (sourceP,len) <- newCAStringLen vertexShaderSource
-    linesPtrsPtr <- newArray [sourceP]
-    lengthsPtr <- newArray [fromIntegral len]
-    glShaderSource vertexShader 1 linesPtrsPtr lengthsPtr
-
-    -- This compiles the shader. C-equivalent
-    --
-    --     glCompileShader(vertexShader);
-    glCompileShader vertexShader
-
-    -- Let's check if the compile succeeded. C-equivalent
-    --
-    --     int  success;
-    --     char infoLog[512];
-    --     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    vertexSuccessP <- malloc
-    glGetShaderiv vertexShader GL_COMPILE_STATUS vertexSuccessP
-
-    -- C-equivalent:
-    --
-    --     if(!success)
-    --     {
-    --         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    --         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    --     }
-    vertexSuccess <- peek vertexSuccessP
-    when (vertexSuccess == GL_FALSE) $ do
-        putStrLn "Vertex Shader Compile Error:"
-        let infoLength = 512
-        resultP <- malloc
-        infoLog <- mallocArray (fromIntegral infoLength)
-        glGetShaderInfoLog vertexShader (fromIntegral infoLength) resultP infoLog
-        result <- fromIntegral <$> peek resultP
-        logBytes <- peekArray result infoLog
-        putStrLn (map (toEnum.fromEnum) logBytes)
-
-    pure vertexShader
-
-compileFragmentShader :: IO GLuint
-compileFragmentShader = do
-    fragmentShader <- glCreateShader GL_FRAGMENT_SHADER
-    (sourceP,len) <- newCAStringLen fragmentShaderSource
-
-    linesPtrsPtr <- newArray [sourceP]
-    lengthsPtr <- newArray [fromIntegral len]
-    glShaderSource fragmentShader 1 linesPtrsPtr lengthsPtr
-
-    glCompileShader fragmentShader
-    fragmentSuccessP <- malloc
-    glGetShaderiv fragmentShader GL_COMPILE_STATUS fragmentSuccessP
-    fragmentSuccess <- peek fragmentSuccessP
-    when (fragmentSuccess == GL_FALSE) $ do
-        putStrLn "Fragment Shader Compile Error:"
-        let infoLength = 512
-        resultP <- malloc
-        infoLog <- mallocArray (fromIntegral infoLength)
-        glGetShaderInfoLog fragmentShader (fromIntegral infoLength) resultP infoLog
-        result <- fromIntegral <$> peek resultP
-        logBytes <- peekArray result infoLog
-        putStrLn (map (toEnum.fromEnum) logBytes)
-
-    pure fragmentShader
-
 linkShadersToProgram :: GLuint -> GLuint -> IO GLuint
 linkShadersToProgram shader1 shader2 = do
     shaderProgram <- glCreateProgram
@@ -300,3 +225,52 @@ linkShadersToProgram shader1 shader2 = do
         putStrLn (map (toEnum.fromEnum) logBytes)
 
     pure shaderProgram
+
+-- | Given a shader type and a shader source, it gives you (Right id) of the
+-- successfully compiled shader, or (Left err) with the error message. In the
+-- error case, the shader id is deleted before the function returns to avoid
+-- accidentally leaking shader objects.
+loadShader :: GLenum -> String -> IO GLuint
+loadShader shaderType source = do
+    -- new shader object
+    shaderID <- glCreateShader shaderType
+
+    -- assign the source to the shader object
+    withCAStringLen source $ \(strP, strLen) ->
+        withArray [strP] $ \linesPtrsPtr ->
+            withArray [fromIntegral strLen] $ \lengthsPtr ->
+                glShaderSource shaderID 1 linesPtrsPtr lengthsPtr
+
+    -- compile and check success
+    glCompileShader shaderID
+    success <- alloca $ \successP -> do
+        glGetShaderiv shaderID GL_COMPILE_STATUS successP
+        peek successP
+    if success == GL_TRUE
+        -- success: we're done
+        then pure shaderID
+        -- failure: we get the log, delete the shader, and return the log.
+        else do
+            -- how many bytes the info log should be (including the '\0')
+            logLen <- alloca $ \logLenP -> do
+                glGetShaderiv shaderID GL_INFO_LOG_LENGTH logLenP
+                peek logLenP
+            -- space for the info log
+            logBytes <- allocaBytes (fromIntegral logLen) $ \logP -> do
+                -- space for the log reading result
+                alloca $ \resultP -> do
+                    -- Try to obtain the log bytes
+                    glGetShaderInfoLog shaderID logLen resultP logP
+                    -- this is how many bytes we actually got
+                    result <- fromIntegral <$> peek resultP
+                    peekArray result logP
+            -- delete the shader object and return the log
+            glDeleteShader shaderID
+            let prefix = case shaderType of
+                    GL_VERTEX_SHADER -> "Vertex"
+                    GL_GEOMETRY_SHADER -> "Geometry"
+                    GL_FRAGMENT_SHADER -> "Fragment"
+                    _ -> "Unknown Type"
+            putStrLn $ prefix ++ " Shader Error:" ++
+                        (map (toEnum.fromEnum) logBytes)
+            pure 0
