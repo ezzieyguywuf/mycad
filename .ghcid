@@ -1,2 +1,0 @@
---command="stack-bin ghci test/Spec.hs"
---command="stack-bin repl"
