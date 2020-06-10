@@ -1,0 +1,2 @@
+- do bounds check on getUniformLocation: if it fails, do nothing (maybe?) or
+  alert the coder.
