@@ -13,10 +13,6 @@ import GL_Helpers
 import Graphics.GL.Core33
 import Graphics.GL.Types
 
--- This is for the Foreign Function Interface, ffi. This calls C-code
-import Foreign
-import Foreign.C.String (newCString)
-
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
 import Linear.Matrix
