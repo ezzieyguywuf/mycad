@@ -27,12 +27,12 @@ main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
     when initWorked act
 
---          positions           colors    Texture Coords
+--          positions  Texture Coords
 vs :: [GLfloat]
-vs = [  0.5,  0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0  -- top right
-     ,  0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0  -- bottom right
-     , -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0  -- bottom left
-     , -0.5,  0.5, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0  -- top left
+vs = [  0.5,  0.5, 0.0, 1.0, 1.0  -- top right
+     ,  0.5, -0.5, 0.0, 1.0, 0.0  -- bottom right
+     , -0.5, -0.5, 0.0, 0.0, 0.0  -- bottom left
+     , -0.5,  0.5, 0.0, 0.0, 1.0  -- top left
      ]
 
 inds :: [GLuint]
