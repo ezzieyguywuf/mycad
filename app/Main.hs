@@ -18,7 +18,7 @@ import Graphics.GL.Types
 import Linear.V3
 import Linear.Matrix
 import qualified Linear.Quaternion as Quat
-{-import Linear.Projection-}
+import Linear.Projection
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -137,8 +137,14 @@ act = do
                             scale = 1.0
                             model = transpose $ mkTransformationMat (scale *!! rot) trans
                         putMatrix shaderProgram model "model"
-                        putMatrix shaderProgram (identity :: M44 Float) "view"
-                        putMatrix shaderProgram (identity :: M44 Float) "projection"
+                        let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) (0.0)
+                            trans = V3 0.0 0.0 0.0
+                            view  = transpose $ mkTransformationMat rot trans
+                        putMatrix shaderProgram view "view"
+                        {-let projection = ortho (-1) 1 1 (-1) 0.1 100.0-}
+                        let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
+                            projection = perspective (pi/2.0) aspectRatio 0.1 100.0
+                        putMatrix shaderProgram projection "projection"
 
                         -- draw the triangle.
                         glBindVertexArray vao
