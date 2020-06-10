@@ -159,7 +159,9 @@ act = do
 
                         --                    rotation     translation      scale
                         let rot = Quat.axisAngle (V3 1.0 0.0 0.0) (-1 * pi/3)
-                        modelMatrix shaderProgram rot (V3 0.0 0.0 0.0) 1.0
+                            trans = V3 0.0 0.0 0.0
+                            scale = 1.0
+                        modelMatrix shaderProgram rot trans scale
                         projectionMatrix shaderProgram (identity :: M44 Float)
 
                         -- draw the triangle.
