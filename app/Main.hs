@@ -77,31 +77,6 @@ inds :: [GLuint]
 inds  = [ 0, 1, 2
         , 2, 3, 0]
 
-modelMatrix :: GLuint -> Quat.Quaternion Float -> V3 Float -> Float -> IO ()
-modelMatrix shaderProgram rotation translation scale = do
-    -- First, calculate the transformation matrix
-    let rotM = fromQuaternion rotation :: M33 Float
-        transMatrix = transpose $ mkTransformationMat (scale *!! rotM) translation
-
-    -- Now do the openGL stuff
-    transP <- malloc
-    poke transP transMatrix
-
-    name <- newCString "model"
-    loc <- glGetUniformLocation shaderProgram name
-
-    glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
-
-projectionMatrix :: GLuint -> M44 Float -> IO ()
-projectionMatrix shaderProgram transMatrix = do
-    transP <- malloc
-    poke transP transMatrix
-
-    name <- newCString "view"
-    loc <- glGetUniformLocation shaderProgram name
-
-    glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
-
 winWIDTH = 800
 winHEIGHT = 600
 winTITLE = "LearnOpenGL Hello Triangle"
@@ -158,11 +133,12 @@ act = do
                         glBindTexture GL_TEXTURE_2D t2
 
                         --                    rotation     translation      scale
-                        let rot = Quat.axisAngle (V3 1.0 0.0 0.0) (-1 * pi/3)
+                        let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 0.0 0.0) (-1 * pi/3)
                             trans = V3 0.0 0.0 0.0
                             scale = 1.0
-                        modelMatrix shaderProgram rot trans scale
-                        projectionMatrix shaderProgram (identity :: M44 Float)
+                            model = transpose $ mkTransformationMat (scale *!! rot) trans
+                        putMatrix shaderProgram model "model"
+                        putMatrix shaderProgram (identity :: M44 Float) "view"
 
                         -- draw the triangle.
                         glBindVertexArray vao
