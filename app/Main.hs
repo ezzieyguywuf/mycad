@@ -17,10 +17,9 @@ import Graphics.GL.Types
 import Foreign
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
-{-import Linear.V3-}
-{-import Linear.V4-}
-{-import Linear.Quaternion-}
-{-import Linear.Quaternion-}
+import Linear.V3
+import Linear.Matrix
+import qualified Linear.Quaternion as Quat
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -38,6 +37,18 @@ inds :: [GLuint]
 inds  = [ 0, 1, 2
         , 2, 3, 0]
 
+transform :: IO ()
+transform = do
+    -- First, calculate the transformation matrix
+    let rotQ = Quat.axisAngle (V3 0.0 0.0 1.0) (pi/4) :: Quat.Quaternion Float
+        rotM = fromQuaternion rotQ :: M33 Float
+        translation = pure 0 :: V3 Float
+        scale = 0.5 :: Float
+        transMatrix = transpose $ mkTransformationMat (scale *!! rotM) translation
+
+    -- Now do the openGL stuff
+    transP <- malloc
+    poke transP transMatrix
 
 act :: IO()
 act = do
