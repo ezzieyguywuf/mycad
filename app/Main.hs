@@ -15,11 +15,13 @@ import Graphics.GL.Types
 
 -- This is for the Foreign Function Interface, ffi. This calls C-code
 import Foreign
+import Foreign.C.String (newCString)
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
 import Linear.Matrix
 import qualified Linear.Quaternion as Quat
+{-import Linear.Projection-}
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -37,25 +39,38 @@ inds :: [GLuint]
 inds  = [ 0, 1, 2
         , 2, 3, 0]
 
-transform :: IO ()
-transform = do
+modelMatrix :: GLuint -> Quat.Quaternion Float -> V3 Float -> Float -> IO ()
+modelMatrix shaderProgram rotation translation scale = do
     -- First, calculate the transformation matrix
-    let rotQ = Quat.axisAngle (V3 0.0 0.0 1.0) (pi/4) :: Quat.Quaternion Float
-        rotM = fromQuaternion rotQ :: M33 Float
-        translation = pure 0 :: V3 Float
-        scale = 0.5 :: Float
+    let rotM = fromQuaternion rotation :: M33 Float
         transMatrix = transpose $ mkTransformationMat (scale *!! rotM) translation
 
     -- Now do the openGL stuff
     transP <- malloc
     poke transP transMatrix
 
+    name <- newCString "model"
+    loc <- glGetUniformLocation shaderProgram name
+
+    glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
+
+projectionMatrix :: GLuint -> M44 Float -> IO ()
+projectionMatrix shaderProgram transMatrix = do
+    transP <- malloc
+    poke transP transMatrix
+
+    name <- newCString "view"
+    loc <- glGetUniformLocation shaderProgram name
+
+    glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
+
+winWIDTH = 800
+winHEIGHT = 600
+winTITLE = "LearnOpenGL Hello Triangle"
+
 act :: IO()
 act = do
-    let winWidth = 800
-        winHeight = 600
-        winTitle = "LearnOpenGL Hello Triangle"
-    maybeWindow <- glfwInit winWidth winHeight winTitle
+    maybeWindow <- glfwInit winWIDTH winHEIGHT winTITLE
     case maybeWindow of
         Nothing -> initFailMsg
         Just window -> do
@@ -103,6 +118,11 @@ act = do
 
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
+
+                        --                    rotation     translation      scale
+                        let rot = Quat.axisAngle (V3 1.0 0.0 0.0) (-1 * pi/3)
+                        modelMatrix shaderProgram rot (V3 0.0 0.0 0.0) 1.0
+                        projectionMatrix shaderProgram (identity :: M44 Float)
 
                         -- draw the triangle.
                         glBindVertexArray vao
