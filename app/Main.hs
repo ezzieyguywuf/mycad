@@ -138,6 +138,7 @@ act = do
                             model = transpose $ mkTransformationMat (scale *!! rot) trans
                         putMatrix shaderProgram model "model"
                         putMatrix shaderProgram (identity :: M44 Float) "view"
+                        putMatrix shaderProgram (identity :: M44 Float) "projection"
 
                         -- draw the triangle.
                         glBindVertexArray vao
