@@ -26,7 +26,7 @@ main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
 
 winWIDTH = 800
 winHEIGHT = 600
-winTITLE = "LearnOpenGL Hello Triangle"
+winTITLE = "LearnOpenGL Hello Cube!"
 
 act :: IO()
 act = do
