@@ -19,8 +19,15 @@ import Codec.Picture ( readImage
                      , DynamicImage(..)
                      , Image(..)
                      , PixelRGB8(..))
+
 -- For doing silly things with vector pointers
 import qualified Data.Vector.Storable as VS
+
+-- For Linear algebra...but really, like vectors and matrices and quaternions
+{-import Linear.V3-}
+{-import Linear.V4-}
+{-import Linear.Quaternion-}
+{-import Linear.Quaternion-}
 
 
 winWidth = 800
