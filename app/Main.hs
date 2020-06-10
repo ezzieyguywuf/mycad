@@ -1,6 +1,7 @@
 -- base
 import Control.Monad (when)
 import Control.Exception (bracket)
+import Data.Bits
 
 -- GLFW-b, qualified for clarity
 import qualified Graphics.UI.GLFW as GLFW
@@ -106,6 +107,9 @@ act = do
             mapTextureUnit shaderProgram 0 "texture0"
             mapTextureUnit shaderProgram 1 "texture1"
 
+            -- enable depth testing
+            glEnable GL_DEPTH_TEST
+
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -115,7 +119,7 @@ act = do
                         -- drawing
                         --   Background
                         glClearColor 0.2 0.3 0.3 1.0
-                        glClear GL_COLOR_BUFFER_BIT
+                        glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
                         -- Use our program
                         glUseProgram shaderProgram
