@@ -9,10 +9,10 @@ import qualified Graphics.UI.GLFW as GLFW
 -- helpers that we wrote
 import GLFW_Helpers
 import GL_Helpers
+import VertexData
 
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
-import Graphics.GL.Types
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
@@ -23,56 +23,6 @@ import Linear.Projection
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
     when initWorked act
-
---          positions  Texture Coords
-vs :: [GLfloat]
-vs = [  -- A cube
-       -0.5, -0.5, -0.5,  0.0, 0.0
-     ,  0.5, -0.5, -0.5,  1.0, 0.0
-     ,  0.5,  0.5, -0.5,  1.0, 1.0
-     ,  0.5,  0.5, -0.5,  1.0, 1.0
-     , -0.5,  0.5, -0.5,  0.0, 1.0
-     , -0.5, -0.5, -0.5,  0.0, 0.0
-
-     , -0.5, -0.5,  0.5,  0.0, 0.0
-     ,  0.5, -0.5,  0.5,  1.0, 0.0
-     ,  0.5,  0.5,  0.5,  1.0, 1.0
-     ,  0.5,  0.5,  0.5,  1.0, 1.0
-     , -0.5,  0.5,  0.5,  0.0, 1.0
-     , -0.5, -0.5,  0.5,  0.0, 0.0
-
-     , -0.5,  0.5,  0.5,  1.0, 0.0
-     , -0.5,  0.5, -0.5,  1.0, 1.0
-     , -0.5, -0.5, -0.5,  0.0, 1.0
-     , -0.5, -0.5, -0.5,  0.0, 1.0
-     , -0.5, -0.5,  0.5,  0.0, 0.0
-     , -0.5,  0.5,  0.5,  1.0, 0.0
-
-     ,  0.5,  0.5,  0.5,  1.0, 0.0
-     ,  0.5,  0.5, -0.5,  1.0, 1.0
-     ,  0.5, -0.5, -0.5,  0.0, 1.0
-     ,  0.5, -0.5, -0.5,  0.0, 1.0
-     ,  0.5, -0.5,  0.5,  0.0, 0.0
-     ,  0.5,  0.5,  0.5,  1.0, 0.0
-
-     , -0.5, -0.5, -0.5,  0.0, 1.0
-     ,  0.5, -0.5, -0.5,  1.0, 1.0
-     ,  0.5, -0.5,  0.5,  1.0, 0.0
-     ,  0.5, -0.5,  0.5,  1.0, 0.0
-     , -0.5, -0.5,  0.5,  0.0, 0.0
-     , -0.5, -0.5, -0.5,  0.0, 1.0
-
-     , -0.5,  0.5, -0.5,  0.0, 1.0
-     ,  0.5,  0.5, -0.5,  1.0, 1.0
-     ,  0.5,  0.5,  0.5,  1.0, 0.0
-     ,  0.5,  0.5,  0.5,  1.0, 0.0
-     , -0.5,  0.5,  0.5,  0.0, 0.0
-     , -0.5,  0.5, -0.5,  0.0, 1.0
-     ]
-
-inds :: [GLuint]
-inds  = [ 0, 1, 2
-        , 2, 3, 0]
 
 winWIDTH = 800
 winHEIGHT = 600
@@ -98,7 +48,7 @@ act = do
             glDeleteShader vshader
             glDeleteShader fshader
 
-            vao <- makeVertices vs inds
+            vao <- makeVertices vertices indices
 
             -- Load the texture information into opengl
             t1 <- loadTexture "res/container.jpg"
