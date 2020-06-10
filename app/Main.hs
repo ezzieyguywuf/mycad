@@ -128,8 +128,7 @@ act = do
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
 
-                        --                    rotation     translation      scale
-                        let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 0.0 0.0) (-1 * pi/3)
+                        let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) (-1 * pi/3)
                             trans = V3 0.0 0.0 0.0
                             scale = 1.0
                             model = transpose $ mkTransformationMat (scale *!! rot) trans
