@@ -16,9 +16,6 @@ import Graphics.GL.Types
 -- This is for the Foreign Function Interface, ffi. This calls C-code
 import Foreign
 
--- Converts Haskell strings to C-strings
-import Foreign.C.String (newCString)
-
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 {-import Linear.V3-}
 {-import Linear.V4-}
@@ -28,6 +25,19 @@ import Foreign.C.String (newCString)
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
     when initWorked act
+
+--          positions           colors    Texture Coords
+vs :: [GLfloat]
+vs = [  0.5,  0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0  -- top right
+     ,  0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0  -- bottom right
+     , -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0  -- bottom left
+     , -0.5,  0.5, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0  -- top left
+     ]
+
+inds :: [GLuint]
+inds  = [ 0, 1, 2
+        , 2, 3, 0]
+
 
 act :: IO()
 act = do
@@ -41,34 +51,18 @@ act = do
             glfwWindowInit window
 
             -- Compile and like our shaders
-            vs <- readFile "./src/VertexShader.glsl"
-                  >>= loadShader GL_VERTEX_SHADER
-            fs <- readFile "./src/FragmentShader.glsl"
-                  >>= loadShader GL_FRAGMENT_SHADER
+            vshader <- readFile "./src/VertexShader.glsl"
+                       >>= loadShader GL_VERTEX_SHADER
+            fshader <- readFile "./src/FragmentShader.glsl"
+                       >>= loadShader GL_FRAGMENT_SHADER
 
-            shaderProgram <- linkShadersToProgram vs fs
+            shaderProgram <- linkShadersToProgram vshader fshader
 
             -- I guess these aren't needed any more?
-            glDeleteShader vs
-            glDeleteShader fs
-
-            --          positions           colors    Texture Coords
-            let vs = [  0.5,  0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0  -- top right
-                     ,  0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0  -- bottom right
-                     , -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0  -- bottom left
-                     , -0.5,  0.5, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0  -- top left
-                     ] :: [GLfloat]
-
-            let inds  = [ 0, 1, 2
-                        , 2, 3, 0] :: [GLuint]
+            glDeleteShader vshader
+            glDeleteShader fshader
 
             vao <- makeVertices vs inds
-
-            -- Wireframe mode
-            {-glPolygonMode GL_FRONT_AND_BACK GL_LINE-}
-
-            -- An openGL-compatible string containing the name of our Uniforms
-            ourColor <- newCString "ourColor"
 
             -- Load the texture information into opengl
             t1 <- loadTexture "res/container.jpg"
