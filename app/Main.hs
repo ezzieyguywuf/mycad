@@ -132,7 +132,9 @@ act = do
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
 
-                        let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) (-1 * pi/3)
+                        time <- maybe 0 realToFrac <$> GLFW.getTime
+                        let theta = time
+                            rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
                             trans = V3 0.0 0.0 0.0
                             scale = 1.0
                             model = transpose $ mkTransformationMat (scale *!! rot) trans
@@ -141,7 +143,6 @@ act = do
                             trans = V3 0.0 0.0 0.0
                             view  = transpose $ mkTransformationMat rot trans
                         putMatrix shaderProgram view "view"
-                        {-let projection = ortho (-1) 1 1 (-1) 0.1 100.0-}
                         let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
                             projection = perspective (pi/2.0) aspectRatio 0.1 100.0
                         putMatrix shaderProgram projection "projection"
