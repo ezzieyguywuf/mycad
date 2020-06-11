@@ -88,12 +88,8 @@ act = do
                         placeModel shaderProgram
                         placeCamera shaderProgram
                         makeProjection shaderProgram
-                        -- draw the cube.
-                        {-glBindVertexArray vao-}
-                        {-glDrawArrays GL_TRIANGLES 0 36-}
-                        {-glBindVertexArray 0-}
 
-                        -- and the square
+                        -- Draw the first cube
                         glBindVertexArray vao2
                         let len = fromIntegral $ length cubeIndices
                         glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
