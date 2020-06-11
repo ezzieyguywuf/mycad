@@ -23,6 +23,7 @@ import Linear.Projection
 
 import Foreign
 import Data.IORef
+import Data.Foldable
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -122,6 +123,17 @@ initCamera = LookAt { getPosition = (V3 0 (-35) (-45))
                     , getUp  = (V3 0 0 1)
                     , getDirection = (V3 0 0 0)
                     }
+
+moveCamera :: IORef Camera -> Float -> Float -> IO ()
+moveCamera ioCam yaw pitch = do
+    cam <- readIORef ioCam
+    let [x, y, z'] = toList $ getPosition cam
+        x' = (cos yaw) + x
+        y' = (sin yaw) + y
+        newCam = LookAt {getPosition = (V3 x' y' z'),
+                         getUp = getUp cam,
+                         getDirection = getDirection cam}
+    writeIORef ioCam newCam
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
