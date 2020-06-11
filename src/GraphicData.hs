@@ -23,11 +23,19 @@ data VertexAttribute =
     deriving (Show)
 
 type DataRow = [VertexAttribute]
+
 type GraphicData = [DataRow]
 
-getIndex :: VertexAttribute -> GLuint
-getIndex (Position _) = 0
-getIndex (Texture _)  = 1
+data RowData = RowData
+    {
+      getIndex :: GLuint
+    , getRowSize :: GLint
+    , getStride ::  GLsizei
+    }
+
+getIndex' :: VertexAttribute -> GLuint
+getIndex' (Position _) = 0
+getIndex' (Texture _)  = 1
 
 squashAttribute :: VertexAttribute -> [GLfloat]
 squashAttribute (Position v) = toList v
@@ -39,8 +47,8 @@ squashRow row = concat $ fmap squashAttribute row
 getRowSizeInt :: DataRow -> Int
 getRowSizeInt gdata = sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
 
-getRowSize :: DataRow -> GLsizei
-getRowSize = fromIntegral . getRowSizeInt
+getRowSize' :: DataRow -> GLsizei
+getRowSize' = fromIntegral . getRowSizeInt
 
 getDataSize :: GraphicData -> GLsizeiptr
 getDataSize rows = fromIntegral $ nRows * rowSize
