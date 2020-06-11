@@ -51,8 +51,7 @@ act = do
             glDeleteShader fshader
 
             vao <- makeVertices vertices indices
-            vao2 <- putGraphicData cube squareIndices
-            vao3 <- makeVertices cube2 cube2Indices
+            vao2 <- putGraphicData cube cubeIndices
 
             -- Load the texture information into opengl
             t1 <- loadTexture "res/container.jpg"
@@ -108,13 +107,9 @@ act = do
 
                         -- and the square
                         glBindVertexArray vao2
-                        {-let len = fromIntegral $ length squareIndices-}
-                        glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr
+                        let len = fromIntegral $ length cubeIndices
+                        glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
-
-                        {-glBindVertexArray vao3-}
-                        {-glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr-}
-                        {-glBindVertexArray 0-}
 
                         -- swap buffers and go again
                         GLFW.swapBuffers window

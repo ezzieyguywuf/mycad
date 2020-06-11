@@ -3,9 +3,7 @@ module VertexData
   vertices
 , indices
 , cube
-, cube2
-, cube2Indices
-, squareIndices
+, cubeIndices
 ) where
 
 -- gl, all types and funcs here will already start with "gl"
@@ -22,24 +20,9 @@ cube =
     , [Position (V3 (-0.5) 0.5 0), Texture (V2 0.0 1.0)]
     ]
 
-squareIndices :: [GLuint]
-squareIndices = [ 0, 1, 3
-                , 1, 2, 3]
-
-cube2 :: [GLfloat]
-cube2 =
-    [
-    (-0.5), (-0.5), 0.0,   0.0, 0.0,   -- bottom left
-     0.5, (-0.5), 0.0,   1.0, 0.0,   -- bottom right
-     0.5,  0.5, 0.0,   1.0, 1.0,   -- top right
-    (-0.5),  0.5, 0.0,   0.0, 1.0    -- top left 
-    ]
-
-cube2Indices :: [GLuint]
-cube2Indices =
-    [ 0, 1, 3
-    , 1, 2, 3
-    ]
+cubeIndices :: [GLuint]
+cubeIndices = [ 0, 1, 3
+              , 1, 2, 3]
 
 --          positions  Texture Coords
 vertices :: [GLfloat]
