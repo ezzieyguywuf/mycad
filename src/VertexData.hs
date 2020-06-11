@@ -14,15 +14,22 @@ import GraphicData
 
 cube :: GraphicData
 cube =
-    [ [Position (V3 (-0.5) (-0.5) 0), Texture (V2 0 0)]
-    , [Position (V3 0.5 (-0.5) 0 ), Texture (V2 1.0 0)]
-    , [Position (V3 0.5 0.5 0), Texture (V2 1.0 1.0)]
-    , [Position (V3 (-0.5) 0.5 0), Texture (V2 0.0 1.0)]
+    [ 
+      [Position (V3 (-0.5) (-0.5) 0) , Texture (V2 0 0)]      -- 0 Back, Bottom Left
+    , [Position (V3    0.5 (-0.5) 0) , Texture (V2 1.0 0)]    -- 1 Back, Bottom Right
+    , [Position (V3    0.5    0.5 0) , Texture (V2 1.0 1.0)]  -- 2 Back, Top Left
+    , [Position (V3 (-0.5)    0.5 0) , Texture (V2 0.0 1.0)]  -- 3 Back, Top Right
+
+    , [Position (V3 (-0.5) (-0.5) 0.5) , Texture (V2 0 0)]    -- 4 Front, Bottom Left
+    , [Position (V3    0.5 (-0.5) 0.5) , Texture (V2 1.0 0)]  -- 5 Front, Bottom Right
+    , [Position (V3    0.5    0.5 0.5) , Texture (V2 1.0 1.0)]-- 6 Front, Top Left
+    , [Position (V3 (-0.5)    0.5 0.5) , Texture (V2 0.0 1.0)]-- 7 Front, Top Right
     ]
 
 cubeIndices :: [GLuint]
-cubeIndices = [ 0, 1, 3
-              , 1, 2, 3]
+cubeIndices = [ 0, 1, 2 -- Back
+              , 0, 2, 3
+              ]
 
 --          positions  Texture Coords
 vertices :: [GLfloat]
