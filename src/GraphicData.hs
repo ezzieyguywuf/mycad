@@ -1,11 +1,11 @@
 module GraphicData
 (
   VertexAttribute(..)
+, AttributeData(..)
 , DataRow
 , GraphicData
-, getIndex
+, getRowData
 , squashAttribute
-, getRowSize
 , getDataSize
 , squashRow
 , flattenData
@@ -16,6 +16,7 @@ import Linear.V2
 import Linear.V3
 import Foreign
 import Data.Foldable
+import Data.List
 
 data VertexAttribute =
      Position (V3 Float)
@@ -33,20 +34,23 @@ data AttributeData = AttributeData
     , getStride ::  GLsizei
     , getOffset :: Ptr ()
     }
+    | NoData
 
 -- DataRow == [VertexAttribute]
 getRowData :: DataRow -> [AttributeData]
-getRowData row = foldl (makeData $ getRowSize' row) row
+getRowData row = snd $ mapAccumL (makeData $ getRowSize' row) 0 row
 
-makeData :: GLsizei -> VertexAttribute -> Int -> AttributeData
-makeData stride attrib cumOffset = AttributeData index attribSize stride offset
+makeData :: GLsizei -> Int -> VertexAttribute -> (Int, AttributeData)
+makeData stride cumOffset attrib = (cumOffset + len, attribData)
     where  index = getIndex' attrib
-           attribSize = fromIntegral $ length (squashAttribute attrib) :: GLint
+           len   = length $ squashAttribute attrib
+           attribSize = fromIntegral len :: GLint
            offset = makeOffset cumOffset
+           attribData = AttributeData index attribSize stride offset
 
 makeOffset :: Int -> Ptr ()
-makeOffset n = castPtr $ plusPtr nullPtr (fromIntegral $ 3*floatSize)
-    where floatSize = fromIntegral $ sizeOf (0.0::GLfloat) :: GLsizei
+makeOffset n = castPtr $ plusPtr nullPtr (fromIntegral $ n*floatSize)
+    where floatSize = sizeOf (0.0::GLfloat)
 
 getIndex' :: VertexAttribute -> GLuint
 getIndex' (Position _) = 0

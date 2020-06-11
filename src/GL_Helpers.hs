@@ -81,18 +81,19 @@ putGraphicData gdata indices = do
     -- our data is laid out. Did you notice how we flattened the data earlier?
     -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
     -- know how to unflatten it.
-    let row = head gdata
-        rowSize = getRowSize row
-    sequence $ fmap (registerVertexAttribute rowSize) row
+    let rowData = getRowData $ head gdata
+    sequence $ map registerVertexAttribute rowData
     -- Finally, register the indices in the Element Buffer Object
     registerElementBufferObject vao indices
 
     pure vao
 
-registerVertexAttribute :: GLsizei -> VertexAttribute -> IO ()
-registerVertexAttribute stride attrib = do
-    let i = getIndex attrib
-        len = fromIntegral $ length (squashAttribute attrib) :: GLint
+registerVertexAttribute :: AttributeData -> IO ()
+registerVertexAttribute d = do
+    let i    = getIndex d
+        size = getAttribSize d
+        stride = getStride d
+        offset = getOffset d
     -- Parameters are:
     -- i = index
     -- len = length
@@ -100,7 +101,7 @@ registerVertexAttribute stride attrib = do
     -- GL_FALSE = don't normalize
     -- stride = distance between subsequent attributes of the same kind
     -- nullPtr = not sure
-    glVertexAttribPointer i len GL_FLOAT GL_FALSE stride nullPtr
+    glVertexAttribPointer i size GL_FLOAT GL_FALSE stride offset
 
     -- Now we have to enable this attribute, per its index
     glEnableVertexAttribArray i
