@@ -43,12 +43,6 @@ cursorPosition prev camera _ yaw y = do
     putStrLn $ "deltaYaw = " <> (show deltaYaw) <> ", dy = " <> (show dy)
     putStrLn $ "    yaw = " <> (show yaw) <> ", y = " <> (show y)
 
---mouseButtonPressed :: (IORef Camera)
-    --                -> GLFW.Window 
-   --                 -> GLFW.MouseButton 
-  --                  -> GLFW.MouseButtonState 
- --                   -> GLFW.ModifierKeys 
---                    -> (IO () )
 mouseButtonPressed :: IORef Camera -> GLFW.MouseButtonCallback
 mouseButtonPressed cam window GLFW.MouseButton'1 state _ =
     if state == GLFW.MouseButtonState'Pressed
@@ -59,7 +53,7 @@ mouseButtonPressed cam window GLFW.MouseButton'1 state _ =
         else do
            GLFW.setCursorPosCallback window Nothing
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
-mouseButtonPressed _ _ _ _ = pure ()
+mouseButtonPressed _ _ _ _ _ = pure ()
 
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit width height title = do
