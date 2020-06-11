@@ -3,8 +3,8 @@ module ViewSpace
 , moveCamera
 )where
 
-import Data.Foldable
 import Linear.V3
+import Linear.Quaternion
 import Data.IORef
 
 data Camera = LookAt { getPosition  :: V3 Float
@@ -15,10 +15,10 @@ data Camera = LookAt { getPosition  :: V3 Float
 moveCamera :: IORef Camera -> Float -> Float -> IO ()
 moveCamera ioCam yaw pitch = do
     cam <- readIORef ioCam
-    let [x, y, z'] = toList $ getPosition cam
-        x' = x * (cos yaw) - y * (sin yaw)
-        y' = x * (sin yaw) + y * (cos yaw)
-        newCam = LookAt {getPosition = (V3 x' y' z'),
-                         getUp = getUp cam,
-                         getDirection = getDirection cam}
+    let pos =  getPosition cam
+        yawRot = axisAngle (V3 0 0 1) yaw
+        pos'   = rotate yawRot pos
+        newCam = LookAt { getPosition = pos'
+                        , getUp = getUp cam
+                        , getDirection = getDirection cam}
     writeIORef ioCam newCam
