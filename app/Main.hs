@@ -103,8 +103,7 @@ act = do
 
 placeModel :: GLuint -> IO ()
 placeModel shaderProgram = do
-    time <- maybe 0 realToFrac <$> GLFW.getTime
-    let theta = time
+    let theta = 0.0
         rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
         trans = V3 0.0 0.0 0.0
         scale = 0.85
@@ -113,7 +112,9 @@ placeModel shaderProgram = do
 
 placeCamera :: GLuint -> IO ()
 placeCamera shaderProgram = do
-    let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) (0.0)
+    time <- maybe 0 realToFrac <$> GLFW.getTime
+    let theta = time
+        rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
         trans = V3 0.0 0.0 0.0
         view  = transpose $ mkTransformationMat rot trans
     putMatrix shaderProgram view "view"
