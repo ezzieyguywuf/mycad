@@ -30,25 +30,39 @@ resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
-cursorPosition :: IORef (Float, Float) -> IORef Camera -> GLFW.CursorPosCallback
-cursorPosition prev camera _ yaw y = do
+cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
+cursorMoved ioCursor camera _ yaw y = do
     -- Calculate delta
-    (yaw0, y0) <- readIORef prev
+    cursor <- readIORef ioCursor
     let sensitivity = -0.01
+        yaw0 = getLastX cursor
         deltaYaw = sensitivity * ((realToFrac yaw) - yaw0)
         --dy = (realToFrac y) - y0
-    writeIORef prev ((realToFrac yaw), (realToFrac y))
+    let updatedCursor = CursorPosition orig (realToFrac yaw) (realToFrac y)
+        orig = getOriginalPosition cursor
+    writeIORef ioCursor updatedCursor
 
     -- Update camera
     moveCamera camera deltaYaw 0.0
+
+data CursorPosition = CursorPosition
+    { getOriginalPosition :: (Float, Float)
+    , getLastX :: Float
+    , _getLastY :: Float
+    }
+
+makeCursorPosition :: Double -> Double -> CursorPosition
+makeCursorPosition x y = CursorPosition (x', y') x' y'
+    where x' = realToFrac x
+          y' = realToFrac y
 
 mouseButtonPressed :: IORef Camera -> GLFW.MouseButtonCallback
 mouseButtonPressed cam window GLFW.MouseButton'1 state _ =
     if state == GLFW.MouseButtonState'Pressed
        then do
            (x, y) <- GLFW.getCursorPos window
-           ref <- newIORef (realToFrac x, realToFrac y)
-           GLFW.setCursorPosCallback window (Just (cursorPosition ref cam))
+           ref <- newIORef $ makeCursorPosition x y
+           GLFW.setCursorPosCallback window (Just (cursorMoved ref cam))
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
         else do
            GLFW.setCursorPosCallback window Nothing
