@@ -31,7 +31,11 @@ cursorPosition _ x y = do
     putStrLn $ "x = " <> (show x) <> ", y = " <> (show y)
 
 mouseButtonPressed :: GLFW.MouseButtonCallback
-mouseButtonPressed _ GLFW.MouseButton'1 state _ = putStrLn $ show state
+mouseButtonPressed win GLFW.MouseButton'1 state _ = GLFW.setCursorPosCallback win target
+    where target =
+            case state of
+                GLFW.MouseButtonState'Pressed -> Just cursorPosition
+                GLFW.MouseButtonState'Released -> Nothing
 mouseButtonPressed _ _ _ _ = pure ()
 
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
@@ -47,7 +51,6 @@ glfwWindowInit window = do
     -- enable callbacks
     GLFW.setKeyCallback window (Just keypressed )
     GLFW.setFramebufferSizeCallback window ( Just resize )
-    GLFW.setCursorPosCallback window  (Just cursorPosition)
     GLFW.setMouseButtonCallback window (Just mouseButtonPressed)
 
     -- Capture the mouse
