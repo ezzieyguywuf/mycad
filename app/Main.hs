@@ -115,7 +115,7 @@ placeCamera shaderProgram = do
     time <- maybe 0 realToFrac <$> GLFW.getTime
     let theta = time
         rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
-        trans = V3 0.0 0.0 0.0
+        trans = V3 0.0 0.0 (1.0)
         view  = transpose $ mkTransformationMat rot trans
     putMatrix shaderProgram view "view"
 
