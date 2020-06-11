@@ -10,6 +10,7 @@ import qualified Graphics.UI.GLFW as GLFW
 import GLFW_Helpers
 import GL_Helpers
 import VertexData
+import ViewSpace
 
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
@@ -23,7 +24,6 @@ import Linear.Projection
 
 import Foreign
 import Data.IORef
-import Data.Foldable
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -39,7 +39,11 @@ act = do
     case maybeWindow of
         Nothing -> initFailMsg
         Just window -> do
-            glfwWindowInit window
+            -- Set up some...well global variables
+            camera <- newIORef initCamera
+
+            -- Initialize glfw things, including callbacks
+            glfwWindowInit window camera
 
             -- Compile and like our shaders
             vshader <- readFile "./src/VertexShader.glsl"
@@ -65,7 +69,6 @@ act = do
             -- enable depth testing
             glEnable GL_DEPTH_TEST
 
-            camera <- newIORef initCamera
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -113,28 +116,6 @@ placeModel shaderProgram = do
         model = mkTransformationMat (scale *!! rot) trans
     putMatrix shaderProgram model "model"
 
-data Camera = LookAt { getPosition  :: V3 Float
-                     , getUp        :: V3 Float
-                     , getDirection :: V3 Float
-                     }
-
-initCamera :: Camera
-initCamera = LookAt { getPosition = (V3 0 (-35) (-45))
-                    , getUp  = (V3 0 0 1)
-                    , getDirection = (V3 0 0 0)
-                    }
-
-moveCamera :: IORef Camera -> Float -> Float -> IO ()
-moveCamera ioCam yaw pitch = do
-    cam <- readIORef ioCam
-    let [x, y, z'] = toList $ getPosition cam
-        x' = (cos yaw) + x
-        y' = (sin yaw) + y
-        newCam = LookAt {getPosition = (V3 x' y' z'),
-                         getUp = getUp cam,
-                         getDirection = getDirection cam}
-    writeIORef ioCam newCam
-
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
     time <- maybe 0 realToFrac <$> GLFW.getTime
@@ -150,3 +131,8 @@ makeProjection shaderProgram = do
         projection = infinitePerspective (pi/4.0) aspectRatio 0.1
     putMatrix shaderProgram projection "projection"
 
+initCamera :: Camera
+initCamera = LookAt { getPosition = (V3 0 (-35) (-45))
+                    , getUp  = (V3 0 0 1)
+                    , getDirection = (V3 0 0 0)
+                    }

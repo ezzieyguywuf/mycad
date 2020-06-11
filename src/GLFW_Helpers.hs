@@ -16,6 +16,7 @@ import qualified Graphics.UI.GLFW as GLFW
 import Graphics.GL.Core33
 
 import Data.IORef
+import ViewSpace
 
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keypressed :: GLFW.KeyCallback
@@ -58,8 +59,8 @@ glfwInit width height title = do
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
     GLFW.createWindow width height title Nothing Nothing
 
-glfwWindowInit :: GLFW.Window -> IO ()
-glfwWindowInit window = do
+glfwWindowInit :: GLFW.Window -> IORef Camera -> IO ()
+glfwWindowInit window ioCam = do
     -- enable callbacks
     GLFW.setKeyCallback window (Just keypressed )
     GLFW.setFramebufferSizeCallback window ( Just resize )
