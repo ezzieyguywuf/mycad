@@ -86,10 +86,12 @@ squashRow row = concat $ fmap squashAttribute row
 getRowSize :: DataRow -> GLsizei
 getRowSize gdata = fromIntegral $ sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
 
+-- | Returns the size of the entire GraphicData in a manner suitable to use in glBufferData
 getDataSize :: GraphicData -> GLsizeiptr
 getDataSize rows = fromIntegral $ nRows * rowSize
     where nRows = length rows
           rowSize = fromIntegral $ getRowSize $ head rows
 
+-- | Flattens a GraphicData into a form that OpenGl can (almost) understand
 flattenData :: GraphicData -> [GLfloat]
 flattenData = concat . (fmap squashRow)
