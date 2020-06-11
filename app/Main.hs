@@ -106,22 +106,25 @@ placeModel shaderProgram = do
     let theta = 0.0
         rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
         trans = V3 0.0 0.0 0.0
-        scale = 0.85
-        model = transpose $ mkTransformationMat (scale *!! rot) trans
+        scale = 1.0
+        model = mkTransformationMat (scale *!! rot) trans
     putMatrix shaderProgram model "model"
 
 placeCamera :: GLuint -> IO ()
 placeCamera shaderProgram = do
     time <- maybe 0 realToFrac <$> GLFW.getTime
     let theta = time
-        rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
-        trans = V3 0.0 0.0 (1.0)
+        x     = 0
+        y     = 0
+        z     = -25
+        rot   = fromQuaternion $ Quat.axisAngle (V3 (1.0) (-1.0) 0.0) theta
+        trans = V3 x y z
         view  = transpose $ mkTransformationMat rot trans
     putMatrix shaderProgram view "view"
 
 makeProjection :: GLuint -> IO ()
 makeProjection shaderProgram = do
     let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-        projection = perspective (pi/2.0) aspectRatio 0.1 100.0
+        projection = transpose $ perspective (pi/2.0) aspectRatio 0.1 100.0
     putMatrix shaderProgram projection "projection"
 

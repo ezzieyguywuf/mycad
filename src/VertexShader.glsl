@@ -6,10 +6,11 @@ out vec2 TexCoord;
 
 uniform mat4 model;
 uniform mat4 view;
+uniform mat4 projection;
 
 void main()
 {
     // see how we directly give a vec3 to vec4's constructor
-    gl_Position = view * model * vec4(aPos, 1.0);
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
     TexCoord = vec2(aTexCoord.x, 1.0f-aTexCoord.y);
 }
