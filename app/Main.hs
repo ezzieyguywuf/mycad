@@ -22,6 +22,7 @@ import qualified Linear.Quaternion as Quat
 import Linear.Projection
 
 import Foreign
+import Data.IORef
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -63,6 +64,7 @@ act = do
             -- enable depth testing
             glEnable GL_DEPTH_TEST
 
+            camera <- newIORef initCamera
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -86,7 +88,7 @@ act = do
                         glBindTexture GL_TEXTURE_2D t2
 
                         placeModel shaderProgram
-                        placeCamera shaderProgram
+                        placeCamera shaderProgram camera
                         makeProjection shaderProgram
 
                         -- Draw the first cube
@@ -110,28 +112,25 @@ placeModel shaderProgram = do
         model = mkTransformationMat (scale *!! rot) trans
     putMatrix shaderProgram model "model"
 
-data Camera = LookAt { getPos :: V3 Float
-                     , getUp  :: V3 Float
+data Camera = LookAt { getPosition  :: V3 Float
+                     , getUp        :: V3 Float
                      , getDirection :: V3 Float
                      }
 
 initCamera :: Camera
-initCamera = LookAt { getPos = (V3 0 (-5) (-5))
+initCamera = LookAt { getPosition = (V3 0 (-35) (-45))
                     , getUp  = (V3 0 0 1)
                     , getDirection = (V3 0 0 0)
                     }
 
-placeCamera :: GLuint -> IO ()
-placeCamera shaderProgram = do
+placeCamera :: GLuint -> IORef Camera -> IO ()
+placeCamera shaderProgram ioCam = do
     time <- maybe 0 realToFrac <$> GLFW.getTime
-    let theta = time
-        x     = 0
-        y     = 0
-        z     = -55
-        rot   = fromQuaternion $ Quat.axisAngle (V3 (1.0) (-1.0) 0.0) theta
-        trans = V3 x y z
-        view  = mkTransformationMat rot trans
-    putMatrix shaderProgram view "view"
+    camera <- readIORef ioCam
+    let eye    = getPosition camera
+        center = getDirection camera
+        up     = getUp camera
+    putMatrix shaderProgram  (lookAt eye center up) "view"
 
 makeProjection :: GLuint -> IO ()
 makeProjection shaderProgram = do
