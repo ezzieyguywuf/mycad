@@ -116,7 +116,7 @@ placeCamera shaderProgram = do
     let theta = time
         x     = 0
         y     = 0
-        z     = -25
+        z     = -55
         rot   = fromQuaternion $ Quat.axisAngle (V3 (1.0) (-1.0) 0.0) theta
         trans = V3 x y z
         view  = mkTransformationMat rot trans
@@ -125,6 +125,6 @@ placeCamera shaderProgram = do
 makeProjection :: GLuint -> IO ()
 makeProjection shaderProgram = do
     let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-        projection = perspective (pi/2.0) aspectRatio 0.1 100.0
+        projection = infinitePerspective (pi/4.0) aspectRatio 0.1
     putMatrix shaderProgram projection "projection"
 
