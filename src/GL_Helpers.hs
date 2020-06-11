@@ -1,5 +1,6 @@
 module GL_Helpers
 ( makeVertices 
+, putGraphicData
 , loadShader
 , linkShadersToProgram
 , loadTexture
@@ -33,6 +34,74 @@ import Foreign.C.String (withCAStringLen, newCString)
 
 -- For doing silly things with vector pointers
 import qualified Data.Vector.Storable as VS
+
+import GraphicData
+
+-- This sequence is performed often enough it's worth wrapping. The argument it
+-- takes it a partially applied glGenSomething function, where we'll provide
+-- the pointer and return the address
+getNewBufferID :: (Ptr GLuint -> IO ()) -> IO (GLuint)
+getNewBufferID f = do
+    -- Haskell will use type inference to figure out what kind of pointer
+    pointer <- malloc
+    -- the openGL function will fill in our pointer for us
+    f pointer
+    -- return back the dereferenced pointer, with the UID that we can use in our program
+    peek pointer
+
+putGraphicData :: GraphicData -> [Int] -> IO GLuint
+putGraphicData gdata indices = do
+    -- First, make a Vertex Buffer Object. This is a place in openGL's memory
+    -- where we can put all of our vertex data
+    vbo <- getNewBufferID $ glGenBuffers 1
+
+    -- Next, we're going to create a Vertex Array Object, or VAO, which allows
+    -- to reuse the data in our VBO over and over (or something like that)
+    vao <- getNewBufferID $ glGenVertexArrays 1
+
+
+    -- OpenGL needs to know the size of the data we're going to give it
+    let dataSize = getDataSize gdata
+        flatData = flattenData gdata
+
+    -- This makes a pointer to our data
+    dataPointer <- newArray flatData
+
+    -- In openGL, you must "bind" a buffer before you are able to do things to
+    -- it. In the case of a VAO, it must be bound before the VBO that is going
+    -- to store the actual data
+    glBindVertexArray vao
+    glBindBuffer GL_ARRAY_BUFFER vbo
+
+    -- Finally write the data. This applies to the currently "bound"
+    -- GL_ARRAY_BUFFER, in our case, vbo
+    glBufferData GL_ARRAY_BUFFER dataSize (castPtr dataPointer) GL_STATIC_DRAW
+
+    -- Since the Shaders, which use our vertex information, are flexible, we
+    -- need to specify to OpenGL how our data is laid out. Did you notice how
+    -- we flattened the data earlier? That's how OpenGL expects to recieve it.
+    -- But, afterwards, it needs to know how to unflatten it.
+    let row = head gdata
+        rowSize = getRowSize row
+    sequence $ fmap (registerVertexAttribute rowSize) row
+
+    pure vao
+
+registerVertexAttribute :: GLsizei -> VertexAttribute -> IO ()
+registerVertexAttribute stride attrib = do
+    let i = getIndex attrib
+        len = fromIntegral $ length (squashAttribute attrib) :: GLint
+    -- First, specify the attribute:
+    -- i = index
+    -- len = length
+    -- GL_FLOAT = type
+    -- GL_FALSE = don't normalize
+    -- stride = distance between subsequent attributes of the same kind
+    -- nullPtr = not sure
+    glVertexAttribPointer i len GL_FLOAT GL_FALSE stride nullPtr
+
+    -- Now we have to enable this attribute, per its index
+    glEnableVertexAttribArray i
 
 makeVertices:: [GLfloat] -> [GLuint] -> IO GLuint
 makeVertices vertices indices = do
