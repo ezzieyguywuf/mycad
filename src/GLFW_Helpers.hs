@@ -26,6 +26,10 @@ resize :: GLFW.FramebufferSizeCallback
 resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
+cursorPosition :: GLFW.CursorPosCallback
+cursorPosition _ x y = do
+    putStrLn $ "x = " <> (show x) <> ", y = " <> (show y)
+
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit width height title = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
@@ -36,9 +40,13 @@ glfwInit width height title = do
 
 glfwWindowInit :: GLFW.Window -> IO ()
 glfwWindowInit window = do
-    -- enable keys
+    -- enable callbacks
     GLFW.setKeyCallback window (Just keypressed )
     GLFW.setFramebufferSizeCallback window ( Just resize )
+    GLFW.setCursorPosCallback window  (Just cursorPosition)
+
+    -- Capture the mouse
+    GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
 
     -- calibrate the viewport
     GLFW.makeContextCurrent (Just window)
