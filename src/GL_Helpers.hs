@@ -49,8 +49,8 @@ getNewBufferID f = do
     -- return back the dereferenced pointer, with the UID that we can use in our program
     peek pointer
 
-putGraphicData :: GraphicData -> [Int] -> IO GLuint
-putGraphicData gdata indices = do
+putGraphicData :: GraphicData -> IO GLuint
+putGraphicData gdata = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
     vbo <- getNewBufferID $ glGenBuffers 1

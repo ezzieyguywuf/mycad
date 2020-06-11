@@ -49,6 +49,7 @@ act = do
             glDeleteShader fshader
 
             vao <- makeVertices vertices indices
+            vao2 <- putGraphicData square
 
             -- Load the texture information into opengl
             t1 <- loadTexture "res/container.jpg"
@@ -97,9 +98,14 @@ act = do
                             projection = perspective (pi/2.0) aspectRatio 0.1 100.0
                         putMatrix shaderProgram projection "projection"
 
-                        -- draw the triangle.
+                        -- draw the cube.
                         glBindVertexArray vao
                         glDrawArrays GL_TRIANGLES 0 36
+                        glBindVertexArray 0
+
+                        -- and the square
+                        glBindVertexArray vao2
+                        glDrawArrays GL_TRIANGLES 0 4
                         glBindVertexArray 0
 
                         -- swap buffers and go again
