@@ -36,17 +36,18 @@ cursorPosition prev _ x y = do
         dy = y - y0
     writeIORef prev (x, y)
     putStrLn $ "dx = " <> (show dx) <> ", dy = " <> (show dy)
+    putStrLn $ "    x = " <> (show x) <> ", y = " <> (show y)
 
 mouseButtonPressed :: GLFW.MouseButtonCallback
 mouseButtonPressed window GLFW.MouseButton'1 state _ =
     if state == GLFW.MouseButtonState'Pressed
        then do
-          ref <- GLFW.getCursorPos window >>= newIORef
-          GLFW.setCursorPosCallback window (Just (cursorPosition ref))
-          GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
+           ref <- GLFW.getCursorPos window >>= newIORef
+           GLFW.setCursorPosCallback window (Just (cursorPosition ref))
+           GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
         else do
-          GLFW.setCursorPosCallback window Nothing
-          GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
+           GLFW.setCursorPosCallback window Nothing
+           GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
 mouseButtonPressed _ _ _ _ = pure ()
 
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
