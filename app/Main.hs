@@ -13,6 +13,7 @@ import VertexData
 
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
+import Graphics.GL.Types
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
@@ -84,21 +85,9 @@ act = do
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
 
-                        time <- maybe 0 realToFrac <$> GLFW.getTime
-                        let theta = time
-                            rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
-                            trans = V3 0.0 0.0 0.0
-                            scale = 0.85
-                            model = transpose $ mkTransformationMat (scale *!! rot) trans
-                        putMatrix shaderProgram model "model"
-                        let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) (0.0)
-                            trans = V3 0.0 0.0 0.0
-                            view  = transpose $ mkTransformationMat rot trans
-                        putMatrix shaderProgram view "view"
-                        let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-                            projection = perspective (pi/2.0) aspectRatio 0.1 100.0
-                        putMatrix shaderProgram projection "projection"
-
+                        placeModel shaderProgram
+                        placeCamera shaderProgram
+                        makeProjection shaderProgram
                         -- draw the cube.
                         {-glBindVertexArray vao-}
                         {-glDrawArrays GL_TRIANGLES 0 36-}
@@ -115,4 +104,27 @@ act = do
                         loop
             loop
     GLFW.terminate
+
+placeModel :: GLuint -> IO ()
+placeModel shaderProgram = do
+    time <- maybe 0 realToFrac <$> GLFW.getTime
+    let theta = time
+        rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
+        trans = V3 0.0 0.0 0.0
+        scale = 0.85
+        model = transpose $ mkTransformationMat (scale *!! rot) trans
+    putMatrix shaderProgram model "model"
+
+placeCamera :: GLuint -> IO ()
+placeCamera shaderProgram = do
+    let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) (0.0)
+        trans = V3 0.0 0.0 0.0
+        view  = transpose $ mkTransformationMat rot trans
+    putMatrix shaderProgram view "view"
+
+makeProjection :: GLuint -> IO ()
+makeProjection shaderProgram = do
+    let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
+        projection = perspective (pi/2.0) aspectRatio 0.1 100.0
+    putMatrix shaderProgram projection "projection"
 
