@@ -16,8 +16,12 @@ moveCamera :: IORef Camera -> Float -> Float -> IO ()
 moveCamera ioCam yaw pitch = do
     cam <- readIORef ioCam
     let pos =  getPosition cam
+        dir =  getDirection cam
+        up  =  getUp cam
+        pitchAxis = dir `cross` up
         yawRot = axisAngle (V3 0 0 1) yaw
-        pos'   = rotate yawRot pos
+        pitchRot = axisAngle pitchAxis pitch
+        pos'   = rotate pitchRot (rotate yawRot pos)
         newCam = LookAt { getPosition = pos'
                         , getUp = getUp cam
                         , getDirection = getDirection cam}
