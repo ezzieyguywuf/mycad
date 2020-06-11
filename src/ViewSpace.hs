@@ -18,11 +18,17 @@ moveCamera ioCam yaw pitch = do
     let pos =  getPosition cam
         dir =  getDirection cam
         up  =  getUp cam
-        pitchAxis = dir `cross` up
+        pitchAxis = (pos - dir) `cross` up
         yawRot = axisAngle (V3 0 0 1) yaw
         pitchRot = axisAngle pitchAxis pitch
         pos'   = rotate pitchRot (rotate yawRot pos)
         newCam = LookAt { getPosition = pos'
                         , getUp = getUp cam
                         , getDirection = getDirection cam}
+    putStrLn $ "up = "
+               <> show up
+               <> ", dir = "
+               <> show dir
+               <> ", pitchAxis ="
+               <> show pitchAxis
     writeIORef ioCam newCam

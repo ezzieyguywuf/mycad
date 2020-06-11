@@ -92,7 +92,7 @@ act = do
                         glBindTexture GL_TEXTURE_2D t2
 
                         --time <- maybe 0 realToFrac <$> GLFW.getTime
-                        --moveCamera camera (time/100) 0
+                        --moveCamera camera 0 (sin (time/100))
                         placeModel shaderProgram
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram
