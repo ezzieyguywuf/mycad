@@ -5,9 +5,7 @@ module GraphicData
 , DataRow
 , GraphicData
 , getRowData
-, squashAttribute
 , getDataSize
-, squashRow
 , flattenData
 )where
 
@@ -24,7 +22,6 @@ data VertexAttribute =
     deriving (Show)
 
 type DataRow = [VertexAttribute]
-
 type GraphicData = [DataRow]
 
 data AttributeData = AttributeData
@@ -34,7 +31,6 @@ data AttributeData = AttributeData
     , getStride ::  GLsizei
     , getOffset :: Ptr ()
     }
-    | NoData
 
 -- | Note: If you add more VertexAttributes, you must also specify and index
 --         for them. This is the index that your Shader will use 
@@ -51,6 +47,19 @@ getRowData :: DataRow -> [AttributeData]
 getRowData row = snd $ mapAccumL (makeData $ stride) 0 row
     where stride = fromIntegral $ getRowSize row :: GLsizei
 
+-- | Returns the size of the entire GraphicData in a manner suitable to use in glBufferData
+getDataSize :: GraphicData -> GLsizeiptr
+getDataSize rows = fromIntegral $ nRows * rowSize
+    where nRows = length rows
+          rowSize = fromIntegral $ getRowSize $ head rows
+
+-- | Flattens a GraphicData into a form that OpenGl can (almost) understand
+flattenData :: GraphicData -> [GLfloat]
+flattenData = concat . (fmap squashRow)
+
+----------------------------------------------------------------------------
+--                  Private Free Functions
+----------------------------------------------------------------------------
 -- | This will construct a single AttributeData
 --   
 --   We can't know the @stride@ ahead of time, since it depends on how many
@@ -68,11 +77,6 @@ makeData stride cumOffset attrib = (cumOffset + len, attribData)
            offset = makeOffset cumOffset
            attribData = AttributeData index attribSize stride offset
 
--- | Generates an offset pointer suitable for use in glVertexAttribPointer
-makeOffset :: Int -> Ptr ()
-makeOffset n = castPtr $ plusPtr nullPtr (fromIntegral $ n*floatSize)
-    where floatSize = sizeOf (0.0::GLfloat)
-
 -- | Flattens out a VertexAttribute in a manner suitable for OpenGL to read
 squashAttribute :: VertexAttribute -> [GLfloat]
 squashAttribute (Position v) = toList v
@@ -86,12 +90,8 @@ squashRow row = concat $ fmap squashAttribute row
 getRowSize :: DataRow -> GLsizei
 getRowSize gdata = fromIntegral $ sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
 
--- | Returns the size of the entire GraphicData in a manner suitable to use in glBufferData
-getDataSize :: GraphicData -> GLsizeiptr
-getDataSize rows = fromIntegral $ nRows * rowSize
-    where nRows = length rows
-          rowSize = fromIntegral $ getRowSize $ head rows
+-- | Generates an offset pointer suitable for use in glVertexAttribPointer
+makeOffset :: Int -> Ptr ()
+makeOffset n = castPtr $ plusPtr nullPtr (fromIntegral $ n*floatSize)
+    where floatSize = sizeOf (0.0::GLfloat)
 
--- | Flattens a GraphicData into a form that OpenGl can (almost) understand
-flattenData :: GraphicData -> [GLfloat]
-flattenData = concat . (fmap squashRow)
