@@ -30,21 +30,31 @@ resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
-cursorPosition :: IORef (Double, Double) -> GLFW.CursorPosCallback
-cursorPosition prev _ x y = do
-    (x0, y0) <- readIORef prev
-    let dx = x - x0
+cursorPosition :: IORef (Double, Double) -> IORef Camera -> GLFW.CursorPosCallback
+cursorPosition prev camera _ yaw y = do
+    -- Calculate delta
+    (yaw0, y0) <- readIORef prev
+    let deltaYaw = yaw - yaw0
         dy = y - y0
-    writeIORef prev (x, y)
-    putStrLn $ "dx = " <> (show dx) <> ", dy = " <> (show dy)
-    putStrLn $ "    x = " <> (show x) <> ", y = " <> (show y)
+    writeIORef prev (yaw, y)
 
-mouseButtonPressed :: GLFW.MouseButtonCallback
-mouseButtonPressed window GLFW.MouseButton'1 state _ =
+    -- Update camera
+    moveCamera camera deltaYaw 0.0
+    putStrLn $ "deltaYaw = " <> (show deltaYaw) <> ", dy = " <> (show dy)
+    putStrLn $ "    yaw = " <> (show yaw) <> ", y = " <> (show y)
+
+--mouseButtonPressed :: (IORef Camera)
+    --                -> GLFW.Window 
+   --                 -> GLFW.MouseButton 
+  --                  -> GLFW.MouseButtonState 
+ --                   -> GLFW.ModifierKeys 
+--                    -> (IO () )
+mouseButtonPressed :: IORef Camera -> GLFW.MouseButtonCallback
+mouseButtonPressed cam window GLFW.MouseButton'1 state _ =
     if state == GLFW.MouseButtonState'Pressed
        then do
            ref <- GLFW.getCursorPos window >>= newIORef
-           GLFW.setCursorPosCallback window (Just (cursorPosition ref))
+           GLFW.setCursorPosCallback window (Just (cursorPosition ref cam))
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
         else do
            GLFW.setCursorPosCallback window Nothing
@@ -64,7 +74,7 @@ glfwWindowInit window ioCam = do
     -- enable callbacks
     GLFW.setKeyCallback window (Just keypressed )
     GLFW.setFramebufferSizeCallback window ( Just resize )
-    GLFW.setMouseButtonCallback window (Just mouseButtonPressed)
+    GLFW.setMouseButtonCallback window (Just (mouseButtonPressed ioCam))
 
     -- calibrate the viewport
     GLFW.makeContextCurrent (Just window)
