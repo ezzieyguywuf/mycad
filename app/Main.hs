@@ -66,7 +66,6 @@ act = do
             glEnable GL_DEPTH_TEST
 
             camera <- newIORef initCamera
-            moveCamera camera 0 0
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -89,7 +88,8 @@ act = do
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
 
-                        --time <- maybe 0 realToFrac <$> GLFW.getTime
+                        time <- maybe 0 realToFrac <$> GLFW.getTime
+                        moveCamera camera (time/100) 0
                         placeModel shaderProgram
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram
@@ -121,7 +121,7 @@ data Camera = LookAt { getPosition  :: V3 Float
                      }
 
 initCamera :: Camera
-initCamera = LookAt { getPosition = (V3 0 (-35) (-45))
+initCamera = LookAt { getPosition = (V3 0 (35) (45))
                     , getUp  = (V3 0 0 1)
                     , getDirection = (V3 0 0 0)
                     }
@@ -130,10 +130,8 @@ moveCamera :: IORef Camera -> Float -> Float -> IO ()
 moveCamera ioCam yaw pitch = do
     cam <- readIORef ioCam
     let [x, y, z'] = toList $ getPosition cam
-        dy = sin yaw
-        dx = 1 - (cos yaw)
-        x' = x + dx
-        y' = y + dy
+        x' = x * (cos yaw) - y * (sin yaw)
+        y' = x * (sin yaw) + y * (cos yaw)
         newCam = LookAt {getPosition = (V3 x' y' z'),
                          getUp = getUp cam,
                          getDirection = getDirection cam}
@@ -141,7 +139,6 @@ moveCamera ioCam yaw pitch = do
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
-    time <- maybe 0 realToFrac <$> GLFW.getTime
     camera <- readIORef ioCam
     let eye    = getPosition camera
         center = getDirection camera
