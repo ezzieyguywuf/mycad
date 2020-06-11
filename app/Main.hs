@@ -49,7 +49,7 @@ act = do
             glDeleteShader fshader
 
             vao <- makeVertices vertices indices
-            vao2 <- putGraphicData square
+            vao2 <- putGraphicData square squareIndices
 
             -- Load the texture information into opengl
             t1 <- loadTexture "res/container.jpg"

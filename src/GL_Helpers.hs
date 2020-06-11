@@ -49,8 +49,8 @@ getNewBufferID f = do
     -- return back the dereferenced pointer, with the UID that we can use in our program
     peek pointer
 
-putGraphicData :: GraphicData -> IO GLuint
-putGraphicData gdata = do
+putGraphicData :: GraphicData -> [GLuint] -> IO GLuint
+putGraphicData gdata indices = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
     vbo <- getNewBufferID $ glGenBuffers 1
@@ -58,7 +58,6 @@ putGraphicData gdata = do
     -- Next, we're going to create a Vertex Array Object, or VAO, which allows
     -- to reuse the data in our VBO over and over (or something like that)
     vao <- getNewBufferID $ glGenVertexArrays 1
-
 
     -- OpenGL needs to know the size of the data we're going to give it
     let dataSize = getDataSize gdata
@@ -77,10 +76,11 @@ putGraphicData gdata = do
     -- GL_ARRAY_BUFFER, in our case, vbo
     glBufferData GL_ARRAY_BUFFER dataSize (castPtr dataPointer) GL_STATIC_DRAW
 
-    -- Since the Shaders, which use our vertex information, are flexible, we
-    -- need to specify to OpenGL how our data is laid out. Did you notice how
-    -- we flattened the data earlier? That's how OpenGL expects to recieve it.
-    -- But, afterwards, it needs to know how to unflatten it.
+    -- Register the Vertex Attribute with OpenGL. Since the Shaders, which use
+    -- our vertex information, are flexible, we need to specify to OpenGL how
+    -- our data is laid out. Did you notice how we flattened the data earlier?
+    -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
+    -- know how to unflatten it.
     let row = head gdata
         rowSize = getRowSize row
     sequence $ fmap (registerVertexAttribute rowSize) row

@@ -3,6 +3,7 @@ module VertexData
   vertices
 , indices
 , square
+, squareIndices
 ) where
 
 -- gl, all types and funcs here will already start with "gl"
@@ -18,6 +19,10 @@ square =
     , [Position (V3 10 10 0), Texture (V2 1.0 1.0)]
     , [Position (V3 0 10 0), Texture (V2 0 1.0)]
     ]
+
+squareIndices :: [GLuint]
+squareIndices = [ 0, 1, 2
+                , 2, 0, 3]
 
 --          positions  Texture Coords
 vertices :: [GLfloat]
