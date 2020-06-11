@@ -14,7 +14,7 @@ import GraphicData
 
 square :: GraphicData
 square = 
-    [ [Position (V3 0 0 0), Texture (V2 0 0)]
+    [ [Position (V3 (-10) 0 0), Texture (V2 0 0)]
     , [Position (V3 10 0 0 ), Texture (V2 0 0)]
     , [Position (V3 10 10 0), Texture (V2 1.0 1.0)]
     , [Position (V3 0 10 0), Texture (V2 0 1.0)]

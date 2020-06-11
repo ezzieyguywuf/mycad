@@ -20,6 +20,8 @@ import Linear.Matrix
 import qualified Linear.Quaternion as Quat
 import Linear.Projection
 
+import Foreign
+
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
     when initWorked act
@@ -105,7 +107,7 @@ act = do
 
                         -- and the square
                         glBindVertexArray vao2
-                        glDrawArrays GL_TRIANGLES 0 4
+                        glDrawElements GL_TRIANGLES 4 GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
 
                         -- swap buffers and go again

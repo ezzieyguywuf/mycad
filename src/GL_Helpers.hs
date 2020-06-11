@@ -84,6 +84,8 @@ putGraphicData gdata indices = do
     let row = head gdata
         rowSize = getRowSize row
     sequence $ fmap (registerVertexAttribute rowSize) row
+    -- Finally, register the indices in the Element Buffer Object
+    registerElementBufferObject vao indices
 
     pure vao
 
@@ -102,6 +104,21 @@ registerVertexAttribute stride attrib = do
 
     -- Now we have to enable this attribute, per its index
     glEnableVertexAttribArray i
+
+registerElementBufferObject :: GLuint -> [GLuint] -> IO ()
+registerElementBufferObject vao indices = do
+    -- Prep the indices for use in the EBO
+    let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * (length indices)
+    indicesP <- newArray indices
+
+    -- The Element Buffer Object, or EBO, allows us to re-use vertices in the Buffer. this
+    -- let's us save space on the graphics memory.
+    -- We sould do this after the VAO has been bound, because then ith VAO will
+    -- automatically store a reference to this EBO
+    ebo <- getNewBufferID $ glGenBuffers 1
+    glBindVertexArray vao
+    glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
+    glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
 
 makeVertices:: [GLfloat] -> [GLuint] -> IO GLuint
 makeVertices vertices indices = do
