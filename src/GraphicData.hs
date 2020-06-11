@@ -82,13 +82,14 @@ squashAttribute (Texture v) = toList v
 squashRow :: DataRow -> [GLfloat]
 squashRow row = concat $ fmap squashAttribute row
 
-getRowSize :: DataRow -> Int
-getRowSize gdata = sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
+-- | Returns the size of the row in a manner suitable to use in glVertexAttribPointer
+getRowSize :: DataRow -> GLsizei
+getRowSize gdata = fromIntegral $ sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
 
 getDataSize :: GraphicData -> GLsizeiptr
 getDataSize rows = fromIntegral $ nRows * rowSize
     where nRows = length rows
-          rowSize = getRowSize $ head rows
+          rowSize = fromIntegral $ getRowSize $ head rows
 
 flattenData :: GraphicData -> [GLfloat]
 flattenData = concat . (fmap squashRow)
