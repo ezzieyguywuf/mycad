@@ -30,7 +30,6 @@ cursorPosition :: GLFW.CursorPosCallback
 cursorPosition _ x y = do
     putStrLn $ "x = " <> (show x) <> ", y = " <> (show y)
 
-
 mouseButtonPressed :: GLFW.MouseButtonCallback
 mouseButtonPressed window GLFW.MouseButton'1 state _ =
     if state == GLFW.MouseButtonState'Pressed
