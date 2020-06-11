@@ -88,6 +88,8 @@ act = do
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
 
+                        time <- maybe 0 realToFrac <$> GLFW.getTime
+                        moveCamera camera (sin time) 0
                         placeModel shaderProgram
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram
@@ -127,9 +129,9 @@ initCamera = LookAt { getPosition = (V3 0 (-35) (-45))
 moveCamera :: IORef Camera -> Float -> Float -> IO ()
 moveCamera ioCam yaw pitch = do
     cam <- readIORef ioCam
-    let [x, y, z'] = toList $ getPosition cam
-        x' = (cos yaw) + x
-        y' = (sin yaw) + y
+    let [_, _, z'] = toList $ getPosition cam
+        x' = (cos yaw)
+        y' = (sin yaw)
         newCam = LookAt {getPosition = (V3 x' y' z'),
                          getUp = getUp cam,
                          getDirection = getDirection cam}
