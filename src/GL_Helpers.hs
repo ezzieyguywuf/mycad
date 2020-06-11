@@ -216,7 +216,7 @@ mapTextureUnit shaderProgram target name= do
     -- Bind the texture location to the target index
     glUniform1i loc target
 
-putMatrix :: GLuint -> M44 Double -> String -> IO ()
+putMatrix :: GLuint -> M44 Float -> String -> IO ()
 putMatrix shaderProgram transMatrix name = do
     transP <- malloc
     poke transP transMatrix
