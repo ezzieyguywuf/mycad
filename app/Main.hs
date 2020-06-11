@@ -50,7 +50,6 @@ act = do
             glDeleteShader vshader
             glDeleteShader fshader
 
-            vao <- makeVertices vertices indices
             vao2 <- putGraphicData cube cubeIndices
 
             -- Load the texture information into opengl

@@ -1,6 +1,6 @@
 module GL_Helpers
-( makeVertices 
-, putGraphicData
+( 
+  putGraphicData
 , loadShader
 , linkShadersToProgram
 , loadTexture
@@ -120,87 +120,6 @@ registerElementBufferObject vao indices = do
     glBindVertexArray vao
     glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
-
-makeVertices:: [GLfloat] -> [GLuint] -> IO GLuint
-makeVertices vertices indices = do
-    let verticesSize = fromIntegral $ sizeOf (0.0 :: GLfloat) * (length vertices)
-
-    --   This converts our vertices into something that openGL understands - I
-    --   think it's a pointer, thus the P
-    verticesP <- newArray vertices
-
-    -- This creates 1 buffer in openGL In C, it would be:
-    --
-    --     unsigned int VBO;
-    --     glGenBuffers(1, &VBO);
-    --
-    --  Why is it longer is Haskell? Because we are being more explicit about
-    --  what we're doing.
-    vboP <- malloc       -- Give me a pointer to 'someting'
-    glGenBuffers 1 vboP  -- Make the pointer (this determines what 'something'
-                         -- is. It's 'Int' in the c-code)
-    vbo <- peek vboP     -- vbo is the uniqueID that openGL generated, unsigned
-                         -- int VBO in c
-
-    -- Now we can "bind" the buffer. This allows us to write to it. In C, this
-    -- was:
-    --
-    --     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    --     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer GL_ARRAY_BUFFER vbo
-    glBufferData GL_ARRAY_BUFFER verticesSize (castPtr verticesP) GL_STATIC_DRAW
-
-    -- The Vertex Array Object, or VAO, allows us to store a Vertex Buffer
-    -- Object and attribute data to re-use later. I guess it's like an object?
-    vaoP <- malloc
-    glGenVertexArrays 1 vaoP
-    vao <- peek vaoP
-
-    -- ...:: initializing code, done once unless your object frequently changes
-    -- 1. bind Vertex Array Object
-    glBindVertexArray vao
-    -- 2. copy our vertices array in a buffer for openGL to use
-    glBindBuffer GL_ARRAY_BUFFER vbo
-    glBufferData GL_ARRAY_BUFFER verticesSize (castPtr verticesP) GL_STATIC_DRAW
-    -- 3. Next, set our vertex attribute pointers
-    let floatSize = fromIntegral $ sizeOf (0.0::GLfloat) :: GLsizei
-        nData     = 5
-
-    -- position attribute
-    glVertexAttribPointer 0 3 GL_FLOAT GL_FALSE (nData * floatSize) nullPtr
-    glEnableVertexAttribArray 0
-
-    -- color attribute
-    {-let offset = castPtr $ plusPtr nullPtr (fromIntegral $ 3*floatSize)-}
-    {-glVertexAttribPointer 1 3 GL_FLOAT GL_FALSE (nData * floatSize) offset-}
-    {-glEnableVertexAttribArray 1-}
-
-    -- texture attribute
-    let sixFloatOffset = castPtr $ plusPtr nullPtr (fromIntegral $ 3*floatSize)
-    glVertexAttribPointer 1 2 GL_FLOAT GL_FALSE (nData * floatSize) sixFloatOffset
-    glEnableVertexAttribArray 1
-
-
-    -- Prep the indices for use in the EBO
-    let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * (length indices)
-    indicesP <- newArray indices
-
-    -- The Element Buffer Object, or EBO, allows us to re-use vertices in the Buffer. this
-    -- let's us save space on the graphics memory.
-    -- We sould do this after the VAO has been bound, because then ith VAO will
-    -- automatically store a reference to this EBO
-    eboP <- malloc
-    glGenBuffers 1 eboP
-    ebo <- peek eboP
-    glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
-    glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
-
-
-    -- unbind the array when we're  done, I guess?
-    glBindVertexArray 0
-
-    -- 4. (in the loop) draw the object (see :main)
-    pure vao
 
 -- | Given a shader type and a shader source, it gives you (Right id) of the
 -- successfully compiled shader, or (Left err) with the error message. In the
