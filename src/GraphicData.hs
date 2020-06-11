@@ -46,11 +46,21 @@ getAttributeIndex :: VertexAttribute -> GLuint
 getAttributeIndex (Position _) = 0
 getAttributeIndex (Texture _)  = 1
 
+-- | This will return a list of data suitable for making calls to glVertexAttribPointer
 getRowData :: DataRow -> [AttributeData]
 getRowData row = snd $ mapAccumL (makeData $ stride) 0 row
-    where stride = fromIntegral $ getRowSizeInt row :: GLsizei
+    where stride = fromIntegral $ getRowSize row :: GLsizei
 
-makeData :: GLsizei -> Int -> VertexAttribute -> (Int, AttributeData)
+-- | This will construct a single AttributeData
+--   
+--   We can't know the @stride@ ahead of time, since it depends on how many
+--   'VertexAttribute' are used in each 'DataRow'
+--
+--  This function is meant to be used with mapAccumL
+makeData :: GLsizei                 -- ^ The stride
+            -> Int                  -- ^ The cumulative offset
+            -> VertexAttribute      -- ^ The VertexAttribute for which to build the AttributeData
+            -> (Int, AttributeData)
 makeData stride cumOffset attrib = (cumOffset + len, attribData)
     where  index = getAttributeIndex attrib
            len   = length $ squashAttribute attrib
@@ -58,24 +68,27 @@ makeData stride cumOffset attrib = (cumOffset + len, attribData)
            offset = makeOffset cumOffset
            attribData = AttributeData index attribSize stride offset
 
+-- | Generates an offset pointer suitable for use in glVertexAttribPointer
 makeOffset :: Int -> Ptr ()
 makeOffset n = castPtr $ plusPtr nullPtr (fromIntegral $ n*floatSize)
     where floatSize = sizeOf (0.0::GLfloat)
 
+-- | Flattens out a VertexAttribute in a manner suitable for OpenGL to read
 squashAttribute :: VertexAttribute -> [GLfloat]
 squashAttribute (Position v) = toList v
 squashAttribute (Texture v) = toList v
 
+-- | A helper, flattens out an entire 'DataRow' using 'squashAttribute'
 squashRow :: DataRow -> [GLfloat]
 squashRow row = concat $ fmap squashAttribute row
 
-getRowSizeInt :: DataRow -> Int
-getRowSizeInt gdata = sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
+getRowSize :: DataRow -> Int
+getRowSize gdata = sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
 
 getDataSize :: GraphicData -> GLsizeiptr
 getDataSize rows = fromIntegral $ nRows * rowSize
     where nRows = length rows
-          rowSize = getRowSizeInt $ head rows
+          rowSize = getRowSize $ head rows
 
 flattenData :: GraphicData -> [GLfloat]
 flattenData = concat . (fmap squashRow)
