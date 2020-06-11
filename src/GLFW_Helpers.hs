@@ -31,24 +31,25 @@ resize _ width height = do
 
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
 cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
-cursorMoved ioCursor camera _ yaw y = do
+cursorMoved ioCursor camera _ yaw pitch = do
     -- Calculate delta
     cursor <- readIORef ioCursor
     let sensitivity = -0.01
         yaw0 = getLastX cursor
         deltaYaw = sensitivity * ((realToFrac yaw) - yaw0)
-        --dy = (realToFrac y) - y0
-    let updatedCursor = CursorPosition orig (realToFrac yaw) (realToFrac y)
+        pitch0 = getLastY cursor
+        deltaPitch = sensitivity * ((realToFrac pitch) - pitch0)
+    let updatedCursor = CursorPosition orig (realToFrac yaw) (realToFrac pitch)
         orig = getOriginalPosition cursor
     writeIORef ioCursor updatedCursor
 
     -- Update camera
-    moveCamera camera deltaYaw 0.0
+    moveCamera camera deltaYaw deltaPitch
 
 data CursorPosition = CursorPosition
     { getOriginalPosition :: (Double, Double)
     , getLastX :: Float
-    , _getLastY :: Float
+    , getLastY :: Float
     }
 
 initializeCursor :: GLFW.Window -> IORef CursorPosition -> IO ()
