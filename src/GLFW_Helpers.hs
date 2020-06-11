@@ -34,9 +34,9 @@ cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
 cursorMoved ioCursor camera _ yaw pitch = do
     -- Calculate delta
     cursor <- readIORef ioCursor
-    let sensitivity = -0.01
+    let sensitivity = 0.01
         yaw0 = getLastX cursor
-        deltaYaw = sensitivity * ((realToFrac yaw) - yaw0)
+        deltaYaw = -1 * sensitivity * ((realToFrac yaw) - yaw0)
         pitch0 = getLastY cursor
         deltaPitch = sensitivity * ((realToFrac pitch) - pitch0)
     let updatedCursor = CursorPosition orig (realToFrac yaw) (realToFrac pitch)
