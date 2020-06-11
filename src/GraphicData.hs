@@ -26,12 +26,27 @@ type DataRow = [VertexAttribute]
 
 type GraphicData = [DataRow]
 
-data RowData = RowData
+data AttributeData = AttributeData
     {
       getIndex :: GLuint
-    , getRowSize :: GLint
+    , getAttribSize :: GLint
     , getStride ::  GLsizei
+    , getOffset :: Ptr ()
     }
+
+-- DataRow == [VertexAttribute]
+getRowData :: DataRow -> [AttributeData]
+getRowData row = foldl (makeData $ getRowSize' row) row
+
+makeData :: GLsizei -> VertexAttribute -> Int -> AttributeData
+makeData stride attrib cumOffset = AttributeData index attribSize stride offset
+    where  index = getIndex' attrib
+           attribSize = fromIntegral $ length (squashAttribute attrib) :: GLint
+           offset = makeOffset cumOffset
+
+makeOffset :: Int -> Ptr ()
+makeOffset n = castPtr $ plusPtr nullPtr (fromIntegral $ 3*floatSize)
+    where floatSize = fromIntegral $ sizeOf (0.0::GLfloat) :: GLsizei
 
 getIndex' :: VertexAttribute -> GLuint
 getIndex' (Position _) = 0
