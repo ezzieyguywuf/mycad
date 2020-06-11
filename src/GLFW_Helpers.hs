@@ -16,6 +16,7 @@ import qualified Graphics.UI.GLFW as GLFW
 import Graphics.GL.Core33
 
 import Data.IORef
+import ViewSpace
 
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keypressed :: GLFW.KeyCallback
@@ -29,26 +30,31 @@ resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
-cursorPosition :: IORef (Double, Double) -> GLFW.CursorPosCallback
-cursorPosition prev _ x y = do
-    (x0, y0) <- readIORef prev
-    let dx = x - x0
-        dy = y - y0
-    writeIORef prev (x, y)
-    putStrLn $ "dx = " <> (show dx) <> ", dy = " <> (show dy)
-    putStrLn $ "    x = " <> (show x) <> ", y = " <> (show y)
+cursorPosition :: IORef (Float, Float) -> IORef Camera -> GLFW.CursorPosCallback
+cursorPosition prev camera _ yaw y = do
+    -- Calculate delta
+    (yaw0, y0) <- readIORef prev
+    let deltaYaw = (realToFrac yaw) - yaw0
+        dy = (realToFrac y) - y0
+    writeIORef prev ((realToFrac yaw), (realToFrac y))
 
-mouseButtonPressed :: GLFW.MouseButtonCallback
-mouseButtonPressed window GLFW.MouseButton'1 state _ =
+    -- Update camera
+    moveCamera camera deltaYaw 0.0
+    putStrLn $ "deltaYaw = " <> (show deltaYaw) <> ", dy = " <> (show dy)
+    putStrLn $ "    yaw = " <> (show yaw) <> ", y = " <> (show y)
+
+mouseButtonPressed :: IORef Camera -> GLFW.MouseButtonCallback
+mouseButtonPressed cam window GLFW.MouseButton'1 state _ =
     if state == GLFW.MouseButtonState'Pressed
        then do
-           ref <- GLFW.getCursorPos window >>= newIORef
-           GLFW.setCursorPosCallback window (Just (cursorPosition ref))
+           (x, y) <- GLFW.getCursorPos window
+           ref <- newIORef (realToFrac x, realToFrac y)
+           GLFW.setCursorPosCallback window (Just (cursorPosition ref cam))
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
         else do
            GLFW.setCursorPosCallback window Nothing
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
-mouseButtonPressed _ _ _ _ = pure ()
+mouseButtonPressed _ _ _ _ _ = pure ()
 
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit width height title = do
@@ -58,12 +64,12 @@ glfwInit width height title = do
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
     GLFW.createWindow width height title Nothing Nothing
 
-glfwWindowInit :: GLFW.Window -> IO ()
-glfwWindowInit window = do
+glfwWindowInit :: GLFW.Window -> IORef Camera -> IO ()
+glfwWindowInit window ioCam = do
     -- enable callbacks
     GLFW.setKeyCallback window (Just keypressed )
     GLFW.setFramebufferSizeCallback window ( Just resize )
-    GLFW.setMouseButtonCallback window (Just mouseButtonPressed)
+    GLFW.setMouseButtonCallback window (Just (mouseButtonPressed ioCam))
 
     -- calibrate the viewport
     GLFW.makeContextCurrent (Just window)

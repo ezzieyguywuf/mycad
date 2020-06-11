@@ -39,7 +39,11 @@ act = do
     case maybeWindow of
         Nothing -> initFailMsg
         Just window -> do
-            glfwWindowInit window
+            -- Set up some...well global variables
+            camera <- newIORef initCamera
+
+            -- Initialize glfw things, including callbacks
+            glfwWindowInit window camera
 
             -- Compile and like our shaders
             vshader <- readFile "./src/VertexShader.glsl"
@@ -65,7 +69,6 @@ act = do
             -- enable depth testing
             glEnable GL_DEPTH_TEST
 
-            camera <- newIORef initCamera
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -115,12 +118,6 @@ placeModel shaderProgram = do
         model = mkTransformationMat (scale *!! rot) trans
     putMatrix shaderProgram model "model"
 
-initCamera :: Camera
-initCamera = LookAt { getPosition = (V3 0 (35) (45))
-                    , getUp  = (V3 0 0 1)
-                    , getDirection = (V3 0 0 0)
-                    }
-
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
     camera <- readIORef ioCam
@@ -135,3 +132,8 @@ makeProjection shaderProgram = do
         projection = infinitePerspective (pi/4.0) aspectRatio 0.1
     putMatrix shaderProgram projection "projection"
 
+initCamera :: Camera
+initCamera = LookAt { getPosition = (V3 0 (35) (45))
+                    , getUp  = (V3 0 0 1)
+                    , getDirection = (V3 0 0 0)
+                    }
