@@ -110,6 +110,17 @@ placeModel shaderProgram = do
         model = mkTransformationMat (scale *!! rot) trans
     putMatrix shaderProgram model "model"
 
+data Camera = LookAt { getPos :: V3 Float
+                     , getUp  :: V3 Float
+                     , getDirection :: V3 Float
+                     }
+
+initCamera :: Camera
+initCamera = LookAt { getPos = (V3 0 (-5) (-5))
+                    , getUp  = (V3 0 0 1)
+                    , getDirection = (V3 0 0 0)
+                    }
+
 placeCamera :: GLuint -> IO ()
 placeCamera shaderProgram = do
     time <- maybe 0 realToFrac <$> GLFW.getTime
