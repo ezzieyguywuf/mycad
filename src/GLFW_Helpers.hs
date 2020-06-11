@@ -30,12 +30,16 @@ cursorPosition :: GLFW.CursorPosCallback
 cursorPosition _ x y = do
     putStrLn $ "x = " <> (show x) <> ", y = " <> (show y)
 
+
 mouseButtonPressed :: GLFW.MouseButtonCallback
-mouseButtonPressed win GLFW.MouseButton'1 state _ = GLFW.setCursorPosCallback win target
-    where target =
-            case state of
-                GLFW.MouseButtonState'Pressed -> Just cursorPosition
-                GLFW.MouseButtonState'Released -> Nothing
+mouseButtonPressed window GLFW.MouseButton'1 state _ =
+    if state == GLFW.MouseButtonState'Pressed
+       then do
+          GLFW.setCursorPosCallback window (Just cursorPosition)
+          GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
+        else do
+          GLFW.setCursorPosCallback window Nothing
+          GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
 mouseButtonPressed _ _ _ _ = pure ()
 
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
@@ -52,9 +56,6 @@ glfwWindowInit window = do
     GLFW.setKeyCallback window (Just keypressed )
     GLFW.setFramebufferSizeCallback window ( Just resize )
     GLFW.setMouseButtonCallback window (Just mouseButtonPressed)
-
-    -- Capture the mouse
-    GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
 
     -- calibrate the viewport
     GLFW.makeContextCurrent (Just window)
