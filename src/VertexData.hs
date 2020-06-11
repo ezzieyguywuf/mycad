@@ -2,7 +2,9 @@ module VertexData
 (
   vertices
 , indices
-, square
+, cube
+, cube2
+, cube2Indices
 , squareIndices
 ) where
 
@@ -12,17 +14,32 @@ import Linear.V2
 import Linear.V3
 import GraphicData
 
-square :: GraphicData
-square = 
-    [ [Position (V3 (-10) 0 0), Texture (V2 0 0)]
-    , [Position (V3 10 0 0 ), Texture (V2 0 0)]
-    , [Position (V3 10 10 0), Texture (V2 1.0 1.0)]
-    , [Position (V3 0 10 0), Texture (V2 0 1.0)]
+cube :: GraphicData
+cube =
+    [ [Position (V3 (-0.5) (-0.5) 0), Texture (V2 0 0)]
+    , [Position (V3 0.5 (-0.5) 0 ), Texture (V2 1.0 0)]
+    , [Position (V3 0.5 0.5 0), Texture (V2 1.0 1.0)]
+    , [Position (V3 (-0.5) 0.5 0), Texture (V2 0.0 1.0)]
     ]
 
 squareIndices :: [GLuint]
-squareIndices = [ 0, 1, 2
-                , 2, 0, 3]
+squareIndices = [ 0, 1, 3
+                , 1, 2, 3]
+
+cube2 :: [GLfloat]
+cube2 =
+    [
+    (-0.5), (-0.5), 0.0,   0.0, 0.0,   -- bottom left
+     0.5, (-0.5), 0.0,   1.0, 0.0,   -- bottom right
+     0.5,  0.5, 0.0,   1.0, 1.0,   -- top right
+    (-0.5),  0.5, 0.0,   0.0, 1.0    -- top left 
+    ]
+
+cube2Indices :: [GLuint]
+cube2Indices =
+    [ 0, 1, 3
+    , 1, 2, 3
+    ]
 
 --          positions  Texture Coords
 vertices :: [GLfloat]

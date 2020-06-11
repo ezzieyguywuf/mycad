@@ -51,7 +51,8 @@ act = do
             glDeleteShader fshader
 
             vao <- makeVertices vertices indices
-            vao2 <- putGraphicData square squareIndices
+            vao2 <- putGraphicData cube squareIndices
+            vao3 <- makeVertices cube2 cube2Indices
 
             -- Load the texture information into opengl
             t1 <- loadTexture "res/container.jpg"
@@ -89,7 +90,7 @@ act = do
                         let theta = time
                             rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
                             trans = V3 0.0 0.0 0.0
-                            scale = 1.0
+                            scale = 0.85
                             model = transpose $ mkTransformationMat (scale *!! rot) trans
                         putMatrix shaderProgram model "model"
                         let rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) (0.0)
@@ -101,14 +102,19 @@ act = do
                         putMatrix shaderProgram projection "projection"
 
                         -- draw the cube.
-                        glBindVertexArray vao
-                        glDrawArrays GL_TRIANGLES 0 36
-                        glBindVertexArray 0
+                        {-glBindVertexArray vao-}
+                        {-glDrawArrays GL_TRIANGLES 0 36-}
+                        {-glBindVertexArray 0-}
 
                         -- and the square
                         glBindVertexArray vao2
-                        glDrawElements GL_TRIANGLES 4 GL_UNSIGNED_INT nullPtr
+                        {-let len = fromIntegral $ length squareIndices-}
+                        glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr
                         glBindVertexArray 0
+
+                        {-glBindVertexArray vao3-}
+                        {-glDrawElements GL_TRIANGLES 6 GL_UNSIGNED_INT nullPtr-}
+                        {-glBindVertexArray 0-}
 
                         -- swap buffers and go again
                         GLFW.swapBuffers window
