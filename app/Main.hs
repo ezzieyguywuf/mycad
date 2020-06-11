@@ -91,8 +91,8 @@ act = do
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
 
-                        time <- maybe 0 realToFrac <$> GLFW.getTime
-                        moveCamera camera (time/100) 0
+                        --time <- maybe 0 realToFrac <$> GLFW.getTime
+                        --moveCamera camera (time/100) 0
                         placeModel shaderProgram
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram

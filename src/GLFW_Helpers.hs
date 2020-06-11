@@ -34,14 +34,13 @@ cursorPosition :: IORef (Float, Float) -> IORef Camera -> GLFW.CursorPosCallback
 cursorPosition prev camera _ yaw y = do
     -- Calculate delta
     (yaw0, y0) <- readIORef prev
-    let deltaYaw = (realToFrac yaw) - yaw0
-        dy = (realToFrac y) - y0
+    let sensitivity = -0.01
+        deltaYaw = sensitivity * ((realToFrac yaw) - yaw0)
+        --dy = (realToFrac y) - y0
     writeIORef prev ((realToFrac yaw), (realToFrac y))
 
     -- Update camera
     moveCamera camera deltaYaw 0.0
-    putStrLn $ "deltaYaw = " <> (show deltaYaw) <> ", dy = " <> (show dy)
-    putStrLn $ "    yaw = " <> (show yaw) <> ", y = " <> (show y)
 
 mouseButtonPressed :: IORef Camera -> GLFW.MouseButtonCallback
 mouseButtonPressed cam window GLFW.MouseButton'1 state _ =
