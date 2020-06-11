@@ -15,6 +15,8 @@ import qualified Graphics.UI.GLFW as GLFW
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
 
+import Data.IORef
+
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keypressed :: GLFW.KeyCallback
 keypressed window key scanCode keyState modKeys = do
@@ -26,15 +28,21 @@ resize :: GLFW.FramebufferSizeCallback
 resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
-cursorPosition :: GLFW.CursorPosCallback
-cursorPosition _ x y = do
-    putStrLn $ "x = " <> (show x) <> ", y = " <> (show y)
+-- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
+cursorPosition :: IORef (Double, Double) -> GLFW.CursorPosCallback
+cursorPosition prev _ x y = do
+    (x0, y0) <- readIORef prev
+    let dx = x - x0
+        dy = y - y0
+    writeIORef prev (x, y)
+    putStrLn $ "dx = " <> (show dx) <> ", dy = " <> (show dy)
 
 mouseButtonPressed :: GLFW.MouseButtonCallback
 mouseButtonPressed window GLFW.MouseButton'1 state _ =
     if state == GLFW.MouseButtonState'Pressed
        then do
-          GLFW.setCursorPosCallback window (Just cursorPosition)
+          ref <- GLFW.getCursorPos window >>= newIORef
+          GLFW.setCursorPosCallback window (Just (cursorPosition ref))
           GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
         else do
           GLFW.setCursorPosCallback window Nothing
