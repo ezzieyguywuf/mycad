@@ -91,7 +91,7 @@ registerVertexAttribute :: GLsizei -> VertexAttribute -> IO ()
 registerVertexAttribute stride attrib = do
     let i = getIndex attrib
         len = fromIntegral $ length (squashAttribute attrib) :: GLint
-    -- First, specify the attribute:
+    -- Parameters are:
     -- i = index
     -- len = length
     -- GL_FLOAT = type
