@@ -7,19 +7,18 @@ import Data.Foldable
 import Linear.V3
 import Data.IORef
 
-data Camera = LookAt { getPosition  :: V3 Double
-                     , getUp        :: V3 Double
-                     , getDirection :: V3 Double
+data Camera = LookAt { getPosition  :: V3 Float
+                     , getUp        :: V3 Float
+                     , getDirection :: V3 Float
                      }
 
-moveCamera :: IORef Camera -> Double -> Double -> IO ()
+moveCamera :: IORef Camera -> Float -> Float -> IO ()
 moveCamera ioCam yaw pitch = do
     cam <- readIORef ioCam
-    let [_, _, z'] = toList $ getPosition cam
-        x' = (cos yaw)
-        y' = (sin yaw)
+    let [x, y, z'] = toList $ getPosition cam
+        x' = x * (cos yaw) - y * (sin yaw)
+        y' = x * (sin yaw) + y * (cos yaw)
         newCam = LookAt {getPosition = (V3 x' y' z'),
                          getUp = getUp cam,
                          getDirection = getDirection cam}
     writeIORef ioCam newCam
-

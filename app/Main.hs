@@ -91,6 +91,8 @@ act = do
                         glActiveTexture GL_TEXTURE1
                         glBindTexture GL_TEXTURE_2D t2
 
+                        time <- maybe 0 realToFrac <$> GLFW.getTime
+                        moveCamera camera (time/100) 0
                         placeModel shaderProgram
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram
@@ -118,7 +120,6 @@ placeModel shaderProgram = do
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
-    time <- maybe 0 realToFrac <$> GLFW.getTime
     camera <- readIORef ioCam
     let eye    = getPosition camera
         center = getDirection camera
@@ -132,7 +133,7 @@ makeProjection shaderProgram = do
     putMatrix shaderProgram projection "projection"
 
 initCamera :: Camera
-initCamera = LookAt { getPosition = (V3 0 (-35) (-45))
+initCamera = LookAt { getPosition = (V3 0 (35) (45))
                     , getUp  = (V3 0 0 1)
                     , getDirection = (V3 0 0 0)
                     }
