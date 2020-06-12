@@ -19,11 +19,15 @@ import Data.IORef
 import ViewSpace
 
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
-keypressed :: GLFW.KeyCallback
-keypressed window key scanCode keyState modKeys = do
-    print key
+keypressed :: IORef Camera -> GLFW.KeyCallback
+keypressed cam window key scanCode keyState modKeys = do
+    let delta = 10 * pi / 180.0
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
         (GLFW.setWindowShouldClose window True)
+    when (key == GLFW.Key'Up && keyState == GLFW.KeyState'Pressed)
+        (moveCamera cam 0 delta)
+    when (key == GLFW.Key'Down && keyState == GLFW.KeyState'Pressed)
+        (moveCamera cam 0 (-delta))
 
 resize :: GLFW.FramebufferSizeCallback
 resize _ width height = do
@@ -96,7 +100,7 @@ glfwWindowInit window ioCam = do
     cursor <- newIORef $ CursorPosition (x, y) 0 0
 
     -- enable callbacks
-    GLFW.setKeyCallback window (Just keypressed )
+    GLFW.setKeyCallback window (Just (keypressed ioCam))
     GLFW.setFramebufferSizeCallback window ( Just resize )
     GLFW.setMouseButtonCallback window (Just (mouseButtonPressed ioCam cursor))
 

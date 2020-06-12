@@ -133,7 +133,7 @@ makeProjection shaderProgram = do
     putMatrix shaderProgram projection "projection"
 
 initCamera :: Camera
-initCamera = LookAt { getPosition = (V3 0 (35) (45))
+initCamera = LookAt { getPosition = (V3 13.7 (0) (37.6))
                     , getUp  = (V3 0 0 1)
                     , getDirection = (V3 0 0 0)
                     }
