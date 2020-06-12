@@ -36,6 +36,7 @@ resize _ width height = do
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
 cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
 cursorMoved ioCursor camera _ yaw pitch = do
+    putStrLn $ "x = " <> (show yaw) <> ", y = " <> (show pitch)
     -- Calculate delta
     cursor <- readIORef ioCursor
     let sensitivity = 0.01
@@ -43,45 +44,28 @@ cursorMoved ioCursor camera _ yaw pitch = do
         deltaYaw = -1 * sensitivity * ((realToFrac yaw) - yaw0)
         pitch0 = getLastY cursor
         deltaPitch = sensitivity * ((realToFrac pitch) - pitch0)
-    let updatedCursor = CursorPosition orig (realToFrac yaw) (realToFrac pitch)
-        orig = getOriginalPosition cursor
-    writeIORef ioCursor updatedCursor
+
+    -- Update our IORef (err....global var.)
+    writeIORef  ioCursor $ CursorPosition (realToFrac yaw) (realToFrac pitch)
 
     -- Update camera
     moveCamera camera deltaYaw deltaPitch
 
 data CursorPosition = CursorPosition
-    { getOriginalPosition :: (Double, Double)
-    , getLastX :: Float
+    {
+      getLastX :: Float
     , getLastY :: Float
     }
-
-initializeCursor :: GLFW.Window -> IORef CursorPosition -> IO ()
-initializeCursor window ioCursor = do
-    (x, y) <- GLFW.getCursorPos window
-    let x' = realToFrac x
-        y' = realToFrac y
-    writeIORef ioCursor $ CursorPosition (x, y) x' y'
 
 mouseButtonPressed :: IORef Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
 mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
     if state == GLFW.MouseButtonState'Pressed
        then do
-
-           initializeCursor window cursor
            GLFW.setCursorPosCallback window (Just (cursorMoved cursor cam))
-           GLFW.setCursorInputMode window GLFW.CursorInputMode'Hidden
-       else do
-           cursor' <- readIORef cursor
-           let (x, y) = getOriginalPosition cursor'
-
-           GLFW.setCursorPosCallback window Nothing
-           -- Disable first, for the Wayland folks
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Disabled
-           GLFW.setCursorPos window x y
-           -- Then also do it this way, for good measure
+       else do
+           GLFW.setCursorPosCallback window Nothing
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
-           GLFW.setCursorPos window x y
            -- re-enable the cursor
 mouseButtonPressed _ _ _ _ _ _ = pure ()
 
@@ -96,8 +80,7 @@ glfwInit width height title = do
 glfwWindowInit :: GLFW.Window -> IORef Camera -> IO ()
 glfwWindowInit window ioCam = do
     -- Initialise (global... :(  ) cursor info
-    (x, y) <- GLFW.getCursorPos window
-    cursor <- newIORef $ CursorPosition (x, y) 0 0
+    cursor <- newIORef $ CursorPosition 0 0
 
     -- enable callbacks
     GLFW.setKeyCallback window (Just (keypressed ioCam))
