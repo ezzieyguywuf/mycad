@@ -133,7 +133,13 @@ makeProjection shaderProgram = do
     putMatrix shaderProgram projection "projection"
 
 initCamera :: Camera
-initCamera = LookAt { getPosition = (V3 13.7 (0) (37.6))
-                    , getUp  = (V3 0 0 1)
-                    , getDirection = (V3 0 0 0)
+initCamera = LookAt { getPosition = pos
+                    , getUp  = up
+                    , getDirection = dir
+                    , getLastPitchAxis = pitchAxis
                     }
+    where pos = V3 13.7 0 (37.6)
+          up  = V3 0 0 1
+          dir = V3 0 0 0
+          calcd = (pos - dir) `cross` up
+          pitchAxis = calcd
