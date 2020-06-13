@@ -32,9 +32,9 @@ keypressed cam window key scanCode keyState modKeys = do
     when (key == GLFW.Key'Down && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
         (rotateCameraNudge cam 0 (-delta))
     when (key == GLFW.Key'Right && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam delta 0)
-    when (key == GLFW.Key'Left && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
         (rotateCameraNudge cam (-delta) 0)
+    when (key == GLFW.Key'Left && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
+        (rotateCameraNudge cam (delta) 0)
 
 resize :: GLFW.FramebufferSizeCallback
 resize _ width height = do
@@ -55,7 +55,7 @@ cursorMoved ioCursor camera _ x y = do
     writeIORef  ioCursor (CursorPosition x' y')
 
     -- Update camera
-    rotateCameraNudge camera dx dy
+    rotateCameraNudge camera (-dx) dy
 
 data CursorPosition = CursorPosition Float Float
 
