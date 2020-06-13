@@ -132,14 +132,7 @@ makeProjection shaderProgram = do
         projection = infinitePerspective (pi/4.0) aspectRatio 0.1
     putMatrix shaderProgram projection "projection"
 
-initCamera :: Camera
-initCamera = LookAt { getPosition = pos
-                    , getUp  = up
-                    , getDirection = dir
-                    , getLastPitchAxis = pitchAxis
-                    }
-    where pos = V3 13.7 0 (37.6)
-          up  = V3 0 0 1
-          dir = V3 0 0 0
-          calcd = (pos - dir) `cross` up
-          pitchAxis = calcd
+initCamera :: IORef Camera
+initCamera = ArcBall { getRadius = 50
+                     , getRotation = axisAngle (V3 1 1 0) (pi / 4)
+                     }
