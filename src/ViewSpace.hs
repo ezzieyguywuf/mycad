@@ -1,6 +1,6 @@
 module ViewSpace
 ( Camera(..)
-, rotateCamera
+, rotateCameraNudge
 )where
 
 import Linear.V3
@@ -17,21 +17,29 @@ data Camera = ArcBall { getRadius   :: Float
 _pprintV3 :: RealFloat a => V3 a -> String
 _pprintV3 v = (foldMap (showFFloat (Just 3)) v) ", "
 
--- | Rotates the camera around the origin prom p1' to p2' on a unit sphere
+-- | Rotates the camera around the origin
 --
---   Simply provide the x-y-z coordinates of a starting and stopping point, and
---   this should do the rest
-rotateCamera :: IORef Camera -> (V3 Float) -> (V3 Float) -> IO()
-rotateCamera ioCam p1 p2 = do
-    (ArcBall rad rot) <- readIORef ioCam
-    let p1'     = normalize p1
-        p2'     = normalize p2
-        n       = p1' `cross` p2'
-        theta   = acos (p1' `dot` p2')
+--   Imagine looking straight down at a sphere and pinching the point closest
+--   to you. Now move your fingers up/down left/right. This will cause the
+--   sphere to rotate around its center. That's what this function does.
+--
+--   The maximum you'll be able to rotate the camera in such a manner is
+--   90-degrees in any direction. This is intended to be called incrementally,
+--   say when tracking a mouse pointer
+rotateCameraNudge :: IORef Camera
+                  -> Float         -- ^ dx
+                  -> Float         -- ^ dy
+                  -> IO ()
+rotateCameraNudge ioCam dx dy = do
+    cam@(ArcBall rad rot) <- readIORef ioCam
+    let p1 = (V3 0 0 1)
+        p2 = normalize $ (V3 dx dy 1)
+        n       = p1 `cross` p2
+        theta   = acos (p1 `dot` p2)
         w       = cos (theta / 2)
         v       =  (sin (theta / 2)) *^ n
         quat    = Quaternion w v
-    writeIORef ioCam (ArcBall rad (rot * quat))
+    writeIORef ioCam (ArcBall (getRadius cam) (rot * quat))
 
 --moveCamera :: IORef Camera -> Float -> Float -> IO ()
 --moveCamera ioCam yaw pitch = do

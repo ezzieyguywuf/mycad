@@ -28,33 +28,54 @@ keypressed cam window key scanCode keyState modKeys = do
         (moveCamera cam 0 delta)
     when (key == GLFW.Key'Down && keyState == GLFW.KeyState'Pressed)
         (moveCamera cam 0 (-delta))
+    when (key == GLFW.Key'Right && keyState == GLFW.KeyState'Pressed)
+        (moveCamera cam delta 0)
+    when (key == GLFW.Key'Left && keyState == GLFW.KeyState'Pressed)
+        (moveCamera cam (-delta) 0)
 
 resize :: GLFW.FramebufferSizeCallback
 resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
+updateCursor :: CursorPosition -> Float -> Float -> CursorPosition
+updateCursor cursor x y = CursorPosition x y dx' dy' cumDX cumDY
+    where sensitivity = 600
+          x0 = getLastX cursor
+          y0 = getLastY cursor
+          dx = getDeltaX cursor + (x0 - x)
+          dy = getDeltaY cursor + (y0 - y)
+          (dx', cumDX) = case compare dx sensitivity of
+                          GT -> (dx, 0)
+                          _  -> (0, dx)
+          (dy', cumDY) = case compare dy sensitivity of
+                          GT -> (dy, 0)
+                          _  -> (0, dy)
+
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
 cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
-cursorMoved ioCursor camera _ yaw pitch = do
-    putStrLn $ "x = " <> (show yaw) <> ", y = " <> (show pitch)
+cursorMoved ioCursor camera _ x y = do
     -- Calculate delta
     cursor <- readIORef ioCursor
-    let sensitivity = 0.01
-        yaw0 = getLastX cursor
-        deltaYaw = -1 * sensitivity * ((realToFrac yaw) - yaw0)
-        pitch0 = getLastY cursor
-        deltaPitch = sensitivity * ((realToFrac pitch) - pitch0)
+    let cursor' = updateCursor cursor (realToFrac x) (realToFrac y)
 
     -- Update our IORef (err....global var.)
-    writeIORef  ioCursor $ CursorPosition (realToFrac yaw) (realToFrac pitch)
+    writeIORef  ioCursor cursor'
+
+    putStrLn $ "x = " <> (show x) <> ", y = " <> (show y)
+    putStrLn $ "dx = " <> (show $ getDeltaX cursor') <> ", dy = " <> (show $ getDeltaY cursor')
+    putStrLn $ "cumdx = " <> (show $ _cumDeltaX cursor') <> ", cumdy = " <> (show $ _cumDeltaY cursor')
 
     -- Update camera
-    moveCamera camera deltaYaw deltaPitch
+    moveCamera camera (getDeltaX cursor') (getDeltaY cursor')
 
 data CursorPosition = CursorPosition
     {
       getLastX :: Float
     , getLastY :: Float
+    , getDeltaX :: Float
+    , getDeltaY :: Float
+    , _cumDeltaX :: Float
+    , _cumDeltaY :: Float
     }
 
 mouseButtonPressed :: IORef Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
@@ -80,7 +101,7 @@ glfwInit width height title = do
 glfwWindowInit :: GLFW.Window -> IORef Camera -> IO ()
 glfwWindowInit window ioCam = do
     -- Initialise (global... :(  ) cursor info
-    cursor <- newIORef $ CursorPosition 0 0
+    cursor <- newIORef $ CursorPosition 0 0 0 0 0 0
 
     -- enable callbacks
     GLFW.setKeyCallback window (Just (keypressed ioCam))
