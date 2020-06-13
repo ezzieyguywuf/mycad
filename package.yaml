@@ -26,6 +26,7 @@ dependencies:
 - JuicyPixels
 - linear
 - vector
+- ansi-terminal
 
 library:
   source-dirs: src

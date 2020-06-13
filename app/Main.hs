@@ -24,6 +24,7 @@ import Linear.Projection
 
 import Foreign
 import Data.IORef
+import System.Console.ANSI
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -39,6 +40,9 @@ act = do
     case maybeWindow of
         Nothing -> initFailMsg
         Just window -> do
+            -- Initialize console output
+            initializeConsole
+
             -- Set up some...well global variables
             camera <- initCamera
 
@@ -138,3 +142,8 @@ initCamera :: IO (IORef Camera)
 initCamera = newIORef ArcBall { getRadius = 50
                               , getRotation = Quat.axisAngle (V3 1 1 0) (pi / 4)
                               }
+
+initializeConsole :: IO ()
+initializeConsole = do
+    putStrLn "All data should update only below here. Welcome!"
+    sequence_ $ take 5 (repeat $ putStrLn "")
