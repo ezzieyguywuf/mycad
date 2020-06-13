@@ -2,6 +2,7 @@ module VertexData
 (
   cube
 , cubeIndices
+, cubeLocations
 ) where
 
 -- gl, all types and funcs here will already start with "gl"
@@ -9,6 +10,24 @@ import Graphics.GL.Types
 import Linear.V2
 import Linear.V3
 import GraphicData
+
+cubeLocations :: [V3 Float]
+cubeLocations =
+    [
+      V3 0 0 0
+    , V3 20 0 0
+    , V3 40 0 0
+    , V3 60 0 0
+    , V3 80 0 0
+    , V3 0 20 0
+    , V3 0 40 0
+    , V3 0 60 0
+    , V3 0 80 0
+    , V3 20 20 0
+    , V3 40 40 0
+    , V3 60 60 0
+    , V3 80 80 0
+    ]
 
 cube :: GraphicData
 cube =

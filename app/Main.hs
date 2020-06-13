@@ -62,7 +62,7 @@ act = do
             glDeleteShader vshader
             glDeleteShader fshader
 
-            vao2 <- putGraphicData cube cubeIndices
+            vao <- putGraphicData cube cubeIndices
 
             -- Load the texture information into opengl
             t1 <- loadTexture "res/container.jpg"
@@ -98,14 +98,15 @@ act = do
 
                         --time <- maybe 0 realToFrac <$> GLFW.getTime
                         --moveCamera camera 0 (sin (time/100))
-                        placeModel shaderProgram
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram
 
-                        -- Draw the first cube
-                        glBindVertexArray vao2
+                        -- Draw the cubes
+                        glBindVertexArray vao
                         let len = fromIntegral $ length cubeIndices
-                        glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
+                            place = map (placeModel shaderProgram) cubeLocations
+                            draw  = map (\x -> x >> drawElements len) place
+                        sequence_ $ draw
                         glBindVertexArray 0
 
                         -- swap buffers and go again
@@ -114,11 +115,13 @@ act = do
             loop
     GLFW.terminate
 
-placeModel :: GLuint -> IO ()
-placeModel shaderProgram = do
+drawElements :: GLsizei -> IO()
+drawElements len = glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
+
+placeModel :: GLuint -> V3 Float -> IO ()
+placeModel shaderProgram trans = do
     let theta = 0.0
         rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
-        trans = V3 0.0 0.0 0.0
         scale = 1.0
         model = mkTransformationMat (scale *!! rot) trans
     putMatrix shaderProgram model "model"
@@ -134,12 +137,12 @@ placeCamera shaderProgram ioCam = do
 makeProjection :: GLuint -> IO ()
 makeProjection shaderProgram = do
     let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-        projection = perspective (pi/4.0) aspectRatio 0.1 100.0
+        projection = perspective (pi/4.0) aspectRatio 0.1 1000.0
     putMatrix shaderProgram projection "projection"
 
 initCamera :: IO (IORef Camera)
-initCamera = newIORef ArcBall { getPosition = V3 0 0 50
-                              , getRotation = Quat.axisAngle (V3 0 1 0) (0)
+initCamera = newIORef ArcBall { getPosition = V3 0 0 150
+                              , getRotation = Quat.axisAngle (V3 0 1 0) (pi / 4)
                               }
 
 initializeConsole :: IO ()
