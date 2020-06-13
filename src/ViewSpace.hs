@@ -39,7 +39,7 @@ rotateCameraNudge ioCam dx dy = do
         w       = cos (theta / 2)
         v       =  (sin (theta / 2)) *^ n
         quat    = Quaternion w v
-    writeIORef ioCam (ArcBall (getRadius cam) (rot * quat))
+    writeIORef ioCam (ArcBall rad (rot * quat))
 
 --moveCamera :: IORef Camera -> Float -> Float -> IO ()
 --moveCamera ioCam yaw pitch = do

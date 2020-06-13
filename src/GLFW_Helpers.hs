@@ -24,13 +24,13 @@ keypressed cam window key scanCode keyState modKeys = do
     let delta = 10 * pi / 180
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
         (GLFW.setWindowShouldClose window True)
-    when (key == GLFW.Key'Up && keyState == GLFW.KeyState'Pressed)
+    when (key == GLFW.Key'Up && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
         (rotateCameraNudge cam 0 delta)
-    when (key == GLFW.Key'Down && keyState == GLFW.KeyState'Pressed)
+    when (key == GLFW.Key'Down && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
         (rotateCameraNudge cam 0 (-delta))
-    when (key == GLFW.Key'Right && keyState == GLFW.KeyState'Pressed)
+    when (key == GLFW.Key'Right && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
         (rotateCameraNudge cam delta 0)
-    when (key == GLFW.Key'Left && keyState == GLFW.KeyState'Pressed)
+    when (key == GLFW.Key'Left && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
         (rotateCameraNudge cam (-delta) 0)
 
 resize :: GLFW.FramebufferSizeCallback
