@@ -11,9 +11,11 @@ import Linear.Vector
 import Data.IORef
 import Numeric
 
-data Camera = ArcBall { getPosition :: V3 Float
-                      , getRotation :: Quaternion Float
-                      }
+data Camera = LookAt { 
+                       location  :: V3 Float
+                     , up        :: V3 Float
+                     , direction :: V3 Float
+                     }
 
 _pprintV3 :: RealFloat a => V3 a -> String
 _pprintV3 v = (foldMap (showFFloat (Just 3)) v) ", "
@@ -32,36 +34,29 @@ rotateCameraNudge :: IORef Camera
                   -> Float         -- ^ dy
                   -> IO ()
 rotateCameraNudge ioCam dx dy = do
-    cam@(ArcBall pos _) <- readIORef ioCam
-    let p1@(V3 x y _) = pos
-        x'    = x + dx
-        y'    = y + dy
-        z'    = getZ (norm pos) dx dy
-        p1'   = normalize p1
-        p2    = normalize $ (V3 x' y' z')
-        n     = p1' `cross` p2
-        theta = acos (p1' `dot` p2)
-        rot  = axisAngle n theta
-        rot' = axisAngle n (-theta)
-        pos'  = rotate rot' pos
-    writeIORef ioCam (ArcBall pos' rot)
-    putStrLn $ "x',y',z' = " <> (show x') <> ", " <> (show y') <> ", " <> (show z')
-    putStrLn $ "    pos = " <> (show pos)
-    putStrLn $ "    dx = " <> (show dx) <> ", dy = " <> (show dy)
-    putStrLn $ "    p1 = " <> (show p1)
-    putStrLn $ "    p2 = " <> (show p2)
-    putStrLn $ "    n = " <> (show n)
-    putStrLn $ "    theta = " <> (show theta)
-    putStrLn $ "    rot' = " <> (show rot')
-    putStrLn $ "    pos' = " <> (show pos')
+    (LookAt loc up dir) <- readIORef ioCam
+    let p1@(V3 x1 y1 z1) = normalize loc
+        p2 = V3 x2 y2 z2
+        x2 = x1 + dx
+        y2 = y1 + dy
+        z2 = getZ 1 x2 y2
+        axis = p1 `cross` p2
+        theta = acos (p1 `dot` p2)
+        w   = cos (theta / 2)
+        v   = (sin (theta / 2)) *^ axis
+        rot = Quaternion w v
+        loc' = rotate rot loc
+        up'  = rotate rot up
+        
+    writeIORef ioCam (LookAt loc' up' dir)
 
 zoomCamera :: IORef Camera -> Float -> IO ()
 zoomCamera ioCam amt = do
-    (ArcBall pos rot) <- readIORef ioCam
-    let rad  = norm pos
+    (LookAt loc up dir) <- readIORef ioCam
+    let rad  = norm (loc - dir)
         rad' = rad - amt
-        pos' = (rad' / rad) *^ pos
-    writeIORef ioCam (ArcBall pos' rot)
+        loc' = lerp (rad' / rad) loc dir
+    writeIORef ioCam (LookAt loc' up dir)
 
 
 getZ :: Float -> Float -> Float -> Float

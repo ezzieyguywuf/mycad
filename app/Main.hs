@@ -127,10 +127,8 @@ placeModel shaderProgram trans = do
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
-    camera <- readIORef ioCam
-    let pos = getPosition camera
-        rot = getRotation camera
-        mat = mkTransformation rot (V3 0 0 (-1 * norm pos))
+    (LookAt loc up dir) <- readIORef ioCam
+    let mat = lookAt loc dir up
     putMatrix shaderProgram  mat "view"
 
 makeProjection :: GLuint -> IO ()
@@ -140,9 +138,11 @@ makeProjection shaderProgram = do
     putMatrix shaderProgram projection "projection"
 
 initCamera :: IO (IORef Camera)
-initCamera = newIORef ArcBall { getPosition = V3 0 0 150
-                              , getRotation = Quat.axisAngle (V3 0 (-1) 0) (0)
-                              }
+initCamera = newIORef LookAt { 
+                               location  = V3 0 0 300
+                             , up        = V3 0 1 0
+                             , direction = V3 0 0 0
+                             }
 
 initializeConsole :: IO ()
 initializeConsole = do
