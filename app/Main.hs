@@ -123,7 +123,10 @@ placeCamera shaderProgram ioCam = do
     camera <- readIORef ioCam
     let rad = getRadius camera
         rot = getRotation camera
-    putMatrix shaderProgram  (mkTransformation rot (V3 0 0 rad)) "view"
+        mat = mkTransformation rot (V3 0 0 (-rad))
+    putMatrix shaderProgram  mat "view"
+    putStrLn $ "rad = " <> show rad
+    putStrLn $ "rot = " <> show rot
 
 makeProjection :: GLuint -> IO ()
 makeProjection shaderProgram = do

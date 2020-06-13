@@ -21,7 +21,7 @@ import ViewSpace
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keypressed :: IORef Camera -> GLFW.KeyCallback
 keypressed cam window key scanCode keyState modKeys = do
-    let delta = 10
+    let delta = 10 * pi / 180
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
         (GLFW.setWindowShouldClose window True)
     when (key == GLFW.Key'Up && keyState == GLFW.KeyState'Pressed)
@@ -42,9 +42,9 @@ cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
 cursorMoved ioCursor camera _ x y = do
     -- Calculate delta
     (CursorPosition x0 y0) <- readIORef ioCursor
-    let sensitivity = 0.01
+    let sensitivity = 0.1
         x' = realToFrac x
-        y' = realToFrac y
+        y' = -1 * realToFrac y
         dx = sensitivity * (x0 - x')
         dy = sensitivity * (y0 - y')
 
