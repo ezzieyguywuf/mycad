@@ -21,7 +21,7 @@ import ViewSpace
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keypressed :: IORef Camera -> GLFW.KeyCallback
 keypressed cam window key scanCode keyState modKeys = do
-    let delta = 1
+    let delta = 0.1
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
         (GLFW.setWindowShouldClose window True)
     --when (key == GLFW.Key'C && keyState == GLFW.KeyState'Pressed)

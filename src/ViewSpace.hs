@@ -36,10 +36,10 @@ rotateCameraNudge :: IORef Camera
 rotateCameraNudge ioCam dx dy = do
     (LookAt loc up dir) <- readIORef ioCam
     let p1@(V3 x1 y1 z1) = normalize loc
-        p2 = V3 x2 y2 z2
-        x2 = x1 + dx
-        y2 = y1 + dy
-        z2 = getZ 1 x2 y2
+        p2 = normalize $ rotate (pitchRot * yawRot) p1
+        right = (loc - dir) `cross` up
+        yawRot = axisAngle up dx
+        pitchRot = axisAngle right (-dy)
         axis = p1 `cross` p2
         theta = acos (p1 `dot` p2)
         w   = cos (theta / 2)
@@ -47,6 +47,13 @@ rotateCameraNudge ioCam dx dy = do
         rot = Quaternion w v
         loc' = rotate rot loc
         up'  = rotate rot up
+    putStrLn $ "P1 = " <> (show p1)
+    putStrLn $ "    P2 = " <> (show p2)
+    putStrLn $ "    dx = " <> (show dx) <> ", dy = " <> (show dy)
+    putStrLn $ "    axis= " <> (show axis)
+    putStrLn $ "    theta= " <> (show theta)
+    putStrLn $ "    up'= " <> (show up')
+    putStrLn $ "    loc' = " <> (show loc')
         
     writeIORef ioCam (LookAt loc' up' dir)
 
@@ -59,8 +66,8 @@ zoomCamera ioCam amt = do
     writeIORef ioCam (LookAt loc' up dir)
 
 
-getZ :: Float -> Float -> Float -> Float
-getZ rad x y = sqrt (rad**2 - x**2 - y**2)
+--getZ :: Float -> Float -> Float -> Float
+--getZ rad x y = sqrt (rad**2 - x**2 - y**2)
 --moveCamera :: IORef Camera -> Float -> Float -> IO ()
 --moveCamera ioCam yaw pitch = do
     --cam <- readIORef ioCam

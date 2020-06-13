@@ -78,7 +78,7 @@ act = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
                     when shouldContinue $ do
                         -- event poll
-                        GLFW.pollEvents
+                        GLFW.waitEvents
                         -- drawing
                         --   Background
                         glClearColor 0.2 0.3 0.3 1.0
