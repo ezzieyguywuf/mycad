@@ -142,7 +142,7 @@ makeProjection shaderProgram = do
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef ArcBall { getPosition = V3 0 0 150
-                              , getRotation = Quat.axisAngle (V3 0 1 0) (pi / 4)
+                              , getRotation = Quat.axisAngle (V3 0 (-1) 0) (0)
                               }
 
 initializeConsole :: IO ()
