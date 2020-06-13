@@ -73,6 +73,11 @@ mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
            -- re-enable the cursor
 mouseButtonPressed _ _ _ _ _ _ = pure ()
 
+mouseScrolled :: IORef Camera -> GLFW.ScrollCallback
+mouseScrolled camera _ _ dy = do
+    zoomCamera camera (realToFrac dy)
+    putStrLn $ "Scroll received, dy = " <> (show dy)
+
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit width height title = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
@@ -90,6 +95,7 @@ glfwWindowInit window ioCam = do
     GLFW.setKeyCallback window (Just (keypressed ioCam))
     GLFW.setFramebufferSizeCallback window ( Just resize )
     GLFW.setMouseButtonCallback window (Just (mouseButtonPressed ioCam cursor))
+    GLFW.setScrollCallback window ( Just (mouseScrolled ioCam) )
 
     -- calibrate the viewport
     GLFW.makeContextCurrent (Just window)

@@ -1,6 +1,7 @@
 module ViewSpace
 ( Camera(..)
 , rotateCameraNudge
+, zoomCamera
 )where
 
 import Linear.V3
@@ -53,6 +54,15 @@ rotateCameraNudge ioCam dx dy = do
     putStrLn $ "    theta = " <> (show theta)
     putStrLn $ "    rot' = " <> (show rot')
     putStrLn $ "    pos' = " <> (show pos')
+
+zoomCamera :: IORef Camera -> Float -> IO ()
+zoomCamera ioCam amt = do
+    (ArcBall pos rot) <- readIORef ioCam
+    let rad  = norm pos
+        rad' = rad - amt
+        pos' = (rad' / rad) *^ pos
+    writeIORef ioCam (ArcBall pos' rot)
+
 
 getZ :: Float -> Float -> Float -> Float
 getZ rad x y = sqrt (rad**2 - x**2 - y**2)
