@@ -40,7 +40,7 @@ act = do
         Nothing -> initFailMsg
         Just window -> do
             -- Set up some...well global variables
-            camera <- newIORef initCamera
+            camera <- initCamera
 
             -- Initialize glfw things, including callbacks
             glfwWindowInit window camera
@@ -121,10 +121,9 @@ placeModel shaderProgram = do
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
     camera <- readIORef ioCam
-    let eye    = getPosition camera
-        center = getDirection camera
-        up     = getUp camera
-    putMatrix shaderProgram  (lookAt eye center up) "view"
+    let rad = getRadius camera
+        rot = getRotation camera
+    putMatrix shaderProgram  (mkTransformation rot (V3 0 0 rad)) "view"
 
 makeProjection :: GLuint -> IO ()
 makeProjection shaderProgram = do
@@ -132,7 +131,7 @@ makeProjection shaderProgram = do
         projection = infinitePerspective (pi/4.0) aspectRatio 0.1
     putMatrix shaderProgram projection "projection"
 
-initCamera :: IORef Camera
-initCamera = ArcBall { getRadius = 50
-                     , getRotation = axisAngle (V3 1 1 0) (pi / 4)
-                     }
+initCamera :: IO (IORef Camera)
+initCamera = newIORef ArcBall { getRadius = 50
+                              , getRotation = Quat.axisAngle (V3 1 1 0) (pi / 4)
+                              }

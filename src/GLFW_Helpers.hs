@@ -21,62 +21,40 @@ import ViewSpace
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keypressed :: IORef Camera -> GLFW.KeyCallback
 keypressed cam window key scanCode keyState modKeys = do
-    let delta = 10 * pi / 180.0
+    let delta = 10
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
         (GLFW.setWindowShouldClose window True)
     when (key == GLFW.Key'Up && keyState == GLFW.KeyState'Pressed)
-        (moveCamera cam 0 delta)
+        (rotateCameraNudge cam 0 delta)
     when (key == GLFW.Key'Down && keyState == GLFW.KeyState'Pressed)
-        (moveCamera cam 0 (-delta))
+        (rotateCameraNudge cam 0 (-delta))
     when (key == GLFW.Key'Right && keyState == GLFW.KeyState'Pressed)
-        (moveCamera cam delta 0)
+        (rotateCameraNudge cam delta 0)
     when (key == GLFW.Key'Left && keyState == GLFW.KeyState'Pressed)
-        (moveCamera cam (-delta) 0)
+        (rotateCameraNudge cam (-delta) 0)
 
 resize :: GLFW.FramebufferSizeCallback
 resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
-updateCursor :: CursorPosition -> Float -> Float -> CursorPosition
-updateCursor cursor x y = CursorPosition x y dx' dy' cumDX cumDY
-    where sensitivity = 600
-          x0 = getLastX cursor
-          y0 = getLastY cursor
-          dx = getDeltaX cursor + (x0 - x)
-          dy = getDeltaY cursor + (y0 - y)
-          (dx', cumDX) = case compare dx sensitivity of
-                          GT -> (dx, 0)
-                          _  -> (0, dx)
-          (dy', cumDY) = case compare dy sensitivity of
-                          GT -> (dy, 0)
-                          _  -> (0, dy)
-
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
 cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
 cursorMoved ioCursor camera _ x y = do
     -- Calculate delta
-    cursor <- readIORef ioCursor
-    let cursor' = updateCursor cursor (realToFrac x) (realToFrac y)
+    (CursorPosition x0 y0) <- readIORef ioCursor
+    let sensitivity = 0.01
+        x' = realToFrac x
+        y' = realToFrac y
+        dx = sensitivity * (x0 - x')
+        dy = sensitivity * (y0 - y')
 
     -- Update our IORef (err....global var.)
-    writeIORef  ioCursor cursor'
-
-    putStrLn $ "x = " <> (show x) <> ", y = " <> (show y)
-    putStrLn $ "dx = " <> (show $ getDeltaX cursor') <> ", dy = " <> (show $ getDeltaY cursor')
-    putStrLn $ "cumdx = " <> (show $ _cumDeltaX cursor') <> ", cumdy = " <> (show $ _cumDeltaY cursor')
+    writeIORef  ioCursor (CursorPosition x' y')
 
     -- Update camera
-    moveCamera camera (getDeltaX cursor') (getDeltaY cursor')
+    rotateCameraNudge camera dx dy
 
-data CursorPosition = CursorPosition
-    {
-      getLastX :: Float
-    , getLastY :: Float
-    , getDeltaX :: Float
-    , getDeltaY :: Float
-    , _cumDeltaX :: Float
-    , _cumDeltaY :: Float
-    }
+data CursorPosition = CursorPosition Float Float
 
 mouseButtonPressed :: IORef Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
 mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
@@ -101,7 +79,7 @@ glfwInit width height title = do
 glfwWindowInit :: GLFW.Window -> IORef Camera -> IO ()
 glfwWindowInit window ioCam = do
     -- Initialise (global... :(  ) cursor info
-    cursor <- newIORef $ CursorPosition 0 0 0 0 0 0
+    cursor <- newIORef $ CursorPosition 0 0
 
     -- enable callbacks
     GLFW.setKeyCallback window (Just (keypressed ioCam))
