@@ -33,7 +33,7 @@ rotateCameraNudge :: IORef Camera
                   -> IO ()
 rotateCameraNudge ioCam dx dy = do
     cam@(ArcBall pos _) <- readIORef ioCam
-    let p1@(V3 x y z) = pos
+    let p1@(V3 x y _) = pos
         x'    = x + dx
         y'    = y + dy
         z'    = getZ (norm pos) dx dy
