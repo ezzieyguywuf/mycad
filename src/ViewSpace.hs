@@ -36,9 +36,7 @@ rotateCameraNudge ioCam dx dy = do
         p2 = normalize $ (V3 dx dy 1)
         n       = p1 `cross` p2
         theta   = acos (p1 `dot` p2)
-        w       = cos (theta / 2)
-        v       =  (sin (theta / 2)) *^ n
-        quat    = Quaternion w v
+        quat    = axisAngle n theta
     writeIORef ioCam (ArcBall rad (rot * quat))
 
 --moveCamera :: IORef Camera -> Float -> Float -> IO ()

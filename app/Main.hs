@@ -129,13 +129,11 @@ placeCamera shaderProgram ioCam = do
         rot = getRotation camera
         mat = mkTransformation rot (V3 0 0 (-rad))
     putMatrix shaderProgram  mat "view"
-    putStrLn $ "rad = " <> show rad
-    putStrLn $ "rot = " <> show rot
 
 makeProjection :: GLuint -> IO ()
 makeProjection shaderProgram = do
     let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-        projection = infinitePerspective (pi/4.0) aspectRatio 0.1
+        projection = perspective (pi/4.0) aspectRatio 0.1 100.0
     putMatrix shaderProgram projection "projection"
 
 initCamera :: IO (IORef Camera)
