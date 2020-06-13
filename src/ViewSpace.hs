@@ -31,19 +31,19 @@ rotateCameraNudge :: IORef Camera
                   -> Float         -- ^ dy
                   -> IO ()
 rotateCameraNudge ioCam dx dy = do
-    cam@(ArcBall pos rot) <- readIORef ioCam
-    let p1@(V3 x y z) = normalize $ pos
+    cam@(ArcBall pos _) <- readIORef ioCam
+    let p1@(V3 x y z) = pos
         x'    = x + dx
         y'    = y + dy
-        z'    = getZ 1 dx dy
+        z'    = getZ (norm pos) dx dy
+        p1'   = normalize p1
         p2    = normalize $ (V3 x' y' z')
-        n     = p1 `cross` p2
-        theta = acos (p1 `dot` p2)
-        quat  = axisAngle n theta
-        quat' = axisAngle n (-theta)
-        rot'  = rot * quat
-        pos'  = rotate quat' pos
-    writeIORef ioCam (ArcBall pos' rot')
+        n     = p1' `cross` p2
+        theta = acos (p1' `dot` p2)
+        rot  = axisAngle n theta
+        rot' = axisAngle n (-theta)
+        pos'  = rotate rot' pos
+    writeIORef ioCam (ArcBall pos' rot)
     putStrLn $ "x',y',z' = " <> (show x') <> ", " <> (show y') <> ", " <> (show z')
     putStrLn $ "    pos = " <> (show pos)
     putStrLn $ "    dx = " <> (show dx) <> ", dy = " <> (show dy)
