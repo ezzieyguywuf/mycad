@@ -19,6 +19,7 @@ import Graphics.GL.Types
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
 import Linear.Matrix
+import Linear.Metric
 import qualified Linear.Quaternion as Quat
 import Linear.Projection
 
@@ -125,9 +126,9 @@ placeModel shaderProgram = do
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
     camera <- readIORef ioCam
-    let rad = getRadius camera
+    let pos = getPosition camera
         rot = getRotation camera
-        mat = mkTransformation rot (V3 0 0 (-rad))
+        mat = mkTransformation rot (V3 0 0 (-1 * norm pos))
     putMatrix shaderProgram  mat "view"
 
 makeProjection :: GLuint -> IO ()
@@ -137,8 +138,8 @@ makeProjection shaderProgram = do
     putMatrix shaderProgram projection "projection"
 
 initCamera :: IO (IORef Camera)
-initCamera = newIORef ArcBall { getRadius = 50
-                              , getRotation = Quat.axisAngle (V3 1 1 0) (pi / 4)
+initCamera = newIORef ArcBall { getPosition = V3 0 0 50
+                              , getRotation = Quat.axisAngle (V3 0 1 0) (0)
                               }
 
 initializeConsole :: IO ()

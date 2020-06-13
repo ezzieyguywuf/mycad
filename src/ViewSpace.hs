@@ -10,7 +10,7 @@ import Linear.Vector
 import Data.IORef
 import Numeric
 
-data Camera = ArcBall { getRadius   :: Float
+data Camera = ArcBall { getPosition :: V3 Float
                       , getRotation :: Quaternion Float
                       }
 
@@ -31,14 +31,31 @@ rotateCameraNudge :: IORef Camera
                   -> Float         -- ^ dy
                   -> IO ()
 rotateCameraNudge ioCam dx dy = do
-    cam@(ArcBall rad rot) <- readIORef ioCam
-    let p1 = (V3 0 0 1)
-        p2 = normalize $ (V3 dx dy 1)
-        n       = p1 `cross` p2
-        theta   = acos (p1 `dot` p2)
-        quat    = axisAngle n theta
-    writeIORef ioCam (ArcBall rad (rot * quat))
+    cam@(ArcBall pos rot) <- readIORef ioCam
+    let p1@(V3 x y z) = normalize $ pos
+        x'    = x + dx
+        y'    = y + dy
+        z'    = getZ 1 dx dy
+        p2    = normalize $ (V3 x' y' z')
+        n     = p1 `cross` p2
+        theta = acos (p1 `dot` p2)
+        quat  = axisAngle n theta
+        quat' = axisAngle n (-theta)
+        rot'  = rot * quat
+        pos'  = rotate quat' pos
+    writeIORef ioCam (ArcBall pos' rot')
+    putStrLn $ "x',y',z' = " <> (show x') <> ", " <> (show y') <> ", " <> (show z')
+    putStrLn $ "    pos = " <> (show pos)
+    putStrLn $ "    dx = " <> (show dx) <> ", dy = " <> (show dy)
+    putStrLn $ "    p1 = " <> (show p1)
+    putStrLn $ "    p2 = " <> (show p2)
+    putStrLn $ "    n = " <> (show n)
+    putStrLn $ "    theta = " <> (show theta)
+    putStrLn $ "    rot' = " <> (show rot')
+    putStrLn $ "    pos' = " <> (show pos')
 
+getZ :: Float -> Float -> Float -> Float
+getZ rad x y = sqrt (rad**2 - x**2 - y**2)
 --moveCamera :: IORef Camera -> Float -> Float -> IO ()
 --moveCamera ioCam yaw pitch = do
     --cam <- readIORef ioCam

@@ -21,7 +21,7 @@ import ViewSpace
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
 keypressed :: IORef Camera -> GLFW.KeyCallback
 keypressed cam window key scanCode keyState modKeys = do
-    let delta = 10 * pi / 180
+    let delta = 0.01
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
         (GLFW.setWindowShouldClose window True)
     when (key == GLFW.Key'Up && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
@@ -44,9 +44,9 @@ cursorMoved ioCursor camera _ x y = do
     (CursorPosition x0 y0) <- readIORef ioCursor
     let sensitivity = 0.1
         x' = realToFrac x
-        y' = -1 * realToFrac y
-        dx = sensitivity * (x0 - x')
-        dy = sensitivity * (y0 - y')
+        y' = realToFrac y
+        dx = sensitivity * (x' - x0)
+        dy = -1 * sensitivity * (y' - y0)
 
     -- Update our IORef (err....global var.)
     writeIORef  ioCursor (CursorPosition x' y')
@@ -60,6 +60,8 @@ mouseButtonPressed :: IORef Camera -> IORef CursorPosition -> GLFW.MouseButtonCa
 mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
     if state == GLFW.MouseButtonState'Pressed
        then do
+           (x, y) <- GLFW.getCursorPos window
+           writeIORef cursor (CursorPosition (realToFrac x) (realToFrac y))
            GLFW.setCursorPosCallback window (Just (cursorMoved cursor cam))
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Disabled
        else do
