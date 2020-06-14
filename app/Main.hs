@@ -140,7 +140,7 @@ makeProjection shaderProgram = do
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 
-                               location  = V3 0 0 301
+                               location  = V3 0 0 80
                              , up        = V3 0 1 0
                              , direction = V3 0 0 0
                              }

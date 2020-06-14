@@ -76,7 +76,6 @@ mouseButtonPressed _ _ _ _ _ _ = pure ()
 mouseScrolled :: IORef Camera -> GLFW.ScrollCallback
 mouseScrolled camera _ _ dy = do
     zoomCamera camera (realToFrac dy)
-    putStrLn $ "Scroll received, dy = " <> (show dy)
 
 glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit width height title = do

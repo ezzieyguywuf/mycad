@@ -10,6 +10,7 @@ import Linear.Metric
 import Linear.Vector
 import Data.IORef
 import Numeric
+import Control.Monad (unless)
 
 data Camera = LookAt { 
                        location  :: V3 Float
@@ -46,4 +47,4 @@ zoomCamera ioCam amt = do
     let rad  = norm (loc - dir)
         rad' = rad - amt
         loc' = lerp (rad' / rad) loc dir
-    writeIORef ioCam (LookAt loc' up dir)
+    unless (rad' <= 0.001) (writeIORef ioCam (LookAt loc' up dir))
