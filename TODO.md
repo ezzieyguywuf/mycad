@@ -1,5 +1,6 @@
 # General
 - ADD INTERNATIONALIZATION!!!!
+- Add gitlab CI integration back, using the haskell stuff.
 - Figure out how to host haddock documentation on gitlab
 - Figure out if we can set up a cross-platform (i.e. including windows and mac) automated
   build system
