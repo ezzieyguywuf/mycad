@@ -38,4 +38,14 @@
 - Rename `getLineSegment` to `getGeometry`? Or add an abstraction or inheritence level?
 - Update Wire constructor to accept Edge rather than LineSegment?
 
-# GUI
+# HaskellCAD
+- run hlint on Geometry and GeometrySpec
+- use Set as appropriate in Topology. We can then get rid of hasAny
+- move pretty printing to it's own module
+- re-evaluate if Geometry needs typeclasses
+- update topo functions to return added value, or add a prime version of such functions
+- update Geometry.getComponents to return a tuple.
+- Figure out better way to get "last X" from Topology or even Entity.
+- refactor Entity to use State monad better.
+- Add test for "If removeXXX called with non-existent XXX, nothing happens"
+- check out 'boxes' for prettyprinter using 'columns'

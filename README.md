@@ -1,4 +1,3 @@
->>>
 NOTE
 ====
 
@@ -10,7 +9,6 @@ I do plan to eventually merge the two projects or put them under a common umbrel
 something. So don't worry that you don't see any commits on this repository (although,
 check the [haskell branch](https://gitlab.com/ezzieyguywuf/mycad/-/tree/haskell) and
 you'll notice I haven't been entirely inactive).
->>>
 
 MyCAD
 =====
