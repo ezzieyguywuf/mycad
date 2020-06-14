@@ -51,3 +51,8 @@
 - refactor Entity to use State monad better.
 - Add test for "If removeXXX called with non-existent XXX, nothing happens"
 - check out 'boxes' for prettyprinter using 'columns'
+
+# GUI
+- do bounds check on getUniformLocation: if it fails, do nothing (maybe?) or
+  alert the coder.
+- infinite zoom.
