@@ -1,19 +1,5 @@
-NOTE
-====
-
-Focus in currently centered on [HaskellCAD](https://gitlab.com/ezzieyguywuf/haskellcad).
-This is a Haskell implementation of the MyCAD "backend" - I've been interested in Haskell
-for a while and thought this may be a good opportunity to kick the tires on it a bit.
-
-I do plan to eventually merge the two projects or put them under a common umbrella or
-something. So don't worry that you don't see any commits on this repository (although,
-check the [haskell branch](https://gitlab.com/ezzieyguywuf/mycad/-/tree/haskell) and
-you'll notice I haven't been entirely inactive).
-
 MyCAD
 =====
-
-![A brief tour of MyCAD's capabilities. Very brief.](res/readme_demo.gif "MyCAD Demo")
 
 MyCAD is a small passion-project (for now). I like to contribute to
 [FreeCAD](https://freecadweb.org), which is a great piece of software with a fantastic
@@ -34,13 +20,9 @@ gitlab](https://ezzieyguywuf.gitlab.io/mycad)
 Project Status
 ==============
 
-As can be seen in the brief demo at the top of this file, currently, MyCAD doesn't do
-much. 🤣
-
-Don't fret though! We're working on it! And by "we" I mean "me". Seriously though, take a
-glance at the git commit history - there's a lot of work going on trying to incrementally
-improve MyCAD so that it can be...well, My CAD (but when you say it, it will be YOUR CAD.
-Get it?).
+mycad continues to be a work in progress. Most recently, we've transitioned almost all of
+the original c++ stuff over to Haskell. Once this transition is entirely complete we'll
+continue moving forward with executing the Storied as described below.
 
 One of the goals (number 3 below) is to be disciplined in our approach to growing the code
 base. As part of that, I'm trying out some of these fancy "Agile" principles, namely, I'm
