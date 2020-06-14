@@ -1,1 +1,2 @@
-opengl-haskell.cabal
+*.cabal
+*.hspec-failures
