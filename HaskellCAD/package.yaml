@@ -27,6 +27,7 @@ dependencies:
 - prettyprinter
 - fgl
 - mtl
+- linear
 
 library:
   source-dirs: src

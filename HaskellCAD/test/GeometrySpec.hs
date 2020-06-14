@@ -3,15 +3,10 @@ module GeometrySpec (spec) where
 import Test.Hspec
 import Test.QuickCheck
 import qualified Geometry as G
+import Linear.V3
 
 spec :: Spec
 spec = do
-    describe "makePoint" $ do
-        it "creates a point with the expected coordinates" $ do
-            property prop_pointCoordinates
-    describe "makeVector" $ do
-        it "creates a vector with the expected offsets" $ do
-            property prop_vectorOffsets
     context "Vector addition must satisfy certain axioms" $ do
         describe "(+)" $ do
             it "is communative" $
@@ -153,17 +148,8 @@ prop_vectCrossJacobi a b c =
         c' = c `G.cross` (a `G.cross` b)
     in a' + b' + c' == 0
 
--- Point and Vector properties
-prop_pointCoordinates :: Rational -> Rational -> Rational -> Bool
-prop_pointCoordinates x y z = G.getComponents (G.makePoint x y z) == [x, y, z]
-
-prop_vectorOffsets :: G.Point Rational -> G.Point Rational -> Bool
-prop_vectorOffsets p q =
-    let check = zipWith (-) (G.getComponents q) (G.getComponents p)
-    in (G.getComponents (G.makeVector p q)) == check
-
 -- Line properties
-prop_lineParametricStartEnd :: G.Point Rational -> G.Point Rational -> Bool
+prop_lineParametricStartEnd rararara:: G.Point Rational -> G.Point Rational -> Bool
 prop_lineParametricStartEnd p q =
     let l = G.makeLine p q
     in (G.pointAtU l 0 == p) &&
