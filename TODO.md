@@ -1,5 +1,6 @@
 # General
 - ADD INTERNATIONALIZATION!!!!
+- Figure out how to host haddock documentation on gitlab
 - Figure out if we can set up a cross-platform (i.e. including windows and mac) automated
   build system
 - Should we explicitly `#include` every header needed, regardless of whether its already
