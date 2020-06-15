@@ -89,11 +89,11 @@ act = do
 
                         -- Bind the texture we want to use
                         -- Tell openGL about our Uniforms
-                        glActiveTexture GL_TEXTURE0
-                        glBindTexture GL_TEXTURE_2D t1
+                        --glActiveTexture GL_TEXTURE0
+                        --glBindTexture GL_TEXTURE_2D t1
 
-                        glActiveTexture GL_TEXTURE1
-                        glBindTexture GL_TEXTURE_2D t2
+                        --glActiveTexture GL_TEXTURE1
+                        --glBindTexture GL_TEXTURE_2D t2
 
                         --time <- maybe 0 realToFrac <$> GLFW.getTime
                         --moveCamera camera 0 (sin (time/100))

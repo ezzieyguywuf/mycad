@@ -33,6 +33,7 @@ data AttributeData = AttributeData
     , getStride ::  GLsizei
     , getOffset :: Ptr ()
     }
+    deriving (Show)
 
 -- | Note: If you add more VertexAttributes, you must also specify and index
 --         for them. This is the index that your Shader will use 
