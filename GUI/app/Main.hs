@@ -47,20 +47,8 @@ act = do
             glfwWindowInit window camera
 
             -- Compile and like our shaders
-            vshader <- readFile "./src/VertexShader.glsl"
-                       >>= loadShader GL_VERTEX_SHADER
-            fshader <- readFile "./src/FragmentShader.glsl"
-                       >>= loadShader GL_FRAGMENT_SHADER
-            vshaderLine <- readFile "./src/LineVShader.glsl"
-                           >>= loadShader GL_VERTEX_SHADER
-
-            baseShader <- linkShadersToProgram vshader fshader
-            lineShader <- linkShadersToProgram vshaderLine fshader
-
-            -- I guess these aren't needed any more?
-            glDeleteShader vshader
-            glDeleteShader fshader
-            glDeleteShader vshaderLine
+            baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
+            lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
             vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)

@@ -1,8 +1,7 @@
 module GL_Helpers
-( 
+(
   putGraphicData
-, loadShader
-, linkShadersToProgram
+, makeShader
 , loadTexture
 , mapTextureUnit
 , putMatrix
@@ -36,6 +35,21 @@ import Foreign.C.String (withCAStringLen, newCString)
 import qualified Data.Vector.Storable as VS
 
 import GraphicData
+
+-- | Creates a Shader that can be used to draw things
+makeShader :: String        -- ^ Vertex Shader, path to a file
+              -> String     -- ^ Fragment Shader, path to a file
+              -> IO GLuint  -- ^ The openGL unique ID of the created shader
+makeShader vpath fpath = do
+    vshader <- readFile vpath >>= loadShader GL_VERTEX_SHADER
+    fshader <- readFile fpath >>= loadShader GL_FRAGMENT_SHADER
+    uid     <- linkShadersToProgram vshader fshader
+
+    -- I guess these aren't needed any more?
+    glDeleteShader vshader
+    glDeleteShader fshader
+
+    pure uid
 
 -- This sequence is performed often enough it's worth wrapping. The argument it
 -- takes it a partially applied glGenSomething function, where we'll provide
@@ -212,7 +226,7 @@ putMatrix :: GLuint -> M44 Float -> String -> IO ()
 putMatrix shader transMatrix name = do
     transP <- malloc
     poke transP transMatrix
-    
+
     let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
     putUniform shader (Uniform name exec)
 
