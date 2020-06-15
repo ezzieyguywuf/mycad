@@ -14,21 +14,7 @@ import GraphicData
 cubeLocations :: [V3 Float]
 cubeLocations =
     [
-      --V3 0 0 0
-      V3 20 0 20
-    , V3 40 40 40
-    , V3 (-60) 60 (-20)
-    , V3 (-50) (-50) (20)
-    , V3 40 (-60) (-20)
-    , V3 0 40 0
-    --, V3 0 60 0
-    --, V3 0 80 0
-    --, V3 (-20) 0 0
-    --, V3 0 (-20) 1
-    , V3 20 20 0
-    , V3 40 40 0
-    , V3 60 60 0
-    , V3 80 80 0
+      V3 10 10 0
     ]
 
 cube :: GraphicData
