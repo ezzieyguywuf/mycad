@@ -38,8 +38,8 @@ data GraphicData' = GraphicData' [AttributeData] [DataRow]
 
 data ElementData'  = ElementData' GraphicData' [GLuint]
 
-data PlacementData = PlacementData { _rotation :: Quaternion Float
-                                   , _translation :: V3 Float}
+data PlacementData = PlacementData { placementRotation    :: Quaternion Float
+                                   , placementTranslation :: V3 Float}
 
 data ObjectData = ObjectData ElementData' [PlacementData]
 

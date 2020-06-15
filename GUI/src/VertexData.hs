@@ -2,6 +2,7 @@ module VertexData
 (
   line
 , line'
+, line''
 , cube
 , lineElements
 , cubeElements
@@ -66,6 +67,20 @@ line =
 
 line' :: ElementData'
 line' = makeElementData' line lineIndices
+
+line'' :: ObjectData
+line'' = ObjectData eData posDatas
+    where eData = makeElementData' line lineIndices
+          posDatas = lineData'
+
+lineData' :: [PlacementData]
+lineData' =
+    [
+      PlacementData { placementRotation=(axisAngle (V3 0 0 0) 0)
+                    , placementTranslation=(V3 0 0 0)}
+    , PlacementData { placementRotation=(axisAngle (V3 0 0 1) (-pi/4))
+                    , placementTranslation=(V3 15 0 0)}
+    ]
 
 cubeElements :: GeoData
 cubeElements = GeoData cubeIndices cubeData
