@@ -221,9 +221,10 @@ putMatrix shaderProgram transMatrix name = do
     transP <- malloc
     poke transP transMatrix
 
-    name <- newCString name
-    loc <- glGetUniformLocation shaderProgram name
+    cName <- newCString name
+    loc <- glGetUniformLocation shaderProgram cName
 
+    when (loc < 0) (putStrLn $ "Uniform with name '" <> name <> "' was not found")
     glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
 
 ------------------------------------------------------------------
