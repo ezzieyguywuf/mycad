@@ -5,7 +5,7 @@ module VertexData
 , lineElements
 , cubeElements
 , ModelData (..)
-, ElementData (..)
+, GeoData (..)
 , makeMatrix
 ) where
 
@@ -26,17 +26,17 @@ data ModelData = ModelData { getRotation :: Quaternion Float
                            deriving (Show)
 
 -- | Any given Element can be re-used as often as you like
-data ElementData = ElementData { getIndices :: Element
-                               , getGeoData :: [ModelData]
-                               }
-                               deriving (Show)
+data GeoData = GeoData { getIndices :: Element
+                       , getGeoData :: [ModelData]
+                       }
+                       deriving (Show)
 
 -- | Creates a transformation matrix given the ModelData
 makeMatrix :: ModelData -> M44 Float
 makeMatrix (ModelData rot trans)= mkTransformation rot trans
 
-lineElements :: ElementData
-lineElements = ElementData lineIndices lineData
+lineElements :: GeoData
+lineElements = GeoData lineIndices lineData
 
 lineData :: [ModelData]
 lineData =
@@ -63,8 +63,8 @@ line =
       , [Position (V3 15 0 0), Color (V4 0.0 0.5 0.2 1)]
     ]
 
-cubeElements :: ElementData
-cubeElements = ElementData cubeIndices cubeData
+cubeElements :: GeoData
+cubeElements = GeoData cubeIndices cubeData
 
 cubeData :: [ModelData]
 cubeData =
