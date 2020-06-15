@@ -57,3 +57,4 @@
   alert the coder.
 - infinite zoom.
 - Remove hard-coded paths - allow for configurable or something.
+- Use TQueue to only render when we need to.
