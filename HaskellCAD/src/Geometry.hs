@@ -33,7 +33,7 @@ data Line a = Line (Point a) (Point a) deriving (Show, Eq)
 data Plane a = Plane (Point a) (Point a) (Point a)
 
 data Intersection a =
-    AtPoint (Point a) 
+    AtPoint (Point a)
   | Coincident
   | NoIntersection
 
