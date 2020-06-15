@@ -60,6 +60,7 @@ act = do
             -- I guess these aren't needed any more?
             glDeleteShader vshader
             glDeleteShader fshader
+            glDeleteShader vshaderLine
 
             vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)
