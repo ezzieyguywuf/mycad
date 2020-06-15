@@ -216,12 +216,6 @@ putMatrix shader transMatrix name = do
     let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
     putUniform shader (Uniform name exec)
 
--- MonadIO m => GLint -> GLint -> m () 
--- MonadIO m => GLint -> GLsizei -> GLboolean -> Ptr GLfloat -> m () 
-data Uniform = Uniform { _uniformName :: String
-                       , _uniformExec :: GLint -> IO()
-                       }
-
 putUniform :: GLuint -> Uniform -> IO ()
 putUniform shader (Uniform name exec) = do
     -- Make sure to activate the shader first
@@ -237,6 +231,9 @@ putUniform shader (Uniform name exec) = do
 ------------------------------------------------------------------
 --          Private Free Functions
 ------------------------------------------------------------------
+data Uniform = Uniform { _uniformName :: String
+                       , _uniformExec :: GLint -> IO()
+                       }
 
 
 makeOpenGLTexture :: GLsizei -> GLsizei -> Ptr a -> IO GLuint
