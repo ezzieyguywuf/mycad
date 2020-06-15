@@ -58,8 +58,8 @@ act = do
             glDeleteShader vshader
             glDeleteShader fshader
 
-            vao <- putGraphicData line lineIndices
-            vao2 <- putGraphicData cube cubeIndices
+            vao <- putGraphicData line (getIndices lineElements)
+            vao2 <- putGraphicData cube (getIndices cubeElements)
 
             -- Load the texture information into opengl
             t1 <- loadTexture "./res/container.jpg"
@@ -100,14 +100,14 @@ act = do
 
                         -- Draw the lines
                         glBindVertexArray vao
-                        let len = fromIntegral $ length lineIndices
-                            place = map (placeModel shaderProgram) lineData
+                        let len = fromIntegral $ length (getIndices lineElements)
+                            place = map (placeModel shaderProgram) (getGeoData lineElements)
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
 
                         glBindVertexArray vao2
-                        let len = fromIntegral $ length cubeIndices
-                            place = map (placeModel shaderProgram) cubeData
+                        let len = fromIntegral $ length (getIndices cubeElements)
+                            place = map (placeModel shaderProgram) (getGeoData cubeElements)
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
                         glBindVertexArray 0
