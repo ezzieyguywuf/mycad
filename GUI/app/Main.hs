@@ -48,7 +48,7 @@ act = do
 
             -- Compile and like our shaders
             baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
-            lineShader <- makeShader' "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
+            lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
             vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)
