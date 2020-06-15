@@ -30,7 +30,7 @@ lineData :: [ModelData]
 lineData =
     [
       ModelData (axisAngle (V3 0 0 0) 0) (V3 0 0 0)
-    , ModelData (axisAngle (V3 0 0 0) 0) (V3 15 0 0)
+    , ModelData (axisAngle (V3 0 0 1) (-pi/4)) (V3 15 0 0)
     ]
 
 line :: GraphicData
