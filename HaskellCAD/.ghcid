@@ -1,2 +1,2 @@
---command="stack-bin ghci test/Spec.hs"
+--command="stack-bin ghci HaskellCAD:HaskellCAD-test"
 --test=":main -m Geometry"

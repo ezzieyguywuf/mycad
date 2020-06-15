@@ -14,11 +14,9 @@ module Geometry
 , pointIntersectsLine
 ) where
 
-import Data.List
 import Test.QuickCheck
 import Linear.V3
 import Linear.Vector (lerp)
-import qualified Data.Text as T
 
 -- ===========================================================================
 --                               Data Types
@@ -58,9 +56,6 @@ makePlane :: (Fractional a) => Point a -> Point a -> Point a -> Plane a
 makePlane p1 p2 p3 = Plane p1 p2 p3
 
 -- | Parametrizes a component between u=0 and u=1
-componentAtU :: (Fractional a) => a -> a -> a -> a
-componentAtU u c1 c2 = c1 + u * (c2 - c1)
-
 pointAtU :: (Fractional a) => Line a -> a -> Point a
 pointAtU (Line p1 p2) u = lerp u p2 p1
 
@@ -78,13 +73,10 @@ pointAtUV (Plane p1 p2 p3) u v =
 --                      Implementations (Instances)
 -- ===========================================================================
 pointIntersectsLine :: (Fractional a, Eq a) => Line a -> Point a -> Bool
-pointIntersectsLine l p =
-    let u0 = pointAtU l 0
-        v  = p - u0
-        m  = slope l
-        (V3 x y z)  = (m / v)
-    -- If all components are equal, then the Point lies on the line
-    in all (\x -> x == head [x, y, z]) (tail [x, y, z])
+pointIntersectsLine l p = (m `cross` v) == (V3 0 0 0)
+    where u0 = pointAtU l 0
+          v  = p - u0
+          m  = slope l
 
 --lineIntersectsLine :: Line a -> Line a -> Intersection a
 --lineIntersectsLine l1 l2

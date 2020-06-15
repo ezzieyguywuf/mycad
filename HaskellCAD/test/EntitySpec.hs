@@ -3,6 +3,7 @@ module EntitySpec (spec) where
 import Test.Hspec
 import qualified Entity as E
 import qualified Geometry as Geo
+import Linear.V3
 
 nullE :: E.Entity Float
 nullE = E.nullEntity
@@ -16,7 +17,7 @@ spec = do
             in (vs + es) `shouldBe` 0
     describe "addVertex" $ do
         let e = E.addVertex nullE p
-            p = Geo.makePoint 10 20 0
+            p = V3 10 20 0
             v = last . E.getVertices $ e
         it "Adds a single Vertex to the Entity" $
             (length $ E.getVertices e) `shouldBe` 1
@@ -28,8 +29,8 @@ spec = do
         let e  = E.addEdge e0 v1 p2
             e0 = E.addVertex nullE p1
             v1 = last . E.getVertices $ e0
-            p1 = Geo.makePoint 10 10 10
-            p2 = Geo.makePoint 20 20 20
+            p1 = V3 10 10 10
+            p2 = V3 20 20 20
         it "Adds a single Edge to the Entity" $
             (length $ E.getEdges e) `shouldBe` 1
         it "Adds a single Vertex to Entity" $
@@ -42,7 +43,7 @@ spec = do
         let e  = E.addEdge (E.addVertex nullE p1) v1 p2
             [v2,v1] = E.getVertices e
             [ed] = E.getEdges e
-            p1 = Geo.makePoint 10 20 30
-            p2 = Geo.makePoint 5 10 5
+            p1 = V3 10 20 30
+            p2 = V3 5 10 5
         it "Returns the Vertex on the other side of the Edge" $
             (E.oppositeVertex e v1 ed) `shouldBe` Just v2
