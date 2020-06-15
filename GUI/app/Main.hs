@@ -138,8 +138,8 @@ placeModel shader dat = putMatrix shader (makeMatrix dat) "model"
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shader ioCam = do
-    (LookAt loc up dir ) <- readIORef ioCam
-    putMatrix shader  (lookAt loc dir up) "view"
+    mat <- viewMatrix ioCam
+    putMatrix shader mat  "view"
 
 makeProjection :: GLuint -> IO ()
 makeProjection shader = do
@@ -147,9 +147,15 @@ makeProjection shader = do
         projection = perspective (pi/4.0) aspectRatio 0.1 1000.0
     putMatrix shader projection "projection"
 
+
 projectionMatrix :: M44 Float
 projectionMatrix = perspective (pi/4.0) aspectRatio 0.1 1000.0
     where aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
+
+viewMatrix :: IORef Camera -> IO (M44 Float)
+viewMatrix ioCam = do
+    (LookAt loc up dir ) <- readIORef ioCam
+    pure $ lookAt loc dir up
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 
