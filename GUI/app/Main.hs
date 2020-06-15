@@ -19,11 +19,8 @@ import Graphics.GL.Types
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
 import Linear.Matrix
-import Linear.Vector
-import Linear.Metric
 import qualified Linear.Quaternion as Quat
 import Linear.Projection
-import Linear.Quaternion
 
 import Foreign
 import Data.IORef
