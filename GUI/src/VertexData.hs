@@ -4,7 +4,7 @@ module VertexData
 , cube
 , lineElements
 , cubeElements
-, ModelData (..)
+, ElementData (..)
 , GeoData (..)
 , makeMatrix
 ) where
@@ -20,29 +20,29 @@ import GraphicData
 -- | An Element is a set of Vertices that can be reused in different locations/rotations
 type Element= [GLuint]
 
-data ModelData = ModelData { getRotation :: Quaternion Float
-                           , getLocation :: V3 Float
-                           }
-                           deriving (Show)
+data ElementData = ElementData { elementRotation :: Quaternion Float
+                               , elementTranslation :: V3 Float
+                               }
+                               deriving (Show)
 
 -- | Any given Element can be re-used as often as you like
 data GeoData = GeoData { getIndices :: Element
-                       , getGeoData :: [ModelData]
+                       , getGeoData :: [ElementData]
                        }
                        deriving (Show)
 
--- | Creates a transformation matrix given the ModelData
-makeMatrix :: ModelData -> M44 Float
-makeMatrix (ModelData rot trans)= mkTransformation rot trans
+-- | Creates a transformation matrix given the ElementData
+makeMatrix :: ElementData -> M44 Float
+makeMatrix (ElementData rot trans)= mkTransformation rot trans
 
 lineElements :: GeoData
 lineElements = GeoData lineIndices lineData
 
-lineData :: [ModelData]
+lineData :: [ElementData]
 lineData =
     [
-      ModelData (axisAngle (V3 0 0 0) 0) (V3 0 0 0)
-    , ModelData (axisAngle (V3 0 0 1) (-pi/4)) (V3 15 0 0)
+      ElementData (axisAngle (V3 0 0 0) 0) (V3 0 0 0)
+    , ElementData (axisAngle (V3 0 0 1) (-pi/4)) (V3 15 0 0)
     ]
 
 lineIndices :: Element
@@ -66,10 +66,10 @@ line =
 cubeElements :: GeoData
 cubeElements = GeoData cubeIndices cubeData
 
-cubeData :: [ModelData]
+cubeData :: [ElementData]
 cubeData =
     [
-      ModelData (axisAngle (V3 0 0 0) 0) (V3 60 10 0)
+      ElementData (axisAngle (V3 0 0 0) 0) (V3 60 10 0)
     ]
 
 cube :: GraphicData

@@ -113,7 +113,7 @@ act = do
                         -- Draw same lines, offset down in y a bit
                         glBindVertexArray vao
                         let (GeoData inds datas) = lineElements
-                            shift (ModelData rot (V3 x y z)) = ModelData rot (V3 x (y - 10) z)
+                            shift (ElementData rot (V3 x y z)) = ElementData rot (V3 x (y - 10) z)
                             datas' = map shift datas
                             len = fromIntegral $ length inds
                             place = map (placeModel lineShader) datas'
@@ -130,7 +130,7 @@ act = do
 drawElements :: GLsizei -> IO()
 drawElements len = glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
 
-placeModel :: GLuint -> ModelData -> IO ()
+placeModel :: GLuint -> ElementData -> IO ()
 placeModel shader dat = putMatrix shader (makeMatrix dat) "model"
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
