@@ -218,6 +218,8 @@ mapTextureUnit shaderProgram target name= do
 
 putMatrix :: GLuint -> M44 Float -> String -> IO ()
 putMatrix shaderProgram transMatrix name = do
+    glUseProgram shaderProgram
+
     transP <- malloc
     poke transP transMatrix
 

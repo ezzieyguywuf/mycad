@@ -53,6 +53,8 @@ act = do
                        >>= loadShader GL_FRAGMENT_SHADER
 
             shaderProgram <- linkShadersToProgram vshader fshader
+            lineShader    <- linkShadersToProgram vshader fshader
+            putStrLn $ "Shader 1 = " <> (show shaderProgram) <> ", shader2 = " <> (show lineShader)
 
             -- I guess these aren't needed any more?
             glDeleteShader vshader
@@ -82,9 +84,6 @@ act = do
                         glClearColor 0.2 0.3 0.3 1.0
                         glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
-                        -- Use our program
-                        glUseProgram shaderProgram
-
                         -- Bind the texture we want to use
                         -- Tell openGL about our Uniforms
                         --glActiveTexture GL_TEXTURE0
@@ -97,6 +96,19 @@ act = do
                         --moveCamera camera 0 (sin (time/100))
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram
+                        placeCamera lineShader camera
+                        makeProjection lineShader
+
+                        -- Use our program
+                        glUseProgram shaderProgram
+
+                        -- draw a cube
+                        glBindVertexArray vao2
+                        let len = fromIntegral $ length (getIndices cubeElements)
+                            place = map (placeModel shaderProgram) (getGeoData cubeElements)
+                            draw  = map (\x -> x >> drawElements len) place
+                        sequence_ $ draw
+                        glBindVertexArray 0
 
                         -- Draw the lines
                         glBindVertexArray vao
@@ -105,20 +117,15 @@ act = do
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
 
+                        -- Use our second shader program
+                        glUseProgram lineShader
                         -- Draw same lines, offset down in y a bit
                         glBindVertexArray vao
                         let (GeoData inds datas) = lineElements
                             shift (ModelData rot (V3 x y z)) = ModelData rot (V3 x (y - 10) z)
                             datas' = map shift datas
                             len = fromIntegral $ length inds
-                            place = map (placeModel shaderProgram) datas'
-                            draw  = map (\x -> x >> drawElements len) place
-                        sequence_ $ draw
-                        glBindVertexArray 0
-
-                        glBindVertexArray vao2
-                        let len = fromIntegral $ length (getIndices cubeElements)
-                            place = map (placeModel shaderProgram) (getGeoData cubeElements)
+                            place = map (placeModel lineShader) datas'
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
                         glBindVertexArray 0
@@ -133,18 +140,18 @@ drawElements :: GLsizei -> IO()
 drawElements len = glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
 
 placeModel :: GLuint -> ModelData -> IO ()
-placeModel shaderProgram dat = putMatrix shaderProgram (makeMatrix dat) "model"
+placeModel shader dat = putMatrix shader (makeMatrix dat) "model"
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
-placeCamera shaderProgram ioCam = do
+placeCamera shader ioCam = do
     (LookAt loc up dir ) <- readIORef ioCam
-    putMatrix shaderProgram  (lookAt loc dir up) "view"
+    putMatrix shader  (lookAt loc dir up) "view"
 
 makeProjection :: GLuint -> IO ()
-makeProjection shaderProgram = do
+makeProjection shader = do
     let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
         projection = perspective (pi/4.0) aspectRatio 0.1 1000.0
-    putMatrix shaderProgram projection "projection"
+    putMatrix shader projection "projection"
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 
