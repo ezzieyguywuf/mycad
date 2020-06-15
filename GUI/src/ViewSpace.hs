@@ -28,7 +28,7 @@ rotateCameraNudge :: IORef Camera
                   -> IO ()
 rotateCameraNudge ioCam yaw pitch = do
     (LookAt loc up dir) <- readIORef ioCam
-    let p1@(V3 x1 y1 z1) = normalize loc
+    let p1 = normalize loc
         p2 = normalize $ rotate (pitchRot * yawRot) p1
         right = (loc - dir) `cross` up
         yawRot = axisAngle up yaw
