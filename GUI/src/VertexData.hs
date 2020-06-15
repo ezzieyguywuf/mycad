@@ -10,7 +10,6 @@ module VertexData
 
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Types
-import Linear.V2
 import Linear.V3
 import Linear.V4
 import GraphicData
@@ -19,26 +18,30 @@ lineLocations :: [V3 Float]
 lineLocations =
     [
       V3 0 0 0
-    , V3 4 6 0
+    , V3 5 0 0
     ]
 line :: GraphicData
 line =
     [
-        [Position (V3 0 0 0), Texture (V2 0 0)]
-      , [Position (V3 3 0 0), Texture (V2 0 0)]
-      , [Position (V3 3 5 0), Texture (V2 0 0)]
+        [Position (V3 0 3 0), Color (V4 1.0 0.5 0.2 1)]
+      , [Position (V3 0 0 0), Color (V4 1.0 0.5 0.2 1)]
+      , [Position (V3 5 3 0), Color (V4 1.0 0.5 0.2 1)]
+      , [Position (V3 5 3 0), Color (V4 0.0 0.5 0.2 1)]
+      , [Position (V3 0 0 0), Color (V4 0.0 0.5 0.2 1)]
+      , [Position (V3 5 0 0), Color (V4 0.0 0.5 0.2 1)]
     ]
 
 lineIndices :: [GLuint]
 lineIndices =
     [
       0, 1, 2
+    , 3, 4, 5
     ]
 
 cubeLocations :: [V3 Float]
 cubeLocations =
     [
-      V3 10 10 0
+      V3 60 10 0
     ]
 
 cube :: GraphicData
@@ -46,7 +49,7 @@ cube =
     [ 
       [Position (V3 (-10) (-10) 10), Color (V4 0.2 0.5 0.2 1)]    -- 0 Top, Bottom Left
     , [Position (V3    10 (-10) 10), Color (V4 0.2 0.5 0.2 1) ]    -- 1 Top, Bottom Right
-    , [Position (V3    10    10 10), Color (V4 0.2 0.5 0.2 1) ]    -- 2 Top, Top Right
+    , [Position (V3    10    10 10), Color (V4 1.0 0.5 0.2 1) ]    -- 2 Top, Top Right
     , [Position (V3 (-10)    10 10), Color (V4 0.2 0.5 0.2 1) ]    -- 3 Top, Top Left
 
     , [Position (V3 (-10) (-10) (-10)), Color (V4 0.2 0.5 0.2 1) ]     -- 4 Bottom, Bottom Left
