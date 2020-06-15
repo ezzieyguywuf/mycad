@@ -35,9 +35,9 @@ prop_lineParametricStartEnd x1 y1 z1 x2 y2 z2 =
 
 prop_lineConstantSlope :: G.Line Rational -> Bool
 prop_lineConstantSlope l =
-    let m1 = (G.pointAtU l 1) - (G.pointAtU l 0) 
-        m2 = (G.pointAtU l 2) - (G.pointAtU l 1) 
-        m3 = (G.pointAtU l 3) - (G.pointAtU l 4) 
+    let m1 = (G.pointAtU l 1) - (G.pointAtU l 0)
+        m2 = (G.pointAtU l 2) - (G.pointAtU l 1)
+        m3 = (G.pointAtU l 3) - (G.pointAtU l 4)
         m  = G.slope l
         crosses = map (`cross` m) [m1, m2, m3]
     -- The cross product of parallel vectors is 0 (or one of them is the zero vector...)
