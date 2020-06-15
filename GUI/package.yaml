@@ -1,4 +1,4 @@
-name:                opengl-haskell
+name:                GUI
 version:             0.1.0.0
 github:              "githubuser/opengl-haskell"
 license:             BSD3
@@ -32,7 +32,7 @@ library:
   source-dirs: src
 
 executables:
-  opengl-haskell-exe:
+  gui-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -40,10 +40,10 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - opengl-haskell
+    - GUI
 
 tests:
-  opengl-haskell-test:
+  gui-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -51,4 +51,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - opengl-haskell
+    - GUI
