@@ -109,7 +109,8 @@ act = do
 
                         -- Use our second shader program
                         --glUseProgram lineShader
-                        matrixUniform viewMatrix "view" >>= (putUniform' lineDrawer)
+                        viewMat <- viewMatrix camera
+                        matrixUniform viewMat "view" >>= (putUniform' lineDrawer)
                         matrixUniform projectionMatrix "projection" >>= (putUniform' lineDrawer)
 
                         --placeCamera lineShader camera
