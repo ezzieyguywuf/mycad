@@ -52,9 +52,9 @@ act = do
             fshader <- readFile "./src/FragmentShader.glsl"
                        >>= loadShader GL_FRAGMENT_SHADER
 
-            shaderProgram <- linkShadersToProgram vshader fshader
+            baseShader <- linkShadersToProgram vshader fshader
             lineShader    <- linkShadersToProgram vshader fshader
-            putStrLn $ "Shader 1 = " <> (show shaderProgram) <> ", shader2 = " <> (show lineShader)
+            putStrLn $ "Shader 1 = " <> (show baseShader) <> ", shader2 = " <> (show lineShader)
 
             -- I guess these aren't needed any more?
             glDeleteShader vshader
@@ -67,8 +67,8 @@ act = do
             t1 <- loadTexture "./res/container.jpg"
             t2 <- loadTexture "./res/awesomeface.png"
 
-            mapTextureUnit shaderProgram 0 "texture0"
-            mapTextureUnit shaderProgram 1 "texture1"
+            mapTextureUnit baseShader 0 "texture0"
+            mapTextureUnit baseShader 1 "texture1"
 
             -- enable depth testing
             glEnable GL_DEPTH_TEST
@@ -94,18 +94,18 @@ act = do
 
                         --time <- maybe 0 realToFrac <$> GLFW.getTime
                         --moveCamera camera 0 (sin (time/100))
-                        placeCamera shaderProgram camera
-                        makeProjection shaderProgram
+                        placeCamera baseShader camera
+                        makeProjection baseShader
                         placeCamera lineShader camera
                         makeProjection lineShader
 
                         -- Use our program
-                        glUseProgram shaderProgram
+                        glUseProgram baseShader
 
                         -- draw a cube
                         glBindVertexArray vao2
                         let len = fromIntegral $ length (getIndices cubeElements)
-                            place = map (placeModel shaderProgram) (getGeoData cubeElements)
+                            place = map (placeModel baseShader) (getGeoData cubeElements)
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
                         glBindVertexArray 0
@@ -113,7 +113,7 @@ act = do
                         -- Draw the lines
                         glBindVertexArray vao
                         let len = fromIntegral $ length (getIndices lineElements)
-                            place = map (placeModel shaderProgram) (getGeoData lineElements)
+                            place = map (placeModel baseShader) (getGeoData lineElements)
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
 
