@@ -6,6 +6,8 @@ module GraphicData
 , GraphicData
 , GraphicData'(..)
 , ElementData'(..)
+, ObjectData (..)
+, PlacementData (..)
 , getDataSize
 , flattenData
 , makeGraphicData'
@@ -17,6 +19,7 @@ import Graphics.GL.Types
 import Linear.V2
 import Linear.V3
 import Linear.V4
+import Linear.Quaternion
 import Foreign
 import Data.Foldable
 import Data.List
@@ -34,6 +37,11 @@ type GraphicData = [DataRow]
 data GraphicData' = GraphicData' [AttributeData] [DataRow]
 
 data ElementData'  = ElementData' GraphicData' [GLuint]
+
+data PlacementData = PlacementData { _rotation :: Quaternion Float
+                                   , _translation :: V3 Float}
+
+data ObjectData = ObjectData ElementData' [PlacementData]
 
 data AttributeData = AttributeData
     {
