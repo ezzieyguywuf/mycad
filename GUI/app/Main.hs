@@ -31,7 +31,7 @@ main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
 
 winWIDTH = 800
 winHEIGHT = 600
-winTITLE = "LearnOpenGL Hello Cube!"
+winTITLE = "LearnOpenGL Hello Line!"
 
 act :: IO()
 act = do
@@ -49,9 +49,9 @@ act = do
             glfwWindowInit window camera
 
             -- Compile and like our shaders
-            vshader <- readFile "./GUI/src/VertexShader.glsl"
+            vshader <- readFile "./src/VertexShader.glsl"
                        >>= loadShader GL_VERTEX_SHADER
-            fshader <- readFile "./GUI/src/FragmentShader.glsl"
+            fshader <- readFile "./src/FragmentShader.glsl"
                        >>= loadShader GL_FRAGMENT_SHADER
 
             shaderProgram <- linkShadersToProgram vshader fshader
@@ -60,11 +60,12 @@ act = do
             glDeleteShader vshader
             glDeleteShader fshader
 
-            vao <- putGraphicData cube cubeIndices
+            vao <- putGraphicData line lineIndices
+            vao2 <- putGraphicData cube cubeIndices
 
             -- Load the texture information into opengl
-            t1 <- loadTexture "./GUI/res/container.jpg"
-            t2 <- loadTexture "./GUI/res/awesomeface.png"
+            t1 <- loadTexture "./res/container.jpg"
+            t2 <- loadTexture "./res/awesomeface.png"
 
             mapTextureUnit shaderProgram 0 "texture0"
             mapTextureUnit shaderProgram 1 "texture1"
@@ -99,8 +100,14 @@ act = do
                         placeCamera shaderProgram camera
                         makeProjection shaderProgram
 
-                        -- Draw the cubes
+                        -- Draw the lines
                         glBindVertexArray vao
+                        let len = fromIntegral $ length lineIndices
+                            place = map (placeModel shaderProgram) lineLocations
+                            draw  = map (\x -> x >> drawElements len) place
+                        sequence_ $ draw
+
+                        glBindVertexArray vao2
                         let len = fromIntegral $ length cubeIndices
                             place = map (placeModel shaderProgram) cubeLocations
                             draw  = map (\x -> x >> drawElements len) place
@@ -137,7 +144,7 @@ makeProjection shaderProgram = do
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 
-                               location  = V3 0 0 80
+                               location  = V3 0 0 15
                              , up        = V3 0 1 0
                              , direction = V3 0 0 0
                              }

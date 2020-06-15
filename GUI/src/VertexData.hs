@@ -1,6 +1,9 @@
 module VertexData
 (
-  cube
+  line
+, lineIndices
+, lineLocations
+, cube
 , cubeIndices
 , cubeLocations
 ) where
@@ -9,7 +12,28 @@ module VertexData
 import Graphics.GL.Types
 import Linear.V2
 import Linear.V3
+import Linear.V4
 import GraphicData
+
+lineLocations :: [V3 Float]
+lineLocations =
+    [
+      V3 0 0 0
+    , V3 4 6 0
+    ]
+line :: GraphicData
+line =
+    [
+        [Position (V3 0 0 0), Texture (V2 0 0)]
+      , [Position (V3 3 0 0), Texture (V2 0 0)]
+      , [Position (V3 3 5 0), Texture (V2 0 0)]
+    ]
+
+lineIndices :: [GLuint]
+lineIndices =
+    [
+      0, 1, 2
+    ]
 
 cubeLocations :: [V3 Float]
 cubeLocations =
@@ -20,15 +44,15 @@ cubeLocations =
 cube :: GraphicData
 cube =
     [ 
-      [Position (V3 (-10) (-10) 10) , Texture (V2 0.0 0.0)]    -- 0 Top, Bottom Left
-    , [Position (V3    10 (-10) 10) , Texture (V2 1.0 0.0)]    -- 1 Top, Bottom Right
-    , [Position (V3    10    10 10) , Texture (V2 1.0 1.0)]    -- 2 Top, Top Right
-    , [Position (V3 (-10)    10 10) , Texture (V2 0.0 1.0)]    -- 3 Top, Top Left
+      [Position (V3 (-10) (-10) 10), Color (V4 1 0.5 0.2 1)]    -- 0 Top, Bottom Left
+    , [Position (V3    10 (-10) 10), Color (V4 1 0.5 0.2 1) ]    -- 1 Top, Bottom Right
+    , [Position (V3    10    10 10), Color (V4 1 0.5 0.2 1) ]    -- 2 Top, Top Right
+    , [Position (V3 (-10)    10 10), Color (V4 1 0.5 0.2 1) ]    -- 3 Top, Top Left
 
-    , [Position (V3 (-10) (-10) (-10)) , Texture (V2 0 1.0)]     -- 4 Bottom, Bottom Left
-    , [Position (V3    10 (-10) (-10)) , Texture (V2 1.0 1.0)]   -- 5 Bottom, Bottom Right
-    , [Position (V3    10    10 (-10)) , Texture (V2 1.0 0.0)] -- 6 Bottom, Top Left
-    , [Position (V3 (-10)    10 (-10)) , Texture (V2 0.0 0.0)] -- 7 Bottom, Top Right
+    , [Position (V3 (-10) (-10) (-10)), Color (V4 1 0.5 0.2 1) ]     -- 4 Bottom, Bottom Left
+    , [Position (V3    10 (-10) (-10)), Color (V4 1 0.5 0.2 1) ]   -- 5 Bottom, Bottom Right
+    , [Position (V3    10    10 (-10)), Color (V4 1 0.5 0.2 1) ] -- 6 Bottom, Top Left
+    , [Position (V3 (-10)    10 (-10)), Color (V4 1 0.5 0.2 1) ] -- 7 Bottom, Top Right
 
     ]
 

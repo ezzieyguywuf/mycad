@@ -12,12 +12,14 @@ module GraphicData
 import Graphics.GL.Types
 import Linear.V2
 import Linear.V3
+import Linear.V4
 import Foreign
 import Data.Foldable
 import Data.List
 
 data VertexAttribute =
      Position (V3 Float)
+   | Color (V4 Float)
    | Texture (V2 Float)
     deriving (Show)
 
@@ -40,7 +42,8 @@ data AttributeData = AttributeData
 --         would still need two distinct VertexAttributes values.
 getAttributeIndex :: VertexAttribute -> GLuint
 getAttributeIndex (Position _) = 0
-getAttributeIndex (Texture _)  = 1
+getAttributeIndex (Color _)  = 1
+getAttributeIndex (Texture _)  = 2
 
 -- | This will return a list of data suitable for making calls to glVertexAttribPointer
 getRowData :: DataRow -> [AttributeData]
@@ -80,6 +83,7 @@ makeData stride cumOffset attrib = (cumOffset + len, attribData)
 -- | Flattens out a VertexAttribute in a manner suitable for OpenGL to read
 squashAttribute :: VertexAttribute -> [GLfloat]
 squashAttribute (Position v) = toList v
+squashAttribute (Color v) = toList v
 squashAttribute (Texture v) = toList v
 
 -- | A helper, flattens out an entire 'DataRow' using 'squashAttribute'
