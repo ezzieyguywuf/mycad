@@ -51,10 +51,11 @@ act = do
                        >>= loadShader GL_VERTEX_SHADER
             fshader <- readFile "./src/FragmentShader.glsl"
                        >>= loadShader GL_FRAGMENT_SHADER
+            vshaderLine <- readFile "./src/LineVShader.glsl"
+                           >>= loadShader GL_VERTEX_SHADER
 
             baseShader <- linkShadersToProgram vshader fshader
-            lineShader    <- linkShadersToProgram vshader fshader
-            putStrLn $ "Shader 1 = " <> (show baseShader) <> ", shader2 = " <> (show lineShader)
+            lineShader <- linkShadersToProgram vshaderLine fshader
 
             -- I guess these aren't needed any more?
             glDeleteShader vshader
