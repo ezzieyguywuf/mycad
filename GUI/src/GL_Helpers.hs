@@ -2,6 +2,7 @@ module GL_Helpers
 (
   putGraphicData
 , makeShader
+, makeShader'
 , loadTexture
 , mapTextureUnit
 , putMatrix
@@ -36,6 +37,11 @@ import qualified Data.Vector.Storable as VS
 
 import GraphicData
 
+-- | This will store the data necessary to execute a shader and draw something
+data Shader = Shader { _shaderID       :: GLuint
+                     , _shaderUniforms :: [Uniform]
+                     }
+
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
               -> String     -- ^ Fragment Shader, path to a file
@@ -51,17 +57,12 @@ makeShader vpath fpath = do
 
     pure uid
 
--- This sequence is performed often enough it's worth wrapping. The argument it
--- takes it a partially applied glGenSomething function, where we'll provide
--- the pointer and return the address
-getNewBufferID :: (Ptr GLuint -> IO ()) -> IO (GLuint)
-getNewBufferID f = do
-    -- Haskell will use type inference to figure out what kind of pointer
-    pointer <- malloc
-    -- the openGL function will fill in our pointer for us
-    f pointer
-    -- return back the dereferenced pointer, with the UID that we can use in our program
-    peek pointer
+makeShader' :: String        -- ^ Vertex Shader, path to a file
+              -> String     -- ^ Fragment Shader, path to a file
+              -> IO Shader  -- ^ The Shader can be used to draw things
+makeShader' vpath fpath = do
+    uid <- makeShader vpath fpath
+    pure $ Shader uid []
 
 putGraphicData :: GraphicData -> [GLuint] -> IO GLuint
 putGraphicData gdata indices = do
@@ -101,111 +102,6 @@ putGraphicData gdata indices = do
     registerElementBufferObject vao indices
 
     pure vao
-
-registerVertexAttribute :: AttributeData -> IO ()
-registerVertexAttribute d = do
-    let i    = getIndex d
-        size = getAttribSize d
-        stride = getStride d
-        offset = getOffset d
-    -- Parameters are:
-    -- i = index
-    -- len = length
-    -- GL_FLOAT = type
-    -- GL_FALSE = don't normalize
-    -- stride = distance between subsequent attributes of the same kind
-    -- nullPtr = not sure
-    glVertexAttribPointer i size GL_FLOAT GL_FALSE stride offset
-
-    -- Now we have to enable this attribute, per its index
-    glEnableVertexAttribArray i
-
-registerElementBufferObject :: GLuint -> [GLuint] -> IO ()
-registerElementBufferObject vao indices = do
-    -- Prep the indices for use in the EBO
-    let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * (length indices)
-    indicesP <- newArray indices
-
-    -- The Element Buffer Object, or EBO, allows us to re-use vertices in the Buffer. this
-    -- let's us save space on the graphics memory.
-    -- We sould do this after the VAO has been bound, because then ith VAO will
-    -- automatically store a reference to this EBO
-    ebo <- getNewBufferID $ glGenBuffers 1
-    glBindVertexArray vao
-    glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
-    glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
-
--- | Given a shader type and a shader source, it gives you (Right id) of the
--- successfully compiled shader, or (Left err) with the error message. In the
--- error case, the shader id is deleted before the function returns to avoid
--- accidentally leaking shader objects.
-loadShader :: GLenum -> String -> IO GLuint
-loadShader shaderType source = do
-    -- new shader object
-    shaderID <- glCreateShader shaderType
-
-    -- assign the source to the shader object
-    withCAStringLen source $ \(strP, strLen) ->
-        withArray [strP] $ \linesPtrsPtr ->
-            withArray [fromIntegral strLen] $ \lengthsPtr ->
-                glShaderSource shaderID 1 linesPtrsPtr lengthsPtr
-
-    -- compile and check success
-    glCompileShader shaderID
-    success <- alloca $ \successP -> do
-        glGetShaderiv shaderID GL_COMPILE_STATUS successP
-        peek successP
-    if success == GL_TRUE
-        -- success: we're done
-        then pure shaderID
-        -- failure: we get the log, delete the shader, and return the log.
-        else do
-            -- how many bytes the info log should be (including the '\0')
-            logLen <- alloca $ \logLenP -> do
-                glGetShaderiv shaderID GL_INFO_LOG_LENGTH logLenP
-                peek logLenP
-            -- space for the info log
-            logBytes <- allocaBytes (fromIntegral logLen) $ \logP -> do
-                -- space for the log reading result
-                alloca $ \resultP -> do
-                    -- Try to obtain the log bytes
-                    glGetShaderInfoLog shaderID logLen resultP logP
-                    -- this is how many bytes we actually got
-                    result <- fromIntegral <$> peek resultP
-                    peekArray result logP
-            -- delete the shader object and return the log
-            glDeleteShader shaderID
-            let prefix = case shaderType of
-                    GL_VERTEX_SHADER -> "Vertex"
-                    GL_GEOMETRY_SHADER -> "Geometry"
-                    GL_FRAGMENT_SHADER -> "Fragment"
-                    _ -> "Unknown Type"
-            putStrLn $ prefix ++ " Shader Error:" ++
-                        (map (toEnum.fromEnum) logBytes)
-            pure 0
-
-linkShadersToProgram :: GLuint -> GLuint -> IO GLuint
-linkShadersToProgram shader1 shader2 = do
-    shaderProgram <- glCreateProgram
-
-    glAttachShader shaderProgram shader1
-    glAttachShader shaderProgram shader2
-    glLinkProgram shaderProgram
-
-    linkingSuccessP <- malloc
-    glGetProgramiv shaderProgram GL_LINK_STATUS linkingSuccessP
-    linkingSuccess <- peek linkingSuccessP
-    when (linkingSuccess == GL_FALSE) $ do
-        putStrLn "Program Linking Error:"
-        let infoLength = 512
-        resultP <- malloc
-        infoLog <- mallocArray (fromIntegral infoLength)
-        glGetProgramInfoLog shaderProgram (fromIntegral infoLength) resultP infoLog
-        result <- fromIntegral <$> peek resultP
-        logBytes <- peekArray result infoLog
-        putStrLn (map (toEnum.fromEnum) logBytes)
-
-    pure shaderProgram
 
 loadTexture :: String -> IO GLuint
 loadTexture fname = do
@@ -274,3 +170,117 @@ getDynImage fname = do
 generateGradient :: DynamicImage
 generateGradient = ImageRGB8 $ generateImage renderer 800 600
     where renderer x y = PixelRGB8 (fromIntegral x) (fromIntegral y) 128
+
+loadShader :: GLenum -> String -> IO GLuint
+loadShader shaderType source = do
+    -- new shader object
+    shaderID <- glCreateShader shaderType
+
+    -- assign the source to the shader object
+    withCAStringLen source $ \(strP, strLen) ->
+        withArray [strP] $ \linesPtrsPtr ->
+            withArray [fromIntegral strLen] $ \lengthsPtr ->
+                glShaderSource shaderID 1 linesPtrsPtr lengthsPtr
+
+    -- compile and check success
+    glCompileShader shaderID
+    success <- alloca $ \successP -> do
+        glGetShaderiv shaderID GL_COMPILE_STATUS successP
+        peek successP
+    if success == GL_TRUE
+        -- success: we're done
+        then pure shaderID
+        -- failure: we get the log, delete the shader, and return the log.
+        else do
+            -- how many bytes the info log should be (including the '\0')
+            logLen <- alloca $ \logLenP -> do
+                glGetShaderiv shaderID GL_INFO_LOG_LENGTH logLenP
+                peek logLenP
+            -- space for the info log
+            logBytes <- allocaBytes (fromIntegral logLen) $ \logP -> do
+                -- space for the log reading result
+                alloca $ \resultP -> do
+                    -- Try to obtain the log bytes
+                    glGetShaderInfoLog shaderID logLen resultP logP
+                    -- this is how many bytes we actually got
+                    result <- fromIntegral <$> peek resultP
+                    peekArray result logP
+            -- delete the shader object and return the log
+            glDeleteShader shaderID
+            let prefix = case shaderType of
+                    GL_VERTEX_SHADER -> "Vertex"
+                    GL_GEOMETRY_SHADER -> "Geometry"
+                    GL_FRAGMENT_SHADER -> "Fragment"
+                    _ -> "Unknown Type"
+            putStrLn $ prefix ++ " Shader Error:" ++
+                        (map (toEnum.fromEnum) logBytes)
+            pure 0
+
+linkShadersToProgram :: GLuint -> GLuint -> IO GLuint
+linkShadersToProgram shader1 shader2 = do
+    shaderProgram <- glCreateProgram
+
+    glAttachShader shaderProgram shader1
+    glAttachShader shaderProgram shader2
+    glLinkProgram shaderProgram
+
+    linkingSuccessP <- malloc
+    glGetProgramiv shaderProgram GL_LINK_STATUS linkingSuccessP
+    linkingSuccess <- peek linkingSuccessP
+    when (linkingSuccess == GL_FALSE) $ do
+        putStrLn "Program Linking Error:"
+        let infoLength = 512
+        resultP <- malloc
+        infoLog <- mallocArray (fromIntegral infoLength)
+        glGetProgramInfoLog shaderProgram (fromIntegral infoLength) resultP infoLog
+        result <- fromIntegral <$> peek resultP
+        logBytes <- peekArray result infoLog
+        putStrLn (map (toEnum.fromEnum) logBytes)
+
+    pure shaderProgram
+
+-- This sequence is performed often enough it's worth wrapping. The argument it
+-- takes it a partially applied glGenSomething function, where we'll provide
+-- the pointer and return the address
+getNewBufferID :: (Ptr GLuint -> IO ()) -> IO (GLuint)
+getNewBufferID f = do
+    -- Haskell will use type inference to figure out what kind of pointer
+    pointer <- malloc
+    -- the openGL function will fill in our pointer for us
+    f pointer
+    -- return back the dereferenced pointer, with the UID that we can use in our program
+    peek pointer
+
+registerVertexAttribute :: AttributeData -> IO ()
+registerVertexAttribute d = do
+    let i    = getIndex d
+        size = getAttribSize d
+        stride = getStride d
+        offset = getOffset d
+    -- Parameters are:
+    -- i = index
+    -- len = length
+    -- GL_FLOAT = type
+    -- GL_FALSE = don't normalize
+    -- stride = distance between subsequent attributes of the same kind
+    -- nullPtr = not sure
+    glVertexAttribPointer i size GL_FLOAT GL_FALSE stride offset
+
+    -- Now we have to enable this attribute, per its index
+    glEnableVertexAttribArray i
+
+registerElementBufferObject :: GLuint -> [GLuint] -> IO ()
+registerElementBufferObject vao indices = do
+    -- Prep the indices for use in the EBO
+    let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * (length indices)
+    indicesP <- newArray indices
+
+    -- The Element Buffer Object, or EBO, allows us to re-use vertices in the Buffer. this
+    -- let's us save space on the graphics memory.
+    -- We sould do this after the VAO has been bound, because then ith VAO will
+    -- automatically store a reference to this EBO
+    ebo <- getNewBufferID $ glGenBuffers 1
+    glBindVertexArray vao
+    glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
+    glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
+

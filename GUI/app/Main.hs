@@ -48,7 +48,7 @@ act = do
 
             -- Compile and like our shaders
             baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
-            lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
+            lineShader <- makeShader' "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
             vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)
@@ -86,8 +86,6 @@ act = do
                         --moveCamera camera 0 (sin (time/100))
                         placeCamera baseShader camera
                         makeProjection baseShader
-                        placeCamera lineShader camera
-                        makeProjection lineShader
 
                         -- Use our program
                         glUseProgram baseShader
@@ -109,6 +107,9 @@ act = do
 
                         -- Use our second shader program
                         glUseProgram lineShader
+
+                        placeCamera lineShader camera
+                        makeProjection lineShader
                         -- Draw same lines, offset down in y a bit
                         glBindVertexArray vao
                         let (GeoData inds datas) = lineElements
