@@ -204,31 +204,35 @@ loadTexture fname = do
     VS.unsafeWith iData (makeOpenGLTexture iWidth iHeight)
 
 mapTextureUnit :: GLuint -> Int32 -> String -> IO ()
-mapTextureUnit shaderProgram target name= do
-    -- Find out where in the program the uniform is located
-    cname <- newCString name
-    loc <- glGetUniformLocation shaderProgram cname
-
-    -- We must call UseProgram before glUniformX, otherwise it won't
-    -- know which program to put it in!
-    glUseProgram shaderProgram
-
-    -- Bind the texture location to the target index
-    glUniform1i loc target
+mapTextureUnit shader target name= do
+    let exec = (flip glUniform1i) target
+    putUniform shader (Uniform name exec)
 
 putMatrix :: GLuint -> M44 Float -> String -> IO ()
-putMatrix shaderProgram transMatrix name = do
-    glUseProgram shaderProgram
-
+putMatrix shader transMatrix name = do
     transP <- malloc
     poke transP transMatrix
+    
+    let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
+    putUniform shader (Uniform name exec)
+
+-- MonadIO m => GLint -> GLint -> m () 
+-- MonadIO m => GLint -> GLsizei -> GLboolean -> Ptr GLfloat -> m () 
+data Uniform = Uniform { _uniformName :: String
+                       , _uniformExec :: GLint -> IO()
+                       }
+
+putUniform :: GLuint -> Uniform -> IO ()
+putUniform shader (Uniform name exec) = do
+    -- Make sure to activate the shader first
+    glUseProgram shader
 
     cName <- newCString name
-    loc <- glGetUniformLocation shaderProgram cName
+    loc <- glGetUniformLocation shader cName
 
     case compare loc 0 of
         LT -> putStrLn $ "Uniform with name '" <> name <> "' was not found"
-        _  -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
+        _  -> exec loc
 
 ------------------------------------------------------------------
 --          Private Free Functions
