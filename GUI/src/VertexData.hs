@@ -2,33 +2,46 @@ module VertexData
 (
   line
 , lineIndices
-, lineLocations
+, lineData
 , cube
 , cubeIndices
-, cubeLocations
+, cubeData
+, ModelData (..)
+, makeMatrix
 ) where
 
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Types
 import Linear.V3
 import Linear.V4
+import Linear.Quaternion
+import Linear.Matrix
 import GraphicData
 
-lineLocations :: [V3 Float]
-lineLocations =
+data ModelData = ModelData { getRotation :: Quaternion Float
+                           , getLocation :: V3 Float
+                           }
+                           deriving (Show)
+
+makeMatrix :: ModelData -> M44 Float
+makeMatrix (ModelData rot trans)= mkTransformation rot trans
+
+lineData :: [ModelData]
+lineData =
     [
-      V3 0 0 0
-    , V3 5 0 0
+      ModelData (axisAngle (V3 0 0 0) 0) (V3 0 0 0)
+    , ModelData (axisAngle (V3 0 0 0) 0) (V3 15 0 0)
     ]
+
 line :: GraphicData
 line =
     [
         [Position (V3 0 3 0), Color (V4 1.0 0.5 0.2 1)]
       , [Position (V3 0 0 0), Color (V4 1.0 0.5 0.2 1)]
-      , [Position (V3 5 3 0), Color (V4 1.0 0.5 0.2 1)]
-      , [Position (V3 5 3 0), Color (V4 0.0 0.5 0.2 1)]
+      , [Position (V3 15 3 0), Color (V4 1.0 0.5 0.2 1)]
+      , [Position (V3 15 3 0), Color (V4 0.0 0.5 0.2 1)]
       , [Position (V3 0 0 0), Color (V4 0.0 0.5 0.2 1)]
-      , [Position (V3 5 0 0), Color (V4 0.0 0.5 0.2 1)]
+      , [Position (V3 15 0 0), Color (V4 0.0 0.5 0.2 1)]
     ]
 
 lineIndices :: [GLuint]
@@ -38,10 +51,10 @@ lineIndices =
     , 3, 4, 5
     ]
 
-cubeLocations :: [V3 Float]
-cubeLocations =
+cubeData :: [ModelData]
+cubeData =
     [
-      V3 60 10 0
+      ModelData (axisAngle (V3 0 0 0) 0) (V3 60 10 0)
     ]
 
 cube :: GraphicData

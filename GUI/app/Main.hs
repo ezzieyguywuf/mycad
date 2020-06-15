@@ -18,8 +18,6 @@ import Graphics.GL.Types
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
-import Linear.Matrix
-import qualified Linear.Quaternion as Quat
 import Linear.Projection
 
 import Foreign
@@ -103,13 +101,13 @@ act = do
                         -- Draw the lines
                         glBindVertexArray vao
                         let len = fromIntegral $ length lineIndices
-                            place = map (placeModel shaderProgram) lineLocations
+                            place = map (placeModel shaderProgram) lineData
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
 
                         glBindVertexArray vao2
                         let len = fromIntegral $ length cubeIndices
-                            place = map (placeModel shaderProgram) cubeLocations
+                            place = map (placeModel shaderProgram) cubeData
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
                         glBindVertexArray 0
@@ -123,13 +121,8 @@ act = do
 drawElements :: GLsizei -> IO()
 drawElements len = glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
 
-placeModel :: GLuint -> V3 Float -> IO ()
-placeModel shaderProgram trans = do
-    let theta = 0.0
-        rot   = fromQuaternion $ Quat.axisAngle (V3 1.0 (-1.0) 0.0) theta
-        scale = 1.0
-        model = mkTransformationMat (scale *!! rot) trans
-    putMatrix shaderProgram model "model"
+placeModel :: GLuint -> ModelData -> IO ()
+placeModel shaderProgram dat = putMatrix shaderProgram (makeMatrix dat) "model"
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shaderProgram ioCam = do
@@ -144,7 +137,7 @@ makeProjection shaderProgram = do
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 
-                               location  = V3 0 0 15
+                               location  = V3 0 0 100
                              , up        = V3 0 1 0
                              , direction = V3 0 0 0
                              }
