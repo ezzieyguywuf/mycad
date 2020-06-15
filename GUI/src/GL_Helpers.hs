@@ -1,6 +1,7 @@
 module GL_Helpers
 (
-  putGraphicData
+  makeDrawer
+, putGraphicData
 , putGraphicData'
 , makeShader
 , makeShader'
@@ -32,6 +33,13 @@ data Shader = Shader { _shaderID       :: GLuint
                      , _shaderUniforms :: [Uniform]
                      }
 
+-- | This has all the information necessary to draw something to the screen
+data Drawer = Drawer {
+                       _vao         :: GLuint
+                     , _shader      :: Shader
+                     , _elementData :: ElementData'
+                     }
+
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
               -> String     -- ^ Fragment Shader, path to a file
@@ -53,6 +61,11 @@ makeShader' :: String        -- ^ Vertex Shader, path to a file
 makeShader' vpath fpath = do
     uid <- makeShader vpath fpath
     pure $ Shader uid []
+
+makeDrawer :: Shader -> ElementData' -> IO Drawer
+makeDrawer shader edata = do
+    vao <- putGraphicData' edata
+    pure $ Drawer vao shader edata
 
 putGraphicData' :: ElementData' -> IO GLuint
 putGraphicData' (ElementData' (GraphicData' rowData gdata) indices) = do
