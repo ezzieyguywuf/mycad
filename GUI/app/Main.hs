@@ -52,9 +52,9 @@ act = do
             glfwWindowInit window camera
 
             -- Compile and like our shaders
-            vshader <- readFile "./src/VertexShader.glsl"
+            vshader <- readFile "./GUI/src/VertexShader.glsl"
                        >>= loadShader GL_VERTEX_SHADER
-            fshader <- readFile "./src/FragmentShader.glsl"
+            fshader <- readFile "./GUI/src/FragmentShader.glsl"
                        >>= loadShader GL_FRAGMENT_SHADER
 
             shaderProgram <- linkShadersToProgram vshader fshader
@@ -66,8 +66,8 @@ act = do
             vao <- putGraphicData cube cubeIndices
 
             -- Load the texture information into opengl
-            t1 <- loadTexture "res/container.jpg"
-            t2 <- loadTexture "res/awesomeface.png"
+            t1 <- loadTexture "./GUI/res/container.jpg"
+            t2 <- loadTexture "./GUI/res/awesomeface.png"
 
             mapTextureUnit shaderProgram 0 "texture0"
             mapTextureUnit shaderProgram 1 "texture1"

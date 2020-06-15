@@ -56,3 +56,4 @@
 - do bounds check on getUniformLocation: if it fails, do nothing (maybe?) or
   alert the coder.
 - infinite zoom.
+- Remove hard-coded paths - allow for configurable or something.
