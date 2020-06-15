@@ -4,7 +4,7 @@ module GraphicData
 , AttributeData(..)
 , DataRow
 , GraphicData
-, GraphicData'
+, GraphicData'(..)
 , getDataSize
 , flattenData
 , makeGraphicData'
