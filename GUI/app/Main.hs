@@ -105,6 +105,17 @@ act = do
                             draw  = map (\x -> x >> drawElements len) place
                         sequence_ $ draw
 
+                        -- Draw same lines, offset down in y a bit
+                        glBindVertexArray vao
+                        let (GeoData inds datas) = lineElements
+                            shift (ModelData rot (V3 x y z)) = ModelData rot (V3 x (y - 10) z)
+                            datas' = map shift datas
+                            len = fromIntegral $ length inds
+                            place = map (placeModel shaderProgram) datas'
+                            draw  = map (\x -> x >> drawElements len) place
+                        sequence_ $ draw
+                        glBindVertexArray 0
+
                         glBindVertexArray vao2
                         let len = fromIntegral $ length (getIndices cubeElements)
                             place = map (placeModel shaderProgram) (getGeoData cubeElements)
