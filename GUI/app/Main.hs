@@ -52,6 +52,7 @@ act = do
 
             vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)
+            vao_line <- putGraphicData' line'
 
             -- Load the texture information into opengl
             t1 <- loadTexture "./res/container.jpg"

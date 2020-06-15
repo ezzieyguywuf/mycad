@@ -54,8 +54,8 @@ makeShader' vpath fpath = do
     uid <- makeShader vpath fpath
     pure $ Shader uid []
 
-putGraphicData' :: GraphicData' -> [GLuint] -> IO GLuint
-putGraphicData' (GraphicData' rowData gdata) indices = do
+putGraphicData' :: ElementData' -> IO GLuint
+putGraphicData' (ElementData' (GraphicData' rowData gdata) indices) = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
     vbo <- getNewBufferID $ glGenBuffers 1

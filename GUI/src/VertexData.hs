@@ -64,8 +64,8 @@ line =
       , [Position (V3 15 0 0), Color (V4 0.0 0.5 0.2 1)]
     ]
 
-line' :: GraphicData'
-line' = makeGraphicData' line
+line' :: ElementData'
+line' = makeElementData' line lineIndices
 
 cubeElements :: GeoData
 cubeElements = GeoData cubeIndices cubeData

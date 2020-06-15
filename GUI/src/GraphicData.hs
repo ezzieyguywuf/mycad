@@ -5,9 +5,11 @@ module GraphicData
 , DataRow
 , GraphicData
 , GraphicData'(..)
+, ElementData'(..)
 , getDataSize
 , flattenData
 , makeGraphicData'
+, makeElementData'
 , getRowData
 )where
 
@@ -31,6 +33,8 @@ type GraphicData = [DataRow]
 
 data GraphicData' = GraphicData' [AttributeData] [DataRow]
 
+data ElementData'  = ElementData' GraphicData' [GLuint]
+
 data AttributeData = AttributeData
     {
       getIndex :: GLuint
@@ -43,6 +47,9 @@ data AttributeData = AttributeData
 makeGraphicData' :: [DataRow] -> GraphicData'
 makeGraphicData' rows = GraphicData' attribData rows
     where attribData = getRowData $ head rows
+
+makeElementData' :: [DataRow] -> [GLuint] -> ElementData'
+makeElementData' rows indices = ElementData' (makeGraphicData' rows) indices
 
 -- | Note: If you add more VertexAttributes, you must also specify and index
 --         for them. This is the index that your Shader will use 
