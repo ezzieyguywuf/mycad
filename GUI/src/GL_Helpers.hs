@@ -1,6 +1,7 @@
 module GL_Helpers
 (
-  makeDrawer
+  Uniform(..)
+, makeDrawer
 , putGraphicData
 , putGraphicData'
 , makeShader
@@ -8,6 +9,8 @@ module GL_Helpers
 , loadTexture
 , mapTextureUnit
 , putMatrix
+, matrixUniform
+, putUniform'
 )where
 
 -- base
@@ -39,6 +42,10 @@ data Drawer = Drawer {
                      , _shader      :: Shader
                      , _elementData :: ElementData'
                      }
+
+data Uniform = Uniform { _uniformName :: String
+                       , _uniformExec :: GLint -> IO()
+                       }
 
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
@@ -168,6 +175,14 @@ putMatrix shader transMatrix name = do
     let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
     putUniform shader (Uniform name exec)
 
+matrixUniform :: M44 Float -> String -> IO Uniform
+matrixUniform transMatrix name = do
+    transP <- malloc
+    poke transP transMatrix
+
+    let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
+    pure (Uniform name exec)
+
 putUniform :: GLuint -> Uniform -> IO ()
 putUniform shader (Uniform name exec) = do
     -- Make sure to activate the shader first
@@ -180,13 +195,14 @@ putUniform shader (Uniform name exec) = do
         LT -> putStrLn $ "Uniform with name '" <> name <> "' was not found"
         _  -> exec loc
 
+putUniform' :: Drawer -> Uniform -> IO ()
+putUniform' drawer uniform = do
+    let shader = _shaderID $ _shader drawer
+    putUniform shader uniform
+
 ------------------------------------------------------------------
 --          Private Free Functions
 ------------------------------------------------------------------
-data Uniform = Uniform { _uniformName :: String
-                       , _uniformExec :: GLint -> IO()
-                       }
-
 
 makeOpenGLTexture :: GLsizei -> GLsizei -> Ptr a -> IO GLuint
 makeOpenGLTexture  w h ptr = do

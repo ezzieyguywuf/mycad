@@ -19,6 +19,7 @@ import Graphics.GL.Types
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
 import Linear.Projection
+import Linear.Matrix
 
 import Foreign
 import Data.IORef
@@ -48,11 +49,11 @@ act = do
 
             -- Compile and like our shaders
             baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
-            lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
+            lineShader <- makeShader' "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
             vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)
-            vao_line <- putGraphicData' line'
+            lineDrawer <- makeDrawer lineShader line'
 
             -- Load the texture information into opengl
             t1 <- loadTexture "./res/container.jpg"
@@ -107,20 +108,21 @@ act = do
                         sequence_ $ draw
 
                         -- Use our second shader program
-                        glUseProgram lineShader
+                        --glUseProgram lineShader
+                        matrixUniform projectionMatrix "projection" >>= (putUniform' lineDrawer)
 
-                        placeCamera lineShader camera
-                        makeProjection lineShader
+                        --placeCamera lineShader camera
+                        --makeProjection lineShader
                         -- Draw same lines, offset down in y a bit
-                        glBindVertexArray vao
-                        let (GeoData inds datas) = lineElements
-                            shift (ElementData rot (V3 x y z)) = ElementData rot (V3 x (y - 10) z)
-                            datas' = map shift datas
-                            len = fromIntegral $ length inds
-                            place = map (placeModel lineShader) datas'
-                            draw  = map (\x -> x >> drawElements len) place
-                        sequence_ $ draw
-                        glBindVertexArray 0
+                        --glBindVertexArray vao
+                        --let (GeoData inds datas) = lineElements
+                            --shift (ElementData rot (V3 x y z)) = ElementData rot (V3 x (y - 10) z)
+                            --datas' = map shift datas
+                            --len = fromIntegral $ length inds
+                            --place = map (placeModel lineShader) datas'
+                            --draw  = map (\x -> x >> drawElements len) place
+                        --sequence_ $ draw
+                        --glBindVertexArray 0
 
                         -- swap buffers and go again
                         GLFW.swapBuffers window
@@ -144,6 +146,10 @@ makeProjection shader = do
     let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
         projection = perspective (pi/4.0) aspectRatio 0.1 1000.0
     putMatrix shader projection "projection"
+
+projectionMatrix :: M44 Float
+projectionMatrix = perspective (pi/4.0) aspectRatio 0.1 1000.0
+    where aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 
