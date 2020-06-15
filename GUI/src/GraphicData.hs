@@ -4,9 +4,11 @@ module GraphicData
 , AttributeData(..)
 , DataRow
 , GraphicData
-, getRowData
+, GraphicData'
 , getDataSize
 , flattenData
+, makeGraphicData'
+, getRowData
 )where
 
 import Graphics.GL.Types
@@ -17,6 +19,7 @@ import Foreign
 import Data.Foldable
 import Data.List
 
+-- | A VertexAttribute describes a single piece of data that OpenGL will read
 data VertexAttribute =
      Position (V3 Float)
    | Color (V4 Float)
@@ -26,6 +29,8 @@ data VertexAttribute =
 type DataRow = [VertexAttribute]
 type GraphicData = [DataRow]
 
+data GraphicData' = GraphicData' [AttributeData] [DataRow]
+
 data AttributeData = AttributeData
     {
       getIndex :: GLuint
@@ -34,6 +39,10 @@ data AttributeData = AttributeData
     , getOffset :: Ptr ()
     }
     deriving (Show)
+
+makeGraphicData' :: [DataRow] -> GraphicData'
+makeGraphicData' rows = GraphicData' attribData rows
+    where attribData = getRowData $ head rows
 
 -- | Note: If you add more VertexAttributes, you must also specify and index
 --         for them. This is the index that your Shader will use 
