@@ -10,31 +10,20 @@ module GL_Helpers
 
 -- base
 import Control.Monad (when)
-
--- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
 import Graphics.GL.Types
-
--- For loading images
 import Codec.Picture ( readImage
                      , generateImage
                      , convertRGB8
                      , DynamicImage(..)
                      , Image(..)
                      , PixelRGB8(..))
-
--- For maths
 import Linear.Matrix
-
--- This is for the Foreign Function Interface, ffi. This calls C-code
 import Foreign
-
--- Converts Haskell strings to C-strings
 import Foreign.C.String (withCAStringLen, newCString)
-
--- For doing silly things with vector pointers
 import qualified Data.Vector.Storable as VS
 
+-- Thing's I've defined
 import GraphicData
 
 -- | This will store the data necessary to execute a shader and draw something
