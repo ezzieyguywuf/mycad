@@ -1,2 +1,0 @@
---command="stack-bin ghci HaskellCAD:HaskellCAD-test"
---test=":main -m Geometry"
