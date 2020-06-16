@@ -113,7 +113,7 @@ act = do
                         matrixUniform viewMat "view" >>= (putUniform' lineDrawer)
                         matrixUniform projectionMatrix "projection" >>= (putUniform' lineDrawer)
 
-                        drawObject lineDrawer line''
+                        drawObject lineDrawer
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop

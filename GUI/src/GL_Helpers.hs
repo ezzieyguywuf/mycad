@@ -41,16 +41,17 @@ data Shader = Shader { _shaderID       :: GLuint
 data Drawer = Drawer {
                        _vao        :: GLuint
                      , _shader     :: Shader
-                     , _ojbectData :: ObjectData
+                     , _objectData :: ObjectData
                      }
 
 data Uniform = Uniform { _uniformName :: String
                        , _uniformExec :: GLint -> IO()
                        }
 
-drawObject :: Drawer -> ObjectData -> IO ()
-drawObject drawer (ObjectData (ElementData' _ indices) pdatas) = do
-    let vao = _vao drawer
+drawObject :: Drawer -> IO ()
+drawObject drawer = do
+    let (ObjectData (ElementData' _ indices) pdatas) = _objectData drawer
+        vao = _vao drawer
         len = fromIntegral $ length indices
         makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
         placements = map makeMat pdatas
