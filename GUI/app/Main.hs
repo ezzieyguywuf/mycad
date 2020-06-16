@@ -49,8 +49,8 @@ act = do
             lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
             cubeDrawer <- makeDrawer baseShader cube
-            lineDrawer' <- makeDrawer baseShader line
-            lineDrawer <- makeDrawer lineShader line'
+            lineDrawer' <- makeDrawer baseShader line'
+            lineDrawer <- makeDrawer lineShader line
 
             -- enable depth testing
             glEnable GL_DEPTH_TEST
