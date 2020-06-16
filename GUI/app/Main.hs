@@ -45,8 +45,8 @@ act = do
             glfwWindowInit window camera
 
             -- Compile and like our shaders
-            baseShader <- makeShader' "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
-            lineShader <- makeShader' "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
+            baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
+            lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
             cubeDrawer <- makeDrawer baseShader cube
             lineDrawer' <- makeDrawer baseShader line

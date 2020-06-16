@@ -6,7 +6,6 @@ module GL_Helpers
 , putGraphicData
 , putGraphicData'
 , makeShader
-, makeShader'
 , loadTexture
 , mapTextureUnit
 , putMatrix
@@ -66,7 +65,7 @@ drawObject drawer = do
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
               -> String     -- ^ Fragment Shader, path to a file
-              -> IO GLuint  -- ^ The openGL unique ID of the created shader
+              -> IO Shader  -- ^ The Shader can be used to draw things
 makeShader vpath fpath = do
     vshader <- readFile vpath >>= loadShader GL_VERTEX_SHADER
     fshader <- readFile fpath >>= loadShader GL_FRAGMENT_SHADER
@@ -76,13 +75,6 @@ makeShader vpath fpath = do
     glDeleteShader vshader
     glDeleteShader fshader
 
-    pure uid
-
-makeShader' :: String        -- ^ Vertex Shader, path to a file
-              -> String     -- ^ Fragment Shader, path to a file
-              -> IO Shader  -- ^ The Shader can be used to draw things
-makeShader' vpath fpath = do
-    uid <- makeShader vpath fpath
     pure $ Shader uid []
 
 makeDrawer :: Shader -> ObjectData -> IO Drawer
