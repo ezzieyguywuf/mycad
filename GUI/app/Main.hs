@@ -49,11 +49,12 @@ act = do
 
             -- Compile and like our shaders
             baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
+            baseShader' <- makeShader' "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
             lineShader <- makeShader' "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
-            vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)
-            lineDrawer <- makeDrawer lineShader line''
+            lineDrawer' <- makeDrawer baseShader' line
+            lineDrawer <- makeDrawer lineShader line'
 
             -- Load the texture information into opengl
             t1 <- loadTexture "./res/container.jpg"
@@ -101,24 +102,28 @@ act = do
                         glBindVertexArray 0
 
                         -- Draw the lines
-                        glBindVertexArray vao
-                        let len = fromIntegral $ length (getIndices lineElements)
-                            place = map (placeModel baseShader) (getGeoData lineElements)
-                            draw  = map (\x -> x >> drawElements len) place
-                        sequence_ $ draw
+                        putViewUniform camera lineDrawer'
+                        putProjectionUniform lineDrawer'
+                        drawObject lineDrawer'
 
                         -- Use our second shader program
-                        --glUseProgram lineShader
-                        viewMat <- viewMatrix camera
-                        matrixUniform viewMat "view" >>= (putUniform' lineDrawer)
-                        matrixUniform projectionMatrix "projection" >>= (putUniform' lineDrawer)
-
+                        putViewUniform camera lineDrawer
+                        putProjectionUniform lineDrawer
                         drawObject lineDrawer
+
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop
             loop
     GLFW.terminate
+
+putViewUniform :: IORef Camera -> Drawer -> IO ()
+putViewUniform camera drawer = do
+    viewMat <- viewMatrix camera
+    matrixUniform viewMat "view" >>= (putUniform' drawer)
+
+putProjectionUniform :: Drawer -> IO ()
+putProjectionUniform drawer = matrixUniform projectionMatrix "projection" >>= (putUniform' drawer)
 
 drawElements :: GLsizei -> IO()
 drawElements len = glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr

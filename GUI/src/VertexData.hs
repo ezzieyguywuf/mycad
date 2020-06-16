@@ -2,9 +2,7 @@ module VertexData
 (
   line
 , line'
-, line''
 , cube
-, lineElements
 , cubeElements
 , ElementData (..)
 , GeoData (..)
@@ -37,50 +35,35 @@ data GeoData = GeoData { getIndices :: Element
 makeMatrix :: ElementData -> M44 Float
 makeMatrix (ElementData rot trans)= mkTransformation rot trans
 
-lineElements :: GeoData
-lineElements = GeoData lineIndices lineData
-
-lineData :: [ElementData]
-lineData =
-    [
-      ElementData (axisAngle (V3 0 0 0) 0) (V3 0 0 0)
-    , ElementData (axisAngle (V3 0 0 1) (-pi/4)) (V3 15 0 0)
-    ]
-
-lineIndices :: Element
-lineIndices =
-    [
-      0, 1, 2
-    , 3, 4, 5
-    ]
-
-line :: GraphicData
-line =
-    [
-        [Position (V3 0 3 0), Color (V4 1.0 0.5 0.2 1)]
-      , [Position (V3 0 0 0), Color (V4 1.0 0.5 0.2 1)]
-      , [Position (V3 15 3 0), Color (V4 1.0 0.5 0.2 1)]
-      , [Position (V3 15 3 0), Color (V4 0.0 0.5 0.2 1)]
-      , [Position (V3 0 0 0), Color (V4 0.0 0.5 0.2 1)]
-      , [Position (V3 15 0 0), Color (V4 0.0 0.5 0.2 1)]
-    ]
-
-line' :: ElementData'
-line' = makeElementData' line lineIndices
-
-line'' :: ObjectData
-line'' = ObjectData eData posDatas
+line :: ObjectData
+line = ObjectData eData placementData
     where eData = makeElementData' line lineIndices
-          posDatas = lineData'
-
-lineData' :: [PlacementData]
-lineData' =
-    [
-      PlacementData { placementRotation=(axisAngle (V3 0 0 0) 0)
-                    , placementTranslation=(V3 0 0 0)}
-    , PlacementData { placementRotation=(axisAngle (V3 0 0 1) (-pi/4))
-                    , placementTranslation=(V3 15 0 0)}
-    ]
+          line =
+              [
+                  [Position (V3 0 3 0), Color (V4 1.0 0.5 0.2 1)]
+                , [Position (V3 0 0 0), Color (V4 1.0 0.5 0.2 1)]
+                , [Position (V3 15 3 0), Color (V4 1.0 0.5 0.2 1)]
+                , [Position (V3 15 3 0), Color (V4 0.0 0.5 0.2 1)]
+                , [Position (V3 0 0 0), Color (V4 0.0 0.5 0.2 1)]
+                , [Position (V3 15 0 0), Color (V4 0.0 0.5 0.2 1)]
+              ]
+          lineIndices =
+              [
+                0, 1, 2
+              , 3, 4, 5
+              ]
+          placementData =
+              [
+                PlacementData { placementRotation=(axisAngle (V3 0 0 0) 0)
+                              , placementTranslation=(V3 0 0 0)}
+              , PlacementData { placementRotation=(axisAngle (V3 0 0 1) (-pi/4))
+                              , placementTranslation=(V3 15 0 0)}
+              ]
+line' :: ObjectData
+line' = ObjectData eData placementData
+    where (ObjectData eData pOrig) = line
+          f (PlacementData rot trans) = PlacementData rot (trans + (V3 0 30 0))
+          placementData = map f pOrig
 
 cubeElements :: GeoData
 cubeElements = GeoData cubeIndices cubeData

@@ -1,6 +1,7 @@
 module GL_Helpers
 (
   Uniform(..)
+, Drawer
 , makeDrawer
 , putGraphicData
 , putGraphicData'
