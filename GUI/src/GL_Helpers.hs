@@ -3,8 +3,6 @@ module GL_Helpers
   Uniform(..)
 , Drawer
 , makeDrawer
-, putGraphicData
-, putGraphicData'
 , makeShader
 , loadTexture
 , mapTextureUnit
@@ -79,86 +77,8 @@ makeShader vpath fpath = do
 
 makeDrawer :: Shader -> ObjectData -> IO Drawer
 makeDrawer shader oData@(ObjectData eData _) = do
-    vao <- putGraphicData' eData
+    vao <- putGraphicData eData
     pure $ Drawer vao shader oData
-
-putGraphicData' :: ElementData' -> IO GLuint
-putGraphicData' (ElementData' (GraphicData' rowData gdata) indices) = do
-    -- First, make a Vertex Buffer Object. This is a place in openGL's memory
-    -- where we can put all of our vertex data
-    vbo <- getNewBufferID $ glGenBuffers 1
-
-    -- Next, we're going to create a Vertex Array Object, or VAO, which allows
-    -- to reuse the data in our VBO over and over (or something like that)
-    vao <- getNewBufferID $ glGenVertexArrays 1
-
-    -- OpenGL needs to know the size of the data we're going to give it
-    let dataSize = getDataSize gdata
-        flatData = flattenData gdata
-
-    -- This makes a pointer to our data
-    dataPointer <- newArray flatData
-
-    -- In openGL, you must "bind" a buffer before you are able to do things to
-    -- it. In the case of a VAO, it must be bound before the VBO that is going
-    -- to store the actual data
-    glBindVertexArray vao
-    glBindBuffer GL_ARRAY_BUFFER vbo
-
-    -- Finally write the data. This applies to the currently "bound"
-    -- GL_ARRAY_BUFFER, in our case, vbo
-    glBufferData GL_ARRAY_BUFFER dataSize (castPtr dataPointer) GL_STATIC_DRAW
-
-    -- Register the Vertex Attribute with OpenGL. Since the Shaders, which use
-    -- our vertex information, are flexible, we need to specify to OpenGL how
-    -- our data is laid out. Did you notice how we flattened the data earlier?
-    -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
-    -- know how to unflatten it.
-    sequence $ map registerVertexAttribute rowData
-    -- Finally, register the indices in the Element Buffer Object
-    registerElementBufferObject vao indices
-
-    pure vao
-
-
-putGraphicData :: GraphicData -> [GLuint] -> IO GLuint
-putGraphicData gdata indices = do
-    -- First, make a Vertex Buffer Object. This is a place in openGL's memory
-    -- where we can put all of our vertex data
-    vbo <- getNewBufferID $ glGenBuffers 1
-
-    -- Next, we're going to create a Vertex Array Object, or VAO, which allows
-    -- to reuse the data in our VBO over and over (or something like that)
-    vao <- getNewBufferID $ glGenVertexArrays 1
-
-    -- OpenGL needs to know the size of the data we're going to give it
-    let dataSize = getDataSize gdata
-        flatData = flattenData gdata
-
-    -- This makes a pointer to our data
-    dataPointer <- newArray flatData
-
-    -- In openGL, you must "bind" a buffer before you are able to do things to
-    -- it. In the case of a VAO, it must be bound before the VBO that is going
-    -- to store the actual data
-    glBindVertexArray vao
-    glBindBuffer GL_ARRAY_BUFFER vbo
-
-    -- Finally write the data. This applies to the currently "bound"
-    -- GL_ARRAY_BUFFER, in our case, vbo
-    glBufferData GL_ARRAY_BUFFER dataSize (castPtr dataPointer) GL_STATIC_DRAW
-
-    -- Register the Vertex Attribute with OpenGL. Since the Shaders, which use
-    -- our vertex information, are flexible, we need to specify to OpenGL how
-    -- our data is laid out. Did you notice how we flattened the data earlier?
-    -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
-    -- know how to unflatten it.
-    let rowData = getRowData $ head gdata
-    sequence $ map registerVertexAttribute rowData
-    -- Finally, register the indices in the Element Buffer Object
-    registerElementBufferObject vao indices
-
-    pure vao
 
 loadTexture :: String -> IO GLuint
 loadTexture fname = do
@@ -349,4 +269,42 @@ registerElementBufferObject vao indices = do
     glBindVertexArray vao
     glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
+
+putGraphicData :: ElementData' -> IO GLuint
+putGraphicData (ElementData' (GraphicData' rowData gdata) indices) = do
+    -- First, make a Vertex Buffer Object. This is a place in openGL's memory
+    -- where we can put all of our vertex data
+    vbo <- getNewBufferID $ glGenBuffers 1
+
+    -- Next, we're going to create a Vertex Array Object, or VAO, which allows
+    -- to reuse the data in our VBO over and over (or something like that)
+    vao <- getNewBufferID $ glGenVertexArrays 1
+
+    -- OpenGL needs to know the size of the data we're going to give it
+    let dataSize = getDataSize gdata
+        flatData = flattenData gdata
+
+    -- This makes a pointer to our data
+    dataPointer <- newArray flatData
+
+    -- In openGL, you must "bind" a buffer before you are able to do things to
+    -- it. In the case of a VAO, it must be bound before the VBO that is going
+    -- to store the actual data
+    glBindVertexArray vao
+    glBindBuffer GL_ARRAY_BUFFER vbo
+
+    -- Finally write the data. This applies to the currently "bound"
+    -- GL_ARRAY_BUFFER, in our case, vbo
+    glBufferData GL_ARRAY_BUFFER dataSize (castPtr dataPointer) GL_STATIC_DRAW
+
+    -- Register the Vertex Attribute with OpenGL. Since the Shaders, which use
+    -- our vertex information, are flexible, we need to specify to OpenGL how
+    -- our data is laid out. Did you notice how we flattened the data earlier?
+    -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
+    -- know how to unflatten it.
+    sequence $ map registerVertexAttribute rowData
+    -- Finally, register the indices in the Element Buffer Object
+    registerElementBufferObject vao indices
+
+    pure vao
 
