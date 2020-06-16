@@ -48,20 +48,19 @@ act = do
             glfwWindowInit window camera
 
             -- Compile and like our shaders
-            baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
-            baseShader' <- makeShader' "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
+            baseShader <- makeShader' "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
             lineShader <- makeShader' "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
-            vao2 <- putGraphicData cube (getIndices cubeElements)
-            lineDrawer' <- makeDrawer baseShader' line
+            cubeDrawer <- makeDrawer baseShader cube
+            lineDrawer' <- makeDrawer baseShader line
             lineDrawer <- makeDrawer lineShader line'
 
             -- Load the texture information into opengl
             t1 <- loadTexture "./res/container.jpg"
             t2 <- loadTexture "./res/awesomeface.png"
 
-            mapTextureUnit baseShader 0 "texture0"
-            mapTextureUnit baseShader 1 "texture1"
+            --mapTextureUnit baseShader 0 "texture0"
+            --mapTextureUnit baseShader 1 "texture1"
 
             -- enable depth testing
             glEnable GL_DEPTH_TEST
@@ -87,19 +86,13 @@ act = do
 
                         --time <- maybe 0 realToFrac <$> GLFW.getTime
                         --moveCamera camera 0 (sin (time/100))
-                        placeCamera baseShader camera
-                        makeProjection baseShader
 
                         -- Use our program
-                        glUseProgram baseShader
 
                         -- draw a cube
-                        glBindVertexArray vao2
-                        let len = fromIntegral $ length (getIndices cubeElements)
-                            place = map (placeModel baseShader) (getGeoData cubeElements)
-                            draw  = map (\x -> x >> drawElements len) place
-                        sequence_ $ draw
-                        glBindVertexArray 0
+                        putViewUniform camera cubeDrawer
+                        putProjectionUniform cubeDrawer
+                        drawObject cubeDrawer
 
                         -- Draw the lines
                         putViewUniform camera lineDrawer'
@@ -127,9 +120,6 @@ putProjectionUniform drawer = matrixUniform projectionMatrix "projection" >>= (p
 
 drawElements :: GLsizei -> IO()
 drawElements len = glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-
-placeModel :: GLuint -> ElementData -> IO ()
-placeModel shader dat = putMatrix shader (makeMatrix dat) "model"
 
 placeCamera :: GLuint -> IORef Camera -> IO ()
 placeCamera shader ioCam = do
