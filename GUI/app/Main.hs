@@ -84,6 +84,12 @@ act = do
                         putProjectionUniform lineDrawer
                         drawObject lineDrawer
 
+                        -- Draw third line
+                        lineDrawer2 <- makeDrawer lineShader (makeLine (V3 (-15) 15 0) (V3 0 (-15) 0))
+                        putViewUniform camera lineDrawer2
+                        putProjectionUniform lineDrawer2
+                        drawObject lineDrawer2
+
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop

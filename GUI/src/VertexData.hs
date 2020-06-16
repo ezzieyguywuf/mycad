@@ -18,21 +18,21 @@ makeLine :: V3 Float      -- ^ from
             -> V3 Float   -- ^ to
             -> ObjectData -- ^ drawable object
 makeLine p1 p2 = ObjectData eData placementData
-    where eData = makeElementData' line lineIndices
+    where eData = makeElementData' verts indices
           width = 3
           normal = normalize (-1 *^ (p2 - p1))
           p1    = (p1 + (width *^ normal))
           p2    = (p1 - (width *^ normal))
           p3    = (p2 + (width *^ normal))
           p4    = (p2 - (width *^ normal))
-          line  = [ [Position p1, Color (V4 1.0 0.5 0.2 1)]
+          verts = [ [Position p1, Color (V4 1.0 0.5 0.2 1)]
                   , [Position p2, Color (V4 1.0 0.5 0.2 1)]
                   , [Position p3, Color (V4 1.0 0.5 0.2 1)]
                   , [Position p3, Color (V4 0.0 0.5 0.2 1)]
                   , [Position p2, Color (V4 0.0 0.5 0.2 1)]
                   , [Position p4, Color (V4 0.0 0.5 0.2 1)]
                   ]
-          lineIndices =
+          indices =
               [
                 0, 1, 2
               , 3, 4, 5
@@ -41,8 +41,6 @@ makeLine p1 p2 = ObjectData eData placementData
               [
                 PlacementData { placementRotation=(axisAngle (V3 0 0 0) 0)
                               , placementTranslation=(V3 0 0 0)}
-              , PlacementData { placementRotation=(axisAngle (V3 0 0 1) (-pi/4))
-                              , placementTranslation=(V3 15 0 0)}
               ]
 
 line :: ObjectData

@@ -34,14 +34,15 @@ data VertexAttribute =
 type DataRow = [VertexAttribute]
 type GraphicData = [DataRow]
 
-data GraphicData' = GraphicData' [AttributeData] [DataRow]
+data GraphicData' = GraphicData' [AttributeData] [DataRow] deriving (Show)
 
-data ElementData'  = ElementData' GraphicData' [GLuint]
+data ElementData'  = ElementData' GraphicData' [GLuint] deriving (Show)
 
 data PlacementData = PlacementData { placementRotation    :: Quaternion Float
                                    , placementTranslation :: V3 Float}
+                                   deriving (Show)
 
-data ObjectData = ObjectData ElementData' [PlacementData]
+data ObjectData = ObjectData ElementData' [PlacementData] deriving (Show)
 
 data AttributeData = AttributeData
     {
