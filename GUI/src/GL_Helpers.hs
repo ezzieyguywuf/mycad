@@ -11,6 +11,7 @@ module GL_Helpers
 , putMatrix
 , matrixUniform
 , putUniform'
+, draw
 )where
 
 -- base
@@ -46,6 +47,18 @@ data Drawer = Drawer {
 data Uniform = Uniform { _uniformName :: String
                        , _uniformExec :: GLint -> IO()
                        }
+
+draw :: Drawer -> ObjectData -> IO ()
+draw drawer (ObjectData (ElementData' _ indices) pdatas) = do
+    let vao = _vao drawer
+        len = fromIntegral $ length indices
+        makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
+        placements = map makeMat pdatas
+        draw x = x >> glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
+        putUniforms = map (\x -> x >>= putUniform' drawer) placements
+    glBindVertexArray vao
+    sequence_ $ map draw putUniforms
+    glBindVertexArray 0
 
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
