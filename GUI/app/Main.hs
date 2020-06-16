@@ -56,9 +56,6 @@ act = do
             t1 <- loadTexture "./res/container.jpg"
             t2 <- loadTexture "./res/awesomeface.png"
 
-            --mapTextureUnit baseShader 0 "texture0"
-            --mapTextureUnit baseShader 1 "texture1"
-
             -- enable depth testing
             glEnable GL_DEPTH_TEST
 
@@ -73,18 +70,8 @@ act = do
                         glClearColor 0.2 0.3 0.3 1.0
                         glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
-                        -- Bind the texture we want to use
-                        -- Tell openGL about our Uniforms
-                        --glActiveTexture GL_TEXTURE0
-                        --glBindTexture GL_TEXTURE_2D t1
-
-                        --glActiveTexture GL_TEXTURE1
-                        --glBindTexture GL_TEXTURE_2D t2
-
                         --time <- maybe 0 realToFrac <$> GLFW.getTime
                         --moveCamera camera 0 (sin (time/100))
-
-                        -- Use our program
 
                         -- draw a cube
                         putViewUniform camera cubeDrawer
