@@ -53,7 +53,7 @@ act = do
 
             vao <- putGraphicData line (getIndices lineElements)
             vao2 <- putGraphicData cube (getIndices cubeElements)
-            lineDrawer <- makeDrawer lineShader line'
+            lineDrawer <- makeDrawer lineShader line''
 
             -- Load the texture information into opengl
             t1 <- loadTexture "./res/container.jpg"
@@ -113,19 +113,7 @@ act = do
                         matrixUniform viewMat "view" >>= (putUniform' lineDrawer)
                         matrixUniform projectionMatrix "projection" >>= (putUniform' lineDrawer)
 
-                        --placeCamera lineShader camera
-                        --makeProjection lineShader
-                        -- Draw same lines, offset down in y a bit
-                        --glBindVertexArray vao
-                        --let (GeoData inds datas) = lineElements
-                            --shift (ElementData rot (V3 x y z)) = ElementData rot (V3 x (y - 10) z)
-                            --datas' = map shift datas
-                            --len = fromIntegral $ length inds
-                            --place = map (placeModel lineShader) datas'
-                            --draw  = map (\x -> x >> drawElements len) place
-                        --sequence_ $ draw
-                        --glBindVertexArray 0
-
+                        drawObject lineDrawer line''
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop

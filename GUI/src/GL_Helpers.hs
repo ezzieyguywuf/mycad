@@ -11,7 +11,7 @@ module GL_Helpers
 , putMatrix
 , matrixUniform
 , putUniform'
-, draw
+, drawObject
 )where
 
 -- base
@@ -39,23 +39,24 @@ data Shader = Shader { _shaderID       :: GLuint
 
 -- | This has all the information necessary to draw something to the screen
 data Drawer = Drawer {
-                       _vao         :: GLuint
-                     , _shader      :: Shader
-                     , _elementData :: ElementData'
+                       _vao        :: GLuint
+                     , _shader     :: Shader
+                     , _ojbectData :: ObjectData
                      }
 
 data Uniform = Uniform { _uniformName :: String
                        , _uniformExec :: GLint -> IO()
                        }
 
-draw :: Drawer -> ObjectData -> IO ()
-draw drawer (ObjectData (ElementData' _ indices) pdatas) = do
+drawObject :: Drawer -> ObjectData -> IO ()
+drawObject drawer (ObjectData (ElementData' _ indices) pdatas) = do
     let vao = _vao drawer
         len = fromIntegral $ length indices
         makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
         placements = map makeMat pdatas
         draw x = x >> glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
         putUniforms = map (\x -> x >>= putUniform' drawer) placements
+    glUseProgram (_shaderID $ _shader drawer)
     glBindVertexArray vao
     sequence_ $ map draw putUniforms
     glBindVertexArray 0
@@ -82,10 +83,10 @@ makeShader' vpath fpath = do
     uid <- makeShader vpath fpath
     pure $ Shader uid []
 
-makeDrawer :: Shader -> ElementData' -> IO Drawer
-makeDrawer shader edata = do
-    vao <- putGraphicData' edata
-    pure $ Drawer vao shader edata
+makeDrawer :: Shader -> ObjectData -> IO Drawer
+makeDrawer shader oData@(ObjectData eData _) = do
+    vao <- putGraphicData' eData
+    pure $ Drawer vao shader oData
 
 putGraphicData' :: ElementData' -> IO GLuint
 putGraphicData' (ElementData' (GraphicData' rowData gdata) indices) = do
