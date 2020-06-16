@@ -52,10 +52,6 @@ act = do
             lineDrawer' <- makeDrawer baseShader line
             lineDrawer <- makeDrawer lineShader line'
 
-            -- Load the texture information into opengl
-            t1 <- loadTexture "./res/container.jpg"
-            t2 <- loadTexture "./res/awesomeface.png"
-
             -- enable depth testing
             glEnable GL_DEPTH_TEST
 
@@ -97,10 +93,10 @@ act = do
 putViewUniform :: IORef Camera -> Drawer -> IO ()
 putViewUniform ioCam drawer = do
     (LookAt loc up dir) <- readIORef ioCam
-    matrixUniform (lookAt loc dir up) "view" >>= (putUniform' drawer)
+    matrixUniform (lookAt loc dir up) "view" >>= (putUniform drawer)
 
 putProjectionUniform :: Drawer -> IO ()
-putProjectionUniform drawer = matrixUniform projectionMatrix "projection" >>= (putUniform' drawer)
+putProjectionUniform drawer = matrixUniform projectionMatrix "projection" >>= (putUniform drawer)
     where projectionMatrix = perspective (pi/4.0) aspectRatio 0.1 1000.0
           aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
 

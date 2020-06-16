@@ -4,10 +4,8 @@ module GL_Helpers
 , Drawer
 , makeDrawer
 , makeShader
-, loadTexture
-, mapTextureUnit
 , matrixUniform
-, putUniform'
+, putUniform
 , drawObject
 )where
 
@@ -53,7 +51,7 @@ drawObject drawer = do
         makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
         placements = map makeMat pdatas
         draw x = x >> glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-        putUniforms = map (\x -> x >>= putUniform' drawer) placements
+        putUniforms = map (\x -> x >>= putUniform drawer) placements
     glUseProgram (_shaderID $ _shader drawer)
     glBindVertexArray vao
     sequence_ $ map draw putUniforms
@@ -79,21 +77,6 @@ makeDrawer shader oData@(ObjectData eData _) = do
     vao <- putGraphicData eData
     pure $ Drawer vao shader oData
 
-loadTexture :: String -> IO GLuint
-loadTexture fname = do
-    dynImage <- getDynImage fname
-    let ipixelrgb8 = convertRGB8 dynImage
-        iWidth = fromIntegral $ imageWidth ipixelrgb8
-        iHeight = fromIntegral $ imageHeight ipixelrgb8
-        iData = imageData ipixelrgb8
-
-    VS.unsafeWith iData (makeOpenGLTexture iWidth iHeight)
-
-mapTextureUnit :: GLuint -> Int32 -> String -> IO ()
-mapTextureUnit shader target name= do
-    let exec = (flip glUniform1i) target
-    putUniform shader (Uniform name exec)
-
 matrixUniform :: M44 Float -> String -> IO Uniform
 matrixUniform transMatrix name = do
     transP <- malloc
@@ -102,9 +85,10 @@ matrixUniform transMatrix name = do
     let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
     pure (Uniform name exec)
 
-putUniform :: GLuint -> Uniform -> IO ()
-putUniform shader (Uniform name exec) = do
-    -- Make sure to activate the shader first
+putUniform :: Drawer -> Uniform -> IO ()
+putUniform drawer (Uniform name exec) = do
+    let shader = _shaderID $ _shader drawer
+
     glUseProgram shader
 
     cName <- newCString name
@@ -114,14 +98,18 @@ putUniform shader (Uniform name exec) = do
         LT -> putStrLn $ "Uniform with name '" <> name <> "' was not found"
         _  -> exec loc
 
-putUniform' :: Drawer -> Uniform -> IO ()
-putUniform' drawer uniform = do
-    let shader = _shaderID $ _shader drawer
-    putUniform shader uniform
-
 ------------------------------------------------------------------
 --          Private Free Functions
 ------------------------------------------------------------------
+_loadTexture :: String -> IO GLuint
+_loadTexture fname = do
+    dynImage <- getDynImage fname
+    let ipixelrgb8 = convertRGB8 dynImage
+        iWidth = fromIntegral $ imageWidth ipixelrgb8
+        iHeight = fromIntegral $ imageHeight ipixelrgb8
+        iData = imageData ipixelrgb8
+
+    VS.unsafeWith iData (makeOpenGLTexture iWidth iHeight)
 
 makeOpenGLTexture :: GLsizei -> GLsizei -> Ptr a -> IO GLuint
 makeOpenGLTexture  w h ptr = do
