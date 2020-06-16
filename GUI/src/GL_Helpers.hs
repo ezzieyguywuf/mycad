@@ -6,7 +6,6 @@ module GL_Helpers
 , makeShader
 , loadTexture
 , mapTextureUnit
-, putMatrix
 , matrixUniform
 , putUniform'
 , drawObject
@@ -93,14 +92,6 @@ loadTexture fname = do
 mapTextureUnit :: GLuint -> Int32 -> String -> IO ()
 mapTextureUnit shader target name= do
     let exec = (flip glUniform1i) target
-    putUniform shader (Uniform name exec)
-
-putMatrix :: GLuint -> M44 Float -> String -> IO ()
-putMatrix shader transMatrix name = do
-    transP <- malloc
-    poke transP transMatrix
-
-    let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
     putUniform shader (Uniform name exec)
 
 matrixUniform :: M44 Float -> String -> IO Uniform
