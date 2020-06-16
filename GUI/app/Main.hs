@@ -14,14 +14,11 @@ import ViewSpace
 
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
-import Graphics.GL.Types
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
 import Linear.Projection
-import Linear.Matrix
 
-import Foreign
 import Data.IORef
 
 main :: IO ()
@@ -111,36 +108,14 @@ act = do
     GLFW.terminate
 
 putViewUniform :: IORef Camera -> Drawer -> IO ()
-putViewUniform camera drawer = do
-    viewMat <- viewMatrix camera
-    matrixUniform viewMat "view" >>= (putUniform' drawer)
+putViewUniform ioCam drawer = do
+    (LookAt loc up dir) <- readIORef ioCam
+    matrixUniform (lookAt loc dir up) "view" >>= (putUniform' drawer)
 
 putProjectionUniform :: Drawer -> IO ()
 putProjectionUniform drawer = matrixUniform projectionMatrix "projection" >>= (putUniform' drawer)
-
-drawElements :: GLsizei -> IO()
-drawElements len = glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-
-placeCamera :: GLuint -> IORef Camera -> IO ()
-placeCamera shader ioCam = do
-    mat <- viewMatrix ioCam
-    putMatrix shader mat  "view"
-
-makeProjection :: GLuint -> IO ()
-makeProjection shader = do
-    let aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-        projection = perspective (pi/4.0) aspectRatio 0.1 1000.0
-    putMatrix shader projection "projection"
-
-
-projectionMatrix :: M44 Float
-projectionMatrix = perspective (pi/4.0) aspectRatio 0.1 1000.0
-    where aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-
-viewMatrix :: IORef Camera -> IO (M44 Float)
-viewMatrix ioCam = do
-    (LookAt loc up dir ) <- readIORef ioCam
-    pure $ lookAt loc dir up
+    where projectionMatrix = perspective (pi/4.0) aspectRatio 0.1 1000.0
+          aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 
