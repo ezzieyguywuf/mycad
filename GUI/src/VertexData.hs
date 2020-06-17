@@ -13,24 +13,27 @@ import Linear.Quaternion
 import Linear.Metric
 import Linear.Vector
 import GraphicData
+import ViewSpace
 
-makeLine :: V3 Float      -- ^ from
+makeLine :: Camera        -- ^ View direction for the line
+            -> V3 Float   -- ^ from
             -> V3 Float   -- ^ to
+            -> Float      -- ^ Line width
             -> ObjectData -- ^ drawable object
-makeLine p1 p2 = ObjectData eData placementData
-    where eData = makeElementData' verts indices
-          width = 3
-          normal = normalize (-1 *^ (p2 - p1))
-          p1    = (p1 + (width *^ normal))
-          p2    = (p1 - (width *^ normal))
-          p3    = (p2 + (width *^ normal))
-          p4    = (p2 - (width *^ normal))
-          verts = [ [Position p1, Color (V4 1.0 0.5 0.2 1)]
-                  , [Position p2, Color (V4 1.0 0.5 0.2 1)]
-                  , [Position p3, Color (V4 1.0 0.5 0.2 1)]
-                  , [Position p3, Color (V4 0.0 0.5 0.2 1)]
-                  , [Position p2, Color (V4 0.0 0.5 0.2 1)]
-                  , [Position p4, Color (V4 0.0 0.5 0.2 1)]
+makeLine (LookAt loc up dir) p1 p2 width = ObjectData eData placementData
+    where eData    = makeElementData' verts indices
+          perp = normalize $ (loc - dir) `cross` (p2 - p1)
+          delta = (width / 2) *^ perp
+          v1    = p1 + delta
+          v2    = p1 - delta
+          v3    = p2 + delta
+          v4    = p2 - delta
+          verts = [ [Position v1, Color (V4 1.0 0.5 0.2 1)]
+                  , [Position v2, Color (V4 1.0 0.5 0.2 1)]
+                  , [Position v3, Color (V4 1.0 0.5 0.2 1)]
+                  , [Position v3, Color (V4 0.0 0.5 0.2 1)]
+                  , [Position v2, Color (V4 0.0 0.5 0.2 1)]
+                  , [Position v4, Color (V4 0.0 0.5 0.2 1)]
                   ]
           indices =
               [
@@ -76,7 +79,7 @@ line' = ObjectData eData placementData
 cube :: ObjectData
 cube = ObjectData eData placementData
     where eData = makeElementData' cube cubeIndices
-          cube  = 
+          cube  =
             [
               [Position (V3 (-10) (-10) 10), Color (V4 0.2 0.5 0.2 1)]    -- 0 Top, Bottom Left
             , [Position (V3    10 (-10) 10), Color (V4 0.2 0.5 0.2 1) ]    -- 1 Top, Bottom Right

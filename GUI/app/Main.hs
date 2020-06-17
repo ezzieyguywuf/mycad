@@ -85,7 +85,12 @@ act = do
                         drawObject lineDrawer
 
                         -- Draw third line
-                        lineDrawer2 <- makeDrawer lineShader (makeLine (V3 (-15) 15 0) (V3 0 (-15) 0))
+                        let p1 = V3 (-15) 15 0
+                            p2 = V3 (-15) (-15) 0
+                            width = 3.0
+                        cam <- readIORef camera
+                        lineDrawer2 <- makeDrawer lineShader (makeLine cam p1 p2 width)
+
                         putViewUniform camera lineDrawer2
                         putProjectionUniform lineDrawer2
                         drawObject lineDrawer2
