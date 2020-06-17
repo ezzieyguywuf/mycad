@@ -250,7 +250,7 @@ registerElementBufferObject vao indices = do
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
 
 putGraphicData :: ElementData -> IO GLuint
-putGraphicData edata@(ElementData (GraphicData' rowData gdata) indices) = do
+putGraphicData edata = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
     vbo <- getNewBufferID $ glGenBuffers 1
@@ -281,9 +281,9 @@ putGraphicData edata@(ElementData (GraphicData' rowData gdata) indices) = do
     -- our data is laid out. Did you notice how we flattened the data earlier?
     -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
     -- know how to unflatten it.
-    sequence $ map registerVertexAttribute rowData
+    sequence $ map registerVertexAttribute (getDataAttributes . getGraphicData $ edata)
     -- Finally, register the indices in the Element Buffer Object
-    registerElementBufferObject vao indices
+    registerElementBufferObject vao (getElementIndices edata)
 
     pure vao
 
