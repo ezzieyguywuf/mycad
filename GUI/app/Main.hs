@@ -93,7 +93,7 @@ act = do
                             p1 = p1' + p2
                             width = 3.0
                         cam <- readIORef camera
-                        lineDrawer2 <- makeObjectDrawer lineShader (makeLine cam p1 p2 width)
+                        lineDrawer2 <- makeObjectDrawer lineShader (makeLine width p1 p2)
 
                         putViewUniform camera lineDrawer2
                         putProjectionUniform lineDrawer2

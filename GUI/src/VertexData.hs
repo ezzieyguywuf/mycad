@@ -13,8 +13,6 @@ import Linear.V4
 import Linear.Quaternion
 import Linear.Metric
 import GraphicData
-import ViewSpace
-
 circle = undefined
 
 lineElement :: Float -> Float -> ElementData
@@ -29,12 +27,11 @@ lineElement width length = makeElementData vertices indices
           indices = [ 0, 1, 2
                     , 3, 4, 5 ]
 
-makeLine :: Camera        -- ^ View direction for the line
+makeLine :: Float         -- ^ Width
             -> V3 Float   -- ^ from
             -> V3 Float   -- ^ to
-            -> Float      -- ^ Line width
             -> ObjectData -- ^ drawable object
-makeLine (LookAt loc up dir) p1 p2 width = ObjectData eData placementData
+makeLine width p1 p2 = ObjectData eData placementData
     where eData    = lineElement width length
           vect = p2 - p1
           basis = V3 1 0 0 -- Because LineElement is in the positive x-direction
