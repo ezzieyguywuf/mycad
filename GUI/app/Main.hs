@@ -49,9 +49,9 @@ act = do
             baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
             lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
 
-            cubeDrawer <- makeDrawer baseShader cube
-            lineDrawer' <- makeDrawer baseShader line'
-            lineDrawer <- makeDrawer lineShader line
+            cubeDrawer <- makeObjectDrawer baseShader cube
+            lineDrawer' <- makeObjectDrawer baseShader line'
+            lineDrawer <- makeObjectDrawer lineShader line
 
             -- enable depth testing
             glEnable GL_DEPTH_TEST
@@ -93,7 +93,7 @@ act = do
                             p1 = p1' + p2
                             width = 3.0
                         cam <- readIORef camera
-                        lineDrawer2 <- makeDrawer lineShader (makeLine cam p1 p2 width)
+                        lineDrawer2 <- makeObjectDrawer lineShader (makeLine cam p1 p2 width)
 
                         putViewUniform camera lineDrawer2
                         putProjectionUniform lineDrawer2

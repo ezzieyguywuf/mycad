@@ -2,7 +2,7 @@ module GL_Helpers
 (
   Uniform(..)
 , Drawer
-, makeDrawer
+, makeObjectDrawer
 , makeShader
 , matrixUniform
 , putUniform
@@ -33,11 +33,11 @@ data Shader = Shader { _shaderID       :: GLuint
                      }
 
 -- | This has all the information necessary to draw something to the screen
-data Drawer = Drawer {
-                       _vao        :: GLuint
-                     , _shader     :: Shader
-                     , _objectData :: ObjectData
-                     }
+data Drawer = ObjectDrawer {
+                            _vao        :: GLuint
+                           , _shader     :: Shader
+                           , _objectData :: ObjectData
+                           }
 
 data Uniform = Uniform { _uniformName :: String
                        , _uniformExec :: GLint -> IO()
@@ -72,10 +72,10 @@ makeShader vpath fpath = do
 
     pure $ Shader uid []
 
-makeDrawer :: Shader -> ObjectData -> IO Drawer
-makeDrawer shader oData@(ObjectData eData _) = do
+makeObjectDrawer :: Shader -> ObjectData -> IO Drawer
+makeObjectDrawer shader oData@(ObjectData eData _) = do
     vao <- putGraphicData eData
-    pure $ Drawer vao shader oData
+    pure $ ObjectDrawer vao shader oData
 
 matrixUniform :: M44 Float -> String -> IO Uniform
 matrixUniform transMatrix name = do
