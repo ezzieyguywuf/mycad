@@ -59,3 +59,4 @@
 - Remove hard-coded paths - allow for configurable or something.
 - Use TQueue to only render when we need to.
 - Update Shader data type to actually use the Uniform data type 
+- Use Lens for, say, getDataSize?
