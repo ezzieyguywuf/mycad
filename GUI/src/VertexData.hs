@@ -12,11 +12,22 @@ import Linear.V3
 import Linear.V4
 import Linear.Quaternion
 import Linear.Metric
-import Linear.Vector
 import GraphicData
 import ViewSpace
 
 circle = undefined
+
+lineElement :: Float -> Float -> ElementData
+lineElement width length = makeElementData vertices indices
+    where vertices = [ [Position (V3 0 width 0 )     , Color (V4 1.0 0.5 0.2 1)]
+                     , [Position (V3 0 0 0)          , Color (V4 1.0 0.5 0.2 1)]
+                     , [Position (V3 length width 0) , Color (V4 1.0 0.5 0.2 1)]
+                     , [Position (V3 length width 0) , Color (V4 0.0 0.5 0.2 1)]
+                     , [Position (V3 0 0 0)          , Color (V4 0.0 0.5 0.2 1)]
+                     , [Position (V3 length 0 0)     , Color (V4 0.0 0.5 0.2 1)]
+                     ]
+          indices = [ 0, 1, 2
+                    , 3, 4, 5 ]
 
 makeLine :: Camera        -- ^ View direction for the line
             -> V3 Float   -- ^ from
@@ -24,29 +35,16 @@ makeLine :: Camera        -- ^ View direction for the line
             -> Float      -- ^ Line width
             -> ObjectData -- ^ drawable object
 makeLine (LookAt loc up dir) p1 p2 width = ObjectData eData placementData
-    where eData    = makeElementData verts indices
-          perp = normalize $ (loc - dir) `cross` (p2 - p1)
-          delta = (width / 2) *^ perp
-          v1    = p1 + delta
-          v2    = p1 - delta
-          v3    = p2 + delta
-          v4    = p2 - delta
-          verts = [ [Position v1, Color (V4 1.0 0.5 0.2 1)]
-                  , [Position v2, Color (V4 1.0 0.5 0.2 1)]
-                  , [Position v3, Color (V4 1.0 0.5 0.2 1)]
-                  , [Position v3, Color (V4 0.0 0.5 0.2 1)]
-                  , [Position v2, Color (V4 0.0 0.5 0.2 1)]
-                  , [Position v4, Color (V4 0.0 0.5 0.2 1)]
-                  ]
-          indices =
-              [
-                0, 1, 2
-              , 3, 4, 5
-              ]
+    where eData    = lineElement width length
+          vect = p2 - p1
+          basis = V3 1 0 0 -- Because LineElement is in the positive x-direction
+          length = norm vect
+          axis  = (V3 1 0 0) `cross` vect
+          theta = acos (((normalize vect) `dot` basis))
           placementData =
               [
-                PlacementData { placementRotation=(axisAngle (V3 0 0 0) 0)
-                              , placementTranslation=(V3 0 0 0)}
+                PlacementData { placementRotation=(axisAngle axis theta)
+                              , placementTranslation=p1}
               ]
 
 --nextLine :: ObjectData -> V3 Float -> ObjectData
