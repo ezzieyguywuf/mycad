@@ -3,14 +3,13 @@ module GraphicData
   VertexAttribute(..)
 , AttributeData(..)
 , DataRow
-, GraphicData
-, GraphicData'(..)
+, GraphicData(..)
 , ElementData(..)
 , ObjectData (..)
 , PlacementData (..)
 , getDataSize
 , flattenData
-, makeGraphicData'
+, makeGraphicData
 , makeElementData
 , getRowData
 )where
@@ -32,15 +31,14 @@ data VertexAttribute =
     deriving (Show)
 
 type DataRow = [VertexAttribute]
-type GraphicData = [DataRow]
 
-data GraphicData' = GraphicData' {
+data GraphicData = GraphicData {
                                    getDataAttributes :: [AttributeData]
                                  , getData :: [DataRow]
                                  } deriving (Show)
 
 data ElementData  = ElementData {
-                                  getGraphicData :: GraphicData'
+                                  getGraphicData :: GraphicData
                                 , getElementIndices :: [GLuint]
                                 }
                                 deriving (Show)
@@ -60,12 +58,12 @@ data AttributeData = AttributeData
     }
     deriving (Show)
 
-makeGraphicData' :: [DataRow] -> GraphicData'
-makeGraphicData' rows = GraphicData' attribData rows
+makeGraphicData :: [DataRow] -> GraphicData
+makeGraphicData rows = GraphicData attribData rows
     where attribData = getRowData $ head rows
 
 makeElementData :: [DataRow] -> [GLuint] -> ElementData
-makeElementData rows indices = ElementData (makeGraphicData' rows) indices
+makeElementData rows indices = ElementData (makeGraphicData rows) indices
 
 -- | Note: If you add more VertexAttributes, you must also specify and index
 --         for them. This is the index that your Shader will use 
