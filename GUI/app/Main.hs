@@ -18,6 +18,7 @@ import Graphics.GL.Core33
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
 import Linear.Projection
+import Linear.Quaternion
 
 import Data.IORef
 
@@ -60,14 +61,12 @@ act = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
                     when shouldContinue $ do
                         -- event poll
-                        GLFW.waitEvents
+                        GLFW.pollEvents
                         -- drawing
                         --   Background
                         glClearColor 0.2 0.3 0.3 1.0
                         glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
-                        --time <- maybe 0 realToFrac <$> GLFW.getTime
-                        --moveCamera camera 0 (sin (time/100))
 
                         -- draw a cube
                         putViewUniform camera cubeDrawer
@@ -85,8 +84,11 @@ act = do
                         drawObject lineDrawer
 
                         -- Draw third line
-                        let p1 = V3 (-15) 15 0
+                        time <- maybe 0 realToFrac <$> GLFW.getTime
+                        let p0 = V3 (-15) 15 0
                             p2 = V3 (-15) (-15) 0
+                            p1' = Linear.Quaternion.rotate (axisAngle (V3 0 0 1) (pi * ((sin time) + 1))) (p0 - p2)
+                            p1 = p1' + p2
                             width = 3.0
                         cam <- readIORef camera
                         lineDrawer2 <- makeDrawer lineShader (makeLine cam p1 p2 width)
