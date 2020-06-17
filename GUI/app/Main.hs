@@ -58,14 +58,16 @@ act = do
 
             circleDrawer <- makeObjectDrawer lineShader circle
 
+            -- set static uniforms
+            putProjectionUniform baseShader
+            putProjectionUniform lineShader
+
             -- draw static objects
             drawObject cubeDrawer
             drawObject lineDrawer'
             drawObject lineDrawer
             drawObject circleDrawer
 
-            putProjectionUniform baseShader
-            putProjectionUniform lineShader
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
