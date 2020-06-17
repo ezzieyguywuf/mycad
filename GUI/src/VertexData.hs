@@ -5,6 +5,7 @@ module VertexData
 , cube
 , circle
 , makeLine
+, extendLine
 ) where
 
 -- gl, all types and funcs here will already start with "gl"
@@ -42,8 +43,8 @@ placeLine p1 p2 = PlacementData (axisAngle axis theta) p1
           axis  = (V3 1 0 0) `cross` vect
           theta = acos (((normalize vect) `dot` basis))
 
---extendLine :: ObjectData -> V3 Float -> V3 Float -> ObjectData
---extendLine (ObjectData eData placementData) p1 p2 =
+extendLine :: ObjectData -> V3 Float -> V3 Float -> ObjectData
+extendLine (ObjectData eData placementData) p1 p2 = ObjectData eData ((placeLine p1 p2) : placementData)
 
 line :: ObjectData
 line = ObjectData eData placementData
