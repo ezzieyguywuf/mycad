@@ -261,7 +261,7 @@ putGraphicData edata@(ElementData (GraphicData' rowData gdata) indices) = do
 
     -- OpenGL needs to know the size of the data we're going to give it
     let dataSize = getDataSize edata
-        flatData = flattenData gdata
+        flatData = flattenData edata
 
     -- This makes a pointer to our data
     dataPointer <- newArray flatData

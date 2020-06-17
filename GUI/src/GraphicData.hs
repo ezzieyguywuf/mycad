@@ -91,8 +91,9 @@ getDataSize eData = fromIntegral $ nRows * rowSize
           rowSize = fromIntegral $ getRowSize $ head rows
 
 -- | Flattens a GraphicData into a form that OpenGl can (almost) understand
-flattenData :: GraphicData -> [GLfloat]
-flattenData = concat . (fmap squashRow)
+flattenData :: ElementData -> [GLfloat]
+flattenData eData = concat (fmap squashRow rows)
+    where rows = getData $ getGraphicData eData
 
 ----------------------------------------------------------------------------
 --                  Private Free Functions
