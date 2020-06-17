@@ -36,7 +36,11 @@ type GraphicData = [DataRow]
 
 data GraphicData' = GraphicData' [AttributeData] [DataRow] deriving (Show)
 
-data ElementData  = ElementData GraphicData' [GLuint] deriving (Show)
+data ElementData  = ElementData {
+                                  getGraphicData :: GraphicData'
+                                , getElementIndices :: [GLuint]
+                                }
+                                deriving (Show)
 
 data PlacementData = PlacementData { placementRotation    :: Quaternion Float
                                    , placementTranslation :: V3 Float}
