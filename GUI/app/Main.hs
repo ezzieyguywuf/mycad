@@ -64,6 +64,7 @@ act = do
             drawObject lineDrawer
             drawObject circleDrawer
 
+            putProjectionUniform baseShader
             putProjectionUniform lineShader
             -- enter our main loop
             let loop = do
@@ -79,6 +80,7 @@ act = do
 
                         -- Update our uniforms
                         putViewUniform camera baseShader
+                        putViewUniform camera lineShader
 
                         -- Draw the rotating line
                         time <- maybe 0 realToFrac <$> GLFW.getTime
