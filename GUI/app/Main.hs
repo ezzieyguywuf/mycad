@@ -56,7 +56,7 @@ act = do
             -- enable depth testing
             glEnable GL_DEPTH_TEST
 
-            --circleDrawers <- makeDrawer lineShader circle
+            circleDrawer <- makeObjectDrawer lineShader circle
 
             -- enter our main loop
             let loop = do
@@ -98,6 +98,10 @@ act = do
                         putViewUniform camera lineDrawer2
                         putProjectionUniform lineDrawer2
                         drawObject lineDrawer2
+
+                        putViewUniform camera circleDrawer
+                        putProjectionUniform circleDrawer
+                        drawObject circleDrawer
 
                         -- swap buffers and go again
                         GLFW.swapBuffers window

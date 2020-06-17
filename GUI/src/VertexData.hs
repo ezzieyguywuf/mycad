@@ -14,7 +14,6 @@ import Linear.V4
 import Linear.Quaternion
 import Linear.Metric
 import GraphicData
-circle = undefined
 
 lineElement :: Float -> Float -> ElementData
 lineElement width length = makeElementData vertices indices
@@ -45,6 +44,21 @@ placeLine p1 p2 = PlacementData (axisAngle axis theta) p1
 
 extendLine :: ObjectData -> V3 Float -> V3 Float -> ObjectData
 extendLine (ObjectData eData placementData) p1 p2 = ObjectData eData ((placeLine p1 p2) : placementData)
+
+circle :: ObjectData
+circle = foldl (\ object (p1, p2) -> extendLine object p1 p2) obj pairs
+    where radius = 30
+          center = V3 (-15) (-15) 0
+          thetas = [0, pi/20..2*pi]
+          points = map (pointOnCircle center radius) thetas
+          pairs  = zip points (tail points)
+          obj = makeLine 0.5 (points !! 0) (points !! 1)
+
+pointOnCircle :: V3 Float -> Float -> Float -> V3 Float
+pointOnCircle (V3 c1 c2 c3) radius theta = V3 x y z
+    where x = c1 + radius * cos theta
+          y = c2 + radius * sin theta
+          z = c3
 
 line :: ObjectData
 line = ObjectData eData placementData
