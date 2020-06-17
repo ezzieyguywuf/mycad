@@ -34,7 +34,10 @@ data VertexAttribute =
 type DataRow = [VertexAttribute]
 type GraphicData = [DataRow]
 
-data GraphicData' = GraphicData' [AttributeData] [DataRow] deriving (Show)
+data GraphicData' = GraphicData' {
+                                   getDataAttributes :: [AttributeData]
+                                 , getData :: [DataRow]
+                                 } deriving (Show)
 
 data ElementData  = ElementData {
                                   getGraphicData :: GraphicData'
@@ -81,9 +84,10 @@ getRowData row = snd $ mapAccumL (makeData $ stride) 0 row
     where stride = fromIntegral $ getRowSize row :: GLsizei
 
 -- | Returns the size of the entire GraphicData in a manner suitable to use in glBufferData
-getDataSize :: GraphicData -> GLsizeiptr
-getDataSize rows = fromIntegral $ nRows * rowSize
-    where nRows = length rows
+getDataSize :: ElementData -> GLsizeiptr
+getDataSize eData = fromIntegral $ nRows * rowSize
+    where rows = getData $ getGraphicData eData
+          nRows = length rows
           rowSize = fromIntegral $ getRowSize $ head rows
 
 -- | Flattens a GraphicData into a form that OpenGl can (almost) understand

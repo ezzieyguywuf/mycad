@@ -250,7 +250,7 @@ registerElementBufferObject vao indices = do
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
 
 putGraphicData :: ElementData -> IO GLuint
-putGraphicData (ElementData (GraphicData' rowData gdata) indices) = do
+putGraphicData edata@(ElementData (GraphicData' rowData gdata) indices) = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
     vbo <- getNewBufferID $ glGenBuffers 1
@@ -260,7 +260,7 @@ putGraphicData (ElementData (GraphicData' rowData gdata) indices) = do
     vao <- getNewBufferID $ glGenVertexArrays 1
 
     -- OpenGL needs to know the size of the data we're going to give it
-    let dataSize = getDataSize gdata
+    let dataSize = getDataSize edata
         flatData = flattenData gdata
 
     -- This makes a pointer to our data
