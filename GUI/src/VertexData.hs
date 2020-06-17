@@ -31,21 +31,19 @@ makeLine :: Float         -- ^ Width
             -> V3 Float   -- ^ from
             -> V3 Float   -- ^ to
             -> ObjectData -- ^ drawable object
-makeLine width p1 p2 = ObjectData eData placementData
-    where eData    = lineElement width length
-          vect = p2 - p1
+makeLine width p1 p2 = ObjectData eData [placeLine p1 p2]
+    where eData  = lineElement width length
+          length = norm (p2 - p1)
+
+placeLine :: V3 Float -> V3 Float -> PlacementData
+placeLine p1 p2 = PlacementData (axisAngle axis theta) p1
+    where vect = p2 - p1
           basis = V3 1 0 0 -- Because LineElement is in the positive x-direction
-          length = norm vect
           axis  = (V3 1 0 0) `cross` vect
           theta = acos (((normalize vect) `dot` basis))
-          placementData =
-              [
-                PlacementData { placementRotation=(axisAngle axis theta)
-                              , placementTranslation=p1}
-              ]
 
---nextLine :: ObjectData -> V3 Float -> ObjectData
---nextLine 
+--extendLine :: ObjectData -> V3 Float -> V3 Float -> ObjectData
+--extendLine (ObjectData eData placementData) p1 p2 =
 
 line :: ObjectData
 line = ObjectData eData placementData
