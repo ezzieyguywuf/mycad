@@ -45,7 +45,7 @@ data Uniform = Uniform { _uniformName :: String
 
 drawObject :: Drawer -> IO ()
 drawObject drawer = do
-    let (ObjectData (ElementData' _ indices) pdatas) = _objectData drawer
+    let (ObjectData (ElementData _ indices) pdatas) = _objectData drawer
         vao = _vao drawer
         len = fromIntegral $ length indices
         makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
@@ -249,8 +249,8 @@ registerElementBufferObject vao indices = do
     glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
 
-putGraphicData :: ElementData' -> IO GLuint
-putGraphicData (ElementData' (GraphicData' rowData gdata) indices) = do
+putGraphicData :: ElementData -> IO GLuint
+putGraphicData (ElementData (GraphicData' rowData gdata) indices) = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
     vbo <- getNewBufferID $ glGenBuffers 1

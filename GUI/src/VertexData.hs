@@ -3,6 +3,7 @@ module VertexData
   line
 , line'
 , cube
+, circle
 , makeLine
 ) where
 
@@ -15,13 +16,15 @@ import Linear.Vector
 import GraphicData
 import ViewSpace
 
+circle = undefined
+
 makeLine :: Camera        -- ^ View direction for the line
             -> V3 Float   -- ^ from
             -> V3 Float   -- ^ to
             -> Float      -- ^ Line width
             -> ObjectData -- ^ drawable object
 makeLine (LookAt loc up dir) p1 p2 width = ObjectData eData placementData
-    where eData    = makeElementData' verts indices
+    where eData    = makeElementData verts indices
           perp = normalize $ (loc - dir) `cross` (p2 - p1)
           delta = (width / 2) *^ perp
           v1    = p1 + delta
@@ -46,9 +49,12 @@ makeLine (LookAt loc up dir) p1 p2 width = ObjectData eData placementData
                               , placementTranslation=(V3 0 0 0)}
               ]
 
+--nextLine :: ObjectData -> V3 Float -> ObjectData
+--nextLine 
+
 line :: ObjectData
 line = ObjectData eData placementData
-    where eData = makeElementData' line lineIndices
+    where eData = makeElementData line lineIndices
           line =
               [
                   [Position (V3 0 3 0), Color (V4 1.0 0.5 0.2 1)]
@@ -78,7 +84,7 @@ line' = ObjectData eData placementData
 
 cube :: ObjectData
 cube = ObjectData eData placementData
-    where eData = makeElementData' cube cubeIndices
+    where eData = makeElementData cube cubeIndices
           cube  =
             [
               [Position (V3 (-10) (-10) 10), Color (V4 0.2 0.5 0.2 1)]    -- 0 Top, Bottom Left

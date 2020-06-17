@@ -56,6 +56,8 @@ act = do
             -- enable depth testing
             glEnable GL_DEPTH_TEST
 
+            --circleDrawers <- makeDrawer lineShader circle
+
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
