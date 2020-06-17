@@ -58,6 +58,13 @@ act = do
 
             circleDrawer <- makeObjectDrawer lineShader circle
 
+            -- draw static objects
+            drawObject cubeDrawer
+            drawObject lineDrawer'
+            drawObject lineDrawer
+            drawObject circleDrawer
+
+            putProjectionUniform lineShader
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -70,22 +77,10 @@ act = do
                         glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
 
-                        -- draw a cube
-                        putViewUniform camera cubeDrawer
-                        putProjectionUniform cubeDrawer
-                        drawObject cubeDrawer
+                        -- Update our uniforms
+                        putViewUniform camera baseShader
 
-                        -- Draw the lines
-                        putViewUniform camera lineDrawer'
-                        putProjectionUniform lineDrawer'
-                        drawObject lineDrawer'
-
-                        -- Use our second shader program
-                        putViewUniform camera lineDrawer
-                        putProjectionUniform lineDrawer
-                        drawObject lineDrawer
-
-                        -- Draw third line
+                        -- Draw the rotating line
                         time <- maybe 0 realToFrac <$> GLFW.getTime
                         let p0 = V3 (-15) 15 0
                             p2 = V3 (-15) (-15) 0
@@ -95,13 +90,7 @@ act = do
                         cam <- readIORef camera
                         lineDrawer2 <- makeObjectDrawer lineShader (makeLine width p1 p2)
 
-                        putViewUniform camera lineDrawer2
-                        putProjectionUniform lineDrawer2
                         drawObject lineDrawer2
-
-                        putViewUniform camera circleDrawer
-                        putProjectionUniform circleDrawer
-                        drawObject circleDrawer
 
                         -- swap buffers and go again
                         GLFW.swapBuffers window
@@ -109,13 +98,13 @@ act = do
             loop
     GLFW.terminate
 
-putViewUniform :: IORef Camera -> Drawer -> IO ()
-putViewUniform ioCam drawer = do
+putViewUniform :: IORef Camera -> Shader -> IO ()
+putViewUniform ioCam shader = do
     (LookAt loc up dir) <- readIORef ioCam
-    matrixUniform (lookAt loc dir up) "view" >>= (putUniform drawer)
+    matrixUniform (lookAt loc dir up) "view" >>= (putUniform shader)
 
-putProjectionUniform :: Drawer -> IO ()
-putProjectionUniform drawer = matrixUniform projectionMatrix "projection" >>= (putUniform drawer)
+putProjectionUniform :: Shader -> IO ()
+putProjectionUniform shader = matrixUniform projectionMatrix "projection" >>= (putUniform shader)
     where projectionMatrix = perspective (pi/4.0) aspectRatio 0.1 1000.0
           aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
 

@@ -1,6 +1,7 @@
 module GL_Helpers
 (
   Uniform(..)
+, Shader
 , Drawer
 , makeObjectDrawer
 , makeShader
@@ -51,7 +52,7 @@ drawObject drawer = do
         makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
         placements = map makeMat pdatas
         draw x = x >> glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-        putUniforms = map (\x -> x >>= putUniform drawer) placements
+        putUniforms = map (\x -> x >>= putUniform (_shader drawer)) placements
     glUseProgram (_shaderID $ _shader drawer)
     glBindVertexArray vao
     sequence_ $ map draw putUniforms
@@ -85,14 +86,14 @@ matrixUniform transMatrix name = do
     let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
     pure (Uniform name exec)
 
-putUniform :: Drawer -> Uniform -> IO ()
-putUniform drawer (Uniform name exec) = do
-    let shader = _shaderID $ _shader drawer
+putUniform :: Shader -> Uniform -> IO ()
+putUniform shader (Uniform name exec) = do
+    let sid = _shaderID shader
 
-    glUseProgram shader
+    glUseProgram sid
 
     cName <- newCString name
-    loc <- glGetUniformLocation shader cName
+    loc <- glGetUniformLocation sid cName
 
     case compare loc 0 of
         LT -> putStrLn $ "Uniform with name '" <> name <> "' was not found"
