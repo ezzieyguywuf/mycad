@@ -12,7 +12,7 @@ import Data.IORef
 import Numeric
 import Control.Monad (unless)
 
-data Camera = LookAt { 
+data Camera = LookAt {
                        location  :: V3 Float
                      , up        :: V3 Float
                      , direction :: V3 Float
@@ -38,7 +38,7 @@ rotateCameraNudge ioCam yaw pitch = do
         rot = axisAngle axis theta
         loc' = rotate rot loc
         up'  = rotate rot up
-        
+
     writeIORef ioCam (LookAt loc' up' dir)
 
 zoomCamera :: IORef Camera -> Float -> IO ()
