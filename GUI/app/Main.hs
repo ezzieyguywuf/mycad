@@ -85,9 +85,7 @@ act = do
 
                         -- Update our uniforms
                         putViewUniform camera baseShader
-                        --putViewUniform camera lineShader
-                        initCam <- initCamera
-                        putViewUniform initCam lineShader
+                        putViewUniform camera lineShader
 
                         -- Draw the rotating line
                         time <- maybe 0 realToFrac <$> GLFW.getTime
@@ -102,7 +100,7 @@ act = do
 
                         drawObject lineDrawer2
 
-                        rotateCameraNudge camera (-0.005) 0
+                        --rotateCameraNudge camera (-0.005) 0
 
                         tick <- readIORef ioTick
                         let tick' = time + tick

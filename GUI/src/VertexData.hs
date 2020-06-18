@@ -61,29 +61,9 @@ pointOnCircle (V3 c1 c2 c3) radius theta = V3 x y z
           z = c3
 
 line :: ObjectData
-line = ObjectData eData placementData
-    where eData = makeElementData line lineIndices
-          line =
-              [
-                  [Position (V3 0 3 0), Color (V4 1.0 0.5 0.2 1)]
-                , [Position (V3 0 0 0), Color (V4 1.0 0.5 0.2 1)]
-                , [Position (V3 15 3 0), Color (V4 1.0 0.5 0.2 1)]
-                , [Position (V3 15 3 0), Color (V4 0.0 0.5 0.2 1)]
-                , [Position (V3 0 0 0), Color (V4 0.0 0.5 0.2 1)]
-                , [Position (V3 15 0 0), Color (V4 0.0 0.5 0.2 1)]
-              ]
-          lineIndices =
-              [
-                0, 1, 2
-              , 3, 4, 5
-              ]
-          placementData =
-              [
-                PlacementData { placementRotation=(axisAngle (V3 0 0 0) 0)
-                              , placementTranslation=(V3 0 0 0)}
-              , PlacementData { placementRotation=(axisAngle (V3 0 0 1) (-pi/4))
-                              , placementTranslation=(V3 15 0 0)}
-              ]
+line = extendLine line0 (V3 15 0 0) (V3 30 (-15) 0)
+    where line0 = makeLine 3 (V3 0 0 0) (V3 15 0 0)
+
 line' :: ObjectData
 line' = ObjectData eData placementData
     where (ObjectData eData pOrig) = line
