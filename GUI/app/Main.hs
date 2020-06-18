@@ -99,7 +99,7 @@ act = do
 
                         drawObject lineDrawer2
 
-                        rotateCameraNudge camera (-0.1) 0
+                        rotateCameraNudge camera (-0.005) 0
 
                         tick <- readIORef ioTick
                         let tick' = time + tick
