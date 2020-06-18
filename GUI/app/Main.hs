@@ -88,7 +88,8 @@ act = do
                         time <- maybe 0 realToFrac <$> GLFW.getTime
                         let p0 = V3 (-15) 15 0
                             p2 = V3 (-15) (-15) 0
-                            p1' = Linear.Quaternion.rotate (axisAngle (V3 0 0 1) (pi * ((sin time) + 1))) (p0 - p2)
+                            axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
+                            p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
                             p1 = p1' + p2
                             width = 3.0
                         cam <- readIORef camera
