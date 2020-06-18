@@ -97,6 +97,7 @@ act = do
 
                         drawObject lineDrawer2
 
+                        rotateCameraNudge camera (-0.1) 0
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop
