@@ -11,6 +11,8 @@ module GraphicData
 , flattenData
 , makeGraphicData
 , makeElementData
+--, placeElement
+--, addInstance
 , getRowData
 )where
 
@@ -64,6 +66,12 @@ makeGraphicData rows = GraphicData attribData rows
 
 makeElementData :: [DataRow] -> [GLuint] -> ElementData
 makeElementData rows indices = ElementData (makeGraphicData rows) indices
+
+--placeElement :: ElementData -> Placement -> ObjectData
+--placeElement edata placeent = ObjectData edata [placement]
+
+--addInstance :: ObjectData -> Placement -> ObjectData
+--addInstance (ObjectData edata p0) p = ObjectData edata (p : p0)
 
 -- | Note: If you add more VertexAttributes, you must also specify and index
 --         for them. This is the index that your Shader will use 

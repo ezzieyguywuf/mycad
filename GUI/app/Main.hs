@@ -58,15 +58,10 @@ act = do
 
             circleDrawer <- makeObjectDrawer lineShader circle
 
+
             -- set static uniforms
             putProjectionUniform baseShader
             putProjectionUniform lineShader
-
-            -- draw static objects
-            drawObject cubeDrawer
-            drawObject lineDrawer'
-            drawObject lineDrawer
-            drawObject circleDrawer
 
             -- enter our main loop
             let loop = do
@@ -79,6 +74,11 @@ act = do
                         glClearColor 0.2 0.3 0.3 1.0
                         glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
+                        -- draw static objects
+                        drawObject cubeDrawer
+                        drawObject lineDrawer'
+                        drawObject lineDrawer
+                        drawObject circleDrawer
 
                         -- Update our uniforms
                         putViewUniform camera baseShader
