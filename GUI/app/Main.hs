@@ -65,7 +65,7 @@ act = do
             putProjectionUniform lineShader
 
             ioTick <- newIORef 0 :: IO (IORef Float)
-            ioLines <- newIORef ["", "", "", "", ""] :: IO (IORef [String])
+            ioLines <- newIORef ("", "", "", "", "")
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -110,11 +110,11 @@ act = do
                         writeIORef ioTick tick''
 
                         when (tick'' == 0) (do
-                            lines <- readIORef ioLines
+                            (l1, l2, l3, l4, _) <- readIORef ioLines
                             (LookAt loc _ dir) <- readIORef camera
                             --let lineNormal = V3 0 0 1 :: V3 Float
                                 --view = loc - dir
-                            let lines' = ("tick " <> (show time)) : lines
+                            let lines' = (("tick " <> (show time)), l1, l2, l3, l4)
                             putConsole lines'
                             writeIORef ioLines lines')
                         -- swap buffers and go again
@@ -145,7 +145,7 @@ initializeConsole = do
     putStrLn "All data should update only below here. Welcome!"
     sequence_ $ take 5 (repeat $ putStrLn "")
 
-putConsole :: [String] -> IO()
-putConsole val = do
+putConsole :: (String, String, String, String, String) -> IO()
+putConsole (l1, l2, l3, l4, l5) = do
     cursorUp 5
-    sequence_ (map putStrLn (take 5 val))
+    sequence_ (map putStrLn ([l1, l2, l3, l4, l5]))
