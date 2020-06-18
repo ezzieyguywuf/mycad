@@ -21,6 +21,7 @@ import Linear.Projection
 import Linear.Quaternion
 
 import Data.IORef
+import System.Console.ANSI
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -63,6 +64,7 @@ act = do
             putProjectionUniform baseShader
             putProjectionUniform lineShader
 
+            ioTick <- newIORef 0 :: IO (IORef Float)
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -98,6 +100,14 @@ act = do
                         drawObject lineDrawer2
 
                         rotateCameraNudge camera (-0.1) 0
+
+                        tick <- readIORef ioTick
+                        let tick' = time + tick
+                            tick'' = case compare tick' 100 of
+                                        LT -> tick'
+                                        _  -> 0
+                        when (tick'' == 0) (putConsole $ "tick " <> (show time))
+                        writeIORef ioTick tick''
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop
@@ -125,3 +135,8 @@ initializeConsole :: IO ()
 initializeConsole = do
     putStrLn "All data should update only below here. Welcome!"
     sequence_ $ take 5 (repeat $ putStrLn "")
+
+putConsole :: String -> IO()
+putConsole val = do
+    cursorUp 1
+    putStrLn val
