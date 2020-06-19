@@ -21,12 +21,12 @@ import GraphicData
 lineElement' :: ObjectData
 lineElement' = ObjectData eData [placement]
     where eData    = makeElementData vertices indices
-          vertices = [ [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up True]
-                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up False]
-                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up True]
-                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up True]
-                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up False]
-                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up False]
+          vertices = [ [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up 1]
+                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up 0]
+                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up 1]
+                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up 1]
+                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up 0]
+                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up 0]
                      ]
           indices = [ 0, 1, 2
                     , 3, 4, 5 ]

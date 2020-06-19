@@ -7,7 +7,7 @@ layout (location = 1) in vec3 dir;
 // The color of the vertex
 layout (location = 2) in vec4 aColor;
 // Which way to draw the thickness
-layout (location = 3) in bool up;
+layout (location = 3) in float up;
 
 out vec4 VertexColor;
 
@@ -18,19 +18,14 @@ uniform float aspect;
 uniform float thickness;
 
 void main() {
-    vec2 aspectVec = vec2(aspect, 1.0);
-    mat4 projViewModel = projection * view * model;
-    vec4 previousProjected = projViewModel * vec4(previous, 1.0);
-    vec4 currentProjected = projViewModel * vec4(position, 1.0);
-    vec4 nextProjected = projViewModel * vec4(next, 1.0);
-
     // First, transform points to the so-called "clip space"
     vec4 projectedPos = vec4(aPos, 1.0) * model * view * projection;
     vec4 projectedDir = vec4(dir, 1.0)  * model * view * projection;
 
     // Next, do aspect ratio stuff to convert to "screen space"
-    vec4 screenPos = projectedPos.xy / projectedPos.w * aspectVec;
-    vec4 screenDir = projectedDir.xy / projectedDir.w * aspectVec;
+    vec2 aspectVec = vec2(aspect, 1.0);
+    vec2 screenPos = projectedPos.xy / projectedPos.w * aspectVec;
+    vec2 screenDir = projectedDir.xy / projectedDir.w * aspectVec;
 
     // This vector is the direction of the line in screen-space
     vec2 dir = normalize(screenDir - screenPos);
@@ -46,8 +41,8 @@ void main() {
 
 
     // This delta is where our original point needs to go
-    vec4 delta(0.0f);
-    if(up)
+    vec4 delta = vec4(0.0f);
+    if(up > 0)
     {
         delta = vec4(normal, 0.0, 1.0);
     }
@@ -57,6 +52,6 @@ void main() {
     }
 
     // Finally, transform our point.
-    gl_Position = currentProjected + delta;
+    gl_Position = projectedPos + delta;
     gl_PointSize = 1.0;
 }
