@@ -53,5 +53,5 @@ void main() {
 
     // Finally, transform our point.
     gl_Position = projectedPos + delta;
-    gl_PointSize = 1.0;
+    //gl_PointSize = 1.0;
 }

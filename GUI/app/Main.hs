@@ -17,13 +17,10 @@ import Graphics.GL.Core33
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
-import Linear.Metric
 import Linear.Projection
-import Linear.Quaternion
 
 import Data.IORef
 import System.Console.ANSI
-import GraphicData
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -82,22 +79,22 @@ act = do
                         glClearColor 0.2 0.3 0.3 1.0
                         glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
+                        -- Update our uniforms
+                        putViewUniform camera baseShader
+                        putViewUniform camera lineShader
+
                         -- draw static objects
                         drawObject cubeDrawer
                         drawObject lineDrawer'
                         drawObject lineDrawer
 
-                        (LookAt loc _ dir) <- readIORef camera
-                        let vect = normalize (loc - dir)
-                            theta = cos (vect `dot` (V3 0 0 1))
-                            target = rotateElement line'' (axisAngle (V3 0 1 0) theta)
-                        makeObjectDrawer lineShader target >>= drawObject
+                        --(LookAt loc _ dir) <- readIORef camera
+                        --let vect = normalize (loc - dir)
+                            --theta = cos (vect `dot` (V3 0 0 1))
+                            --target = rotateElement line'' (axisAngle (V3 0 1 0) theta)
+                        --makeObjectDrawer lineShader target >>= drawObject
 
                         --drawObject circleDrawer
-
-                        -- Update our uniforms
-                        putViewUniform camera baseShader
-                        putViewUniform camera lineShader
 
                         -- Draw the rotating line
                         time <- maybe 0 realToFrac <$> GLFW.getTime

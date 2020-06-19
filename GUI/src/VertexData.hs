@@ -29,7 +29,8 @@ lineElement' = ObjectData eData [placement]
                      , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up 0]
                      ]
           indices = [ 0, 1, 2
-                    , 3, 4, 5 ]
+                    , 3, 4, 5
+                    ]
           placement = PlacementData (axisAngle (V3 0 0 1) (pi/4.0)) (V3 (-15) (-15) 0)
 
 lineElement :: Float -> Float -> ElementData
