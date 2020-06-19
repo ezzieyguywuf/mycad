@@ -2,10 +2,13 @@ module VertexData
 (
   line
 , line'
+, line''
+, lineElement'
 , cube
 , circle
 , makeLine
 , extendLine
+, wireCube
 ) where
 
 -- gl, all types and funcs here will already start with "gl"
@@ -14,6 +17,20 @@ import Linear.V4
 import Linear.Quaternion
 import Linear.Metric
 import GraphicData
+
+lineElement' :: ObjectData
+lineElement' = ObjectData eData [placement]
+    where eData    = makeElementData vertices indices
+          vertices = [ [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up True]
+                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up False]
+                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up True]
+                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up True]
+                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up False]
+                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up False]
+                     ]
+          indices = [ 0, 1, 2
+                    , 3, 4, 5 ]
+          placement = PlacementData (axisAngle (V3 0 0 1) (pi/4.0)) (V3 (-15) (-15) 0)
 
 lineElement :: Float -> Float -> ElementData
 lineElement width length = makeElementData vertices indices
@@ -64,10 +81,32 @@ line :: ObjectData
 line = extendLine line0 (V3 15 0 0) (V3 30 (-15) 0)
     where line0 = makeLine 3 (V3 0 0 0) (V3 15 0 0)
 
+wireCube :: ObjectData
+wireCube = foldl (\l (p,q) -> extendLine l p q) line0 pairs
+    where line0 = makeLine 3 (ps !! 0) (ps !! 1)
+          ps = [ V3 (-10) 10 10
+               , V3 (-20) 10 10
+               , V3 (-20) 20 10
+               , V3 (-10) 20 10
+               , V3 (-10) 10 10
+               , V3 (-10) 10 20
+               , V3 (-20) 10 20
+               , V3 (-20) 20 20
+               , V3 (-10) 20 20
+               , V3 (-10) 10 20
+               ]
+          pairs = zip ps (tail ps)
+
 line' :: ObjectData
 line' = ObjectData eData placementData
     where (ObjectData eData pOrig) = line
           f (PlacementData rot trans) = PlacementData rot (trans + (V3 0 30 0))
+          placementData = map f pOrig
+
+line'' :: ObjectData
+line'' = ObjectData eData placementData
+    where (ObjectData eData pOrig) = line
+          f (PlacementData rot trans) = PlacementData rot (trans + (V3 (-50) 00 0))
           placementData = map f pOrig
 
 cube :: ObjectData

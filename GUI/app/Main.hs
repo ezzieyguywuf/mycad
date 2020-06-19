@@ -17,11 +17,13 @@ import Graphics.GL.Core33
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
+import Linear.Metric
 import Linear.Projection
 import Linear.Quaternion
 
 import Data.IORef
 import System.Console.ANSI
+import GraphicData
 
 main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
@@ -29,6 +31,7 @@ main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
 
 winWIDTH = 800
 winHEIGHT = 600
+winASPECT = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
 winTITLE = "LearnOpenGL Hello Line!"
 
 act :: IO()
@@ -52,20 +55,21 @@ act = do
 
             cubeDrawer <- makeObjectDrawer baseShader cube
             lineDrawer' <- makeObjectDrawer baseShader line'
-            lineDrawer <- makeObjectDrawer lineShader line
+            lineDrawer <- makeObjectDrawer lineShader lineElement'
+            --circleDrawer <- makeObjectDrawer lineShader circle
+            --lineCubeDrawer <- makeObjectDrawer lineShader wireCube
 
             -- enable depth testing
             glEnable GL_DEPTH_TEST
-
-            circleDrawer <- makeObjectDrawer lineShader circle
-
 
             -- set static uniforms
             putProjectionUniform baseShader
             putProjectionUniform lineShader
 
+            floatUniform winASPECT "aspect" >>= putUniform lineShader
+
             ioTick <- newIORef 0 :: IO (IORef Float)
-            ioLines <- newIORef ("", "", "", "", "")
+            ioLines <- newIORef ("", "", "", "", "") 
             -- enter our main loop
             let loop = do
                     shouldContinue <- not <$> GLFW.windowShouldClose window
@@ -81,7 +85,14 @@ act = do
                         drawObject cubeDrawer
                         drawObject lineDrawer'
                         drawObject lineDrawer
-                        drawObject circleDrawer
+
+                        (LookAt loc _ dir) <- readIORef camera
+                        let vect = normalize (loc - dir)
+                            theta = cos (vect `dot` (V3 0 0 1))
+                            target = rotateElement line'' (axisAngle (V3 0 1 0) theta)
+                        makeObjectDrawer lineShader target >>= drawObject
+
+                        --drawObject circleDrawer
 
                         -- Update our uniforms
                         putViewUniform camera baseShader
@@ -89,16 +100,17 @@ act = do
 
                         -- Draw the rotating line
                         time <- maybe 0 realToFrac <$> GLFW.getTime
-                        let p0 = V3 (-15) 15 0
-                            p2 = V3 (-15) (-15) 0
-                            axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
-                            p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
-                            p1 = p1' + p2
-                            width = 3.0
-                        cam <- readIORef camera
-                        lineDrawer2 <- makeObjectDrawer lineShader (makeLine width p1 p2)
+                        --let p0 = V3 (-15) 15 0
+                            --p2 = V3 (-15) (-15) 0
+                            --axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
+                            --p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
+                            --p1 = p1' + p2
+                            --width = 3.0
+                        --cam <- readIORef camera
+                        --lineDrawer2 <- makeObjectDrawer lineShader (makeLine width p1 p2)
 
-                        drawObject lineDrawer2
+                        --drawObject lineDrawer2
+                        --drawObject lineCubeDrawer
 
                         --rotateCameraNudge camera (-0.005) 0
 
@@ -128,10 +140,10 @@ putViewUniform ioCam shader = do
     (LookAt loc up dir) <- readIORef ioCam
     matrixUniform (lookAt loc dir up) "view" >>= (putUniform shader)
 
+
 putProjectionUniform :: Shader -> IO ()
 putProjectionUniform shader = matrixUniform projectionMatrix "projection" >>= (putUniform shader)
-    where projectionMatrix = perspective (pi/4.0) aspectRatio 0.1 1000.0
-          aspectRatio = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
+    where projectionMatrix = perspective (pi/4.0) winASPECT 0.1 1000.0
 
 initCamera :: IO (IORef Camera)
 initCamera = newIORef LookAt { 

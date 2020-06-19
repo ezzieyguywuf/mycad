@@ -6,6 +6,7 @@ module GL_Helpers
 , makeObjectDrawer
 , makeShader
 , matrixUniform
+, floatUniform
 , putUniform
 , drawObject
 )where
@@ -58,6 +59,20 @@ drawObject drawer = do
     sequence_ $ map draw putUniforms
     glBindVertexArray 0
 
+_drawObjectLine :: Drawer -> IO ()
+_drawObjectLine drawer = do
+    let (ObjectData (ElementData _ indices) pdatas) = _objectData drawer
+        vao = _vao drawer
+        len = fromIntegral $ length indices
+        makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
+        placements = map makeMat pdatas
+        draw x = x >> glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
+        putUniforms = map (\x -> x >>= putUniform (_shader drawer)) placements
+    glUseProgram (_shaderID $ _shader drawer)
+    glBindVertexArray vao
+    sequence_ $ map draw putUniforms
+    glBindVertexArray 0
+
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
               -> String     -- ^ Fragment Shader, path to a file
@@ -77,6 +92,10 @@ makeObjectDrawer :: Shader -> ObjectData -> IO Drawer
 makeObjectDrawer shader oData@(ObjectData eData _) = do
     vao <- putGraphicData eData
     pure $ ObjectDrawer vao shader oData
+
+floatUniform :: Float -> String -> IO Uniform
+floatUniform val name = pure (Uniform name exec)
+    where exec = \loc -> glUniform1f loc val
 
 matrixUniform :: M44 Float -> String -> IO Uniform
 matrixUniform transMatrix name = do

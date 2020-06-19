@@ -14,6 +14,7 @@ module GraphicData
 , placeElement
 , addInstance
 , getRowData
+, rotateElement
 )where
 
 import Graphics.GL.Types
@@ -30,6 +31,7 @@ data VertexAttribute =
      Position (V3 Float)
    | Color (V4 Float)
    | Texture (V2 Float)
+   | Up Bool
     deriving (Show)
 
 type DataRow = [VertexAttribute]
@@ -72,6 +74,19 @@ placeElement edata placement = ObjectData edata [placement]
 
 addInstance :: ObjectData -> PlacementData -> ObjectData
 addInstance (ObjectData edata p0) p = ObjectData edata (p : p0)
+
+rotateElement :: ObjectData -> Quaternion Float -> ObjectData
+rotateElement (ObjectData edata pdatas) rot = ObjectData edata' pdatas
+    where (ElementData gdata indices) = edata
+          edata' = ElementData gdata' indices
+          (GraphicData adata rows) = gdata
+          gdata' = GraphicData adata rows'
+          rows' = map (\x -> map (_rotateAttribute rot) x) rows
+
+_rotateAttribute :: Quaternion Float -> VertexAttribute -> VertexAttribute
+_rotateAttribute rot (Position v) = Position $ Linear.Quaternion.rotate rot v
+_rotateAttribute _ x = x
+
 
 -- | Note: If you add more VertexAttributes, you must also specify and index
 --         for them. This is the index that your Shader will use 
