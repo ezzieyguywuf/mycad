@@ -104,8 +104,8 @@ getPoint e (Glue _ v) = do
     where f x = (getTopo x) == v
 
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
-getVertex e p = find f (getVertices e)
-    where f x = (getGeo x) == p
+getVertex entity point = find pred (getVertices entity)
+    where pred x = (getGeo x) == point
 
 getCurve :: Entity a -> Edge a -> Maybe (Geo.Line a)
 getCurve ent (Glue c e) = do
