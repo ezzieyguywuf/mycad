@@ -54,5 +54,4 @@ void main() {
     // Finally, transform our point.
     gl_Position = projectedPos + delta;
     VertexColor = aColor;
-    //gl_PointSize = 1.0;
 }
