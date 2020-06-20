@@ -33,7 +33,7 @@ library:
   source-dirs: src
 
 executables:
-  HaskellCAD-exe:
+  HaskellCAD:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
