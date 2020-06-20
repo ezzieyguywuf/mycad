@@ -17,7 +17,9 @@ import Graphics.GL.Core33
 
 -- For Linear algebra...but really, like vectors and matrices and quaternions
 import Linear.V3
+import Linear.V4
 import Linear.Projection
+import Linear.Quaternion
 
 import Data.IORef
 import System.Console.ANSI
@@ -52,8 +54,12 @@ act = do
 
             cubeDrawer <- makeObjectDrawer baseShader cube
             lineDrawer' <- makeObjectDrawer baseShader line'
-            lineDrawer <- makeObjectDrawer lineShader lineElement'
-            --circleDrawer <- makeObjectDrawer lineShader circle
+            let p1 = V3 0 0 0
+                p2 = V3 (-10) (-10) (-10)
+                col1 = V4 0.5 1.0 0.2 1.0
+                col2 = V4 0.2 0.3 0.8 1.0
+            lineDrawer <- makeObjectDrawer lineShader (makeLine'' p1 p2 col1 col2)
+            circleDrawer <- makeObjectDrawer lineShader circle
             --lineCubeDrawer <- makeObjectDrawer lineShader wireCube
 
             -- enable depth testing
@@ -64,7 +70,7 @@ act = do
             putProjectionUniform lineShader
 
             floatUniform winASPECT "aspect" >>= putUniform lineShader
-            floatUniform 50 "thickness" >>= putUniform lineShader
+            floatUniform 5 "thickness" >>= putUniform lineShader
 
             ioTick <- newIORef 0 :: IO (IORef Float)
             ioLines <- newIORef ("", "", "", "", "") 
@@ -94,20 +100,19 @@ act = do
                             --target = rotateElement line'' (axisAngle (V3 0 1 0) theta)
                         --makeObjectDrawer lineShader target >>= drawObject
 
-                        --drawObject circleDrawer
+                        drawObject circleDrawer
 
                         -- Draw the rotating line
                         time <- maybe 0 realToFrac <$> GLFW.getTime
-                        --let p0 = V3 (-15) 15 0
-                            --p2 = V3 (-15) (-15) 0
-                            --axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
-                            --p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
-                            --p1 = p1' + p2
-                            --width = 3.0
-                        --cam <- readIORef camera
-                        --lineDrawer2 <- makeObjectDrawer lineShader (makeLine width p1 p2)
+                        let p0 = V3 (-15) 15 0
+                            p2 = V3 (-15) (-15) 0
+                            axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
+                            p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
+                            p1 = p1' + p2
+                        cam <- readIORef camera
+                        lineDrawer2 <- makeObjectDrawer lineShader (makeLine' p1 p2 col1)
 
-                        --drawObject lineDrawer2
+                        drawObject lineDrawer2
                         --drawObject lineCubeDrawer
 
                         --rotateCameraNudge camera (-0.005) 0

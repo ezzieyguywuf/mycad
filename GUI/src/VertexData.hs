@@ -3,10 +3,11 @@ module VertexData
   line
 , line'
 , line''
-, lineElement'
 , cube
 , circle
 , makeLine
+, makeLine'
+, makeLine''
 , extendLine
 , wireCube
 ) where
@@ -18,20 +19,27 @@ import Linear.Quaternion
 import Linear.Metric
 import GraphicData
 
-lineElement' :: ObjectData
-lineElement' = ObjectData eData placements
-    where eData    = makeElementData vertices indices
-          vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color (V4 0.5 0.2 0.5 1), Up 1]
-                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color (V4 0.5 0.2 0.5 1), Up (-1)]
-                     , [Position (V3 40 0 0 ), Direction (V3 1 0 0), Color (V4 0.5 0.2 0.5 1), Up (1)]
-                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color (V4 0.1 1.0 0.7 1), Up 1]
-                     , [Position (V3 40 0 0 ), Direction (V3 1 0 0), Color (V4 0.1 1.0 0.7 1), Up (1)]
-                     , [Position (V3 40 0 0 ), Direction (V3 1 0 0), Color (V4 0.1 1.0 0.7 1), Up (-1)]
+lineElement' :: Float -> V4 Float-> ElementData
+lineElement' len color = makeElementData vertices indices
+    where vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up 1]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up (-1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (1)]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up 1]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (-1)]
                      ]
           indices = [0, 1, 2, 3, 4, 5]
-          placements = [
-                         PlacementData (axisAngle (V3 0 0 0) 0) (V3 0 0 0)
-                       ]
+
+lineElement'' :: Float -> V4 Float -> V4 Float -> ElementData
+lineElement'' len color1 color2 = makeElementData vertices indices
+    where vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color1, Up 1]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color1, Up (-1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color1, Up (1)]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color2, Up 1]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color2, Up (1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color2, Up (-1)]
+                     ]
+          indices = [0, 1, 2, 3, 4, 5]
 
 lineElement :: Float -> Float -> ElementData
 lineElement width length = makeElementData vertices indices
@@ -53,6 +61,23 @@ makeLine width p1 p2 = ObjectData eData [placeLine p1 p2]
     where eData  = lineElement width length
           length = norm (p2 - p1)
 
+makeLine' ::   V3 Float   -- ^ from
+            -> V3 Float   -- ^ to
+            -> V4 Float   -- ^ color
+            -> ObjectData -- ^ drawable object
+makeLine' p1 p2 color = ObjectData eData [placeLine p1 p2]
+    where eData  = lineElement' length color
+          length = norm (p2 - p1)
+
+makeLine'' ::   V3 Float   -- ^ from
+            -> V3 Float   -- ^ to
+            -> V4 Float   -- ^ color1
+            -> V4 Float   -- ^ color2
+            -> ObjectData -- ^ drawable object
+makeLine'' p1 p2 color1 color2 = ObjectData eData [placeLine p1 p2]
+    where eData  = lineElement'' length color1 color2
+          length = norm (p2 - p1)
+
 placeLine :: V3 Float -> V3 Float -> PlacementData
 placeLine p1 p2 = PlacementData (axisAngle axis theta) p1
     where vect = p2 - p1
@@ -70,7 +95,7 @@ circle = foldl (\ object (p1, p2) -> extendLine object p1 p2) obj pairs
           thetas = [0, pi/20..2*pi]
           points = map (pointOnCircle center radius) thetas
           pairs  = zip points (tail points)
-          obj = makeLine 0.5 (points !! 0) (points !! 1)
+          obj = makeLine' (points !! 0) (points !! 1) (V4 0 0 0 0)
 
 pointOnCircle :: V3 Float -> Float -> Float -> V3 Float
 pointOnCircle (V3 c1 c2 c3) radius theta = V3 x y z
