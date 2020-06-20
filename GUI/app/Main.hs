@@ -64,7 +64,7 @@ act = do
             putProjectionUniform lineShader
 
             floatUniform winASPECT "aspect" >>= putUniform lineShader
-            floatUniform 10.0 "thickness" >>= putUniform lineShader
+            floatUniform 50 "thickness" >>= putUniform lineShader
 
             ioTick <- newIORef 0 :: IO (IORef Float)
             ioLines <- newIORef ("", "", "", "", "") 

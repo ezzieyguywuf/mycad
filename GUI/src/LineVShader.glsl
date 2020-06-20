@@ -42,7 +42,7 @@ void main() {
 
     // This delta is where our original point needs to go
     vec4 delta = vec4(0.0f);
-    if(up > 0)
+    if(up >= 1)
     {
         delta = vec4(normal, 0.0, 1.0);
     }
@@ -53,5 +53,6 @@ void main() {
 
     // Finally, transform our point.
     gl_Position = projectedPos + delta;
+    VertexColor = aColor;
     //gl_PointSize = 1.0;
 }

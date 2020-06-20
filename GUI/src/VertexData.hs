@@ -19,19 +19,19 @@ import Linear.Metric
 import GraphicData
 
 lineElement' :: ObjectData
-lineElement' = ObjectData eData [placement]
+lineElement' = ObjectData eData placements
     where eData    = makeElementData vertices indices
-          vertices = [ [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up 1]
-                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up 0]
-                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 1.0 0.5 0.2 1), Up 1]
-                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up 1]
-                     , [Position (V3 0 0 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up 0]
-                     , [Position (V3 0 1 0 ), Position (V3 1 0 0), Color (V4 0.0 0.5 0.2 1), Up 0]
+          vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color (V4 0.5 0.2 0.5 1), Up 1]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color (V4 0.5 0.2 0.5 1), Up (-1)]
+                     , [Position (V3 40 0 0 ), Direction (V3 1 0 0), Color (V4 0.5 0.2 0.5 1), Up (1)]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color (V4 0.1 1.0 0.7 1), Up 1]
+                     , [Position (V3 40 0 0 ), Direction (V3 1 0 0), Color (V4 0.1 1.0 0.7 1), Up (1)]
+                     , [Position (V3 40 0 0 ), Direction (V3 1 0 0), Color (V4 0.1 1.0 0.7 1), Up (-1)]
                      ]
-          indices = [ 0, 1, 2
-                    , 3, 4, 5
-                    ]
-          placement = PlacementData (axisAngle (V3 0 0 1) (pi/4.0)) (V3 (-15) (-15) 0)
+          indices = [0, 1, 2, 3, 4, 5]
+          placements = [
+                         PlacementData (axisAngle (V3 0 0 0) 0) (V3 0 0 0)
+                       ]
 
 lineElement :: Float -> Float -> ElementData
 lineElement width length = makeElementData vertices indices
