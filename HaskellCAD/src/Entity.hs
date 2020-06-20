@@ -86,13 +86,16 @@ addVertex p = do
     put $ Entity vs' es t'
     pure newVertex
 
-addEdge :: Fractional a => Entity a -> Vertex a -> Geo.Point a -> Entity a
-addEdge (Entity vs es t) (Glue p1 v1) p2 = Entity vs' es' t''
-    where line   = Geo.makeLine p1 p2
-          (Just e, t')  = runState (Topo.addRayEdge v1) t
-          (Just v2, t'')   = runState (Topo.closeRayEdge e) t'
-          vs' = (Glue p2 v2) : vs
-          es' = (Glue line e) : es
+addEdge :: Fractional a => Vertex a -> Geo.Point a -> EntityState a (Edge a)
+addEdge (Glue p1 v1) p2 = do
+    (Entity vs es t) <- get
+    let line   = Geo.makeLine p1 p2
+        (Just e, t')  = runState (Topo.addRayEdge v1) t
+        (Just v2, t'')   = runState (Topo.closeRayEdge e) t'
+        vs' = (Glue p2 v2) : vs
+        es' = (Glue line e) : es
+    put $ Entity vs' es' t''
+    pure $ Glue line e
 
 getPoint :: Entity a -> Vertex a -> Maybe (Geo.Point a)
 getPoint e (Glue _ v) = do
