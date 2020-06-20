@@ -45,6 +45,18 @@ should be motivated by a Story from this list.
 **SO THAT** I can check my homework
 
 ## Communicate with MyCAD::Communication::Server
+**AS A** Remote User \
+**I WANT** to send requests to MyCAD server using TCP/IP \
+**SO THAT** I can recieve responses and use the calculated geometry \
+
+**AS A** MyCAD Server Administrator \
+**I WANT** to communicate directly with a MyCAD::Server process \
+**SO THAT** I can stop the process
+
+**AS A** MyCAD Server User \
+**I WANT** to send requests directly to a running server instance locally \
+**SO THAT** I can understand how to interact with the Server
+
 **AS A** MyCAD Server Administrator \
 **I WANT** allow a remote User to have a specific login Session \
 **SO THAT** their work is sandboxed from any other User's work.
@@ -78,14 +90,3 @@ should be motivated by a Story from this list.
 **I WANT** to create lines in space \
 **SO THAT** I can use them to make more complex geometry \
 
-**AS A** Remote User \
-**I WANT** to send requests to MyCAD server using TCP/IP \
-**SO THAT** I can recieve responses and use the calculated geometry \
-
-**AS A** MyCAD Server Administrator \
-**I WANT** to communicate directly with a MyCAD::Server process \
-**SO THAT** I can stop the process
-
-**AS A** MyCAD Server User \
-**I WANT** to send requests directly to a running server instance locally \
-**SO THAT** I can understand how to interact with the Server
