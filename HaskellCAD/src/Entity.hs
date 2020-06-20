@@ -25,6 +25,7 @@ module Entity
   Vertex
 , Edge
 , Entity
+, EntityState
   -- * Creation and Modification
 , nullEntity
 , addVertex
@@ -66,6 +67,8 @@ data Entity a = Entity { getVertices :: [Vertex a]
                        , _getTopology :: Topo.Topology
                        } deriving (Show)
 
+type EntityState b a = State (Entity b) a
+
 -- ===========================================================================
 --                       Exported Free Functions
 -- ===========================================================================
@@ -74,11 +77,14 @@ data Entity a = Entity { getVertices :: [Vertex a]
 nullEntity :: Entity a
 nullEntity = Entity [] [] Topo.emptyTopology
 
-addVertex :: Fractional a => Entity a -> Geo.Point a -> Entity a
-addVertex (Entity vs es t) p = Entity vs' es t'
-    where t'  = execState Topo.addFreeVertex t
-          v   = last . Topo.getVertices $ t'
-          vs' = (Glue p v) : vs
+addVertex :: Fractional a => Geo.Point a -> EntityState a (Vertex a)
+addVertex p = do
+    (Entity vs es t) <- get
+    let (v, t')  = runState Topo.addFreeVertex t
+        newVertex = Glue p v
+        vs' = newVertex : vs
+    put $ Entity vs' es t'
+    pure newVertex
 
 addEdge :: Fractional a => Entity a -> Vertex a -> Geo.Point a -> Entity a
 addEdge (Entity vs es t) (Glue p1 v1) p2 = Entity vs' es' t''

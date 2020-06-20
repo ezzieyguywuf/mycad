@@ -4,6 +4,7 @@ import Test.Hspec
 import qualified Entity as E
 import qualified Geometry as Geo
 import Linear.V3
+import Control.Monad.State
 
 nullE :: E.Entity Float
 nullE = E.nullEntity
@@ -16,9 +17,8 @@ spec = do
                 es = (length . E.getEdges) nullE
             in (vs + es) `shouldBe` 0
     describe "addVertex" $ do
-        let e = E.addVertex nullE p
+        let (v, e) = runState (E.addVertex p) nullE
             p = V3 10 20 0
-            v = last . E.getVertices $ e
         it "Adds a single Vertex to the Entity" $
             (length $ E.getVertices e) `shouldBe` 1
         it "Creates a Vertex at the given Geometry" $
