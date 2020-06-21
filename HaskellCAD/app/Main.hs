@@ -1,13 +1,9 @@
-import Data.List
-import Control.Monad.IO.Class
-import System.Console.Repline
-
-type Repl a = HaskelineT IO a
-type Command = (String, Repl ())
+import Data.List (isPrefixOf, uncons)
+import System.Console.Haskeline
 
 -- Evaluation : handle each line user inputs
-cmd :: String -> Repl ()
-cmd input = liftIO $ print msg
+cmd :: String -> InputT IO ()
+cmd input = outputStrLn msg
     where msg = case splitCommand input of
                     Just (h, _) -> "I know about the command '" <> h <> "'!"
                     _ -> "Sorry, I'm not familiar with '" <> input <> "'"
@@ -24,11 +20,26 @@ filterKnown :: String -> [String]
 filterKnown s = filter (isPrefixOf s) names
     where names = ["add", "delete", "connect"]
 
-completer :: Monad m => WordCompleter m
-completer n = return $ filterKnown n
+completer :: String -> IO [Completion]
+completer s = pure $ map makeComplete (filterKnown s)
+    where makeComplete :: String -> Completion
+          makeComplete s = Completion s s False
 
-ini :: Repl ()
-ini = liftIO $ putStrLn "Welcome to HaskellCAD, we hope your stay is pleasant."
+settings :: Settings IO
+settings = Settings {
+                      complete = completeWord Nothing [' ', '\t'] completer
+                    , historyFile = Nothing
+                    , autoAddHistory = True
+                    }
 
 main :: IO ()
-main = evalRepl (pure ">>> ") cmd [] (Nothing) (Word completer) ini
+main = runInputT settings loop
+    where
+        loop :: InputT IO ()
+        loop = do
+            minput <- getInputLine ">>> "
+            case minput of
+                Nothing -> return ()
+                Just "quit" -> return ()
+                Just input -> do cmd input
+                                 loop
