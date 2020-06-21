@@ -1,8 +1,6 @@
 import Data.List
 import Control.Monad.IO.Class
-import System.Console.Haskeline
 import System.Console.Repline
-import System.Process
 
 type Repl a = HaskelineT IO a
 type Command = (String, Repl ())
