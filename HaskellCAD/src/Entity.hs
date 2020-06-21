@@ -54,13 +54,17 @@ import Control.Monad.State
 -- ===========================================================================
 --                               Data Types
 -- ===========================================================================
-data Glue g t = Glue { getGeo :: g
-                     , getTopo :: t
-                     }
-                      deriving (Show, Eq)
+data Vertex a = Vertex {
+                         getGeoPoint   :: Geo.Point a
+                       , getTopoVertex :: Topo.Vertex
+                       }
+                       deriving (Show, Eq)
 
-type Vertex a = Glue (Geo.Point a) Topo.Vertex
-type Edge   a = Glue (Geo.Line a) Topo.Edge
+data Edge   a = Edge {
+                       getGeoLine  :: (Geo.Line a)
+                     , getTopoEdge :: Topo.Edge
+                     }
+                     deriving (Show, Eq)
 
 data Entity a = Entity { getVertices :: [Vertex a]
                        , getEdges :: [Edge a]
@@ -81,39 +85,40 @@ addVertex :: Fractional a => Geo.Point a -> EntityState a (Vertex a)
 addVertex p = do
     (Entity vs es t) <- get
     let (v, t')  = runState Topo.addFreeVertex t
-        newVertex = Glue p v
+        newVertex = Vertex p v
         vs' = newVertex : vs
     put $ Entity vs' es t'
     pure newVertex
 
 addEdge :: Fractional a => Vertex a -> Geo.Point a -> EntityState a (Edge a)
-addEdge (Glue p1 v1) p2 = do
+addEdge (Vertex p1 v1) p2 = do
     (Entity vs es t) <- get
     let line   = Geo.makeLine p1 p2
         (Just e, t')  = runState (Topo.addRayEdge v1) t
         (Just v2, t'')   = runState (Topo.closeRayEdge e) t'
-        vs' = (Glue p2 v2) : vs
-        es' = (Glue line e) : es
+        vs' = (Vertex p2 v2) : vs
+        es' = (Edge line e) : es
     put $ Entity vs' es' t''
-    pure $ Glue line e
+    pure $ Edge line e
 
 getPoint :: Entity a -> Vertex a -> Maybe (Geo.Point a)
-getPoint e (Glue _ v) = do
-    p <- find f (getVertices e)
-    return $ getGeo p
-    where f x = (getTopo x) == v
+getPoint entity vertex = do
+    mPoint <- find pred (getVertices entity)
+    pure $ getGeoPoint mPoint
+    where pred v = (getTopoVertex v) == (getTopoVertex vertex)
 
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
 getVertex entity point = find pred (getVertices entity)
-    where pred x = (getGeo x) == point
+    where pred v = (getGeoPoint v) == point
 
 getCurve :: Entity a -> Edge a -> Maybe (Geo.Line a)
-getCurve ent (Glue c e) = do
-    find f (getEdges ent) >>= \_ -> return c
-    where f x = (getTopo x) == e
+getCurve entity (Edge line edge) = do
+    find pred (getEdges entity)
+    pure line
+    where pred e = (getTopoEdge e) == edge
 
 oppositeVertex :: Eq a => Entity a -> Vertex a -> Edge a -> Maybe (Vertex a)
-oppositeVertex e@(Entity _ _ t) (Glue _ v1) (Glue _ ed) = v2
+oppositeVertex e@(Entity _ _ t) (Vertex _ v1) (Edge _ ed) = v2
     where xs = Topo.adjVertToEdge t ed
           v2 | (length xs) /= 2 = Nothing
              | a == v1        = getVertex' e b
@@ -123,7 +128,7 @@ oppositeVertex e@(Entity _ _ t) (Glue _ v1) (Glue _ ed) = v2
                    b = xs !! 1
 
 prettyPrintVertex :: Show a => Entity a -> Vertex a -> Doc ann
-prettyPrintVertex (Entity _ _ t) (Glue p v) = nest 4 $ vsep [v', p']
+prettyPrintVertex (Entity _ _ t) (Vertex p v) = nest 4 $ vsep [v', p']
     where p'  = pretty $ show p
           v'  = Topo.prettyPrintVertex t v
 
@@ -132,7 +137,7 @@ prettyPrintVertices e = vsep $ reverse vs
     where vs = map (prettyPrintVertex e) $ getVertices e
 
 prettyPrintEdge :: Show a => Entity a -> Edge a -> Doc ann
-prettyPrintEdge (Entity _ _ t) (Glue _ e) =
+prettyPrintEdge (Entity _ _ t) (Edge _ e) =
     nest 4 $ vsep [e', pretty "Line"]
     where e' = Topo.prettyPrintEdge t e
 
@@ -150,4 +155,4 @@ prettyPrintEntity e = vs <> line <> es
 -- ===========================================================================
 getVertex' :: Eq a => Entity a -> Topo.Vertex -> Maybe (Vertex a)
 getVertex' (Entity vs _ _) v = find f vs
-    where f x = (getTopo x) == v
+    where f x = (getTopoVertex x) == v
