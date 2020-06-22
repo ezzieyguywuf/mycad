@@ -18,11 +18,10 @@ loop entity = do
 -- | Evaluation : handle each line user inputs
 evaluateCommand :: String -> Entity a -> InputT IO (Entity a)
 evaluateCommand input entity = do
-    case parseCommand input of
-        Nothing -> pure entity
-        Just (command, _) -> case execCommand command of
-                               Left msg      -> outputStrLn msg >> pure entity
-                               Right entity' -> pure entity'
+    let output = parseCommand input >>= execCommand
+    case output of
+        Left msg -> outputStrLn msg >> pure entity
+        Right (entity') -> pure entity'
 
 -- | Provides tab-completion to Haskeline's InputT
 completer :: String -> IO [Completion]
