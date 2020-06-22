@@ -10,10 +10,10 @@ cmd input entity = outputStrLn msg >> pure entity
                     _ -> "Sorry, I'm not familiar with '" <> input <> "'"
 
 splitCommand :: String -> Maybe (String, [String])
-splitCommand s = do
-    (h, t) <- uncons $ words s
-    case filterKnown h of
-        [h'] -> Just (h', t)
+splitCommand info = do
+    (maybeCommand, args) <- uncons $ words info
+    case filterKnown maybeCommand of
+        [command] -> Just (command, args)
         _    -> Nothing -- non-unique command prefix
 
 -- Tab Completion: return a completion for partial words entered
