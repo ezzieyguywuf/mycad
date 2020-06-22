@@ -1,6 +1,7 @@
-import Data.List (isPrefixOf, uncons)
+import Data.List (uncons)
 import System.Console.Haskeline
 import Entity
+import Commands
 
 -- Evaluation : handle each line user inputs
 cmd :: String -> EntityState a () -> InputT IO (EntityState a ())
@@ -15,12 +16,7 @@ splitCommand info = do
     (maybeCommand, args) <- uncons $ words info
     case filterKnown maybeCommand of
         [command] -> Just (command, args)
-        _    -> Nothing -- non-unique command prefix
-
--- Tab Completion: return a completion for partial words entered
-filterKnown :: String -> [String]
-filterKnown s = filter (isPrefixOf s) names
-    where names = ["add", "delete", "connect"]
+        _    -> Nothing -- non-unique command prefix, or unknown command
 
 completer :: String -> IO [Completion]
 completer s = pure $ map makeComplete (filterKnown s)
