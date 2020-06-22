@@ -10,7 +10,7 @@ import Data.List (isPrefixOf, uncons, intersperse)
 import Entity
 
 -- | Tries to execute the provided command on the given EntityState.
-tryCommand :: String -> EntityState a String
+tryCommand :: String -> MutateEntityMsg a
 tryCommand input = case msg of
                        Nothing -> pure $ "Sorry, I'm not familiar with " <> input <> ""
                        Just s  -> s
@@ -26,6 +26,8 @@ filterKnown s = filter (isPrefixOf s) (Map.keys knownCommands)
 --                   Private Free Functions and Data Type
 -- ===========================================================================
 type Args = [String]
+
+type MutateEntityMsg a = EntityState a String
 
 data Command = Add
              | Delete
@@ -43,7 +45,7 @@ parseCommand input = do
                   --where commands :: [Command]
                         --commands = [(minBound :: Command) ..]
 
-knownCommands :: Map.Map String (Args -> EntityState a String)
+knownCommands :: Map.Map String (Args -> MutateEntityMsg a)
 knownCommands = Map.fromList
     [
       ("add", doNothing)
@@ -51,9 +53,9 @@ knownCommands = Map.fromList
     , ("connect", doNothing)
     , ("help", help)
     ]
-        where doNothing _ = pure "" :: EntityState a String
+        where doNothing _ = pure "" :: MutateEntityMsg a
 
-help :: Args -> EntityState a String
+help :: Args -> MutateEntityMsg a
 help _ = pure msg
     where msg = "Please type one of these commands: "
                 <> concat (intersperse ", " (Map.keys knownCommands))
