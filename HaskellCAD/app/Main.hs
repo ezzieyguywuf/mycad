@@ -3,8 +3,8 @@ import Entity
 import Commands
 
 -- Evaluation : handle each line user inputs
-cmd :: String -> EntityState a () -> InputT IO (EntityState a ())
-cmd input entity = outputStrLn msg >> pure entity
+evaluateCommand :: String -> EntityState a () -> InputT IO (EntityState a ())
+evaluateCommand input entity = outputStrLn msg >> pure entity
     where msg = case splitCommand input of
                     Just (command, args) -> "I know about the command '" <> command <> "'!" 
                                             <> " Args = " <> (show args)
@@ -31,4 +31,4 @@ loop entity = do
     case minput of
         Nothing -> pure entity
         Just "quit" -> pure entity
-        Just input -> cmd input entity >>= loop
+        Just input -> evaluateCommand input entity >>= loop
