@@ -35,12 +35,12 @@ splitCommand info = do
 -- ===========================================================================
 type Args = [String]
 
-knownCommands :: Map.Map String (Args -> EntityState a ())
+knownCommands :: Map.Map String (Args -> EntityState a String)
 knownCommands = Map.fromList
     [
       ("add", doNothing)
     , ("delete", doNothing)
     , ("connect", doNothing)
-    , ("construct", doNothing)
+    , ("help", doNothing)
     ]
-        where doNothing _ = pure () :: EntityState a ()
+        where doNothing _ = pure "" :: EntityState a String
