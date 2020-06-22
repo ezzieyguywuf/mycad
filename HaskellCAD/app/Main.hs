@@ -1,14 +1,14 @@
 import System.Console.Haskeline
 import Entity
 import Commands
+import Control.Monad.State
 
 -- Evaluation : handle each line user inputs
-evaluateCommand :: String -> EntityState a () -> InputT IO (EntityState a ())
-evaluateCommand input entity = outputStrLn msg >> pure entity
-    where msg = case splitCommand input of
-                    Just (command, args) -> "I know about the command '" <> command <> "'!" 
-                                            <> " Args = " <> (show args)
-                    _ -> "Sorry, I'm not familiar with '" <> input <> "'"
+evaluateCommand :: String -> Entity a -> InputT IO (Entity a)
+evaluateCommand input entity = do
+    let (ret, entity') = runState (tryCommand input) entity
+    outputStrLn ret
+    pure entity'
 
 completer :: String -> IO [Completion]
 completer s = pure $ map makeComplete (filterKnown s)
@@ -22,13 +22,13 @@ settings = Settings {
                     , autoAddHistory = True
                     }
 
-main :: IO (EntityState a ())
-main = runInputT settings (loop emptyEntityState)
+main :: IO ()
+main = runInputT settings (loop nullEntity)
 
-loop :: EntityState a () -> InputT IO (EntityState a ())
+loop :: Entity a -> InputT IO ()
 loop entity = do
     minput <- getInputLine ">>> "
     case minput of
-        Nothing -> pure entity
-        Just "quit" -> pure entity
+        Nothing -> pure ()
+        Just "quit" -> pure ()
         Just input -> evaluateCommand input entity >>= loop
