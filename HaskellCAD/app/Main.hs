@@ -6,7 +6,8 @@ import Entity
 cmd :: String -> EntityState a () -> InputT IO (EntityState a ())
 cmd input entity = outputStrLn msg >> pure entity
     where msg = case splitCommand input of
-                    Just (h, _) -> "I know about the command '" <> h <> "'!"
+                    Just (command, args) -> "I know about the command '" <> command <> "'!" 
+                                            <> " Args = " <> (show args)
                     _ -> "Sorry, I'm not familiar with '" <> input <> "'"
 
 splitCommand :: String -> Maybe (String, [String])
