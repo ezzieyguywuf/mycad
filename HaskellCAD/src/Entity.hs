@@ -28,6 +28,7 @@ module Entity
 , EntityState
   -- * Creation and Modification
 , nullEntity
+, emptyEntityState
 , addVertex
 , addEdge
   -- * Inspection
@@ -80,6 +81,9 @@ type EntityState b a = State (Entity b) a
 
 nullEntity :: Entity a
 nullEntity = Entity [] [] Topo.emptyTopology
+
+emptyEntityState :: EntityState a ()
+emptyEntityState = pure ()
 
 addVertex :: Fractional a => Geo.Point a -> EntityState a (Vertex a)
 addVertex p = do

@@ -3,7 +3,7 @@ import System.Console.Haskeline
 import Entity
 
 -- Evaluation : handle each line user inputs
-cmd :: String -> Entity a -> InputT IO (Entity a)
+cmd :: String -> EntityState a () -> InputT IO (EntityState a ())
 cmd input entity = outputStrLn msg >> pure entity
     where msg = case splitCommand input of
                     Just (h, _) -> "I know about the command '" <> h <> "'!"
@@ -33,10 +33,10 @@ settings = Settings {
                     , autoAddHistory = True
                     }
 
-main :: IO (Entity a)
-main = runInputT settings (loop nullEntity)
+main :: IO (EntityState a ())
+main = runInputT settings (loop emptyEntityState)
 
-loop :: Entity a -> InputT IO (Entity a)
+loop :: EntityState a () -> InputT IO (EntityState a ())
 loop entity = do
     minput <- getInputLine ">>> "
     case minput of
