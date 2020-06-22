@@ -1,4 +1,3 @@
-import Data.List (uncons)
 import System.Console.Haskeline
 import Entity
 import Commands
@@ -10,13 +9,6 @@ cmd input entity = outputStrLn msg >> pure entity
                     Just (command, args) -> "I know about the command '" <> command <> "'!" 
                                             <> " Args = " <> (show args)
                     _ -> "Sorry, I'm not familiar with '" <> input <> "'"
-
-splitCommand :: String -> Maybe (String, [String])
-splitCommand info = do
-    (maybeCommand, args) <- uncons $ words info
-    case filterKnown maybeCommand of
-        [command] -> Just (command, args)
-        _    -> Nothing -- non-unique command prefix, or unknown command
 
 completer :: String -> IO [Completion]
 completer s = pure $ map makeComplete (filterKnown s)
