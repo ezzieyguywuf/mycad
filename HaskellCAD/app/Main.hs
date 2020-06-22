@@ -1,9 +1,10 @@
 import Data.List (isPrefixOf, uncons)
 import System.Console.Haskeline
+import Entity
 
 -- Evaluation : handle each line user inputs
-cmd :: String -> InputT IO ()
-cmd input = outputStrLn msg
+cmd :: String -> Entity a -> InputT IO ()
+cmd input entity = outputStrLn msg
     where msg = case splitCommand input of
                     Just (h, _) -> "I know about the command '" <> h <> "'!"
                     _ -> "Sorry, I'm not familiar with '" <> input <> "'"
@@ -37,9 +38,10 @@ main = runInputT settings loop
     where
         loop :: InputT IO ()
         loop = do
+            let entity = nullEntity
             minput <- getInputLine ">>> "
             case minput of
                 Nothing -> return ()
                 Just "quit" -> return ()
-                Just input -> do cmd input
+                Just input -> do cmd input entity
                                  loop
