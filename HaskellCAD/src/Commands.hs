@@ -1,7 +1,6 @@
 module Commands
 (
-  Args
-, tryCommand
+  tryCommand
 , filterKnown
 , splitCommand
 )where
@@ -9,8 +8,6 @@ module Commands
 import qualified Data.Map as Map
 import Data.List (isPrefixOf, uncons)
 import Entity
-
-type Args = [String]
 
 -- | Tries to execute the provided command on the given EntityState.
 tryCommand :: String -> EntityState a String
@@ -34,8 +31,9 @@ splitCommand info = do
 
 
 -- ===========================================================================
---                       Private Free Functions
+--                   Private Free Functions and Data Type
 -- ===========================================================================
+type Args = [String]
 
 knownCommands :: Map.Map String (Args -> EntityState a ())
 knownCommands = Map.fromList
@@ -43,5 +41,6 @@ knownCommands = Map.fromList
       ("add", doNothing)
     , ("delete", doNothing)
     , ("connect", doNothing)
+    , ("construct", doNothing)
     ]
         where doNothing _ = pure () :: EntityState a ()
