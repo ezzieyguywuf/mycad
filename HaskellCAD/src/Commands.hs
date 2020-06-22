@@ -2,6 +2,7 @@ module Commands
 (
   tryCommand
 , filterKnown
+, parseCommand
 )where
 
 import qualified Data.Map as Map
@@ -25,6 +26,22 @@ filterKnown s = filter (isPrefixOf s) (Map.keys knownCommands)
 --                   Private Free Functions and Data Type
 -- ===========================================================================
 type Args = [String]
+
+data Command = Add
+             | Delete
+             | Connect
+             | Help
+             deriving (Enum, Bounded)
+
+parseCommand :: String -> Maybe (Command, Args)
+parseCommand input = do
+    (commandName, args) <- uncons (words input)
+    case commandName of
+        _ -> Just (Help, [])
+
+--"These are the known commands: " <> (show commands)
+                  --where commands :: [Command]
+                        --commands = [(minBound :: Command) ..]
 
 knownCommands :: Map.Map String (Args -> EntityState a String)
 knownCommands = Map.fromList
