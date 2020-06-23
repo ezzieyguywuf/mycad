@@ -31,6 +31,12 @@ dependencies:
 
 library:
   source-dirs: src
+  exposed-modules:
+      - CommandParser
+      - CommandRunner
+      - Entity
+      - Geometry
+      - Topology
 
 executables:
   HaskellCAD:
