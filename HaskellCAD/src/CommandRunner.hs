@@ -26,4 +26,7 @@ runHelp _ = "These are the known commands:\n"
             <> "Try help <command> for more information."
 
 runAdd :: [String] -> Either String (Entity a)
-runAdd [] = Left $ runHelp "add"
+runAdd args
+  | head args == "vertex" = Left "Adding vertex"
+  | head args == "edge"   = Left "Adding edge"
+  | otherwise = Left $ runHelp "add"
