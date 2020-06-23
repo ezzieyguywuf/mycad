@@ -15,7 +15,8 @@ parseCommand input = do
     matches     <- filterKnown' cmd
     case compare (length matches) 1 of
         EQ -> Right $ Runnable cmd' args
-                  where Just cmd' = Map.lookup (head matches) knownCommands
+                  where Just cmd' = Map.lookup match knownCommands
+                        [match]   = matches
         LT -> Left "checkValid function seems to have failed"
         GT -> Left $ "Perhaps you meant one of these: " <> (concat $ intersperse ", " matches)
 
