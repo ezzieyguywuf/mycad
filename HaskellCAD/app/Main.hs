@@ -1,6 +1,7 @@
 import System.Console.Haskeline
 import Entity
 import Commands
+import CommandParser
 
 -- | Run Haskeline
 main :: IO ()
