@@ -1,11 +1,12 @@
 module CommandParser
 (
   parseCommand
+, filterKnown
 )where
 
-import Commands
 import qualified Data.Map as Map
-import Data.List (uncons, intersperse)
+import Data.List (isPrefixOf, uncons, intersperse)
+import Commands
 
 -- | Try to parse a String into a Command
 parseCommand :: String -> Either String Runnable
@@ -17,6 +18,10 @@ parseCommand input = do
                   where Just cmd' = Map.lookup (head matches) knownCommands
         LT -> Left "checkValid function seems to have failed"
         GT -> Left $ "Perhaps you meant one of these: " <> (concat $ intersperse ", " matches)
+
+-- | Returns a list of commands which partially match the provided String
+filterKnown :: String -> [String]
+filterKnown s = filter (isPrefixOf s) (Map.keys knownCommands)
 
 -- ===========================================================================
 --                   Private Free Functions and Data Type

@@ -1,7 +1,7 @@
 import System.Console.Haskeline
 import Entity
-import Commands
 import CommandParser
+import CommandRunner
 
 -- | Run Haskeline
 main :: IO ()
@@ -19,7 +19,7 @@ loop entity = do
 -- | Evaluation : handle each line user inputs
 evaluateCommand :: String -> Entity a -> InputT IO (Entity a)
 evaluateCommand input entity = do
-    let output = parseCommand input >>= execCommand
+    let output = parseCommand input >>= runCommand
     case output of
         Left msg -> outputStrLn msg >> pure entity
         Right (entity') -> pure entity'
