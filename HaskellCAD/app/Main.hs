@@ -19,7 +19,7 @@ loop entity = do
 -- | Evaluation : handle each line user inputs
 evaluateCommand :: String -> Entity a -> InputT IO (Entity a)
 evaluateCommand input entity = do
-    let output = parseCommand input >>= runCommand
+    let output = parseCommand input >>= runCommand entity
     case output of
         Left msg -> outputStrLn msg >> pure entity
         Right (entity') -> pure entity'

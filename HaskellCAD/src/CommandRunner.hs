@@ -10,11 +10,11 @@ import Commands
 import Entity
 
 -- | Either execute the command and return the mutated Entity, or return an error message
-runCommand :: Runnable -> Either String (Entity a)
-runCommand (Runnable Help [])    = Left $ runHelp ""
-runCommand (Runnable Help (arg:_))    = Left $ runHelp arg
-runCommand (Runnable Add (arg:_))  = runAdd arg
-runCommand (Runnable command _) = Left $ "The command " <> (show command) <> " has not yet been implemented"
+runCommand :: Entity a -> Runnable -> Either String (Entity a)
+runCommand entity (Runnable Help [])    = Left $ runHelp ""
+runCommand entity (Runnable Help (arg:_))    = Left $ runHelp arg
+runCommand entity (Runnable Add (arg:_))  = runAdd arg
+runCommand entity (Runnable command _) = Left $ "The command " <> (show command) <> " has not yet been implemented"
 
 -- ===========================================================================
 --                   Private Free Functions and Data Type
