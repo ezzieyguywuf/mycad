@@ -34,4 +34,3 @@ knownCommands = Map.fromList
 --                   Private Free Functions and Data Type
 -- ===========================================================================
 type Args = [String]
-
