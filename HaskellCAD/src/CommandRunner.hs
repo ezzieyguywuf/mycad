@@ -13,7 +13,7 @@ import Entity
 runCommand :: Runnable -> Either String (Entity a)
 runCommand (Runnable Help [])    = Left $ runHelp ""
 runCommand (Runnable Help (arg:_))    = Left $ runHelp arg
-runCommand (Runnable Add args)  = runAdd args
+runCommand (Runnable Add (arg:_))  = runAdd arg
 runCommand (Runnable command _) = Left $ "The command " <> (show command) <> " has not yet been implemented"
 
 -- ===========================================================================
@@ -25,9 +25,9 @@ runHelp _ = "These are the known commands:\n"
             <> "    " <> (show commands) <> "\n"
             <> "Try help <command> for more information."
 
-runAdd :: [String] -> Either String (Entity a)
-runAdd [] = Left $ runHelp "add"
-runAdd (arg:_)
+runAdd :: String -> Either String (Entity a)
+runAdd "" = Left $ runHelp "add"
+runAdd arg
   | arg == "vertex" = Left "Adding vertex"
   | arg == "edge"   = Left "Adding edge"
   | otherwise = Left $ runHelp "add"
