@@ -12,7 +12,7 @@ import Entity
 -- | Either execute the command and return the mutated Entity, or return an error message
 runCommand :: Runnable -> Either String (Entity a)
 runCommand (Runnable Help [])    = Left $ runHelp ""
-runCommand (Runnable Help args)    = Left $ runHelp (head args)
+runCommand (Runnable Help (arg:_))    = Left $ runHelp arg
 runCommand (Runnable Add args)  = runAdd args
 runCommand (Runnable command _) = Left $ "The command " <> (show command) <> " has not yet been implemented"
 
