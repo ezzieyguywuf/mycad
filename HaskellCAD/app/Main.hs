@@ -11,10 +11,13 @@ main = runInputT settings (loop nullEntity)
 loop :: Entity a -> InputT IO ()
 loop entity = do
     minput <- getInputLine ">>> "
-    case minput of
-        Nothing -> pure ()
-        Just "quit" -> pure ()
-        Just input -> evaluateCommand input entity >>= loop
+    maybe (pure ()) (parseInput entity) minput
+
+parseInput :: Entity a -> String -> InputT IO ()
+parseInput entity input =
+    case input of
+       "quit" -> pure ()
+       input -> evaluateCommand input entity >>= loop
 
 -- | Evaluation : handle each line user inputs
 evaluateCommand :: String -> Entity a -> InputT IO (Entity a)
