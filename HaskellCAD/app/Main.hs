@@ -11,9 +11,7 @@ main = runInputT settings (loop nullEntity)
 
 -- | Keep getting input from User until quit
 loop :: Entity a -> InputIO ()
-loop entity = do
-    minput <- getInputLine ">>> "
-    maybe (pure ()) (parseInput entity) minput
+loop entity = getInputLine ">>> " >>= maybe (pure ()) (parseInput entity)
 
 parseInput :: Entity a -> String -> InputIO ()
 parseInput entity input =
