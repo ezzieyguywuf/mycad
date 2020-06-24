@@ -27,12 +27,6 @@ evaluateCommand input entity = do
         Left msg -> outputStrLn msg >> pure entity
         Right (entity') -> pure entity'
 
--- | Provides tab-completion to Haskeline's InputT
-completer :: String -> IO [Completion]
-completer s = pure $ map makeComplete (filterKnown s)
-    where makeComplete :: String -> Completion
-          makeComplete s = Completion s s False
-
 -- | Provides setting information to InputT
 settings :: Settings IO
 settings = Settings {
@@ -40,3 +34,10 @@ settings = Settings {
                     , historyFile = Nothing
                     , autoAddHistory = True
                     }
+
+-- | Provides tab-completion to Haskeline's InputT
+completer :: String -> IO [Completion]
+completer s = pure $ map makeComplete (filterKnown s)
+    where makeComplete :: String -> Completion
+          makeComplete s = Completion s s False
+
