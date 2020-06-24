@@ -3,17 +3,19 @@ import Entity
 import CommandParser
 import CommandRunner
 
+type InputIO a = InputT IO a
+
 -- | Run Haskeline
 main :: IO ()
 main = runInputT settings (loop nullEntity)
 
 -- | Keep getting input from User until quit
-loop :: Entity a -> InputT IO ()
+loop :: Entity a -> InputIO ()
 loop entity = do
     minput <- getInputLine ">>> "
     maybe (pure ()) (parseInput entity) minput
 
-parseInput :: Entity a -> String -> InputT IO ()
+parseInput :: Entity a -> String -> InputIO ()
 parseInput entity input =
     case input of
        "quit" -> pure ()
