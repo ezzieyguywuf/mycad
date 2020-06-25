@@ -2,12 +2,12 @@
 module CommandParser2 where
 
 import qualified Geometry as Geo
-import Data.Char (isDigit)
+import Control.Applicative ((<|>), some)
 
-import Text.Megaparsec
-import Text.Megaparsec.Char
-import Data.Text
-import Data.Void
+import Text.Megaparsec (Parsec, choice)
+import Text.Megaparsec.Char (space, digitChar, string)
+import Data.Text (Text)
+import Data.Void (Void)
 
 import Linear.V3
 
