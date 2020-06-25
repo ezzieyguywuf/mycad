@@ -22,43 +22,25 @@ data Command a = Add (Item a)
 data Item a = Vertex (Geo.Point a)
               deriving (Show)
 
-parseCommand :: Parser Text
-parseCommand = choice [ string "add"
-                      , string "help"
-                      ]
-
-parseInteger :: Parser Int
-parseInteger = some digitChar >>= pure . read
+maybeCommand :: Parser (Maybe Text)
+maybeCommand = do
+    fmap Just $ choice [ string "add"
+                       , string "help"
+                       ]
+    <|> pure Nothing
 
 maybeInteger :: Parser (Maybe Int)
 maybeInteger = do
-    (some digitChar >>= pure . Just . read)
+    (fmap (Just . read) (some digitChar))
     <|> pure Nothing
 
---parsePoint' :: Parser (Geo.Point Int)
---parsePoint' = do
-    --x <- parseInteger
-    --space
-    --y <- parseInteger
-    --space
-    --z <- parseInteger
-    --pure $ V3 x y z
-
---maybePoint :: ReadP (Maybe (Geo.Point Int))
+--maybePoint :: Parser (Maybe (Geo.Point Int))
 --maybePoint = do
-    --x <- parseInteger <++ (pure Nothing)
-    --y <- parseInteger <++ (pure Nothing)
-    --z <- parseInteger <++ (pure Nothing)
+    --x <- maybeInteger
+    --space
+    --y <- maybeInteger
+    --space
+    --z <- maybeInteger
     --pure $ Just (V3 x y z)
+    -- <|> pure Nothing
 
-maybeCommand :: Num a => Parser (Maybe (Command a))
-maybeCommand = do
-    parsed <- parseCommand
-    case parsed of
-       ""     -> pure $ Nothing
-       "help" -> pure $ Just Help
-       "add"  -> pure $ parsePoint >>= (\x -> Just (Add x))
-       _      -> pure $ Nothing
-
-parsePoint :: Num a => (Maybe (Item a))
-parsePoint = Just (Vertex (V3 10 10 10))
