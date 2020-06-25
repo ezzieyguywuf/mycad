@@ -9,6 +9,9 @@ import Text.Megaparsec.Char (space, digitChar, string)
 import Data.Text (Text)
 import Data.Void (Void)
 
+-- TODO: delete this, it's only needed for development
+import Text.Megaparsec (parseTest)
+
 import Linear.V3
 
 type Parser = Parsec Void Text
@@ -30,8 +33,7 @@ maybeCommand = do
 
 maybeInteger :: Parser (Maybe Int)
 maybeInteger = do
-    (fmap (Just . read) (some digitChar))
-    <|> pure Nothing
+    optional $ fmap read (some digitChar)
 
 maybePoint :: Parser (Maybe (Geo.Point Int))
 maybePoint = do
