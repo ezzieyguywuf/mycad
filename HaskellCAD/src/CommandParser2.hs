@@ -4,7 +4,7 @@ module CommandParser2 where
 import qualified Geometry as Geo
 import Control.Applicative ((<|>), some)
 
-import Text.Megaparsec (Parsec, choice)
+import Text.Megaparsec (Parsec, choice, optional)
 import Text.Megaparsec.Char (space, digitChar, string)
 import Data.Text (Text)
 import Data.Void (Void)
@@ -24,10 +24,9 @@ data Item a = Vertex (Geo.Point a)
 
 maybeCommand :: Parser (Maybe Text)
 maybeCommand = do
-    fmap Just $ choice [ string "add"
-                       , string "help"
-                       ]
-    <|> pure Nothing
+    optional $ choice [ string "add"
+                      , string "help"
+                      ]
 
 maybeInteger :: Parser (Maybe Int)
 maybeInteger = do
