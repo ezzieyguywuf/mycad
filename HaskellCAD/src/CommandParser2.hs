@@ -34,13 +34,11 @@ maybeInteger = do
     (fmap (Just . read) (some digitChar))
     <|> pure Nothing
 
---maybePoint :: Parser (Maybe (Geo.Point Int))
---maybePoint = do
-    --x <- maybeInteger
-    --space
-    --y <- maybeInteger
-    --space
-    --z <- maybeInteger
-    --pure $ Just (V3 x y z)
-    -- <|> pure Nothing
-
+maybePoint :: Parser (Maybe (Geo.Point Int))
+maybePoint = do
+    x <- maybeInteger
+    space
+    y <- maybeInteger
+    space
+    z <- maybeInteger
+    pure $ V3 <$> x <*> y <*> z
