@@ -11,25 +11,17 @@ import Data.Void
 
 import Linear.V3
 
-type Parser = Parsec Void Text
+type Parser = ParsecT Void Text Maybe
 
--- | This is a command that the user can request
-data Command a = Add (Item a)
-               | Help
-               deriving (Show)
 
--- | This is something that the user can Add
-data Item a = Vertex (Geo.Point a)
-              deriving (Show)
+--maybeCommand :: Parser Text
+--maybeCommand = do
+    --fmap Just $ choice [ string "add"
+                                 --, string "help"
+                                 --]
+    -- <|> pure Nothing
 
-maybeCommand :: Parser (Maybe Text)
-maybeCommand = do
-    fmap Just $ choice [ string "add"
-                       , string "help"
-                       ]
-    <|> pure Nothing
-
-maybeInteger :: Parser (Maybe Int)
+maybeInteger :: Parser Int
 maybeInteger = do
     (fmap (Just . read) (some digitChar))
     <|> pure Nothing
@@ -44,3 +36,11 @@ maybeInteger = do
     --pure $ Just (V3 x y z)
     -- <|> pure Nothing
 
+-- | This is a command that the user can request
+data Command a = Add (Item a)
+               | Help
+               deriving (Show)
+
+-- | This is something that the user can Add
+data Item a = Vertex (Geo.Point a)
+              deriving (Show)
