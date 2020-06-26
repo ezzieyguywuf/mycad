@@ -30,6 +30,10 @@ loopAgain input =
         Right (Just ret) -> outputStrLn ret >> mainLoop
         Right Nothing    -> exit
 
+-- ----------------------------------------------------------------------------
+--                   Haskeline-Specific Setup Stuff. You can probably ignore
+-- ----------------------------------------------------------------------------
+
 -- | Provides setting information to InputT
 settings :: Settings IO
 settings = Settings {
