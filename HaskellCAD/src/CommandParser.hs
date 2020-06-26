@@ -59,7 +59,9 @@ parseAction :: [String] -> Either ParseError (Action, [String])
 parseAction input =
     case uncons input of
        Nothing    -> Left InvalidInput
-       Just (cmd,args) -> knownAction cmd >>= \cmd' -> Right (cmd', args)
+       Just (cmd,args) -> case Map.lookup cmd actionMap of
+                             Just action -> Right (action, args)
+                             Nothing     -> Left UnknownAction
 
 hasArgs :: (Action, [String]) -> Either ParseError Command
 hasArgs (cmd, args) =
@@ -67,12 +69,6 @@ hasArgs (cmd, args) =
        GetHelp     -> Right $ helpArgs args
        QuitProgram -> Right Quit
        MakeVertex  -> Right $ addVertexArgs args
-
-knownAction :: String -> Either ParseError Action
-knownAction string =
-    case Map.lookup string actionMap of
-       Just action -> Right action
-       Nothing     -> Left UnknownAction
 
 helpArgs :: [String] -> Command
 helpArgs args = case parseAction args of
