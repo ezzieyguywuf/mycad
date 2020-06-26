@@ -49,6 +49,9 @@ data ParseError = EmptyInput
                  | UnknownAction
                    deriving (Show)
 
+-- ===========================================================================
+--                                  Parsers
+-- ===========================================================================
 parseStatement :: String -> Either ParseError [String]
 parseStatement input =
     case words input of
@@ -70,6 +73,9 @@ parseCommand (cmd, args) =
        QuitProgram -> Right Quit
        MakeVertex  -> Right $ parseAddVertexArgs args
 
+-- ===========================================================================
+--                           Argument  Parsers
+-- ===========================================================================
 parseHelpArgs :: [String] -> Command
 parseHelpArgs args = case parseAction args of
                      Right (action, _) -> Help (Just action)
