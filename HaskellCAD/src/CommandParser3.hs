@@ -8,14 +8,20 @@ data ParseError = EmptyInput
                  | UnknownAction
                    deriving (Show)
 
--- | 
+-- | An Action that can be performed
 data Action = Help
                deriving (Show)
 
+-- | These arguments may be passed to certion "Action"
 data Argument = String String
                 deriving (Show)
 
---parseInput :: String -> Either ParseError (Action, [Argument])
+-- | A "Command" includes all the information necessary to execute an "Action"
+data Command = Undefined
+
+-- | Takes a single "String", probably from IO, and returns a Command that can later be executed
+parseInput :: String -> Either ParseError Command
+parseInput = undefined
 
 isStatement :: String -> Either ParseError [String]
 isStatement input =
