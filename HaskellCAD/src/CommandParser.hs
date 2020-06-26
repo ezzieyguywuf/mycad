@@ -79,15 +79,15 @@ parseCommand (cmd, args) =
        QuitProgram -> Right Quit
        MakeVertex  -> Right $ parseAddVertexArgs args
 
-parseFloat :: Text -> Either ParseError Float
+parseFloat :: Text -> Either ParseError (Float, Text)
 parseFloat text = do
     case rational (strip text) of
         Left _         -> Left FloatParseError
-        Right (val, _) -> Right val
+        Right val -> Right val
 
 _parsePoint :: Text -> Either ParseError (Point)
 _parsePoint text = do
-    x <- parseFloat text
+    (x, t0) <- parseFloat text
     pure (V3 x x x)
 
 -- ===========================================================================
