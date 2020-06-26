@@ -3,6 +3,7 @@ module Main (main) where
 import Control.Monad.Except (runExcept)
 import System.Console.Haskeline
 import CommandParser
+import CommandRunners
 import Errors
 
 -- | Entry point for program.
@@ -28,7 +29,7 @@ loopAgain input =
         Left err -> outputStrLn (getErrorString err) >> mainLoop
         Right cmd -> if cmd == Quit
                         then exit
-                        else outputStrLn (show cmd) >> mainLoop
+                        else outputStrLn (runCommand cmd) >> mainLoop
 
 -- | Provides setting information to InputT
 settings :: Settings IO

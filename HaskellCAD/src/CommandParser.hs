@@ -1,6 +1,7 @@
 module CommandParser
 (
   Command (..)
+, Action  (..)
 , parseInput
 , commandCompletions
 )where
@@ -25,7 +26,7 @@ data Command = Help (Maybe Action)
              | AddVertex Point
                deriving (Show, Eq)
 
--- | An Action that can be performed. This is not exported, it is just useful to place it here
+-- | An Action that can be performed.
 data Action = GetHelp
             | QuitProgram
             | MakeVertex
