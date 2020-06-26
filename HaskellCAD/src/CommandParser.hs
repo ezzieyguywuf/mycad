@@ -43,12 +43,14 @@ type Point = Geo.Point Float
 data Command = Help (Maybe Action)
              | Quit
              | AddVertex Point
+             | Show
                deriving (Show, Eq)
 
 -- | An Action that can be performed.
 data Action = GetHelp
             | QuitProgram
             | MakeVertex
+            | ShowEntity
               deriving (Show, Eq)
 
 -- | This maps a string to each of our Action. This is not exported, but it's useful to have here.
@@ -57,6 +59,7 @@ actionMap = Map.fromList
     [ (pack "help", GetHelp)
     , (pack "quit", QuitProgram)
     , (pack "addVertex", MakeVertex)
+    , (pack "show", ShowEntity)
     ]
 
 -- | The input to this function is expected to be the raw input from the User.
@@ -97,6 +100,7 @@ parseCommand (cmd, args) =
         GetHelp     -> parseHelpArgs args
         QuitProgram -> pure Quit
         MakeVertex  -> parseAddVertexArgs args
+        ShowEntity  -> pure Show
 
 parseFloat :: Text -> ErrorT p (Float, Text)
 parseFloat text = do

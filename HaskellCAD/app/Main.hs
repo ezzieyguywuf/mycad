@@ -33,20 +33,20 @@ import Entity (Entity, nullEntity)
 main :: IO ()
 main = do
     putStrLn "Welcome to mycad. [Ctrl-d] to exit."
-    HL.runInputT settings (mainLoop nullEntity)
+    HL.runInputT settings (mainLoop (nullEntity :: Entity Float))
 
 -- | Exit gracefully
 exit :: HL.InputT IO ()
 exit = HL.outputStrLn "exiting."
 
 -- | Entry point for main loop
-mainLoop :: Entity p -> HL.InputT IO ()
+mainLoop :: Show p => Entity p -> HL.InputT IO ()
 mainLoop entity = do
     input <- HL.getInputLine "mycad> "
     maybe exit (loopAgain entity) input
 
 -- | Determine if we should loop again or bail out.
-loopAgain :: Entity p -> String -> HL.InputT IO ()
+loopAgain :: Show p => Entity p -> String -> HL.InputT IO ()
 loopAgain entity input =
     let estate    = runExceptT (parseInput input >>= runCommand entity)
         (check, entity') = runState estate entity

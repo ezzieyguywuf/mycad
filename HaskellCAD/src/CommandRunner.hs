@@ -28,7 +28,7 @@ module CommandRunner
 -- | Internal imports
 import CommandParser (Command(..), Action(..))
 import Errors (ErrorT)
-import Entity (Entity)
+import Entity (Entity, addVertex, prettyPrintEntity)
 
 -- | This will execute the "Command".
 --
@@ -37,13 +37,15 @@ import Entity (Entity)
 --   empty or a message
 --
 --   Error-handling is done using the "Except" monad.
-runCommand :: Entity p -> Command -> ErrorT p (Maybe String)
+runCommand :: Show p => Entity p -> Command -> ErrorT p (Maybe String)
 runCommand entity cmd = do
     pure entity
     case cmd of
-        Help arg -> pure $ (Just $ getHelpString arg)
-        Quit     -> pure Nothing
-        _        -> pure $ (Just $ "There is no runner for " <> show cmd)
+        Help arg        -> pure $ (Just $ getHelpString arg)
+        AddVertex point -> pure (addVertex point) >> pure $ Just "added a vertex"
+        Show            -> pure $ Just (show (prettyPrintEntity entity))
+        Quit            -> pure Nothing
+        --_               -> pure $ (Just $ "There is no runner for " <> show cmd)
 
 getHelpString :: Maybe Action -> String
 getHelpString maction =
