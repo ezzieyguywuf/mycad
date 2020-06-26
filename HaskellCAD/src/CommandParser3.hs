@@ -2,16 +2,20 @@ module CommandParser3 where
 
 import Data.List (uncons)
 
+-- | Indicates that there was an error parsing a user's input
 data ParseError = EmptyInput
                  | InvalidInput
-                 | UnknownCommand
+                 | UnknownAction
                    deriving (Show)
 
-data Command = Help
+-- | 
+data Action = Help
                deriving (Show)
 
 data Argument = String String
                 deriving (Show)
+
+--parseInput :: String -> Either ParseError (Action, [Argument])
 
 isStatement :: String -> Either ParseError [String]
 isStatement input =
@@ -19,19 +23,19 @@ isStatement input =
        []    -> Left EmptyInput
        split -> Right split
 
-isCommand :: [String] -> Either ParseError (Command, [String])
-isCommand input =
+isAction :: [String] -> Either ParseError (Action, [String])
+isAction input =
     case uncons input of
        Nothing    -> Left InvalidInput
-       Just (cmd,args) -> knownCommand cmd >>= \cmd' -> Right (cmd', args)
+       Just (cmd,args) -> knownAction cmd >>= \cmd' -> Right (cmd', args)
 
-parseArgs :: (Command, [String]) -> Either ParseError (Command, [Argument])
+parseArgs :: (Action, [String]) -> Either ParseError (Action, [Argument])
 parseArgs (cmd, args) =
     case cmd of
        Help -> []
 
-knownCommand :: String -> Either ParseError Command
-knownCommand string =
+knownAction :: String -> Either ParseError Action
+knownAction string =
     case string of
        "help" -> Right Help
-       _      -> Left UnknownCommand
+       _      -> Left UnknownAction
