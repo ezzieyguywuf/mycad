@@ -5,6 +5,8 @@ module CommandParser
 , commandCompletions
 )where
 
+import qualified Data.Map as Map
+
 import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
 
@@ -20,13 +22,21 @@ data Action = GetHelp
             | MakeVertex
               deriving (Show, Eq)
 
+-- | This maps a string to each of our Action. This is not exported, but it's useful to have here.
+actionMap :: Map.Map String Action
+actionMap = Map.fromList
+    [ ("help", GetHelp)
+    , ("quit", QuitProgram)
+    ]
+
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
 parseInput :: String -> Either ParseError Command
 parseInput string = isStatement string >>= isAction >>= hasArgs
 
+-- | Provide a list of potential completions for the partial command supplied
 commandCompletions :: String -> [String]
 commandCompletions string = filter (isPrefixOf string) knownCommands
-    where knownCommands = ["help"]
+    where knownCommands = Map.keys actionMap
 
 -- ===========================================================================
 --                      Private Free Functions and Stuff
@@ -58,10 +68,9 @@ hasArgs (cmd, args) =
 
 knownAction :: String -> Either ParseError Action
 knownAction string =
-    case string of
-       "help" -> Right GetHelp
-       "quit" -> Right QuitProgram
-       _      -> Left UnknownAction
+    case Map.lookup string actionMap of
+       Just action -> Right action
+       Nothing     -> Left UnknownAction
 
 helpArgs :: [String] -> Command
 helpArgs args = case isAction args of
