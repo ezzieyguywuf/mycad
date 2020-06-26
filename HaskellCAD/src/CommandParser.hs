@@ -27,6 +27,7 @@ actionMap :: Map.Map String Action
 actionMap = Map.fromList
     [ ("help", GetHelp)
     , ("quit", QuitProgram)
+    , ("addVertex", MakeVertex)
     ]
 
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
@@ -65,6 +66,7 @@ hasArgs (cmd, args) =
     case cmd of
        GetHelp     -> Right $ helpArgs args
        QuitProgram -> Right Quit
+       MakeVertex  -> Right $ addVertexArgs args
 
 knownAction :: String -> Either ParseError Action
 knownAction string =
@@ -76,3 +78,6 @@ helpArgs :: [String] -> Command
 helpArgs args = case isAction args of
                      Right (action, _) -> Help (Just action)
                      Left _ -> Help Nothing
+
+addVertexArgs :: [String] -> Command
+addVertexArgs args = undefined
