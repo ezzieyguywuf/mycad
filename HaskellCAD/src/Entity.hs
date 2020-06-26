@@ -50,7 +50,7 @@ import qualified Geometry as Geo
 import qualified Topology as Topo
 import Data.Text.Prettyprint.Doc
 import Data.List (find)
-import Control.Monad.State
+import Control.Monad.State (State, get, runState, put)
 
 -- ===========================================================================
 --                               Data Types
