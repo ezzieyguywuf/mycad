@@ -5,7 +5,7 @@ module CommandParser
 , commandCompletions
 )where
 
-import Control.Monad.Except (Except, throwError, runExcept)
+import Control.Monad.Except (Except, throwError, runExcept, catchError)
 --import Control.Applicative ((<|>))
 import qualified Data.Map as Map
 
@@ -95,7 +95,7 @@ _parsePoint text = do
     (y, t1) <- parseFloat t0
     (z, t2) <- parseFloat t1
     pure (V3 x y z)
-    -- <|> throwError PointParseError
+    `catchError` \_ -> (throwError PointParseError)
 
 -- ===========================================================================
 --                           Argument  Parsers
