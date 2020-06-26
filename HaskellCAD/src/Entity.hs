@@ -19,6 +19,21 @@ i.e. "neighbors".
 
 By putting these two concepts together in the form of an Entity, we have the essential
 building block for a Computer Aided Design, or CAD, software.
+
+Please note that there could be some confusion between an "Entity.Vertex" and
+"Topology.Vertex", and similarly an "Entity.Edge" and a "Topology.Edge". A
+distinct decision was made to leave the nomenclature this way - at the end of
+the day, there are rather ambiguous definitions for Vertex, Edge, and even
+Face. There does not seem to be a clear concensus as to whether these entities
+should be strictly topological or include geometric information.V
+
+In the future, it is expected that there will be other "Entity" data types that
+far suprass any amount of "Topology" data types available. For example,
+"EdgeLoop", "Solid", "ExtrudedSolid", etc... This should make it clear that the
+data types in "Topology" are expected to be the very primitive foundations of a
+BREP representation, while the data types in "Entity" are intended to build
+upon the relational information in "Topology", using "Geometry" as necessary to
+make useful data.
 -}
 module Entity
 ( -- * Exported Types
@@ -55,20 +70,37 @@ import Control.Monad.State (State, get, runState, put)
 -- ===========================================================================
 --                               Data Types
 -- ===========================================================================
-data Vertex a = Vertex {
-                         getGeoPoint   :: Geo.Point a
+-- | This looks similar to "Topolog.Vertex" but is distinct, as it includes
+--   "Geometry" information. This data type is parametrized over the type of
+--   "Geo.Point".
+--
+--   This allows for easily changing the precision,  i.e. "Float" versus
+--   "Rational"
+data Vertex p = Vertex {
+                         getGeoPoint   :: Geo.Point p
                        , getTopoVertex :: Topo.Vertex
                        }
                        deriving (Show, Eq)
 
-data Edge   a = Edge {
-                       getGeoLine  :: (Geo.Line a)
+-- | Similar to "Vertex", this provides extra "Geometry" information that is
+--   not present in "Topology.Edge"
+--
+--   Also like "Vertex", the parametrization specifies the precision of the
+--   "Geo.Point"
+data Edge   p = Edge {
+                       getGeoLine  :: (Geo.Line p)
                      , getTopoEdge :: Topo.Edge
                      }
                      deriving (Show, Eq)
 
-data Entity a = Entity { getVertices :: [Vertex a]
-                       , getEdges :: [Edge a]
+-- | The main data type, encapsulating an entire "Topology" and associated
+--   "Geometry"
+--
+--   Please note that the "Vertex" and "Edge" stored here are distinctly *not*
+--   "Topology.Vertex" nor "Topology.Edge". Rather, these are primitive
+--   "Entity" data types that encapsulate both "Topology" and "Geometry"
+data Entity p = Entity { getVertices :: [Vertex p]
+                       , getEdges :: [Edge p]
                        , _getTopology :: Topo.Topology
                        } deriving (Show)
 
