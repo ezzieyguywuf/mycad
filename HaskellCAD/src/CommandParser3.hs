@@ -1,6 +1,22 @@
-module CommandParser3 where
+module CommandParser3
+(
+  Command (..)
+, parseInput
+)where
 
 import Data.List (uncons)
+
+-- | A "Command" includes all the information necessary to execute an "Action"
+data Command = Help (Maybe Action)
+               deriving (Show)
+
+-- | Takes a single "String", probably from IO, and returns a Command that can later be executed
+parseInput :: String -> Either ParseError Command
+parseInput string = isStatement string >>= isAction >>= hasArgs
+
+-- ===========================================================================
+--                      Private Free Functions and Stuff
+-- ===========================================================================
 
 -- | Indicates that there was an error parsing a user's input
 data ParseError = EmptyInput
@@ -15,14 +31,6 @@ data Action = GetHelp
 -- | These arguments may be passed to certion "Action"
 data Argument = String String
                 deriving (Show)
-
--- | A "Command" includes all the information necessary to execute an "Action"
-data Command = Help (Maybe Action)
-               deriving (Show)
-
--- | Takes a single "String", probably from IO, and returns a Command that can later be executed
-parseInput :: String -> Either ParseError Command
-parseInput string = isStatement string >>= isAction >>= hasArgs
 
 isStatement :: String -> Either ParseError [String]
 isStatement input =
