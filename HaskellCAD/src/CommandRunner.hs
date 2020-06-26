@@ -39,6 +39,7 @@ import Entity (Entity)
 --   Error-handling is done using the "Except" monad.
 runCommand :: Entity p -> Command -> ErrorT p (Maybe String)
 runCommand entity cmd = do
+    pure entity
     case cmd of
         Help arg -> pure $ (Just $ getHelpString arg)
         Quit     -> pure Nothing
