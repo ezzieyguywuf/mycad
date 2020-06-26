@@ -12,6 +12,7 @@ main = runInputT settings mainLoop
 -- | Entry point for main loop
 mainLoop :: InputT IO ()
 mainLoop = do
+    outputStrLn "Welcome to mycad. [Ctrl-d] to exit."
     input <- getInputLine "mycad> "
     maybe (outputStrLn "exiting.") loopAgain input
 
