@@ -19,7 +19,7 @@ As it stands, the design is relatively simple:
     3. A "String" is generated in order to provide feedback on the result of
        running the Action
 -}
-module CommandRunners
+module CommandRunner
 (
 -- * Exported functions
   runCommand

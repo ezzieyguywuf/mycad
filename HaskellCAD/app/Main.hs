@@ -24,7 +24,7 @@ import qualified System.Console.Haskeline as HL
 
 -- | Internal imports
 import CommandParser (parseInput, commandCompletions)
-import CommandRunners (runCommand)
+import CommandRunner (runCommand)
 import Errors (getErrorString)
 
 -- | Entry point for program.
