@@ -10,7 +10,7 @@ data ParseError = EmptyInput
 
 -- | An Action that can be performed
 data Action = Help
-               deriving (Show)
+              deriving (Show)
 
 -- | These arguments may be passed to certion "Action"
 data Argument = String String
