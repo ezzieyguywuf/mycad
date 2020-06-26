@@ -26,29 +26,30 @@ import qualified System.Console.Haskeline as HL
 import CommandParser (parseInput, commandCompletions)
 import CommandRunner (runCommand)
 import Errors (getErrorString)
+import Entity (EntityState, emptyEntityState)
 
 -- | Entry point for program.
 main :: IO ()
 main = do
     putStrLn "Welcome to mycad. [Ctrl-d] to exit."
-    HL.runInputT settings mainLoop
+    HL.runInputT settings (mainLoop emptyEntityState)
 
 -- | Exit gracefully
 exit :: HL.InputT IO ()
 exit = HL.outputStrLn "exiting."
 
 -- | Entry point for main loop
-mainLoop :: HL.InputT IO ()
-mainLoop = do
+mainLoop :: EntityState p a -> HL.InputT IO ()
+mainLoop estate = do
     input <- HL.getInputLine "mycad> "
-    maybe exit loopAgain input
+    maybe exit (loopAgain estate) input
 
 -- | Determine if we should loop again or bail out.
-loopAgain :: String -> HL.InputT IO ()
-loopAgain input =
+loopAgain :: EntityState p a -> String -> HL.InputT IO ()
+loopAgain estate input =
     case runExcept (parseInput input >>= runCommand) of
-        Left  err        -> HL.outputStrLn (getErrorString err) >> mainLoop
-        Right (Just ret) -> HL.outputStrLn ret >> mainLoop
+        Left  err        -> HL.outputStrLn (getErrorString err) >> mainLoop estate
+        Right (Just ret) -> HL.outputStrLn ret >> mainLoop estate
         Right Nothing    -> exit
 
 -- ----------------------------------------------------------------------------
