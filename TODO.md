@@ -1,5 +1,6 @@
 # General
 - ADD INTERNATIONALIZATION!!!!
+- UPDATE TODO LIST!!!
 - Add gitlab CI integration back, using the haskell stuff.
 - Figure out how to host haddock documentation on gitlab
 - Figure out if we can set up a cross-platform (i.e. including windows and mac) automated
@@ -62,3 +63,6 @@
 - Use Lens for, say, getDataSize?
 - Figure out why line thickness zooms - it shouldn't, it should always be the same
 - Update GraphicData stuff so that AttributeData index is defined by the user, not in getAttributeDataIndex
+
+# TUI
+- Allow run-time determination (is this a good idea?) of the parametrization of `Command a` in CommandParser. Right now, we hard-code a `Geo.Point Float`, but it'd be nice for this to be configurable by the User somehow
