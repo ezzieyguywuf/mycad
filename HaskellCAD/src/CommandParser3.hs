@@ -32,7 +32,7 @@ isAction input =
 parseArgs :: (Action, [String]) -> Either ParseError (Action, [Argument])
 parseArgs (cmd, args) =
     case cmd of
-       Help -> []
+       Help -> Right (Help, [])
 
 knownAction :: String -> Either ParseError Action
 knownAction string =
