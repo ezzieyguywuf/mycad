@@ -13,14 +13,20 @@ main = do
 mainLoop :: InputT IO ()
 mainLoop = do
     input <- getInputLine "mycad> "
-    maybe (outputStrLn "exiting.") loopAgain input
+    maybe exit loopAgain input
+
+-- | Exit gracefully
+exit :: InputT IO ()
+exit = outputStrLn "exiting."
 
 -- | Determine if we should loop again or bail out.
 loopAgain :: String -> InputT IO ()
 loopAgain input =
     case parseInput input of
         Left err -> outputStrLn (show err)  >> mainLoop
-        Right cmd -> outputStrLn (show cmd) >> mainLoop
+        Right cmd -> if cmd == Quit
+                        then exit
+                        else outputStrLn (show cmd) >> mainLoop
 
 -- | Provides setting information to InputT
 settings :: Settings IO

@@ -9,7 +9,8 @@ import Data.List (uncons, isPrefixOf)
 
 -- | A "Command" includes all the information necessary to execute an "Action"
 data Command = Help (Maybe Action)
-               deriving (Show)
+             | Quit
+               deriving (Show, Eq)
 
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
 parseInput :: String -> Either ParseError Command
@@ -31,7 +32,8 @@ data ParseError = EmptyInput
 
 -- | An Action that can be performed
 data Action = GetHelp
-              deriving (Show)
+            | QuitProgram
+              deriving (Show, Eq)
 
 -- | These arguments may be passed to certion "Action"
 data Argument = String String
@@ -52,12 +54,14 @@ isAction input =
 hasArgs :: (Action, [String]) -> Either ParseError Command
 hasArgs (cmd, args) =
     case cmd of
-       GetHelp -> Right $ helpArgs args
+       GetHelp     -> Right $ helpArgs args
+       QuitProgram -> Right Quit
 
 knownAction :: String -> Either ParseError Action
 knownAction string =
     case string of
        "help" -> Right GetHelp
+       "quit" -> Right QuitProgram
        _      -> Left UnknownAction
 
 helpArgs :: [String] -> Command
