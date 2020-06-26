@@ -2,9 +2,9 @@ module Main (main) where
 
 import Control.Monad.Except (runExcept)
 import qualified System.Console.Haskeline as HL
-import CommandParser
-import CommandRunners
-import Errors
+import CommandParser (parseInput, commandCompletions)
+import CommandRunners (runCommand)
+import Errors (getErrorString)
 
 -- | Entry point for program.
 main :: IO ()
