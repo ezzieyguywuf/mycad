@@ -9,7 +9,7 @@ import qualified Data.Map as Map
 
 import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
-import Data.Text (Text, pack, unpack, words)
+import Data.Text (Text, pack, unpack, words, strip)
 import Data.Text.Read (rational)
 import Linear.V3
 
@@ -81,7 +81,7 @@ parseCommand (cmd, args) =
 
 parseFloat :: Text -> Either ParseError Float
 parseFloat text = do
-    case rational text of
+    case rational (strip text) of
         Left _         -> Left FloatParseError
         Right (val, _) -> Right val
 
