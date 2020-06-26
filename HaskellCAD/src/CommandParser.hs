@@ -1,6 +1,7 @@
 module CommandParser
 (
   Command (..)
+, ParseError (..)
 , parseInput
 , commandCompletions
 )where

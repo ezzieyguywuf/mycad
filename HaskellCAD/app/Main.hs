@@ -1,8 +1,9 @@
-module Main2 (main) where
+module Main (main) where
 
 import Control.Monad.Except (runExcept)
 import System.Console.Haskeline
 import CommandParser
+import ErrorStrings
 
 -- | Entry point for program.
 main :: IO ()
@@ -24,7 +25,7 @@ exit = outputStrLn "exiting."
 loopAgain :: String -> InputT IO ()
 loopAgain input =
     case runExcept (parseInput input) of
-        Left err -> outputStrLn (show err)  >> mainLoop
+        Left err -> outputStrLn (getErrorString err) >> mainLoop
         Right cmd -> if cmd == Quit
                         then exit
                         else outputStrLn (show cmd) >> mainLoop
