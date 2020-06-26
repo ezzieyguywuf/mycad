@@ -9,6 +9,7 @@ import qualified Data.Map as Map
 
 import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
+import Data.Text (Text, pack, unpack, words)
 
 type Point = Geo.Point Float
 
@@ -25,21 +26,21 @@ data Action = GetHelp
               deriving (Show, Eq)
 
 -- | This maps a string to each of our Action. This is not exported, but it's useful to have here.
-actionMap :: Map.Map String Action
+actionMap :: Map.Map Text Action
 actionMap = Map.fromList
-    [ ("help", GetHelp)
-    , ("quit", QuitProgram)
-    , ("addVertex", MakeVertex)
+    [ (pack "help", GetHelp)
+    , (pack "quit", QuitProgram)
+    , (pack "addVertex", MakeVertex)
     ]
 
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
 parseInput :: String -> Either ParseError Command
-parseInput string = parseStatement string >>= parseAction >>= parseCommand
+parseInput string = parseStatement (pack string) >>= parseAction >>= parseCommand
 
 -- | Provide a list of potential completions for the partial command supplied
 commandCompletions :: String -> [String]
 commandCompletions string = filter (isPrefixOf string) knownCommands
-    where knownCommands = Map.keys actionMap
+    where knownCommands = map unpack $ Map.keys actionMap
 
 -- ===========================================================================
 --                      Private Free Functions and Stuff
@@ -54,13 +55,13 @@ data ParseError = EmptyInput
 -- ===========================================================================
 --                                  Parsers
 -- ===========================================================================
-parseStatement :: String -> Either ParseError [String]
+parseStatement :: Text -> Either ParseError [Text]
 parseStatement input =
-    case words input of
+    case Data.Text.words input of
        []    -> Left EmptyInput
        split -> Right split
 
-parseAction :: [String] -> Either ParseError (Action, [String])
+parseAction :: [Text] -> Either ParseError (Action, [Text])
 parseAction input =
     case uncons input of
        Nothing    -> Left InvalidInput
@@ -68,26 +69,26 @@ parseAction input =
                              Just action -> Right (action, args)
                              Nothing     -> Left UnknownAction
 
-parseCommand :: (Action, [String]) -> Either ParseError Command
+parseCommand :: (Action, [Text]) -> Either ParseError Command
 parseCommand (cmd, args) =
     case cmd of
        GetHelp     -> Right $ parseHelpArgs args
        QuitProgram -> Right Quit
        MakeVertex  -> Right $ parseAddVertexArgs args
 
-parseFloat :: String -> Either ParseError Float
-parseFloat string = undefined
+parseFloat :: Text -> Either ParseError Float
+parseFloat text = undefined
 
-parsePoint :: String -> Either ParseError (Point)
-parsePoint string = undefined
+parsePoint :: Text -> Either ParseError (Point)
+parsePoint text = undefined
 
 -- ===========================================================================
 --                           Argument  Parsers
 -- ===========================================================================
-parseHelpArgs :: [String] -> Command
+parseHelpArgs :: [Text] -> Command
 parseHelpArgs args = case parseAction args of
                      Right (action, _) -> Help (Just action)
                      Left _ -> Help Nothing
 
-parseAddVertexArgs :: [String] -> Command
+parseAddVertexArgs :: [Text] -> Command
 parseAddVertexArgs args = undefined
