@@ -9,7 +9,7 @@ data ParseError = EmptyInput
                    deriving (Show)
 
 -- | An Action that can be performed
-data Action = Help
+data Action = GetHelp
               deriving (Show)
 
 -- | These arguments may be passed to certion "Action"
@@ -38,10 +38,10 @@ isAction input =
 parseArgs :: (Action, [String]) -> Either ParseError (Action, [Argument])
 parseArgs (cmd, args) =
     case cmd of
-       Help -> Right (Help, [])
+       GetHelp -> Right (GetHelp, [])
 
 knownAction :: String -> Either ParseError Action
 knownAction string =
     case string of
-       "help" -> Right Help
+       "help" -> Right GetHelp
        _      -> Left UnknownAction
