@@ -64,23 +64,23 @@ data ParseError = EmptyInput
 parseStatement :: Text -> ParserError [Text]
 parseStatement input =
     case Data.Text.words input of
-       []    -> throwError EmptyInput
-       split -> pure split
+        []    -> throwError EmptyInput
+        split -> pure split
 
 parseAction :: [Text] -> ParserError (Action, [Text])
 parseAction input =
     case uncons input of
-       Nothing    -> throwError InvalidInput
-       Just (cmd,args) -> case Map.lookup cmd actionMap of
-                             Just action -> pure (action, args)
-                             Nothing     -> throwError UnknownAction
+        Nothing    -> throwError InvalidInput
+        Just (cmd,args) -> case Map.lookup cmd actionMap of
+                               Just action -> pure (action, args)
+                               Nothing     -> throwError UnknownAction
 
 parseCommand :: (Action, [Text]) -> ParserError Command
 parseCommand (cmd, args) =
     case cmd of
-       GetHelp     -> pure $ parseHelpArgs args
-       QuitProgram -> pure Quit
-       MakeVertex  -> pure $ parseAddVertexArgs args
+        GetHelp     -> pure $ parseHelpArgs args
+        QuitProgram -> pure Quit
+        MakeVertex  -> pure $ parseAddVertexArgs args
 
 parseFloat :: Text -> ParserError (Float, Text)
 parseFloat text = do
@@ -100,11 +100,13 @@ parsePoint text = do
 --                           Argument  Parsers
 -- ===========================================================================
 parseHelpArgs :: [Text] -> Command
-parseHelpArgs args = case runExcept (parseAction args) of
-                     Right (action, _) -> Help (Just action)
-                     Left _ -> Help Nothing
+parseHelpArgs args = 
+    case runExcept (parseAction args) of
+        Right (action, _) -> Help (Just action)
+        Left _ -> Help Nothing
 
 parseAddVertexArgs :: [Text] -> Command
-parseAddVertexArgs args = case runExcept (parsePoint (Data.Text.concat args)) of
-                              Right point -> AddVertex point
-                              Left _      -> Help (Just MakeVertex)
+parseAddVertexArgs args = 
+    case runExcept (parsePoint (Data.Text.concat args)) of
+        Right point -> AddVertex point
+        Left _      -> Help (Just MakeVertex)
