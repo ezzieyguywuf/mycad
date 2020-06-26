@@ -76,11 +76,11 @@ parseCommand (cmd, args) =
        QuitProgram -> Right Quit
        MakeVertex  -> Right $ parseAddVertexArgs args
 
-parseFloat :: Text -> Either ParseError Float
-parseFloat text = undefined
+_parseFloat :: Text -> Either ParseError Float
+_parseFloat text = undefined
 
-parsePoint :: Text -> Either ParseError (Point)
-parsePoint text = undefined
+_parsePoint :: Text -> Either ParseError (Point)
+_parsePoint text = undefined
 
 -- ===========================================================================
 --                           Argument  Parsers
