@@ -104,7 +104,8 @@ data Entity p = Entity { getVertices :: [Vertex p]
                        , _getTopology :: Topo.Topology
                        } deriving (Show)
 
-type EntityState b a = State (Entity b) a
+-- | The will carry the state of an Entity, parametrized over Geo.Point type @p@
+type EntityState p a = State (Entity p) a
 
 -- ===========================================================================
 --                       Exported Free Functions
