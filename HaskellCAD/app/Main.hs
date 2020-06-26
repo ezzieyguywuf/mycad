@@ -19,38 +19,41 @@ The Except monad (from mtl: again, rather ubiquitous) is used for error handling
 module Main (main) where
 
 -- | External imports
-import Control.Monad.Except (runExcept)
+import Control.Monad.Except (runExceptT)
+import Control.Monad.State  (runState)
 import qualified System.Console.Haskeline as HL
 
 -- | Internal imports
 import CommandParser (parseInput, commandCompletions)
 import CommandRunner (runCommand)
 import Errors (getErrorString)
-import Entity (EntityState, emptyEntityState)
+import Entity (Entity, nullEntity)
 
 -- | Entry point for program.
 main :: IO ()
 main = do
     putStrLn "Welcome to mycad. [Ctrl-d] to exit."
-    HL.runInputT settings (mainLoop emptyEntityState)
+    HL.runInputT settings (mainLoop nullEntity)
 
 -- | Exit gracefully
 exit :: HL.InputT IO ()
 exit = HL.outputStrLn "exiting."
 
 -- | Entry point for main loop
-mainLoop :: EntityState p a -> HL.InputT IO ()
-mainLoop estate = do
+mainLoop :: Entity p -> HL.InputT IO ()
+mainLoop entity = do
     input <- HL.getInputLine "mycad> "
-    maybe exit (loopAgain estate) input
+    maybe exit (loopAgain entity) input
 
 -- | Determine if we should loop again or bail out.
-loopAgain :: EntityState p a -> String -> HL.InputT IO ()
-loopAgain estate input =
-    case runExcept (parseInput input >>= runCommand) of
-        Left  err        -> HL.outputStrLn (getErrorString err) >> mainLoop estate
-        Right (Just ret) -> HL.outputStrLn ret >> mainLoop estate
-        Right Nothing    -> exit
+loopAgain :: Entity p -> String -> HL.InputT IO ()
+loopAgain entity input =
+    let estate    = runExceptT (parseInput input >>= runCommand entity)
+        (check, entity') = runState estate entity
+    in case check of
+           Left  err        -> HL.outputStrLn (getErrorString err) >> mainLoop entity'
+           Right (Just ret) -> HL.outputStrLn ret >> mainLoop entity'
+           Right Nothing    -> exit
 
 -- ----------------------------------------------------------------------------
 --                   Haskeline-Specific Setup Stuff. You can probably ignore

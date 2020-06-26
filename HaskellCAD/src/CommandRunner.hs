@@ -25,8 +25,10 @@ module CommandRunner
   runCommand
 )where
 
+-- | Internal imports
 import CommandParser (Command(..), Action(..))
-import Errors (Error)
+import Errors (ErrorT)
+import Entity (Entity)
 
 -- | This will execute the "Command".
 --
@@ -35,12 +37,12 @@ import Errors (Error)
 --   empty or a message
 --
 --   Error-handling is done using the "Except" monad.
-runCommand :: Command -> Error (Maybe String)
-runCommand cmd =
+runCommand :: Entity p -> Command -> ErrorT p (Maybe String)
+runCommand entity cmd = do
     case cmd of
-        Help arg -> pure . Just $ getHelpString arg
+        Help arg -> pure $ (Just $ getHelpString arg)
         Quit     -> pure Nothing
-        _        -> pure . Just $ "There is no runner for " <> show cmd
+        _        -> pure $ (Just $ "There is no runner for " <> show cmd)
 
 getHelpString :: Maybe Action -> String
 getHelpString maction =

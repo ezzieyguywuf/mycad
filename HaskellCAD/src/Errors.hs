@@ -13,15 +13,23 @@ monad.
 module Errors
 (
 -- * Data Types
-  Error
+  ErrorT
 , MyError(..)
 -- * Exported Functions
 , getErrorString
 )where
 
-import Control.Monad.Except (Except)
+-- | External imports
+import Control.Monad.Except (ExceptT)
 
-type Error a = Except MyError a
+-- | Internal imports
+import Entity (EntityState)
+
+-- This error transformer allows to carry the EntityState while still managing
+-- errors in the Except monad.
+-- @p@ is the type of the "Geometry.Point" in the "EntityState"
+-- @a@ is the return type
+type ErrorT p a = ExceptT MyError (EntityState p) a
 
 -- | Indicates that there was an error in MyCAD
 data MyError = EmptyInput
