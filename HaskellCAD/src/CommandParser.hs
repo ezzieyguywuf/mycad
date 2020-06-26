@@ -32,7 +32,7 @@ actionMap = Map.fromList
 
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
 parseInput :: String -> Either ParseError Command
-parseInput string = isStatement string >>= isAction >>= hasArgs
+parseInput string = parseStatement string >>= parseAction >>= hasArgs
 
 -- | Provide a list of potential completions for the partial command supplied
 commandCompletions :: String -> [String]
@@ -49,14 +49,14 @@ data ParseError = EmptyInput
                  | UnknownAction
                    deriving (Show)
 
-isStatement :: String -> Either ParseError [String]
-isStatement input =
+parseStatement :: String -> Either ParseError [String]
+parseStatement input =
     case words input of
        []    -> Left EmptyInput
        split -> Right split
 
-isAction :: [String] -> Either ParseError (Action, [String])
-isAction input =
+parseAction :: [String] -> Either ParseError (Action, [String])
+parseAction input =
     case uncons input of
        Nothing    -> Left InvalidInput
        Just (cmd,args) -> knownAction cmd >>= \cmd' -> Right (cmd', args)
@@ -75,7 +75,7 @@ knownAction string =
        Nothing     -> Left UnknownAction
 
 helpArgs :: [String] -> Command
-helpArgs args = case isAction args of
+helpArgs args = case parseAction args of
                      Right (action, _) -> Help (Just action)
                      Left _ -> Help Nothing
 
