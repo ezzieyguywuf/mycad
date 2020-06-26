@@ -12,6 +12,11 @@ data Command = Help (Maybe Action)
              | Quit
                deriving (Show, Eq)
 
+-- | An Action that can be performed. This is not exported, it is just useful to place it here
+data Action = GetHelp
+            | QuitProgram
+              deriving (Show, Eq)
+
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
 parseInput :: String -> Either ParseError Command
 parseInput string = isStatement string >>= isAction >>= hasArgs
@@ -29,11 +34,6 @@ data ParseError = EmptyInput
                  | InvalidInput
                  | UnknownAction
                    deriving (Show)
-
--- | An Action that can be performed
-data Action = GetHelp
-            | QuitProgram
-              deriving (Show, Eq)
 
 -- | These arguments may be passed to certion "Action"
 data Argument = String String
