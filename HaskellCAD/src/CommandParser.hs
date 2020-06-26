@@ -6,12 +6,11 @@ module CommandParser
 )where
 
 import Control.Monad.Except (Except, throwError, runExcept, catchError)
---import Control.Applicative ((<|>))
 import qualified Data.Map as Map
 
 import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
-import Data.Text (Text, pack, unpack, words, strip)
+import Data.Text (Text, pack, unpack, words, strip, concat)
 import Data.Text.Read (rational)
 import Linear.V3
 
@@ -89,8 +88,8 @@ parseFloat text = do
         Left _    -> throwError FloatParseError
         Right val -> pure val
 
-_parsePoint :: Text -> ParserError (Point)
-_parsePoint text = do
+parsePoint :: Text -> ParserError Point
+parsePoint text = do
     (x, t0) <- parseFloat text
     (y, t1) <- parseFloat t0
     (z, t2) <- parseFloat t1
@@ -106,4 +105,6 @@ parseHelpArgs args = case runExcept (parseAction args) of
                      Left _ -> Help Nothing
 
 parseAddVertexArgs :: [Text] -> Command
-parseAddVertexArgs args = undefined
+parseAddVertexArgs args = case runExcept (parsePoint (Data.Text.concat args)) of
+                              Right point -> AddVertex point
+                              Left _      -> Help (Just MakeVertex)
