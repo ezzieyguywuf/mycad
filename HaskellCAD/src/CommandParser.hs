@@ -5,7 +5,7 @@ module CommandParser
 , commandCompletions
 )where
 
-import Control.Monad.Except (Except, throwError, runExcept, catchError)
+import Control.Monad.Except (Except, throwError, catchError)
 import qualified Data.Map as Map
 
 import Data.List (uncons, isPrefixOf)
@@ -78,9 +78,9 @@ parseAction input =
 parseCommand :: (Action, [Text]) -> ParserError Command
 parseCommand (cmd, args) =
     case cmd of
-        GetHelp     -> pure $ parseHelpArgs args
+        GetHelp     -> parseHelpArgs args
         QuitProgram -> pure Quit
-        MakeVertex  -> pure $ parseAddVertexArgs args
+        MakeVertex  -> parseAddVertexArgs args
 
 parseFloat :: Text -> ParserError (Float, Text)
 parseFloat text = do
@@ -99,15 +99,15 @@ parsePoint text = do
 -- ===========================================================================
 --                           Argument  Parsers
 -- ===========================================================================
-parseHelpArgs :: [Text] -> Command
-parseHelpArgs args = 
-    case runExcept (parseAction args) of
-        Right (action, _) -> Help (Just action)
-        Left _ -> Help Nothing
+parseHelpArgs :: [Text] -> ParserError Command
+parseHelpArgs args = do
+    (action, _) <- parseAction args
+    pure $ Help (Just action)
+    `catchError` \_ -> (pure $ Help Nothing)
 
-parseAddVertexArgs :: [Text] -> Command
-parseAddVertexArgs args = 
-    case runExcept (parsePoint args') of
-        Right point -> AddVertex point
-        Left _      -> Help (Just MakeVertex)
-    where args' = intercalate (pack " ") args
+parseAddVertexArgs :: [Text] -> ParserError Command
+parseAddVertexArgs args = do
+    let args' = intercalate (pack " ") args
+    point <- parsePoint args'
+    pure $ AddVertex point
+    `catchError` \_ -> (pure $ Help (Just MakeVertex))
