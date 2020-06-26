@@ -11,6 +11,7 @@ import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
 import Data.Text (Text, pack, unpack, words)
 import Data.Text.Read (rational)
+import Linear.V3
 
 type Point = Geo.Point Float
 
@@ -78,14 +79,16 @@ parseCommand (cmd, args) =
        QuitProgram -> Right Quit
        MakeVertex  -> Right $ parseAddVertexArgs args
 
-_parseFloat :: Text -> Either ParseError Float
-_parseFloat text = do
+parseFloat :: Text -> Either ParseError Float
+parseFloat text = do
     case rational text of
         Left _         -> Left FloatParseError
         Right (val, _) -> Right val
 
 _parsePoint :: Text -> Either ParseError (Point)
-_parsePoint text = undefined
+_parsePoint text = do
+    x <- parseFloat text
+    pure (V3 x x x)
 
 -- ===========================================================================
 --                           Argument  Parsers
