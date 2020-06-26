@@ -13,11 +13,16 @@ interface.
 
 Haskeline itself seems pretty safe as a dependency - I've heard that even the
 ubiquitous ghci using Haskeline behind-the-scene somewhere.
+
+The Except monad (from mtl: again, rather ubiquitous) is used for error handling.
 -}
 module Main (main) where
 
+-- | External imports
 import Control.Monad.Except (runExcept)
 import qualified System.Console.Haskeline as HL
+
+-- | Internal imports
 import CommandParser (parseInput, commandCompletions)
 import CommandRunners (runCommand)
 import Errors (getErrorString)
