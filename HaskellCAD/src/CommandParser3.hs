@@ -2,16 +2,25 @@ module CommandParser3 where
 
 import Data.List (uncons)
 
-data ParserErrer = EmptyInput
-                 | InvalidCommand
+data ParseError = EmptyInput
+                 | InvalidInput
+                 | UnknownCommand
                    deriving (Show)
+
+data Command = Help
+               deriving (Show)
 
 isStatement :: String -> Either ParseError [String]
 isStatement input = case words input of
                        []    -> Left EmptyInput
                        split -> Right split
 
-isCommand :: [String] -> Either ParserError (Command, [String])
+isCommand :: [String] -> Either ParseError (Command, [String])
 isCommand input = case uncons input of
-                      Nothing    -> Left InvalidCommand
-                      Just split -> Right split
+                      Nothing    -> Left InvalidInput
+                      Just (cmd,args) -> knownCommand cmd >>= \cmd' -> Right (cmd', args)
+
+knownCommand :: String -> Either ParseError Command
+knownCommand string = case string of
+                          "help" -> Right Help
+                          _      -> Left UnknownCommand
