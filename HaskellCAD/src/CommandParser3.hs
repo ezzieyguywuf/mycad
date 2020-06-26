@@ -2,10 +2,10 @@ module CommandParser3
 (
   Command (..)
 , parseInput
-, knownCommands
+, commandCompletions
 )where
 
-import Data.List (uncons)
+import Data.List (uncons, isPrefixOf)
 
 -- | A "Command" includes all the information necessary to execute an "Action"
 data Command = Help (Maybe Action)
@@ -14,6 +14,10 @@ data Command = Help (Maybe Action)
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
 parseInput :: String -> Either ParseError Command
 parseInput string = isStatement string >>= isAction >>= hasArgs
+
+commandCompletions :: String -> [String]
+commandCompletions string = filter (isPrefixOf string) knownCommands
+    where knownCommands = ["help"]
 
 -- ===========================================================================
 --                      Private Free Functions and Stuff
@@ -32,9 +36,6 @@ data Action = GetHelp
 -- | These arguments may be passed to certion "Action"
 data Argument = String String
                 deriving (Show)
-
-knownCommands :: [String]
-knownCommands = ["help"]
 
 isStatement :: String -> Either ParseError [String]
 isStatement input =

@@ -1,7 +1,5 @@
 module Main2 (main) where
 
-import Data.List (isPrefixOf)
-
 import System.Console.Haskeline
 import CommandParser3
 
@@ -33,7 +31,6 @@ settings = Settings {
 
 -- | Provides tab-completion to Haskeline's InputT
 completer :: String -> IO [Completion]
-completer s = pure $ map makeComplete commands
+completer s = pure $ map makeComplete (commandCompletions s)
     where makeComplete :: String -> Completion
           makeComplete s = Completion s s False
-          commands = filter (isPrefixOf s) knownCommands
