@@ -10,7 +10,7 @@ import qualified Data.Map as Map
 
 import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
-import Data.Text (Text, pack, unpack, words, strip, concat)
+import Data.Text (Text, pack, unpack, words, strip, intercalate)
 import Data.Text.Read (rational)
 import Linear.V3
 
@@ -107,6 +107,7 @@ parseHelpArgs args =
 
 parseAddVertexArgs :: [Text] -> Command
 parseAddVertexArgs args = 
-    case runExcept (parsePoint (Data.Text.concat args)) of
+    case runExcept (parsePoint args') of
         Right point -> AddVertex point
         Left _      -> Help (Just MakeVertex)
+    where args' = intercalate (pack " ") args
