@@ -1,7 +1,6 @@
 module CommandParser
 (
   Command (..)
-, ParseError (..)
 , parseInput
 , commandCompletions
 )where
@@ -14,6 +13,8 @@ import qualified Geometry as Geo
 import Data.Text (Text, pack, unpack, words, strip, intercalate)
 import Data.Text.Read (rational)
 import Linear.V3
+
+import Errors (ParseError(..))
 
 type Point = Geo.Point Float
 type ParserError a = Except ParseError a
@@ -46,18 +47,6 @@ parseInput string = parseStatement (pack string) >>= parseAction >>= parseComman
 commandCompletions :: String -> [String]
 commandCompletions string = filter (isPrefixOf string) knownCommands
     where knownCommands = map unpack $ Map.keys actionMap
-
--- ===========================================================================
---                      Private Free Functions and Stuff
--- ===========================================================================
-
--- | Indicates that there was an error parsing a user's input
-data ParseError = EmptyInput
-                 | InvalidInput
-                 | UnknownAction
-                 | FloatParseError
-                 | PointParseError
-                   deriving (Show)
 
 -- ===========================================================================
 --                                  Parsers

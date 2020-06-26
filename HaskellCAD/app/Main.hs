@@ -3,7 +3,7 @@ module Main (main) where
 import Control.Monad.Except (runExcept)
 import System.Console.Haskeline
 import CommandParser
-import ErrorStrings
+import Errors
 
 -- | Entry point for program.
 main :: IO ()
