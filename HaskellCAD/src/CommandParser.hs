@@ -1,7 +1,27 @@
+{-|
+Module      : CommandParser
+Description : Parses string commands to be used in the MyCAD application
+Copyright   : (c) Wolfgang E. Sanyer, 2020
+License     : MPL2
+Maintainer  : WolfgangESanyer@Gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module provides a string-parser which produces a "Command" to be used by
+the MyCAD application.
+
+This parser in somewhat naïve, and is likely to be updated to use megaparsec at
+some point in the future.
+
+As it stands, it uses the Except monad to handle errors, and typically falls
+back to a "Help" command when things go wrong.
+-}
 module CommandParser
 (
+-- * Data Types
   Command (..)
 , Action  (..)
+-- * Exported Functions
 , parseInput
 , commandCompletions
 )where
@@ -39,17 +59,23 @@ actionMap = Map.fromList
     , (pack "addVertex", MakeVertex)
     ]
 
--- | Takes a single "String", probably from IO, and returns a Command that can later be executed
+-- | The input to this function is expected to be the raw input from the User.
+--
+--   This function provides error-handling using the "Except" monad.
 parseInput :: String -> Error Command
 parseInput string = parseStatement (pack string) >>= parseAction >>= parseCommand
 
--- | Provide a list of potential completions for the partial command supplied
+-- | Given some string, determines if this partially matches any of our known "Command".
+--
+--   There's an opportunity to allow for fuzzy matching, but that's not
+--   currently implemented. As it stands, the list of "String" that are
+--   returned are suitable to use, say, in Haskelines tab-completion
 commandCompletions :: String -> [String]
 commandCompletions string = filter (isPrefixOf string) knownCommands
     where knownCommands = map unpack $ Map.keys actionMap
 
 -- ===========================================================================
---                                  Parsers
+--                     Parsers - these are not exported
 -- ===========================================================================
 parseStatement :: Text -> Error [Text]
 parseStatement input =
