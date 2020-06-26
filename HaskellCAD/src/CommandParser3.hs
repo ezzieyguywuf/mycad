@@ -22,7 +22,7 @@ data Command = Help (Maybe Action)
 
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
 parseInput :: String -> Either ParseError Command
-parseInput = undefined
+parseInput string = isStatement string >>= isAction >>= hasArgs
 
 isStatement :: String -> Either ParseError [String]
 isStatement input =
