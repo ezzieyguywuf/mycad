@@ -19,7 +19,7 @@ mainLoop = do
 loopAgain :: String -> InputT IO ()
 loopAgain input =
     case parseInput input of
-        Left err -> outputStrLn (show err)
+        Left err -> outputStrLn (show err)  >> mainLoop
         Right cmd -> outputStrLn (show cmd) >> mainLoop
 
 -- | Provides setting information to InputT
