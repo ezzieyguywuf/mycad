@@ -10,6 +10,7 @@ import qualified Data.Map as Map
 import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
 import Data.Text (Text, pack, unpack, words)
+import Data.Text.Read (rational)
 
 type Point = Geo.Point Float
 
@@ -50,6 +51,7 @@ commandCompletions string = filter (isPrefixOf string) knownCommands
 data ParseError = EmptyInput
                  | InvalidInput
                  | UnknownAction
+                 | FloatParseError
                    deriving (Show)
 
 -- ===========================================================================
@@ -77,7 +79,10 @@ parseCommand (cmd, args) =
        MakeVertex  -> Right $ parseAddVertexArgs args
 
 _parseFloat :: Text -> Either ParseError Float
-_parseFloat text = undefined
+_parseFloat text = do
+    case rational text of
+        Left _         -> Left FloatParseError
+        Right (val, _) -> Right val
 
 _parsePoint :: Text -> Either ParseError (Point)
 _parsePoint text = undefined
