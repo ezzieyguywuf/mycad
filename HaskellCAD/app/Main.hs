@@ -12,15 +12,15 @@ main = do
     putStrLn "Welcome to mycad. [Ctrl-d] to exit."
     runInputT settings mainLoop
 
+-- | Exit gracefully
+exit :: InputT IO ()
+exit = outputStrLn "exiting."
+
 -- | Entry point for main loop
 mainLoop :: InputT IO ()
 mainLoop = do
     input <- getInputLine "mycad> "
     maybe exit loopAgain input
-
--- | Exit gracefully
-exit :: InputT IO ()
-exit = outputStrLn "exiting."
 
 -- | Determine if we should loop again or bail out.
 loopAgain :: String -> InputT IO ()
