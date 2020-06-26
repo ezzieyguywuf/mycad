@@ -1,31 +1,26 @@
+module Main2 (main) where
+
 import System.Console.Haskeline
-import Entity
 import CommandParser
-import CommandRunner
 
-type InputIO a = InputT IO a
-
--- | Run Haskeline
+-- | Entry point for program.
 main :: IO ()
-main = runInputT settings (loop nullEntity)
+main = do
+    putStrLn "Welcome to mycad. [Ctrl-d] to exit."
+    runInputT settings mainLoop
 
--- | Keep getting input from User until quit
-loop :: Entity a -> InputIO ()
-loop entity = getInputLine ">>> " >>= maybe (pure ()) (parseInput entity)
+-- | Entry point for main loop
+mainLoop :: InputT IO ()
+mainLoop = do
+    input <- getInputLine "mycad> "
+    maybe (outputStrLn "exiting.") loopAgain input
 
-parseInput :: Entity a -> String -> InputIO ()
-parseInput entity input =
-    case input of
-       "quit" -> pure ()
-       input -> evaluateCommand input entity >>= loop
-
--- | Evaluation : handle each line user inputs
-evaluateCommand :: String -> Entity a -> InputT IO (Entity a)
-evaluateCommand input entity = do
-    let output = parseCommand input >>= runCommand entity
-    case output of
-        Left msg -> outputStrLn msg >> pure entity
-        Right (entity') -> pure entity'
+-- | Determine if we should loop again or bail out.
+loopAgain :: String -> InputT IO ()
+loopAgain input =
+    case parseInput input of
+        Left err -> outputStrLn (show err)  >> mainLoop
+        Right cmd -> outputStrLn (show cmd) >> mainLoop
 
 -- | Provides setting information to InputT
 settings :: Settings IO
@@ -37,7 +32,6 @@ settings = Settings {
 
 -- | Provides tab-completion to Haskeline's InputT
 completer :: String -> IO [Completion]
-completer s = pure $ map makeComplete (filterKnown s)
+completer s = pure $ map makeComplete (commandCompletions s)
     where makeComplete :: String -> Completion
           makeComplete s = Completion s s False
-
