@@ -6,7 +6,7 @@ module CommandParser
 , commandCompletions
 )where
 
-import Control.Monad.Except (Except, throwError, catchError)
+import Control.Monad.Except (throwError, catchError)
 import qualified Data.Map as Map
 
 import Data.List (uncons, isPrefixOf)
@@ -15,10 +15,9 @@ import Data.Text (Text, pack, unpack, words, strip, intercalate)
 import Data.Text.Read (rational)
 import Linear.V3
 
-import Errors (ParseError(..))
+import Errors (Error, MyError(..))
 
 type Point = Geo.Point Float
-type ParserError a = Except ParseError a
 
 -- | A "Command" includes all the information necessary to execute an "Action"
 data Command = Help (Maybe Action)
@@ -41,7 +40,7 @@ actionMap = Map.fromList
     ]
 
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
-parseInput :: String -> ParserError Command
+parseInput :: String -> Error Command
 parseInput string = parseStatement (pack string) >>= parseAction >>= parseCommand
 
 -- | Provide a list of potential completions for the partial command supplied
@@ -52,13 +51,13 @@ commandCompletions string = filter (isPrefixOf string) knownCommands
 -- ===========================================================================
 --                                  Parsers
 -- ===========================================================================
-parseStatement :: Text -> ParserError [Text]
+parseStatement :: Text -> Error [Text]
 parseStatement input =
     case Data.Text.words input of
         []    -> throwError EmptyInput
         split -> pure split
 
-parseAction :: [Text] -> ParserError (Action, [Text])
+parseAction :: [Text] -> Error (Action, [Text])
 parseAction input =
     case uncons input of
         Nothing    -> throwError InvalidInput
@@ -66,20 +65,20 @@ parseAction input =
                                Just action -> pure (action, args)
                                Nothing     -> throwError UnknownAction
 
-parseCommand :: (Action, [Text]) -> ParserError Command
+parseCommand :: (Action, [Text]) -> Error Command
 parseCommand (cmd, args) =
     case cmd of
         GetHelp     -> parseHelpArgs args
         QuitProgram -> pure Quit
         MakeVertex  -> parseAddVertexArgs args
 
-parseFloat :: Text -> ParserError (Float, Text)
+parseFloat :: Text -> Error (Float, Text)
 parseFloat text = do
     case rational (strip text) of
         Left _    -> throwError FloatParseError
         Right val -> pure val
 
-parsePoint :: Text -> ParserError Point
+parsePoint :: Text -> Error Point
 parsePoint text = do
     (x, t0) <- parseFloat text
     (y, t1) <- parseFloat t0
@@ -90,13 +89,13 @@ parsePoint text = do
 -- ===========================================================================
 --                           Argument  Parsers
 -- ===========================================================================
-parseHelpArgs :: [Text] -> ParserError Command
+parseHelpArgs :: [Text] -> Error Command
 parseHelpArgs args = do
     (action, _) <- parseAction args
     pure $ Help (Just action)
     `catchError` \_ -> (pure $ Help Nothing)
 
-parseAddVertexArgs :: [Text] -> ParserError Command
+parseAddVertexArgs :: [Text] -> Error Command
 parseAddVertexArgs args = do
     let args' = intercalate (pack " ") args
     point <- parsePoint args'

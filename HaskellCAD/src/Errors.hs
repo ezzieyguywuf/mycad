@@ -1,10 +1,15 @@
 module Errors
 (
   getErrorString
-, ParseError (..)
+, Error
+, MyError(..)
 )where
 
-getErrorString :: ParseError -> String
+import Control.Monad.Except (Except)
+
+type Error a = Except MyError a
+
+getErrorString :: MyError -> String
 getErrorString err =
     case err of
         EmptyInput      -> emptyInput
@@ -30,10 +35,10 @@ pointParseError = "Expecting three consective Float, which will be (x,y,z) for a
 -- ===========================================================================
 
 -- | Indicates that there was an error parsing a user's input
-data ParseError = EmptyInput
-                 | InvalidInput
-                 | UnknownAction
-                 | FloatParseError
-                 | PointParseError
-                   deriving (Show)
-
+data MyError = EmptyInput
+              | InvalidInput
+              | UnknownAction
+              | FloatParseError
+              | PointParseError
+              | NoRunnerAvailable
+              deriving (Show)

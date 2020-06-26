@@ -4,12 +4,14 @@ module CommandRunners
 )where
 
 import CommandParser (Command(..), Action(..))
+import Errors (Error)
 
-runCommand :: Command -> String
+runCommand :: Command -> Error (Maybe String)
 runCommand cmd =
     case cmd of
-        Help arg -> getHelpString arg
-        _        -> "There is no runner for " <> show cmd
+        Help arg -> pure . Just $ getHelpString arg
+        Quit     -> pure Nothing
+        _        -> pure . Just $ "There is no runner for " <> show cmd
 
 getHelpString :: Maybe Action -> String
 getHelpString maction =

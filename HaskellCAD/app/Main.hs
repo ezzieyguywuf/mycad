@@ -25,11 +25,10 @@ exit = outputStrLn "exiting."
 -- | Determine if we should loop again or bail out.
 loopAgain :: String -> InputT IO ()
 loopAgain input =
-    case runExcept (parseInput input) of
-        Left err -> outputStrLn (getErrorString err) >> mainLoop
-        Right cmd -> if cmd == Quit
-                        then exit
-                        else outputStrLn (runCommand cmd) >> mainLoop
+    case runExcept (parseInput input >>= runCommand) of
+        Left  err        -> outputStrLn (getErrorString err) >> mainLoop
+        Right (Just ret) -> outputStrLn ret >> mainLoop
+        Right Nothing    -> exit
 
 -- | Provides setting information to InputT
 settings :: Settings IO
