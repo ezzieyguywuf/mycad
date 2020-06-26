@@ -5,14 +5,17 @@ import Data.List (isPrefixOf)
 import System.Console.Haskeline
 import CommandParser3
 
+-- | Entry point for program.
 main :: IO ()
 main = runInputT settings mainLoop
 
+-- | Entry point for main loop
 mainLoop :: InputT IO ()
 mainLoop = do
     input <- getInputLine "mycad> "
     maybe (outputStrLn "exiting.") loopAgain input
 
+-- | Determine if we should loop again or bail out.
 loopAgain :: String -> InputT IO ()
 loopAgain input =
     case parseInput input of
