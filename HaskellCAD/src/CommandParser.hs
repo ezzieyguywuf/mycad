@@ -66,14 +66,14 @@ parseAction input =
 parseCommand :: (Action, [String]) -> Either ParseError Command
 parseCommand (cmd, args) =
     case cmd of
-       GetHelp     -> Right $ helpArgs args
+       GetHelp     -> Right $ parseHelpArgs args
        QuitProgram -> Right Quit
-       MakeVertex  -> Right $ addVertexArgs args
+       MakeVertex  -> Right $ parseAddVertexArgs args
 
-helpArgs :: [String] -> Command
-helpArgs args = case parseAction args of
+parseHelpArgs :: [String] -> Command
+parseHelpArgs args = case parseAction args of
                      Right (action, _) -> Help (Just action)
                      Left _ -> Help Nothing
 
-addVertexArgs :: [String] -> Command
-addVertexArgs args = undefined
+parseAddVertexArgs :: [String] -> Command
+parseAddVertexArgs args = undefined
