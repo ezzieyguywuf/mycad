@@ -6,15 +6,18 @@ module CommandParser
 )where
 
 import Data.List (uncons, isPrefixOf)
+import qualified Geometry as Geo
 
 -- | A "Command" includes all the information necessary to execute an "Action"
 data Command = Help (Maybe Action)
              | Quit
+             | AddVertex (Geo.Point Float)
                deriving (Show, Eq)
 
 -- | An Action that can be performed. This is not exported, it is just useful to place it here
 data Action = GetHelp
             | QuitProgram
+            | MakeVertex
               deriving (Show, Eq)
 
 -- | Takes a single "String", probably from IO, and returns a Command that can later be executed
