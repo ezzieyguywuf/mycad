@@ -35,10 +35,6 @@ data ParseError = EmptyInput
                  | UnknownAction
                    deriving (Show)
 
--- | These arguments may be passed to certion "Action"
-data Argument = String String
-                deriving (Show)
-
 isStatement :: String -> Either ParseError [String]
 isStatement input =
     case words input of
