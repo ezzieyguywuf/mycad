@@ -10,10 +10,12 @@ import qualified Data.Map as Map
 import Data.List (uncons, isPrefixOf)
 import qualified Geometry as Geo
 
+type Point = Geo.Point Float
+
 -- | A "Command" includes all the information necessary to execute an "Action"
 data Command = Help (Maybe Action)
              | Quit
-             | AddVertex (Geo.Point Float)
+             | AddVertex Point
                deriving (Show, Eq)
 
 -- | An Action that can be performed. This is not exported, it is just useful to place it here
@@ -72,6 +74,9 @@ parseCommand (cmd, args) =
        GetHelp     -> Right $ parseHelpArgs args
        QuitProgram -> Right Quit
        MakeVertex  -> Right $ parseAddVertexArgs args
+
+parsePoint :: String -> Either ParseError (Point)
+parsePoint = undefined
 
 -- ===========================================================================
 --                           Argument  Parsers
