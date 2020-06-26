@@ -2,6 +2,7 @@ module CommandParser3
 (
   Command (..)
 , parseInput
+, knownCommands
 )where
 
 import Data.List (uncons)
@@ -31,6 +32,9 @@ data Action = GetHelp
 -- | These arguments may be passed to certion "Action"
 data Argument = String String
                 deriving (Show)
+
+knownCommands :: [String]
+knownCommands = ["help"]
 
 isStatement :: String -> Either ParseError [String]
 isStatement input =
