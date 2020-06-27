@@ -1,6 +1,6 @@
-name:                HaskellCAD
+name:                Geometry
 version:             0.1.0.0
-github:              "githubuser/HaskellCAD"
+github:              "githubuser/Geometry"
 license:             MPL-2.0
 author:              "Wolfgang E. Sanyer"
 maintainer:          "WolfgangESanyer@Gmail.com"
@@ -25,32 +25,12 @@ dependencies:
 - QuickCheck
 - containers
 - prettyprinter
-- fgl
-- mtl
 - linear
-- Geometry
-- Topology
 
 library:
   source-dirs: src
   exposed-modules:
-      - Entity
-      - CommandParser
-      - CommandRunner
-      - Errors
-
-executables:
-  HaskellCAD:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - HaskellCAD
-    - process
-    - haskeline >= 0.8.0.0
+      - Geometry
 
 tests:
   HaskellCAD-test:
@@ -61,5 +41,5 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - HaskellCAD
+    - Geometry
     - hspec
