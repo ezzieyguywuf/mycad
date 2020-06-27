@@ -348,7 +348,7 @@ prettyPrintNodeWithNeighbors t i = h <> pretty ":" <+> ns
 
 prettyPrintMany ::
     Topology -> (Topology -> a -> Doc ann) -> (Topology -> [a]) -> Doc ann
-prettyPrintMany t f g = vsep $ map (f t) $ g t
+prettyPrintMany topo printer getter = vsep $ map (printer topo) $ getter topo
 
 prettyPrintNeighbors :: Int -> Topology -> Doc ann
 prettyPrintNeighbors i t = align doc
