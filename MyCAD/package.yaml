@@ -21,9 +21,6 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
-- Entity
-- Geometry
-- Topology
 - containers
 - linear
 - vector
@@ -32,27 +29,29 @@ dependencies:
 
 executables:
   gui-exe:
-    main:                GuiMain.hs
-    source-dirs:
-    - app
+    main: Main.hs
+    source-dirs: GUI
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - GUI
     - GLFW-b
     - gl
+    - ansi-terminal
     - JuicyPixels
-    - GUI
+
   tui-exe:
-    main:                TuiMain.hs
-    source-dirs:
-    - app
+    main: Main.hs
+    source-dirs: TUI
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - haskeline
-    - ansi-terminal
     - TUI
+    - haskeline
+    - Entity
+    - Geometry
+    - Topology

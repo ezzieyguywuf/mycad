@@ -16,7 +16,7 @@ ubiquitous ghci using Haskeline behind-the-scene somewhere.
 
 The Except monad (from mtl: again, rather ubiquitous) is used for error handling.
 -}
-module TuiMain (main) where
+module Main (main) where
 
 -- | External imports
 import Control.Monad.Except (runExcept)
