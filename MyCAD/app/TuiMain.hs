@@ -1,5 +1,5 @@
 {-|
-Module      : Main
+Module      : TuiMain
 Description : The main executable for MyCAD
 Copyright   : (c) Wolfgang E. Sanyer, 2020
 License     : MPL2
@@ -16,7 +16,7 @@ ubiquitous ghci using Haskeline behind-the-scene somewhere.
 
 The Except monad (from mtl: again, rather ubiquitous) is used for error handling.
 -}
-module Main (main) where
+module TuiMain (main) where
 
 -- | External imports
 import Control.Monad.Except (runExcept)

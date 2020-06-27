@@ -29,10 +29,10 @@ resolver: lts-15.14
 #   - auto-update
 #   - wai
 packages:
-- TUI
-- GUI
+- MyCAD
 - Geometry
 - Topology
+- Entity
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
@@ -40,6 +40,8 @@ packages:
 extra-deps:
   - haskeline-0.8.0.0
   - repline-0.3.0.0
+  - MyCAD/GUI
+  - MyCAD/TUI
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a

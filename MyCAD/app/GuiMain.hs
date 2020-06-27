@@ -1,3 +1,4 @@
+module GuiMain (main) where
 -- base
 import Control.Monad (when)
 import Control.Exception (bracket)
