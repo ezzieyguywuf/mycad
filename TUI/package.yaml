@@ -1,6 +1,6 @@
-name:                HaskellCAD
+name:                TUI
 version:             0.1.0.0
-github:              "githubuser/HaskellCAD"
+github:              "githubuser/TUI"
 license:             MPL-2.0
 author:              "Wolfgang E. Sanyer"
 maintainer:          "WolfgangESanyer@Gmail.com"
@@ -40,7 +40,7 @@ library:
       - Errors
 
 executables:
-  HaskellCAD:
+  tui-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -48,12 +48,12 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - HaskellCAD
+    - TUI
     - process
     - haskeline >= 0.8.0.0
 
 tests:
-  HaskellCAD-test:
+  tui-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -61,5 +61,5 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - HaskellCAD
+    - TUI
     - hspec

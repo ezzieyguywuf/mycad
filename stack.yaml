@@ -29,7 +29,7 @@ resolver: lts-15.14
 #   - auto-update
 #   - wai
 packages:
-- HaskellCAD
+- TUI
 - GUI
 - Geometry
 - Topology
