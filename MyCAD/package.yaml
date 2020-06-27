@@ -36,7 +36,6 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - GUI
     - GLFW-b
     - gl
     - ansi-terminal
@@ -50,7 +49,6 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - TUI
     - haskeline
     - Entity
     - Geometry
