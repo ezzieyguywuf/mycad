@@ -37,6 +37,7 @@ library:
       - Entity
       - Geometry
       - Topology
+      - Errors
 
 executables:
   HaskellCAD:
