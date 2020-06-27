@@ -25,6 +25,14 @@ dependencies:
 - mtl
 
 executables:
+  MyCAD-exe:
+    main: Main.hs
+    source-dirs: MyCAD
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
   gui-exe:
     main: Main.hs
     source-dirs: GUI
