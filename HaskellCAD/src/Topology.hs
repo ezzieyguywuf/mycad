@@ -50,11 +50,8 @@ module Topology
   -- Means that the 'Vertex' @V0@ has __no__ entities ('Edge' or otherwise)
   -- pointing in to it, and a single 'Edge' named @E0@ pointing out of it.
 , prettyPrintVertex
-, prettyPrintVertices
 , prettyPrintEdge
-, prettyPrintEdges
 , prettyPrintFace
-, prettyPrintFaces
 , prettyPrintTopology
 )where
 
@@ -244,29 +241,20 @@ getFaces t = map Face $ getNodes isFace t
 prettyPrintVertex :: Topology -> Vertex -> Doc ann
 prettyPrintVertex t (Vertex i) = prettyPrintNodeWithNeighbors t i
 
-prettyPrintVertices :: Topology -> Doc ann
-prettyPrintVertices t = prettyPrintMany t prettyPrintVertex getVertices
-
 prettyPrintEdge :: Topology -> Edge -> Doc ann
 prettyPrintEdge t (Edge i) = prettyPrintNodeWithNeighbors t i
 
-prettyPrintEdges :: Topology -> Doc ann
-prettyPrintEdges t = prettyPrintMany t prettyPrintEdge getEdges
-
 prettyPrintFace :: Topology -> Face -> Doc ann
 prettyPrintFace t (Face i) = prettyPrintNodeWithNeighbors t i
-
-prettyPrintFaces :: Topology -> Doc ann
-prettyPrintFaces t = prettyPrintMany t prettyPrintFace getFaces
 
 prettyPrintTopology :: Topology -> Doc ann
 prettyPrintTopology t = 
     case show doc of
         "" -> pretty "empty topology"
         _  -> doc
-    where vs = prettyPrintVertices t
-          es = prettyPrintEdges t
-          fs = prettyPrintFaces t
+    where vs = prettyPrintMany t prettyPrintVertex getVertices
+          es = prettyPrintMany t prettyPrintEdge getEdges
+          fs = prettyPrintMany t prettyPrintFace getFaces
           func d = if show d == "" then d else d <> line
           doc = foldMap func [vs,es,fs]
 
