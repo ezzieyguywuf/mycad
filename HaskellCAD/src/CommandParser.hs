@@ -35,16 +35,14 @@ import Data.Text (Text, pack, unpack, words, strip, intercalate)
 import Data.Text.Read (rational)
 import Linear.V3
 
-import Errors (ErrorT, MyError(..))
-
-type Point = Geo.Point Float
+import Errors (Error, MyError(..))
 
 -- | A "Command" includes all the information necessary to execute an "Action"
-data Command = Help (Maybe Action)
-             | Quit
-             | AddVertex Point
-             | Show
-               deriving (Show, Eq)
+data Command a = Help (Maybe Action)
+               | Quit
+               | AddVertex (Geo.Point a)
+               | Show
+                 deriving (Show, Eq)
 
 -- | An Action that can be performed.
 data Action = GetHelp
@@ -65,7 +63,7 @@ actionMap = Map.fromList
 -- | The input to this function is expected to be the raw input from the User.
 --
 --   This function provides error-handling using the "Except" monad.
-parseInput :: String -> ErrorT p Command
+parseInput :: Fractional a => String -> Error (Command a)
 parseInput string = parseStatement (pack string) >>= parseAction >>= parseCommand
 
 -- | Given some string, determines if this partially matches any of our known "Command".
@@ -80,13 +78,13 @@ commandCompletions string = filter (isPrefixOf string) knownCommands
 -- ===========================================================================
 --                     Parsers - these are not exported
 -- ===========================================================================
-parseStatement :: Text -> ErrorT p [Text]
+parseStatement :: Text -> Error [Text]
 parseStatement input =
     case Data.Text.words input of
         []    -> throwError EmptyInput
         split -> pure split
 
-parseAction :: [Text] -> ErrorT p (Action, [Text])
+parseAction :: [Text] -> Error (Action, [Text])
 parseAction input =
     case uncons input of
         Nothing    -> throwError InvalidInput
@@ -94,7 +92,7 @@ parseAction input =
                                Just action -> pure (action, args)
                                Nothing     -> throwError UnknownAction
 
-parseCommand :: (Action, [Text]) -> ErrorT p Command
+parseCommand :: Fractional a => (Action, [Text]) -> Error (Command a)
 parseCommand (cmd, args) =
     case cmd of
         GetHelp     -> parseHelpArgs args
@@ -102,30 +100,30 @@ parseCommand (cmd, args) =
         MakeVertex  -> parseAddVertexArgs args
         ShowEntity  -> pure Show
 
-parseFloat :: Text -> ErrorT p (Float, Text)
-parseFloat text = do
+parseNumber :: Fractional a => Text -> Error (a, Text)
+parseNumber text = do
     case rational (strip text) of
-        Left _    -> throwError FloatParseError
+        Left _    -> throwError NumberParseError
         Right val -> pure val
 
-parsePoint :: Text -> ErrorT p Point
+parsePoint :: Fractional a => Text -> Error (Geo.Point a)
 parsePoint text = do
-    (x, t0) <- parseFloat text
-    (y, t1) <- parseFloat t0
-    (z, t2) <- parseFloat t1
+    (x, t0) <- parseNumber text
+    (y, t1) <- parseNumber t0
+    (z, t2) <- parseNumber t1
     pure (V3 x y z)
     `catchError` \_ -> (throwError PointParseError)
 
 -- ===========================================================================
 --                           Argument  Parsers
 -- ===========================================================================
-parseHelpArgs :: [Text] -> ErrorT p Command
+parseHelpArgs :: [Text] -> Error (Command a)
 parseHelpArgs args = do
     (action, _) <- parseAction args
     pure $ Help (Just action)
     `catchError` \_ -> (pure $ Help Nothing)
 
-parseAddVertexArgs :: [Text] -> ErrorT p Command
+parseAddVertexArgs :: Fractional a => [Text] -> Error (Command a)
 parseAddVertexArgs args = do
     let args' = intercalate (pack " ") args
     point <- parsePoint args'

@@ -19,7 +19,7 @@ The Except monad (from mtl: again, rather ubiquitous) is used for error handling
 module Main (main) where
 
 -- | External imports
-import Control.Monad.Except (runExceptT)
+import Control.Monad.Except (runExcept)
 import Control.Monad.State  (runState)
 import qualified System.Console.Haskeline as HL
 
@@ -40,20 +40,19 @@ exit :: HL.InputT IO ()
 exit = HL.outputStrLn "exiting."
 
 -- | Entry point for main loop
-mainLoop :: Show p => Entity p -> HL.InputT IO ()
+mainLoop :: (Show p, Fractional p) => Entity p -> HL.InputT IO ()
 mainLoop entity = do
     input <- HL.getInputLine "mycad> "
     maybe exit (loopAgain entity) input
 
 -- | Determine if we should loop again or bail out.
-loopAgain :: Show p => Entity p -> String -> HL.InputT IO ()
+loopAgain :: (Show p, Fractional p) => Entity p -> String -> HL.InputT IO ()
 loopAgain entity input =
-    let estate    = runExceptT (parseInput input >>= runCommand entity)
-        (check, entity') = runState estate entity
-    in case check of
-           Left  err        -> HL.outputStrLn (getErrorString err) >> mainLoop entity'
-           Right (Just ret) -> HL.outputStrLn ret >> mainLoop entity'
-           Right Nothing    -> exit
+    case runExcept (parseInput input) of
+        Left  err     -> HL.outputStrLn (getErrorString err) >> mainLoop entity
+        Right command -> case runState (runCommand entity command) entity of
+                           (Nothing, _)        -> exit
+                           (Just msg, entity') -> HL.outputStrLn msg >> mainLoop entity'
 
 -- ----------------------------------------------------------------------------
 --                   Haskeline-Specific Setup Stuff. You can probably ignore
