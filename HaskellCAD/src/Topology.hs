@@ -350,7 +350,7 @@ prettyPrintNeighbors i t = align doc
           sns = Graph.suc t' i
           lns = [length pns, length sns]
           t'  = unTopology t
-          doc | all (== 0) lns = pretty "Free"
+          doc | all (== 0) lns = pretty "No neighbors"
               | otherwise = pre <> line <> suc
               where pre = prettyPrintNodes "<-" pns t
                     suc = prettyPrintNodes "->" sns t
