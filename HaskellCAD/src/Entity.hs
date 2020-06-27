@@ -56,9 +56,7 @@ module Entity
   -- * Pretty Printing
 , prettyPrintEntity
 , prettyPrintVertex
-, prettyPrintVertices
 , prettyPrintEdge
-, prettyPrintEdges
 ) where
 
 import qualified Geometry as Geo
@@ -169,23 +167,20 @@ prettyPrintVertex (Entity _ _ t) (Vertex p v) = nest 4 $ vsep [v', p']
     where p'  = pretty $ show p
           v'  = Topo.prettyPrintVertex t v
 
-prettyPrintVertices :: Show a => Entity a -> Doc ann
-prettyPrintVertices e = vsep $ reverse vs
-    where vs = map (prettyPrintVertex e) $ getVertices e
-
 prettyPrintEdge :: Show a => Entity a -> Edge a -> Doc ann
 prettyPrintEdge (Entity _ _ t) (Edge _ e) =
     nest 4 $ vsep [e', pretty "Line"]
     where e' = Topo.prettyPrintEdge t e
 
-prettyPrintEdges :: Show a => Entity a -> Doc ann
-prettyPrintEdges e = vsep $ reverse es
-    where es = map (prettyPrintEdge e) $ getEdges e
-
 prettyPrintEntity :: Show a => Entity a -> Doc ann
-prettyPrintEntity e = vs <> line <> es
-    where vs = prettyPrintVertices e
-          es = prettyPrintEdges e
+prettyPrintEntity entity@(Entity vs es _) =
+    case show doc of
+        "" -> pretty "null entity"
+        _  -> doc
+    where vs' = vsep $ reverse (map (prettyPrintVertex entity) vs)
+          es' = vsep $ reverse (map (prettyPrintEdge entity) es)
+          func d = if show d == "" then d else d <> line
+          doc = foldMap func [vs',es']
 
 -- ===========================================================================
 --                       Private Free Functions
