@@ -260,10 +260,16 @@ prettyPrintFaces :: Topology -> Doc ann
 prettyPrintFaces t = prettyPrintMany t prettyPrintFace getFaces
 
 prettyPrintTopology :: Topology -> Doc ann
-prettyPrintTopology t = vs <> line <> es <> line <> fs
+prettyPrintTopology t = 
+    case show doc of
+        "" -> pretty "empty topology"
+        _  -> doc
     where vs = prettyPrintVertices t
           es = prettyPrintEdges t
           fs = prettyPrintFaces t
+          func d = if show d == "" then d else d <> line
+          doc = foldMap func [vs,es,fs]
+
 -- ===========================================================================
 --                        Private Free Functions
 -- ===========================================================================
