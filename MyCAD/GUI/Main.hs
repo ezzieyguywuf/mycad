@@ -26,7 +26,7 @@ import Data.IORef
 import System.Console.ANSI
 
 main :: IO ()
-main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
+main = bracket GLFW.init initFailed $ \initWorked ->
     when initWorked act
 
 winWIDTH      = 800

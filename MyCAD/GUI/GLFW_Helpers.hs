@@ -3,6 +3,7 @@ module GLFW_Helpers
 , resize
 , glfwInit
 , glfwWindowInit
+, initFailed
 , initFailMsg
 )where
 
@@ -101,9 +102,14 @@ glfwWindowInit window ioCam = do
     (x,y) <- GLFW.getFramebufferSize window
     glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
+initFailed :: Bool -> IO ()
+initFailed _ = do
+    GLFW.terminate
+    initFailMsg
+
 initFailMsg :: IO ()
 initFailMsg = do
     putStrLn "Failed to create a GLFW window!"
     putStrLn "  are you sure glfw is installed?"
-    putStrLn "  if you're using Intel, you may need to enable software rendering"
-
+    putStrLn "  If you're using Intel, you may need to enable software rendering"
+    putStrLn "  If you're using a terminal, you may need to set DISPLAY."
