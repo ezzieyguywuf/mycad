@@ -1,9 +1,8 @@
 module Main (main) where
 -- base
+import Data.IORef (IORef)
 import Control.Monad (unless)
 import Data.Bits ((.|.))
-import Control.Concurrent.STM (atomically)
-import Control.Concurrent.STM.TMVar (TMVar, newEmptyTMVar)
 
 -- GLFW-b, qualified for clarity
 import qualified Graphics.UI.GLFW as GLFW
@@ -20,8 +19,7 @@ import Graphics.GL.Core33
 main :: IO ()
 main = do
     -- Initialize some global stuff... :(
-    camera <- atomically newEmptyTMVar :: IO (TMVar Camera)
-    initCamera camera
+    camera <- initCamera
 
     mWindow <- glfwInit camera winWIDTH winHEIGHT winTITLE
 
@@ -35,7 +33,7 @@ vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
 lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
 fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
-act :: TMVar Camera -> GLFW.Window -> IO()
+act :: IORef Camera -> GLFW.Window -> IO()
 act camera window = do
     -- Compile and like our shaders
     baseShader <- makeShader vshaderFPATH fshaderFPATH

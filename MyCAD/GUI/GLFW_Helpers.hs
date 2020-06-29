@@ -8,10 +8,6 @@ module GLFW_Helpers
 -- base
 import Control.Monad (when)
 
--- Concurrency stuff
-import Control.Concurrent.STM.TMVar (TMVar)
-
-
 -- GLFW-b, qualified for clarity
 import qualified Graphics.UI.GLFW as GLFW
 
@@ -22,7 +18,7 @@ import Data.IORef
 import ViewSpace
 
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
-keypressed :: TMVar Camera -> GLFW.KeyCallback
+keypressed :: IORef Camera -> GLFW.KeyCallback
 keypressed cam window key scanCode keyState modKeys = do
     let delta = 0.1
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
@@ -44,7 +40,7 @@ resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
-cursorMoved :: IORef CursorPosition -> TMVar Camera -> GLFW.CursorPosCallback
+cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
 cursorMoved ioCursor camera _ x y = do
     -- Calculate delta
     (CursorPosition x0 y0) <- readIORef ioCursor
@@ -62,7 +58,7 @@ cursorMoved ioCursor camera _ x y = do
 
 data CursorPosition = CursorPosition Float Float
 
-mouseButtonPressed :: TMVar Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
+mouseButtonPressed :: IORef Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
 mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
     if state == GLFW.MouseButtonState'Pressed
        then do
@@ -76,11 +72,11 @@ mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
            -- re-enable the cursor
 mouseButtonPressed _ _ _ _ _ _ = pure ()
 
-mouseScrolled :: TMVar Camera -> GLFW.ScrollCallback
+mouseScrolled :: IORef Camera -> GLFW.ScrollCallback
 mouseScrolled camera _ _ dy = do
     zoomCamera camera (realToFrac dy)
 
-glfwInit :: TMVar Camera -> Int -> Int -> String -> IO (Maybe GLFW.Window)
+glfwInit :: IORef Camera -> Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit camera width height title = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
@@ -90,18 +86,18 @@ glfwInit camera width height title = do
     maybeWindow <- GLFW.createWindow width height title Nothing Nothing
     case maybeWindow of
         Nothing -> GLFW.terminate >> pure Nothing
-        Just window -> fmap Just (initWindow camera window)
+        Just window -> fmap Just (initWindow window camera)
 
-initWindow :: TMVar Camera -> GLFW.Window -> IO GLFW.Window
-initWindow camera window = do
-    -- Initialise some...global stuff :(
+initWindow :: GLFW.Window -> IORef Camera -> IO GLFW.Window
+initWindow window ioCam = do
+    -- Initialise (global... :(  ) cursor info
     cursor <- newIORef $ CursorPosition 0 0
 
     -- enable callbacks
-    GLFW.setKeyCallback window (Just (keypressed camera))
+    GLFW.setKeyCallback window (Just (keypressed ioCam))
     GLFW.setFramebufferSizeCallback window ( Just resize )
-    GLFW.setMouseButtonCallback window (Just (mouseButtonPressed camera cursor))
-    GLFW.setScrollCallback window ( Just (mouseScrolled camera) )
+    GLFW.setMouseButtonCallback window (Just (mouseButtonPressed ioCam cursor))
+    GLFW.setScrollCallback window ( Just (mouseScrolled ioCam) )
 
     -- calibrate the viewport
     GLFW.makeContextCurrent (Just window)
