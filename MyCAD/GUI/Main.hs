@@ -48,11 +48,6 @@ act camera window = do
 
     cubeDrawer <- makeObjectDrawer baseShader cube
     lineDrawer' <- makeObjectDrawer baseShader line'
-    let p1 = V3 0 0 0
-        p2 = V3 (-10) (-10) (-10)
-        col1 = V4 0.5 1.0 0.2 1.0
-        col2 = V4 0.2 0.3 0.8 1.0
-    lineDrawer <- makeObjectDrawer lineShader (makeLine'' p1 p2 col1 col2)
     circleDrawer <- makeObjectDrawer lineShader circle
 
     -- set static uniforms
@@ -79,7 +74,6 @@ act camera window = do
                 -- draw static objects
                 drawObject cubeDrawer
                 drawObject lineDrawer'
-                drawObject lineDrawer
                 drawObject circleDrawer
 
                 -- Draw the rotating line
@@ -89,6 +83,7 @@ act camera window = do
                     axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
                     p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
                     p1 = p1' + p2
+                    col1 = V4 0.5 1.0 0.2 1.0
                 cam <- readIORef camera
                 lineDrawer2 <- makeObjectDrawer lineShader (makeLine' p1 p2 col1)
 
