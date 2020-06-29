@@ -60,7 +60,6 @@
 - Remove hard-coded paths - allow for configurable or something.
 - Use TQueue to only render when we need to.
 - Update Shader data type to actually use the Uniform data type 
-- Use Lens for, say, getDataSize?
 - Figure out why line thickness zooms - it shouldn't, it should always be the same
 - Update GraphicData stuff so that AttributeData index is defined by the user, not in getAttributeDataIndex
 
