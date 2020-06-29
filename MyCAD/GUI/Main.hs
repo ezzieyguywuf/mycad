@@ -1,7 +1,6 @@
 module Main (main) where
 -- base
 import Control.Monad (when)
-import Control.Exception (bracket)
 import Data.Bits
 
 -- GLFW-b, qualified for clarity
@@ -25,8 +24,13 @@ import Linear.Quaternion
 import Data.IORef
 
 main :: IO ()
-main = bracket GLFW.init initFailed $ \initWorked ->
-    when initWorked act
+main = do
+    -- Set up some...well global variables
+    camera <- initCamera
+
+    mWindow <- (glfwInit camera) winWIDTH winHEIGHT winTITLE
+
+    maybe initFailMsg (act camera) mWindow
 
 winWIDTH      = 800
 winHEIGHT     = 600
@@ -36,91 +40,84 @@ vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
 lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
 fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
-act :: IO()
-act = do
-    maybeWindow <- glfwInit winWIDTH winHEIGHT winTITLE
-    case maybeWindow of
-        Nothing -> initFailMsg
-        Just window -> do
-            -- Set up some...well global variables
-            camera <- initCamera
+act :: IORef Camera -> GLFW.Window -> IO()
+act camera window = do
+    -- Compile and like our shaders
+    baseShader <- makeShader vshaderFPATH fshaderFPATH
+    lineShader <- makeShader lvshaderFPATH fshaderFPATH
 
-            -- Initialize glfw things, including callbacks
-            glfwWindowInit window camera
+    cubeDrawer <- makeObjectDrawer baseShader cube
+    lineDrawer' <- makeObjectDrawer baseShader line'
+    let p1 = V3 0 0 0
+        p2 = V3 (-10) (-10) (-10)
+        col1 = V4 0.5 1.0 0.2 1.0
+        col2 = V4 0.2 0.3 0.8 1.0
+    lineDrawer <- makeObjectDrawer lineShader (makeLine'' p1 p2 col1 col2)
+    circleDrawer <- makeObjectDrawer lineShader circle
+    --lineCubeDrawer <- makeObjectDrawer lineShader wireCube
 
-            -- Compile and like our shaders
-            baseShader <- makeShader vshaderFPATH fshaderFPATH
-            lineShader <- makeShader lvshaderFPATH fshaderFPATH
+    -- enable depth testing
+    glEnable GL_DEPTH_TEST
 
-            cubeDrawer <- makeObjectDrawer baseShader cube
-            lineDrawer' <- makeObjectDrawer baseShader line'
-            let p1 = V3 0 0 0
-                p2 = V3 (-10) (-10) (-10)
-                col1 = V4 0.5 1.0 0.2 1.0
-                col2 = V4 0.2 0.3 0.8 1.0
-            lineDrawer <- makeObjectDrawer lineShader (makeLine'' p1 p2 col1 col2)
-            circleDrawer <- makeObjectDrawer lineShader circle
-            --lineCubeDrawer <- makeObjectDrawer lineShader wireCube
+    -- set static uniforms
+    putProjectionUniform baseShader
+    putProjectionUniform lineShader
 
-            -- enable depth testing
-            glEnable GL_DEPTH_TEST
+    floatUniform winASPECT "aspect" >>= putUniform lineShader
+    floatUniform 5 "thickness" >>= putUniform lineShader
 
-            -- set static uniforms
-            putProjectionUniform baseShader
-            putProjectionUniform lineShader
+    ioTick <- newIORef 0 :: IO (IORef Float)
+    ioLines <- newIORef ("", "", "", "", "")
 
-            floatUniform winASPECT "aspect" >>= putUniform lineShader
-            floatUniform 5 "thickness" >>= putUniform lineShader
+    -- jump down below to see the first call to loop
+    let loop = do
+            shouldContinue <- not <$> GLFW.windowShouldClose window
+            when shouldContinue $ do
+                -- event poll
+                GLFW.pollEvents
+                -- drawing
+                --   Background
+                glClearColor 0.2 0.3 0.3 1.0
+                glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
-            ioTick <- newIORef 0 :: IO (IORef Float)
-            ioLines <- newIORef ("", "", "", "", "") 
-            -- enter our main loop
-            let loop = do
-                    shouldContinue <- not <$> GLFW.windowShouldClose window
-                    when shouldContinue $ do
-                        -- event poll
-                        GLFW.pollEvents
-                        -- drawing
-                        --   Background
-                        glClearColor 0.2 0.3 0.3 1.0
-                        glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
+                -- Update our uniforms
+                putViewUniform camera baseShader
+                putViewUniform camera lineShader
 
-                        -- Update our uniforms
-                        putViewUniform camera baseShader
-                        putViewUniform camera lineShader
+                -- draw static objects
+                drawObject cubeDrawer
+                drawObject lineDrawer'
+                drawObject lineDrawer
 
-                        -- draw static objects
-                        drawObject cubeDrawer
-                        drawObject lineDrawer'
-                        drawObject lineDrawer
+                --(LookAt loc _ dir) <- readIORef camera
+                --let vect = normalize (loc - dir)
+                    --theta = cos (vect `dot` (V3 0 0 1))
+                    --target = rotateElement line'' (axisAngle (V3 0 1 0) theta)
+                --makeObjectDrawer lineShader target >>= drawObject
 
-                        --(LookAt loc _ dir) <- readIORef camera
-                        --let vect = normalize (loc - dir)
-                            --theta = cos (vect `dot` (V3 0 0 1))
-                            --target = rotateElement line'' (axisAngle (V3 0 1 0) theta)
-                        --makeObjectDrawer lineShader target >>= drawObject
+                drawObject circleDrawer
 
-                        drawObject circleDrawer
+                -- Draw the rotating line
+                time <- maybe 0 realToFrac <$> GLFW.getTime
+                let p0 = V3 (-15) 15 0
+                    p2 = V3 (-15) (-15) 0
+                    axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
+                    p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
+                    p1 = p1' + p2
+                cam <- readIORef camera
+                lineDrawer2 <- makeObjectDrawer lineShader (makeLine' p1 p2 col1)
 
-                        -- Draw the rotating line
-                        time <- maybe 0 realToFrac <$> GLFW.getTime
-                        let p0 = V3 (-15) 15 0
-                            p2 = V3 (-15) (-15) 0
-                            axis = axisAngle (V3 0 0 1) (pi * ((sin time) + 1))
-                            p1' = Linear.Quaternion.rotate (axis) (p0 - p2)
-                            p1 = p1' + p2
-                        cam <- readIORef camera
-                        lineDrawer2 <- makeObjectDrawer lineShader (makeLine' p1 p2 col1)
+                drawObject lineDrawer2
+                --drawObject lineCubeDrawer
 
-                        drawObject lineDrawer2
-                        --drawObject lineCubeDrawer
+                --rotateCameraNudge camera (-0.005) 0
 
-                        --rotateCameraNudge camera (-0.005) 0
+                -- swap buffers and go again
+                GLFW.swapBuffers window
+                loop
 
-                        -- swap buffers and go again
-                        GLFW.swapBuffers window
-                        loop
-            loop
+    -- enter our main loop
+    loop
     GLFW.terminate
 
 putViewUniform :: IORef Camera -> Shader -> IO ()
@@ -134,7 +131,7 @@ putProjectionUniform shader = matrixUniform projectionMatrix "projection" >>= (p
     where projectionMatrix = perspective (pi/4.0) winASPECT 0.1 1000.0
 
 initCamera :: IO (IORef Camera)
-initCamera = newIORef LookAt { 
+initCamera = newIORef LookAt {
                                location  = V3 0 0 100
                              , up        = V3 0 1 0
                              , direction = V3 0 0 0

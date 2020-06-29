@@ -2,8 +2,6 @@ module GLFW_Helpers
 ( keypressed
 , resize
 , glfwInit
-, glfwWindowInit
-, initFailed
 , initFailMsg
 )where
 
@@ -78,16 +76,20 @@ mouseScrolled :: IORef Camera -> GLFW.ScrollCallback
 mouseScrolled camera _ _ dy = do
     zoomCamera camera (realToFrac dy)
 
-glfwInit :: Int -> Int -> String -> IO (Maybe GLFW.Window)
-glfwInit width height title = do
+glfwInit :: IORef Camera -> Int -> Int -> String -> IO (Maybe GLFW.Window)
+glfwInit camera width height title = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
     GLFW.windowHint (GLFW.WindowHint'OpenGLProfile GLFW.OpenGLProfile'Core)
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
-    GLFW.createWindow width height title Nothing Nothing
+    GLFW.init
+    maybeWindow <- GLFW.createWindow width height title Nothing Nothing
+    case maybeWindow of
+        Nothing -> GLFW.terminate >> pure Nothing
+        Just window -> fmap Just (initWindow window camera)
 
-glfwWindowInit :: GLFW.Window -> IORef Camera -> IO ()
-glfwWindowInit window ioCam = do
+initWindow :: GLFW.Window -> IORef Camera -> IO GLFW.Window
+initWindow window ioCam = do
     -- Initialise (global... :(  ) cursor info
     cursor <- newIORef $ CursorPosition 0 0
 
@@ -102,10 +104,7 @@ glfwWindowInit window ioCam = do
     (x,y) <- GLFW.getFramebufferSize window
     glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
-initFailed :: Bool -> IO ()
-initFailed _ = do
-    GLFW.terminate
-    initFailMsg
+    pure window
 
 initFailMsg :: IO ()
 initFailMsg = do
