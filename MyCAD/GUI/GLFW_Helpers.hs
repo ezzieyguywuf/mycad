@@ -104,6 +104,9 @@ initWindow window ioCam = do
     (x,y) <- GLFW.getFramebufferSize window
     glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
+    -- enable depth testing
+    glEnable GL_DEPTH_TEST
+
     pure window
 
 initFailMsg :: IO ()
