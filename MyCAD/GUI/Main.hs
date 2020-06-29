@@ -1,6 +1,6 @@
 module Main (main) where
 -- base
-import Control.Monad (when)
+import Control.Monad (unless)
 import Data.Bits
 
 -- GLFW-b, qualified for clarity
@@ -65,8 +65,7 @@ act camera window = do
 
     -- jump down below to see the first call to loop
     let loop = do
-            shouldContinue <- not <$> GLFW.windowShouldClose window
-            when shouldContinue $ do
+            GLFW.windowShouldClose window >>= flip unless (do
                 -- event poll
                 GLFW.pollEvents
                 -- drawing
@@ -109,6 +108,7 @@ act camera window = do
                 -- swap buffers and go again
                 GLFW.swapBuffers window
                 loop
+                )
 
     -- enter our main loop
     loop
