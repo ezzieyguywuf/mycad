@@ -23,7 +23,6 @@ import Linear.Projection
 import Linear.Quaternion
 
 import Data.IORef
-import System.Console.ANSI
 
 main :: IO ()
 main = bracket GLFW.init initFailed $ \initWorked ->
@@ -43,9 +42,6 @@ act = do
     case maybeWindow of
         Nothing -> initFailMsg
         Just window -> do
-            -- Initialize console output
-            initializeConsole
-
             -- Set up some...well global variables
             camera <- initCamera
 
@@ -121,21 +117,6 @@ act = do
 
                         --rotateCameraNudge camera (-0.005) 0
 
-                        tick <- readIORef ioTick
-                        let tick' = time + tick
-                            tick'' = case compare tick' 100 of
-                                        LT -> tick'
-                                        _  -> 0
-                        writeIORef ioTick tick''
-
-                        when (tick'' == 0) (do
-                            (l1, l2, l3, l4, _) <- readIORef ioLines
-                            (LookAt loc _ dir) <- readIORef camera
-                            --let lineNormal = V3 0 0 1 :: V3 Float
-                                --view = loc - dir
-                            let lines' = (("tick " <> (show time)), l1, l2, l3, l4)
-                            putConsole lines'
-                            writeIORef ioLines lines')
                         -- swap buffers and go again
                         GLFW.swapBuffers window
                         loop
@@ -158,13 +139,3 @@ initCamera = newIORef LookAt {
                              , up        = V3 0 1 0
                              , direction = V3 0 0 0
                              }
-
-initializeConsole :: IO ()
-initializeConsole = do
-    putStrLn "All data should update only below here. Welcome!"
-    sequence_ $ take 5 (repeat $ putStrLn "")
-
-putConsole :: (String, String, String, String, String) -> IO()
-putConsole (l1, l2, l3, l4, l5) = do
-    cursorUp 5
-    sequence_ (map putStrLn ([l1, l2, l3, l4, l5]))
