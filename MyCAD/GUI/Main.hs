@@ -29,10 +29,13 @@ main :: IO ()
 main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
     when initWorked act
 
-winWIDTH = 800
-winHEIGHT = 600
-winASPECT = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-winTITLE = "LearnOpenGL Hello CAD!"
+winWIDTH      = 800
+winHEIGHT     = 600
+winASPECT     = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
+winTITLE      = "LearnOpenGL Hello CAD!"
+vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
+lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
+fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
 act :: IO()
 act = do
@@ -50,8 +53,8 @@ act = do
             glfwWindowInit window camera
 
             -- Compile and like our shaders
-            baseShader <- makeShader "./src/VertexShader.glsl" "./src/FragmentShader.glsl"
-            lineShader <- makeShader "./src/LineVShader.glsl" "./src/FragmentShader.glsl"
+            baseShader <- makeShader vshaderFPATH fshaderFPATH
+            lineShader <- makeShader lvshaderFPATH fshaderFPATH
 
             cubeDrawer <- makeObjectDrawer baseShader cube
             lineDrawer' <- makeObjectDrawer baseShader line'
