@@ -56,18 +56,12 @@ act camera window = do
     circleDrawer <- makeObjectDrawer lineShader circle
     --lineCubeDrawer <- makeObjectDrawer lineShader wireCube
 
-    -- enable depth testing
-    glEnable GL_DEPTH_TEST
-
     -- set static uniforms
     putProjectionUniform baseShader
     putProjectionUniform lineShader
 
     floatUniform winASPECT "aspect" >>= putUniform lineShader
     floatUniform 5 "thickness" >>= putUniform lineShader
-
-    ioTick <- newIORef 0 :: IO (IORef Float)
-    ioLines <- newIORef ("", "", "", "", "")
 
     -- jump down below to see the first call to loop
     let loop = do
