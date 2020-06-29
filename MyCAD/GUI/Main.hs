@@ -32,7 +32,7 @@ main = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
 winWIDTH = 800
 winHEIGHT = 600
 winASPECT = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
-winTITLE = "LearnOpenGL Hello Line!"
+winTITLE = "LearnOpenGL Hello CAD!"
 
 act :: IO()
 act = do
