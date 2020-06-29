@@ -54,6 +54,7 @@
 - check out 'boxes' for prettyprinter using 'columns'
 
 # GUI
+- Add lighting/shading
 - do bounds check on getUniformLocation: if it fails, do nothing (maybe?) or
   alert the coder.
 - infinite zoom.
