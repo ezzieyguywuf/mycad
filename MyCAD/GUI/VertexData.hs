@@ -1,11 +1,8 @@
 module VertexData
 (
   line
-, line'
-, line''
 , cube
 , circle
-, makeLine
 , makeLine'
 , makeLine''
 , extendLine
@@ -40,26 +37,6 @@ lineElement'' len color1 color2 = makeElementData vertices indices
                      , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color2, Up (-1)]
                      ]
           indices = [0, 1, 2, 3, 4, 5]
-
-lineElement :: Float -> Float -> ElementData
-lineElement width length = makeElementData vertices indices
-    where vertices = [ [Position (V3 0 width 0 )     , Color (V4 1.0 0.5 0.2 1)]
-                     , [Position (V3 0 0 0)          , Color (V4 1.0 0.5 0.2 1)]
-                     , [Position (V3 length width 0) , Color (V4 1.0 0.5 0.2 1)]
-                     , [Position (V3 length width 0) , Color (V4 0.0 0.5 0.2 1)]
-                     , [Position (V3 0 0 0)          , Color (V4 0.0 0.5 0.2 1)]
-                     , [Position (V3 length 0 0)     , Color (V4 0.0 0.5 0.2 1)]
-                     ]
-          indices = [ 0, 1, 2
-                    , 3, 4, 5 ]
-
-makeLine :: Float         -- ^ Width
-            -> V3 Float   -- ^ from
-            -> V3 Float   -- ^ to
-            -> ObjectData -- ^ drawable object
-makeLine width p1 p2 = ObjectData eData [placeLine p1 p2]
-    where eData  = lineElement width length
-          length = norm (p2 - p1)
 
 makeLine' ::   V3 Float   -- ^ from
             -> V3 Float   -- ^ to
@@ -105,35 +82,19 @@ pointOnCircle (V3 c1 c2 c3) radius theta = V3 x y z
 
 line :: ObjectData
 line = extendLine line0 (V3 15 0 0) (V3 30 (-15) 0)
-    where line0 = makeLine 3 (V3 0 0 0) (V3 15 0 0)
+    where line0 = makeLine'' (V3 0 0 0) (V3 15 0 0) (V4 0.2 0.7 0.2 1.0) (V4 0.3 0.4 0.5 1.0)
 
 wireCube :: ObjectData
 wireCube = foldl (\l (p,q) -> extendLine l p q) line0 pairs
-    where line0 = makeLine 3 (ps !! 0) (ps !! 1)
-          ps = [ V3 (-10) 10 10
-               , V3 (-20) 10 10
-               , V3 (-20) 20 10
-               , V3 (-10) 20 10
-               , V3 (-10) 10 10
-               , V3 (-10) 10 20
-               , V3 (-20) 10 20
-               , V3 (-20) 20 20
-               , V3 (-10) 20 20
-               , V3 (-10) 10 20
+    where line0 = makeLine'' p0 p1 (V4 0.4 0.2 0.3 1.0) (V4 0.5 0.3 0.3 1.0)
+          p0 = (V3 0 0 10)
+          p1 = (V3 10 0 10)
+          ps = [ 
+                 p1
+               , V3 10 10 10
+               , V3 0 10 10
                ]
           pairs = zip ps (tail ps)
-
-line' :: ObjectData
-line' = ObjectData eData placementData
-    where (ObjectData eData pOrig) = line
-          f (PlacementData rot trans) = PlacementData rot (trans + (V3 0 30 0))
-          placementData = map f pOrig
-
-line'' :: ObjectData
-line'' = ObjectData eData placementData
-    where (ObjectData eData pOrig) = line
-          f (PlacementData rot trans) = PlacementData rot (trans + (V3 (-50) 00 0))
-          placementData = map f pOrig
 
 cube :: ObjectData
 cube = ObjectData eData placementData

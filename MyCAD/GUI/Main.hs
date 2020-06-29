@@ -45,7 +45,7 @@ act camera window = do
     lineShader <- makeShader lvshaderFPATH fshaderFPATH
 
     cubeDrawer <- makeObjectDrawer baseShader cube
-    lineDrawer' <- makeObjectDrawer baseShader line'
+    lineDrawer <- makeObjectDrawer lineShader line
     circleDrawer <- makeObjectDrawer lineShader circle
 
     -- set static uniforms
@@ -71,10 +71,10 @@ act camera window = do
 
                 -- draw static objects
                 drawObject cubeDrawer
-                drawObject lineDrawer'
+                drawObject lineDrawer
                 drawObject circleDrawer
 
-                rotateCameraNudge camera (-0.005) 0
+                --rotateCameraNudge camera (-0.005) 0
 
                 -- swap buffers and go again
                 GLFW.swapBuffers window
