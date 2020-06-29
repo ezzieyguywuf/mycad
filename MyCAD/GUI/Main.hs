@@ -54,7 +54,6 @@ act camera window = do
         col2 = V4 0.2 0.3 0.8 1.0
     lineDrawer <- makeObjectDrawer lineShader (makeLine'' p1 p2 col1 col2)
     circleDrawer <- makeObjectDrawer lineShader circle
-    --lineCubeDrawer <- makeObjectDrawer lineShader wireCube
 
     -- set static uniforms
     putProjectionUniform baseShader
@@ -81,13 +80,6 @@ act camera window = do
                 drawObject cubeDrawer
                 drawObject lineDrawer'
                 drawObject lineDrawer
-
-                --(LookAt loc _ dir) <- readIORef camera
-                --let vect = normalize (loc - dir)
-                    --theta = cos (vect `dot` (V3 0 0 1))
-                    --target = rotateElement line'' (axisAngle (V3 0 1 0) theta)
-                --makeObjectDrawer lineShader target >>= drawObject
-
                 drawObject circleDrawer
 
                 -- Draw the rotating line
@@ -101,9 +93,8 @@ act camera window = do
                 lineDrawer2 <- makeObjectDrawer lineShader (makeLine' p1 p2 col1)
 
                 drawObject lineDrawer2
-                --drawObject lineCubeDrawer
 
-                --rotateCameraNudge camera (-0.005) 0
+                rotateCameraNudge camera (-0.005) 0
 
                 -- swap buffers and go again
                 GLFW.swapBuffers window
