@@ -46,6 +46,7 @@ executables:
     - ansi-terminal
     - JuicyPixels
     - vector
+    - stm
 
   tui-exe:
     main: Main.hs

@@ -1,7 +1,7 @@
 module GL_Helpers
 (
   Uniform(..)
-, Shader
+, Shader (..)
 , Drawer
 , makeObjectDrawer
 , makeShader

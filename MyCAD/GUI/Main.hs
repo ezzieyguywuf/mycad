@@ -2,6 +2,8 @@ module Main (main) where
 -- base
 import Control.Monad (unless)
 import Data.Bits ((.|.))
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TMVar (TMVar, newEmptyTMVar)
 
 -- GLFW-b, qualified for clarity
 import qualified Graphics.UI.GLFW as GLFW
@@ -15,14 +17,13 @@ import ViewSpace
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
 
-import Data.IORef
-
 main :: IO ()
 main = do
-    -- Set up some...well global variables
-    camera <- initCamera
+    -- Initialize some global stuff... :(
+    camera <- atomically newEmptyTMVar :: IO (TMVar Camera)
+    initCamera camera
 
-    mWindow <- (glfwInit camera) winWIDTH winHEIGHT winTITLE
+    mWindow <- glfwInit camera winWIDTH winHEIGHT winTITLE
 
     maybe initFailMsg (act camera) mWindow
 
@@ -34,7 +35,7 @@ vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
 lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
 fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
-act :: IORef Camera -> GLFW.Window -> IO()
+act :: TMVar Camera -> GLFW.Window -> IO()
 act camera window = do
     -- Compile and like our shaders
     baseShader <- makeShader vshaderFPATH fshaderFPATH
@@ -56,19 +57,17 @@ act camera window = do
             GLFW.windowShouldClose window >>= flip unless (do
                 -- event poll
                 GLFW.pollEvents
+
                 -- drawing
                 --   Background
                 glClearColor 0.2 0.3 0.3 1.0
                 glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
                 -- Update our uniforms
-                putViewUniform camera baseShader
-                putViewUniform camera lineShader
+                putViewUniform camera [baseShader, lineShader]
 
                 -- draw static objects
-                drawObject cubeDrawer
-                drawObject lineDrawer
-                drawObject circleDrawer
+                sequence_ $ fmap drawObject [cubeDrawer, lineDrawer, circleDrawer]
 
                 --rotateCameraNudge camera (-0.005) 0
 

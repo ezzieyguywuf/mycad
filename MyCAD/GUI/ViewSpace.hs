@@ -11,12 +11,13 @@ import Linear.V3
 import Linear.Quaternion
 import Linear.Metric
 import Linear.Vector
-import Data.IORef
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TMVar (TMVar, readTMVar, swapTMVar, putTMVar)
 import Numeric
 
 import Linear.Projection (lookAt, perspective)
 import Control.Monad (unless)
-import GL_Helpers (Shader, matrixUniform, putUniform)
+import GL_Helpers (Shader(..), matrixUniform, putUniform)
 
 data Camera = LookAt {
                        location  :: V3 Float
@@ -27,20 +28,21 @@ data Camera = LookAt {
 _pprintV3 :: RealFloat a => V3 a -> String
 _pprintV3 v = (foldMap (showFFloat (Just 3)) v) ", "
 
-initCamera :: IO (IORef Camera)
-initCamera = newIORef LookAt {
-                               location  = V3 0 0 100
-                             , up        = V3 0 1 0
-                             , direction = V3 0 0 0
-                             }
+initCamera :: TMVar Camera -> IO ()
+initCamera cam = do
+    atomically $ putTMVar cam mat
+    where mat =LookAt { location  = V3 0 0 100
+                        , up        = V3 0 1 0
+                        , direction = V3 0 0 0
+                      }
 
 -- | Rotates the camera.
-rotateCameraNudge :: IORef Camera
+rotateCameraNudge :: TMVar Camera
                   -> Float         -- ^ dx
                   -> Float         -- ^ dy
                   -> IO ()
-rotateCameraNudge ioCam yaw pitch = do
-    (LookAt loc up dir) <- readIORef ioCam
+rotateCameraNudge cam yaw pitch = do
+    (LookAt loc up dir) <- atomically $ readTMVar cam
     let p1 = normalize loc
         p2 = normalize $ rotate (pitchRot * yawRot) p1
         right = (loc - dir) `cross` up
@@ -52,21 +54,23 @@ rotateCameraNudge ioCam yaw pitch = do
         loc' = rotate rot loc
         up'  = rotate rot up
 
-    writeIORef ioCam (LookAt loc' up' dir)
+    atomically $ swapTMVar cam (LookAt loc' up' dir)
+    pure ()
 
-zoomCamera :: IORef Camera -> Float -> IO ()
-zoomCamera ioCam amt = do
-    (LookAt loc up dir) <- readIORef ioCam
+zoomCamera :: TMVar Camera -> Float -> IO ()
+zoomCamera camera amt = do
+    (LookAt loc up dir) <- atomically $ readTMVar camera
     let rad  = norm (loc - dir)
         rad' = rad - amt
         loc' = lerp (rad' / rad) loc dir
-    unless (rad' <= 0.001) (writeIORef ioCam (LookAt loc' up dir))
 
-putViewUniform :: IORef Camera -> Shader -> IO ()
-putViewUniform ioCam shader = do
-    (LookAt loc up dir) <- readIORef ioCam
-    matrixUniform (lookAt loc dir up) "view" >>= (putUniform shader)
+    unless (rad' <= 0.001) (atomically $ swapTMVar camera (LookAt loc' up dir) >> pure ())
 
+putViewUniform :: TMVar Camera -> [Shader] -> IO ()
+putViewUniform camera shaders = do
+    (LookAt loc up dir) <- atomically $ readTMVar camera
+    mat <- matrixUniform (lookAt loc dir up) "view"
+    sequence_ $ fmap (flip putUniform mat) shaders
 
 putProjectionUniform :: Float -> Shader -> IO ()
 putProjectionUniform aspect shader = matrixUniform projectionMatrix "projection" >>= (putUniform shader)
