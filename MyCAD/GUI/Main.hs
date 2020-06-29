@@ -15,10 +15,6 @@ import ViewSpace
 -- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
 
--- For Linear algebra...but really, like vectors and matrices and quaternions
-import Linear.V3
-import Linear.Projection
-
 import Data.IORef
 
 main :: IO ()
@@ -49,8 +45,8 @@ act camera window = do
     circleDrawer <- makeObjectDrawer lineShader circle
 
     -- set static uniforms
-    putProjectionUniform baseShader
-    putProjectionUniform lineShader
+    putProjectionUniform winASPECT baseShader
+    putProjectionUniform winASPECT lineShader
 
     floatUniform winASPECT "aspect" >>= putUniform lineShader
     floatUniform 5 "thickness" >>= putUniform lineShader
@@ -84,20 +80,3 @@ act camera window = do
     -- enter our main loop
     loop
     GLFW.terminate
-
-putViewUniform :: IORef Camera -> Shader -> IO ()
-putViewUniform ioCam shader = do
-    (LookAt loc up dir) <- readIORef ioCam
-    matrixUniform (lookAt loc dir up) "view" >>= (putUniform shader)
-
-
-putProjectionUniform :: Shader -> IO ()
-putProjectionUniform shader = matrixUniform projectionMatrix "projection" >>= (putUniform shader)
-    where projectionMatrix = perspective (pi/4.0) winASPECT 0.1 1000.0
-
-initCamera :: IO (IORef Camera)
-initCamera = newIORef LookAt {
-                               location  = V3 0 0 100
-                             , up        = V3 0 1 0
-                             , direction = V3 0 0 0
-                             }
