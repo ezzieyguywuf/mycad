@@ -1,7 +1,7 @@
 module Main (main) where
 -- base
 import Control.Monad (unless)
-import Data.Bits
+import Data.Bits ((.|.))
 
 -- GLFW-b, qualified for clarity
 import qualified Graphics.UI.GLFW as GLFW
