@@ -34,7 +34,7 @@ fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
 act :: Camera -> GLFW.Window -> IO()
 act camera window = do
-    -- Compile and like our shaders
+    -- Compile and link our shaders
     baseShader <- makeShader vshaderFPATH fshaderFPATH
     lineShader <- makeShader lvshaderFPATH fshaderFPATH
 
