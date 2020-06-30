@@ -34,23 +34,8 @@ main = do
 
 act :: Window -> IO()
 act window = do
-    -- Compile and link our shaders
-    baseShader <- makeShader vshaderFPATH fshaderFPATH
-    lineShader <- makeShader lvshaderFPATH fshaderFPATH
+    (shaders, drawers) <- initShadersAndDrawers
 
-    cubeDrawer <- makeObjectDrawer baseShader cube
-    lineDrawer <- makeObjectDrawer lineShader line
-    circleDrawer <- makeObjectDrawer lineShader circle
-
-    -- set static uniforms
-    putProjectionUniform winASPECT baseShader
-    putProjectionUniform winASPECT lineShader
-
-    floatUniform winASPECT "aspect" >>= putUniform lineShader
-    floatUniform 5 "thickness" >>= putUniform lineShader
-
-    let shaders = [baseShader, lineShader]
-        drawers = [cubeDrawer, lineDrawer, circleDrawer]
     -- enter our main loop
     loop window shaders drawers
 
@@ -72,19 +57,19 @@ loop window shaders drawers = do
 
 redraw :: Window -> [Drawer] -> IO ()
 redraw window drawers = do
-    -- drawing
-    --   Background
+    -- First, clear what was there
     glClearColor 0.2 0.3 0.3 1.0
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
-
-    -- draw static objects
+    -- draw it again
     sequence_ $ fmap drawObject drawers
 
-    --rotateCameraNudge camera (-0.005) 0
-
-    -- swap buffers and go again
+    -- swap the buffers
     swapBuffers window
+
+-------------------------------------------------------------------------------
+--                    Consider moving this stuff elsewhere
+-------------------------------------------------------------------------------
 
 -- | This will initialize the camera.
 startCam :: CameraData
@@ -92,6 +77,26 @@ startCam = LookAt { location  = V3 0 0 100 -- Where is the camera located
                   , up        = V3 0 1 0   -- Which way is "up" to the camera
                   , direction = V3 0 0 0   -- Where is it looking
                   }
+
+initShadersAndDrawers :: IO ([Shader], [Drawer])
+initShadersAndDrawers = do
+    -- Compile and link our shaders
+    baseShader <- makeShader vshaderFPATH fshaderFPATH
+    lineShader <- makeShader lvshaderFPATH fshaderFPATH
+
+    -- set static uniforms
+    putProjectionUniform winASPECT baseShader
+    putProjectionUniform winASPECT lineShader
+
+    floatUniform winASPECT "aspect"    >>= putUniform lineShader
+    floatUniform 5         "thickness" >>= putUniform lineShader
+
+
+    cubeDrawer <- makeObjectDrawer baseShader cube
+    lineDrawer <- makeObjectDrawer lineShader line
+    circleDrawer <- makeObjectDrawer lineShader circle
+
+    pure ([baseShader, lineShader], [cubeDrawer, lineDrawer, circleDrawer])
 
 -- | This message provides some useful output in case we can't initialize
 initFailMsg :: IO ()
