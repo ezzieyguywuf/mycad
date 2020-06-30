@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeSynonymInstances,FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 module GL_Helpers
 (
   GLUniform
@@ -41,10 +41,26 @@ data Drawer = ObjectDrawer {
                            , _objectData :: ObjectData
                            }
 
+-- | This data type encapsulates a glUniform name, and some data to go along with it
+--
+--   Note that in order for this to be useful with, say, "putUniform", @a@ must
+--   be an instance of  "GLUiniform".
 data Uniform a = Uniform { _uniformName :: String
                          , _uniformData :: a
                          }
 
+-- | A typeclass that describes how to take an arbitrary piece of data @a@ and
+--   load it into an openGL context as a \"Uniform\"
+class GLUniform a where
+    putData :: GLint -> a -> IO ()
+
+-- | Draws some object(s) to the screen.
+--
+--   Please note: in the current implementation, it's actually
+--   "makeObjectDrawer" that does most of the heavy lifting. Here, we simply
+--   take the vertices that were already sent to openGL and draw them in
+--   different locations and orientations, per the information provided by
+--   "PlacmentData" in the "Drawer"
 drawObject :: Drawer -> IO ()
 drawObject drawer = do
     let (ObjectData (ElementData _ indices) pdatas) = _objectData drawer
@@ -56,13 +72,12 @@ drawObject drawer = do
     sequence_ $ map (drawPlacement shader len) pdatas
     glBindVertexArray 0
 
+-- | this is not exported, but it's only used in drawObject so we'll keep it
+--   here
 drawPlacement :: Shader -> GLsizei -> PlacementData -> IO ()
 drawPlacement shader len pdata = do
     putUniform shader (makeUniform "model" pdata)
     glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-
-makeUniform :: GLUniform a => String -> a -> Uniform a
-makeUniform uniformName uniformData = Uniform uniformName uniformData
 
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
@@ -79,11 +94,29 @@ makeShader vpath fpath = do
 
     pure $ Shader uid
 
+-- | This will not only create the "Drawer", but also send all the vertices to
+--   openGL
+--
+--   The "drawer" will retain a UID to the Vertex Attribute Object (VAO) that
+--   we can use to tell openGL "hey, remember those vertices I sent you? Let's
+--   do something with them."
 makeObjectDrawer :: Shader -> ObjectData -> IO Drawer
 makeObjectDrawer shader oData@(ObjectData eData _) = do
     vao <- putGraphicData eData
     pure $ ObjectDrawer vao shader oData
 
+-- | Create a uniform with the given name and data
+makeUniform :: GLUniform a
+               => String     -- ^ The name of the uniform
+               -> a          -- ^ The data
+               -> Uniform a
+makeUniform uniformName uniformData = Uniform uniformName uniformData
+
+-- | Tries to load the uniform data with the given name.
+--
+--   Since the openGL program will still compile and load, even with a missing
+--   uniform, we don't return a "Maybe" here. Rather, we print a useful mesage
+--   to stdout and let someone else worry about it.
 putUniform :: GLUniform a => Shader -> Uniform a -> IO ()
 putUniform shader (Uniform name uniformData) = do
     let sid = _shaderID shader
@@ -100,11 +133,8 @@ putUniform shader (Uniform name uniformData) = do
 ------------------------------------------------------------------
 --          Private Free Functions
 ------------------------------------------------------------------
-class GLUniform a where
-    putData :: GLint -> a -> IO ()
-
 instance GLUniform Float where
-    putData uid val = glUniform1f uid val 
+    putData uid val = glUniform1f uid val
 
 instance GLUniform (M44 Float) where
     putData uid transformationMatrix = do
