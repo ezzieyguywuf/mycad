@@ -13,7 +13,8 @@
 - check out 'boxes' for prettyprinter using 'columns'
 
 # Commands
-- Move away from individual "addXXX" (i.e. `addVertex` right now) and instead use a generic `add` which accepts a sub-command, i.e. `add vertex`
+- Move away from individual "addXXX" (i.e. `addVertex` right now) and instead
+  use a generic `add` which accepts a sub-command, i.e. `add vertex`
 - Allow for a "brief" and a "long" help message.
 - Add actual help messages
 
@@ -33,7 +34,14 @@
 - Use TQueue to only render when we need to.
 - Update Shader data type to actually use the Uniform data type 
 - Figure out why line thickness zooms - it shouldn't, it should always be the same
-- Update GraphicData stuff so that AttributeData index is defined by the user, not in getAttributeDataIndex
+- Update GraphicData stuff so that AttributeData index is defined by the user,
+  not in getAttributeDataIndex
+- Update mouse rotation so that it's not so twitchy.
+
+# UX
+- Add icons to GUI
 
 # TUI
-- Allow run-time determination (is this a good idea?) of the parametrization of `Command a` in CommandParser. Right now, we hard-code a `Geo.Point Float`, but it'd be nice for this to be configurable by the User somehow
+- Allow run-time determination (is this a good idea?) of the parametrization of
+  `Command a` in CommandParser. Right now, we hard-code a `Geo.Point Float`,
+  but it'd be nice for this to be configurable by the User somehow
