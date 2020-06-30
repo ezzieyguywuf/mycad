@@ -1,6 +1,10 @@
 module GLFW_Helpers
-( 
-  glfwInit
+(
+  Window
+, camera
+, shouldClose
+, swapBuffers
+, glfwInit
 , initFailMsg
 )where
 
@@ -13,27 +17,33 @@ import qualified Graphics.UI.GLFW as GLFW
 import Graphics.GL.Core33
 
 -- internal
-import ViewSpace (Camera, rotateCameraNudge, zoomCamera)
+import ViewSpace (Camera, initCamera, rotateCameraNudge, zoomCamera)
+
+-- | A Window includes the data needed to communicate with GLFW, as well as
+--   information about the View
+data Window = Window { _window :: GLFW.Window
+                     , camera :: Camera
+                     }
 
 -- | This data is used to determine how far the cursor has moved
 data CursorPosition = CursorPosition Float Float
 
 -- | Initializes a GLFW window, including the openGL context
-glfwInit :: Camera -> Int -> Int -> String -> IO (Maybe GLFW.Window)
-glfwInit camera width height title = do
+glfwInit :: Int -> Int -> String -> IO (Maybe Window)
+glfwInit width height title = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
     GLFW.windowHint (GLFW.WindowHint'OpenGLProfile GLFW.OpenGLProfile'Core)
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
     GLFW.init
     maybeWindow <- GLFW.createWindow width height title Nothing Nothing
-    let bail = GLFW.terminate >> pure Nothing
-        go   = initWindow camera
-    maybe bail go maybeWindow
+    maybe bail initWindow maybeWindow
+        where bail = GLFW.terminate >> pure Nothing
 
-initWindow :: Camera -> GLFW.Window -> IO (Maybe GLFW.Window)
-initWindow ioCam window = do
-    -- Initialise (global... :(  ) cursor info
+initWindow :: GLFW.Window -> IO (Maybe Window)
+initWindow window = do
+    -- Initialize...well, global stuf :(
+    ioCam <- initCamera
     cursor <- newIORef $ CursorPosition 0 0
 
     -- enable callbacks
@@ -50,7 +60,15 @@ initWindow ioCam window = do
     -- enable depth testing
     glEnable GL_DEPTH_TEST
 
-    pure (Just window)
+    pure $ Just (Window window ioCam)
+
+-- | Determine if the User or OS has requested for the window to close.
+shouldClose :: Window -> IO Bool
+shouldClose (Window window _) = do
+    GLFW.windowShouldClose window
+
+swapBuffers :: Window -> IO ()
+swapBuffers (Window window _) = GLFW.swapBuffers window
 
 -- | This message provides some useful output in case we can't initialize
 initFailMsg :: IO ()

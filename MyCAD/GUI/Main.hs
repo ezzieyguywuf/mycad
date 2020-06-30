@@ -17,12 +17,9 @@ import Graphics.GL.Core33
 
 main :: IO ()
 main = do
-    -- Initialize some global stuff... :(
-    camera <- initCamera
+    mWindow <- glfwInit winWIDTH winHEIGHT winTITLE
 
-    mWindow <- glfwInit camera winWIDTH winHEIGHT winTITLE
-
-    maybe initFailMsg (act camera) mWindow
+    maybe initFailMsg act mWindow
 
 winWIDTH      = 800
 winHEIGHT     = 600
@@ -32,8 +29,8 @@ vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
 lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
 fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
-act :: Camera -> GLFW.Window -> IO()
-act camera window = do
+act :: Window -> IO()
+act window = do
     -- Compile and link our shaders
     baseShader <- makeShader vshaderFPATH fshaderFPATH
     lineShader <- makeShader lvshaderFPATH fshaderFPATH
@@ -51,8 +48,8 @@ act camera window = do
 
     -- jump down below to see the first call to loop
     let loop = do
-            shouldClose <- GLFW.windowShouldClose window 
-            unless shouldClose $ do
+            bClose <- shouldClose window
+            unless bClose $ do
                 -- event poll
                 GLFW.pollEvents
 
@@ -62,7 +59,7 @@ act camera window = do
                 glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
                 -- Update our uniforms
-                putViewUniform camera [baseShader, lineShader]
+                putViewUniform (camera window) [baseShader, lineShader]
 
                 -- draw static objects
                 sequence_ $ fmap drawObject [cubeDrawer, lineDrawer, circleDrawer]
@@ -70,7 +67,7 @@ act camera window = do
                 --rotateCameraNudge camera (-0.005) 0
 
                 -- swap buffers and go again
-                GLFW.swapBuffers window
+                swapBuffers window
                 loop
 
     -- enter our main loop
