@@ -13,20 +13,15 @@ module GL_Helpers
 
 -- base
 import Control.Monad (when)
-import Graphics.GL.Core33
-import Graphics.GL.Types
-import Codec.Picture ( readImage
-                     , generateImage
-                     , convertRGB8
-                     , DynamicImage(..)
-                     , Image(..)
-                     , PixelRGB8(..))
-import Linear.Matrix
 import Foreign
 import Foreign.C.String (withCAStringLen, newCString)
-import qualified Data.Vector.Storable as VS
 
--- Thing's I've defined
+-- Third party
+import Graphics.GL.Core33
+import Graphics.GL.Types (GLuint, GLint, GLsizei, GLenum)
+import Linear.Matrix
+
+-- internal
 import GraphicData
 
 -- | This will store the data necessary to execute a shader and draw something
@@ -121,18 +116,21 @@ putUniform shader (Uniform name exec) = do
 ------------------------------------------------------------------
 --          Private Free Functions
 ------------------------------------------------------------------
-_loadTexture :: String -> IO GLuint
-_loadTexture fname = do
-    dynImage <- getDynImage fname
-    let ipixelrgb8 = convertRGB8 dynImage
-        iWidth = fromIntegral $ imageWidth ipixelrgb8
-        iHeight = fromIntegral $ imageHeight ipixelrgb8
-        iData = imageData ipixelrgb8
+-- TODO: If you want to use this, you'll need to finish fleshing out the
+--       Pictures module.
+--import qualified Data.Vector.Storable as VS
+--_loadTexture :: String -> IO GLuint
+--_loadTexture fname = do
+    --dynImage <- getDynImage fname
+    --let ipixelrgb8 = convertRGB8 dynImage
+        --iWidth = fromIntegral $ imageWidth ipixelrgb8
+        --iHeight = fromIntegral $ imageHeight ipixelrgb8
+        --iData = imageData ipixelrgb8
 
-    VS.unsafeWith iData (makeOpenGLTexture iWidth iHeight)
+    --VS.unsafeWith iData (makeOpenGLTexture iWidth iHeight)
 
-makeOpenGLTexture :: GLsizei -> GLsizei -> Ptr a -> IO GLuint
-makeOpenGLTexture  w h ptr = do
+_makeOpenGLTexture :: GLsizei -> GLsizei -> Ptr a -> IO GLuint
+_makeOpenGLTexture  w h ptr = do
     textureP <- malloc
     glGenTextures 1 textureP
     texture <- peek textureP
@@ -144,17 +142,6 @@ makeOpenGLTexture  w h ptr = do
     glBindTexture GL_TEXTURE_2D 0
 
     pure texture
-
-getDynImage :: String -> IO DynamicImage
-getDynImage fname = do
-    check <- readImage fname
-    case check of
-        Left msg -> pure generateGradient
-        Right rawData -> pure rawData
-
-generateGradient :: DynamicImage
-generateGradient = ImageRGB8 $ generateImage renderer 800 600
-    where renderer x y = PixelRGB8 (fromIntegral x) (fromIntegral y) 128
 
 loadShader :: GLenum -> String -> IO GLuint
 loadShader shaderType source = do
