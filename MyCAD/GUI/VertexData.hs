@@ -14,7 +14,9 @@ import Linear.V3
 import Linear.V4
 import Linear.Quaternion
 import Linear.Metric
-import GraphicData
+import GraphicData ( ObjectData(..), ElementData(..)
+                   , PlacementData(..), VertexAttribute(..)
+                   , makeElementData)
 
 lineElement' :: Float -> V4 Float-> ElementData
 lineElement' len color = makeElementData vertices indices
