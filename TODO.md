@@ -37,6 +37,7 @@
 - Update GraphicData stuff so that AttributeData index is defined by the user,
   not in getAttributeDataIndex
 - Update mouse rotation so that it's not so twitchy.
+- Allow simultaneous keys, i.e. arrows, to control things
 
 # UX
 - Add icons to GUI

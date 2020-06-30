@@ -1,19 +1,21 @@
 module Main (main) where
 -- base
-import Control.Monad (unless)
 import Data.Bits ((.|.))
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TMVar(tryTakeTMVar)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
 import Graphics.GL.Core33
+import Linear.V3 (V3(..))
 
 -- internal
-import GLFW_Helpers (Window, camera, glfwInit, initFailMsg, shouldClose,
+import GLFW_Helpers (Window(..), glfwInit, closeIfNeeded, shutdownGLFW,
                      swapBuffers)
 import GL_Helpers (Shader, Drawer, makeShader, makeObjectDrawer, floatUniform,
                    putUniform,  drawObject)
 import VertexData (cube, line, circle)
-import ViewSpace (putProjectionUniform, putViewUniform)
+import ViewSpace (CameraData(..), putProjectionUniform, putViewUniform)
 
 winWIDTH      = 800
 winHEIGHT     = 600
@@ -25,7 +27,8 @@ fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
 main :: IO ()
 main = do
-    mWindow <- glfwInit winWIDTH winHEIGHT winTITLE
+    putStrLn "executing main"
+    mWindow <- glfwInit winWIDTH winHEIGHT winTITLE startCam
 
     maybe initFailMsg act mWindow
 
@@ -46,33 +49,55 @@ act window = do
     floatUniform winASPECT "aspect" >>= putUniform lineShader
     floatUniform 5 "thickness" >>= putUniform lineShader
 
-    -- enter our main loop
     let shaders = [baseShader, lineShader]
         drawers = [cubeDrawer, lineDrawer, circleDrawer]
+    -- enter our main loop
     loop window shaders drawers
 
-    GLFW.terminate
+    -- Just in case our loop didn't manage to get there
+    shutdownGLFW
 
 loop :: Window -> [Shader] -> [Drawer] -> IO ()
 loop window shaders drawers = do
-    bClose <- shouldClose window
-    unless bClose $ do
-        -- event poll
-        GLFW.pollEvents
+    closeIfNeeded window
+    GLFW.pollEvents
 
-        -- drawing
-        --   Background
-        glClearColor 0.2 0.3 0.3 1.0
-        glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
+    -- Update our uniforms
+    mTaken <- atomically $ tryTakeTMVar (cameraQueue window)
+    case mTaken of
+        Nothing         -> pure()
+        Just cameraData -> do putViewUniform cameraData shaders
+                              redraw window drawers
+    loop window shaders drawers
 
-        -- Update our uniforms
-        putViewUniform (camera window) shaders
+redraw :: Window -> [Drawer] -> IO ()
+redraw window drawers = do
+    -- drawing
+    --   Background
+    glClearColor 0.2 0.3 0.3 1.0
+    glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
-        -- draw static objects
-        sequence_ $ fmap drawObject drawers
 
-        --rotateCameraNudge camera (-0.005) 0
+    -- draw static objects
+    sequence_ $ fmap drawObject drawers
 
-        -- swap buffers and go again
-        swapBuffers window
-        loop window shaders drawers
+    --rotateCameraNudge camera (-0.005) 0
+
+    -- swap buffers and go again
+    swapBuffers window
+
+-- | This will initialize the camera.
+startCam :: CameraData
+startCam = LookAt { location  = V3 0 0 100 -- Where is the camera located
+                  , up        = V3 0 1 0   -- Which way is "up" to the camera
+                  , direction = V3 0 0 0   -- Where is it looking
+                  }
+
+-- | This message provides some useful output in case we can't initialize
+initFailMsg :: IO ()
+initFailMsg = do
+    putStrLn "Failed to create a GLFW window!"
+    putStrLn "  are you sure glfw is installed?"
+    putStrLn "  If you're using Intel, you may need to enable software rendering"
+    putStrLn "  If you're using a terminal, you may need to set DISPLAY."
+

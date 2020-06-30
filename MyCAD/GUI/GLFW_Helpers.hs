@@ -1,104 +1,120 @@
 module GLFW_Helpers
 (
-  Window
-, camera
-, shouldClose
+  Window(..)
+, closeIfNeeded
+, shutdownGLFW
 , swapBuffers
 , glfwInit
-, initFailMsg
 )where
 
 -- base
 import Control.Monad (when)
 import Data.IORef (IORef, readIORef, writeIORef, newIORef)
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TMVar (TMVar, newEmptyTMVar, putTMVar)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
 import Graphics.GL.Core33
 
 -- internal
-import ViewSpace (Camera, initCamera, rotateCameraNudge, zoomCamera)
+import ViewSpace (CameraData, rotateCameraNudge, zoomCamera)
 
 -- | A Window includes the data needed to communicate with GLFW, as well as
 --   information about the View
-data Window = Window { _window :: GLFW.Window
-                     , camera :: Camera
+data Window = Window { getWindow     :: GLFW.Window
+                     , lastCamera  :: IORef CameraData
+                     , cameraQueue :: TMVar CameraData
                      }
 
--- | This data is used to determine how far the cursor has moved
+-- | This data is used to determine how far the cursor has moved in callbacks
 data CursorPosition = CursorPosition Float Float
 
 -- | Initializes a GLFW window, including the openGL context
-glfwInit :: Int -> Int -> String -> IO (Maybe Window)
-glfwInit width height title = do
+glfwInit :: Int -> Int -> String -> CameraData -> IO (Maybe Window)
+glfwInit width height title camera = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
     GLFW.windowHint (GLFW.WindowHint'OpenGLProfile GLFW.OpenGLProfile'Core)
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
     GLFW.init
     maybeWindow <- GLFW.createWindow width height title Nothing Nothing
-    maybe bail initWindow maybeWindow
-        where bail = GLFW.terminate >> pure Nothing
+    maybe (shutdownGLFW >> pure Nothing) (initWindow camera) maybeWindow
 
-initWindow :: GLFW.Window -> IO (Maybe Window)
-initWindow window = do
+initWindow :: CameraData -> GLFW.Window -> IO (Maybe Window)
+initWindow camera glfwWindow = do
     -- Initialize...well, global stuf :(
-    ioCam <- initCamera
+    ioCam  <- newIORef camera
     cursor <- newIORef $ CursorPosition 0 0
+    camQueue <- atomically newEmptyTMVar :: IO (TMVar CameraData)
+    let window = Window glfwWindow ioCam camQueue
 
     -- enable callbacks
-    GLFW.setKeyCallback window (Just (keypressed ioCam))
-    GLFW.setFramebufferSizeCallback window ( Just resize )
-    GLFW.setMouseButtonCallback window (Just (mouseButtonPressed ioCam cursor))
-    GLFW.setScrollCallback window ( Just (mouseScrolled ioCam) )
+    GLFW.setKeyCallback glfwWindow (Just (keypressed window))
+    GLFW.setFramebufferSizeCallback glfwWindow ( Just resize )
+    GLFW.setMouseButtonCallback glfwWindow (Just (mouseButtonPressed window cursor))
+    GLFW.setScrollCallback glfwWindow ( Just (mouseScrolled window) )
 
     -- calibrate the viewport
-    GLFW.makeContextCurrent (Just window)
-    (x,y) <- GLFW.getFramebufferSize window
+    GLFW.makeContextCurrent (Just glfwWindow)
+    (x,y) <- GLFW.getFramebufferSize glfwWindow
     glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
     -- enable depth testing
     glEnable GL_DEPTH_TEST
 
-    pure $ Just (Window window ioCam)
+    pure $ Just window
 
 -- | Determine if the User or OS has requested for the window to close.
-shouldClose :: Window -> IO Bool
-shouldClose (Window window _) = do
-    GLFW.windowShouldClose window
+closeIfNeeded :: Window -> IO ()
+closeIfNeeded window = do
+    bClose <- GLFW.windowShouldClose (getWindow window)
+    when bClose shutdownGLFW
+
+-- | Exit the GLFW stuff
+shutdownGLFW :: IO ()
+shutdownGLFW = GLFW.terminate
 
 swapBuffers :: Window -> IO ()
-swapBuffers (Window window _) = GLFW.swapBuffers window
-
--- | This message provides some useful output in case we can't initialize
-initFailMsg :: IO ()
-initFailMsg = do
-    putStrLn "Failed to create a GLFW window!"
-    putStrLn "  are you sure glfw is installed?"
-    putStrLn "  If you're using Intel, you may need to enable software rendering"
-    putStrLn "  If you're using a terminal, you may need to set DISPLAY."
+swapBuffers window = GLFW.swapBuffers (getWindow window)
 
 -- ===========================================================================
 --                            Callbacks
 -- ===========================================================================
 -- | callback for when the user presses a key
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
-keypressed :: Camera -> GLFW.KeyCallback
-keypressed cam window key scanCode keyState modKeys = do
+keypressed :: Window -> GLFW.KeyCallback
+keypressed window glfwWindow key _ keyState _ = do
     let delta = 0.1
-    when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
-        (GLFW.setWindowShouldClose window True)
-    --when (key == GLFW.Key'C && keyState == GLFW.KeyState'Pressed)
-        --(rotateCameraNudge cam 0 delta)
-        --(setCamera cam (V3 0 0 50))
-    when (key == GLFW.Key'Up && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam 0 delta)
-    when (key == GLFW.Key'Down && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam 0 (-delta))
-    when (key == GLFW.Key'Right && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam (-delta) 0)
-    when (key == GLFW.Key'Left && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam (delta) 0)
+        isPressed   = keyState == GLFW.KeyState'Pressed
+        isRepeating = keyState == GLFW.KeyState'Repeating
+        isEscape    = key == GLFW.Key'Escape
+        isUp        = key == GLFW.Key'Up
+        isDown      = key == GLFW.Key'Down
+        isLeft      = key == GLFW.Key'Left
+        isRight     = key == GLFW.Key'Right
+
+    when (and [isPressed, isEscape]) (GLFW.setWindowShouldClose glfwWindow True)
+    when (and [isUp,    or [isPressed, isRepeating]]) (bumpCamera window 0        delta)
+    when (and [isDown,  or [isPressed, isRepeating]]) (bumpCamera window 0        (-delta))
+    when (and [isRight, or [isPressed, isRepeating]]) (bumpCamera window (-delta) 0)
+    when (and [isLeft,  or [isPressed, isRepeating]]) (bumpCamera window delta    0)
+
+bumpCamera :: Window -> Float -> Float -> IO ()
+bumpCamera window dx dy = do
+    let ioCam    = lastCamera window
+        camQueue = cameraQueue window
+    -- Get the previous camera information
+    oldCamData <- readIORef ioCam
+
+    -- Transform the camera to it's new position
+    let newCamData = rotateCameraNudge oldCamData dx dy
+
+    -- Update our lastCamera IORef
+    writeIORef ioCam newCamData
+    -- Let whoever's listening know that there's new data to use.
+    atomically $ putTMVar camQueue newCamData
+
 
 -- | callback for when the user resizes the window
 resize :: GLFW.FramebufferSizeCallback
@@ -107,8 +123,8 @@ resize _ width height = do
 
 -- | callback for when the cursor is moved inside the window
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
-cursorMoved :: IORef CursorPosition -> Camera -> GLFW.CursorPosCallback
-cursorMoved ioCursor camera _ x y = do
+cursorMoved :: IORef CursorPosition -> Window -> GLFW.CursorPosCallback
+cursorMoved ioCursor window _ x y = do
     -- Calculate delta
     (CursorPosition x0 y0) <- readIORef ioCursor
     let sensitivity = 0.1
@@ -121,26 +137,28 @@ cursorMoved ioCursor camera _ x y = do
     writeIORef  ioCursor (CursorPosition x' y')
 
     -- Update camera
-    rotateCameraNudge camera (-dx) dy
+    bumpCamera window (-dx) dy
 
 -- | Callback for when the user presses a button in the window
-mouseButtonPressed :: Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
-mouseButtonPressed cam cursor window button state _ = do
+mouseButtonPressed :: Window -> IORef CursorPosition -> GLFW.MouseButtonCallback
+mouseButtonPressed window cursor glfwWindow button state _ = do
     let isPressed = state  == GLFW.MouseButtonState'Pressed
         isMB1     = button == GLFW.MouseButton'1
     if and [isMB1, isPressed]
        then do
            -- track the cursor's movement
-           (x, y) <- GLFW.getCursorPos window
+           (x, y) <- GLFW.getCursorPos glfwWindow
            writeIORef cursor (CursorPosition (realToFrac x) (realToFrac y))
-           GLFW.setCursorPosCallback window (Just (cursorMoved cursor cam))
-           GLFW.setCursorInputMode window GLFW.CursorInputMode'Disabled
+           GLFW.setCursorPosCallback glfwWindow (Just (cursorMoved cursor window))
+           GLFW.setCursorInputMode glfwWindow GLFW.CursorInputMode'Disabled
        else do
            -- stop tracking the cursor's movement
-           GLFW.setCursorPosCallback window Nothing
-           GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
+           GLFW.setCursorPosCallback glfwWindow Nothing
+           GLFW.setCursorInputMode glfwWindow GLFW.CursorInputMode'Normal
 
 -- | Callback for when the user scrolls the mouse wheel
-mouseScrolled :: Camera -> GLFW.ScrollCallback
-mouseScrolled camera _ _ dy = zoomCamera camera (realToFrac dy)
-
+mouseScrolled :: Window -> GLFW.ScrollCallback
+mouseScrolled window _ _ dy = do
+    oldCamData <- readIORef (lastCamera window)
+    let newCamData = zoomCamera oldCamData (realToFrac dy)
+    atomically $ putTMVar (cameraQueue window) newCamData
