@@ -1,81 +1,24 @@
 module GLFW_Helpers
-( keypressed
-, resize
-, glfwInit
+( 
+  glfwInit
 , initFailMsg
 )where
 
 -- base
 import Control.Monad (when)
+import Data.IORef (IORef, readIORef, writeIORef, newIORef)
 
--- GLFW-b, qualified for clarity
+-- third party
 import qualified Graphics.UI.GLFW as GLFW
-
--- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
 
-import Data.IORef
-import ViewSpace
+-- internal
+import ViewSpace (Camera, rotateCameraNudge, zoomCamera)
 
--- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
-keypressed :: Camera -> GLFW.KeyCallback
-keypressed cam window key scanCode keyState modKeys = do
-    let delta = 0.1
-    when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
-        (GLFW.setWindowShouldClose window True)
-    --when (key == GLFW.Key'C && keyState == GLFW.KeyState'Pressed)
-        --(rotateCameraNudge cam 0 delta)
-        --(setCamera cam (V3 0 0 50))
-    when (key == GLFW.Key'Up && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam 0 delta)
-    when (key == GLFW.Key'Down && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam 0 (-delta))
-    when (key == GLFW.Key'Right && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam (-delta) 0)
-    when (key == GLFW.Key'Left && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
-        (rotateCameraNudge cam (delta) 0)
-
-resize :: GLFW.FramebufferSizeCallback
-resize _ width height = do
-    glViewport 0 0 (fromIntegral width) (fromIntegral height)
-
--- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
-cursorMoved :: IORef CursorPosition -> Camera -> GLFW.CursorPosCallback
-cursorMoved ioCursor camera _ x y = do
-    -- Calculate delta
-    (CursorPosition x0 y0) <- readIORef ioCursor
-    let sensitivity = 0.1
-        x' = realToFrac x
-        y' = realToFrac y
-        dx = sensitivity * (x' - x0)
-        dy = -1 * sensitivity * (y' - y0)
-
-    -- Update our IORef (err....global var.)
-    writeIORef  ioCursor (CursorPosition x' y')
-
-    -- Update camera
-    rotateCameraNudge camera (-dx) dy
-
+-- | This data is used to determine how far the cursor has moved
 data CursorPosition = CursorPosition Float Float
 
-mouseButtonPressed :: Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
-mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
-    if state == GLFW.MouseButtonState'Pressed
-       then do
-           (x, y) <- GLFW.getCursorPos window
-           writeIORef cursor (CursorPosition (realToFrac x) (realToFrac y))
-           GLFW.setCursorPosCallback window (Just (cursorMoved cursor cam))
-           GLFW.setCursorInputMode window GLFW.CursorInputMode'Disabled
-       else do
-           GLFW.setCursorPosCallback window Nothing
-           GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
-           -- re-enable the cursor
-mouseButtonPressed _ _ _ _ _ _ = pure ()
-
-mouseScrolled :: Camera -> GLFW.ScrollCallback
-mouseScrolled camera _ _ dy = do
-    zoomCamera camera (realToFrac dy)
-
+-- | Initializes a GLFW window, including the openGL context
 glfwInit :: Camera -> Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit camera width height title = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
@@ -115,3 +58,69 @@ initFailMsg = do
     putStrLn "  are you sure glfw is installed?"
     putStrLn "  If you're using Intel, you may need to enable software rendering"
     putStrLn "  If you're using a terminal, you may need to set DISPLAY."
+
+-- ===========================================================================
+--                            Callbacks
+-- ===========================================================================
+-- | callback for when the user presses a key
+-- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
+keypressed :: Camera -> GLFW.KeyCallback
+keypressed cam window key scanCode keyState modKeys = do
+    let delta = 0.1
+    when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
+        (GLFW.setWindowShouldClose window True)
+    --when (key == GLFW.Key'C && keyState == GLFW.KeyState'Pressed)
+        --(rotateCameraNudge cam 0 delta)
+        --(setCamera cam (V3 0 0 50))
+    when (key == GLFW.Key'Up && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
+        (rotateCameraNudge cam 0 delta)
+    when (key == GLFW.Key'Down && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
+        (rotateCameraNudge cam 0 (-delta))
+    when (key == GLFW.Key'Right && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
+        (rotateCameraNudge cam (-delta) 0)
+    when (key == GLFW.Key'Left && (elem keyState [GLFW.KeyState'Pressed, GLFW.KeyState'Repeating]))
+        (rotateCameraNudge cam (delta) 0)
+
+-- | callback for when the user resizes the window
+resize :: GLFW.FramebufferSizeCallback
+resize _ width height = do
+    glViewport 0 0 (fromIntegral width) (fromIntegral height)
+
+-- | callback for when the cursor is moved inside the window
+-- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
+cursorMoved :: IORef CursorPosition -> Camera -> GLFW.CursorPosCallback
+cursorMoved ioCursor camera _ x y = do
+    -- Calculate delta
+    (CursorPosition x0 y0) <- readIORef ioCursor
+    let sensitivity = 0.1
+        x' = realToFrac x
+        y' = realToFrac y
+        dx = sensitivity * (x' - x0)
+        dy = -1 * sensitivity * (y' - y0)
+
+    -- Update our IORef (err....global var.)
+    writeIORef  ioCursor (CursorPosition x' y')
+
+    -- Update camera
+    rotateCameraNudge camera (-dx) dy
+
+-- | Callback for when the user presses a button in the window
+mouseButtonPressed :: Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
+mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
+    if state == GLFW.MouseButtonState'Pressed
+       then do
+           (x, y) <- GLFW.getCursorPos window
+           writeIORef cursor (CursorPosition (realToFrac x) (realToFrac y))
+           GLFW.setCursorPosCallback window (Just (cursorMoved cursor cam))
+           GLFW.setCursorInputMode window GLFW.CursorInputMode'Disabled
+       else do
+           GLFW.setCursorPosCallback window Nothing
+           GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
+           -- re-enable the cursor
+mouseButtonPressed _ _ _ _ _ _ = pure ()
+
+-- | Callback for when the user scrolls the mouse wheel
+mouseScrolled :: Camera -> GLFW.ScrollCallback
+mouseScrolled camera _ _ dy = do
+    zoomCamera camera (realToFrac dy)
+
