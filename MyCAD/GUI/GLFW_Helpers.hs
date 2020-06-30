@@ -18,7 +18,7 @@ import Data.IORef
 import ViewSpace
 
 -- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
-keypressed :: IORef Camera -> GLFW.KeyCallback
+keypressed :: Camera -> GLFW.KeyCallback
 keypressed cam window key scanCode keyState modKeys = do
     let delta = 0.1
     when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
@@ -40,7 +40,7 @@ resize _ width height = do
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
 -- GLFW.CursorPosCallback :: GLFW.Window -> Double -> Double -> IO ()
-cursorMoved :: IORef CursorPosition -> IORef Camera -> GLFW.CursorPosCallback
+cursorMoved :: IORef CursorPosition -> Camera -> GLFW.CursorPosCallback
 cursorMoved ioCursor camera _ x y = do
     -- Calculate delta
     (CursorPosition x0 y0) <- readIORef ioCursor
@@ -58,7 +58,7 @@ cursorMoved ioCursor camera _ x y = do
 
 data CursorPosition = CursorPosition Float Float
 
-mouseButtonPressed :: IORef Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
+mouseButtonPressed :: Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
 mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
     if state == GLFW.MouseButtonState'Pressed
        then do
@@ -72,11 +72,11 @@ mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
            -- re-enable the cursor
 mouseButtonPressed _ _ _ _ _ _ = pure ()
 
-mouseScrolled :: IORef Camera -> GLFW.ScrollCallback
+mouseScrolled :: Camera -> GLFW.ScrollCallback
 mouseScrolled camera _ _ dy = do
     zoomCamera camera (realToFrac dy)
 
-glfwInit :: IORef Camera -> Int -> Int -> String -> IO (Maybe GLFW.Window)
+glfwInit :: Camera -> Int -> Int -> String -> IO (Maybe GLFW.Window)
 glfwInit camera width height title = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
@@ -88,7 +88,7 @@ glfwInit camera width height title = do
         Nothing -> GLFW.terminate >> pure Nothing
         Just window -> fmap Just (initWindow window camera)
 
-initWindow :: GLFW.Window -> IORef Camera -> IO GLFW.Window
+initWindow :: GLFW.Window -> Camera -> IO GLFW.Window
 initWindow window ioCam = do
     -- Initialise (global... :(  ) cursor info
     cursor <- newIORef $ CursorPosition 0 0

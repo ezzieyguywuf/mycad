@@ -1,5 +1,5 @@
 module ViewSpace
-( Camera(..)
+( Camera
 , initCamera
 , rotateCameraNudge
 , zoomCamera
@@ -11,31 +11,34 @@ import Linear.V3
 import Linear.Quaternion
 import Linear.Metric
 import Linear.Vector
-import Data.IORef
 import Numeric
 
 import Linear.Projection (lookAt, perspective)
 import Control.Monad (unless)
+import Data.IORef (IORef, newIORef, readIORef, writeIORef)
 import GL_Helpers (Shader, matrixUniform, putUniform)
 
-data Camera = LookAt {
-                       location  :: V3 Float
-                     , up        :: V3 Float
-                     , direction :: V3 Float
-                     }
+type Camera = IORef CameraData
+
+
+data CameraData = LookAt { location  :: V3 Float
+                         , up        :: V3 Float
+                         , direction :: V3 Float
+                         }
 
 _pprintV3 :: RealFloat a => V3 a -> String
 _pprintV3 v = (foldMap (showFFloat (Just 3)) v) ", "
 
-initCamera :: IO (IORef Camera)
-initCamera = newIORef LookAt {
-                               location  = V3 0 0 100
-                             , up        = V3 0 1 0
-                             , direction = V3 0 0 0
-                             }
+initCamera :: IO Camera
+initCamera = do
+    let cam = LookAt { location  = V3 0 0 100
+                     , up        = V3 0 1 0
+                     , direction = V3 0 0 0
+                     }
+    newIORef cam
 
 -- | Rotates the camera.
-rotateCameraNudge :: IORef Camera
+rotateCameraNudge :: Camera
                   -> Float         -- ^ dx
                   -> Float         -- ^ dy
                   -> IO ()
@@ -54,15 +57,16 @@ rotateCameraNudge ioCam yaw pitch = do
 
     writeIORef ioCam (LookAt loc' up' dir)
 
-zoomCamera :: IORef Camera -> Float -> IO ()
+zoomCamera :: Camera -> Float -> IO ()
 zoomCamera ioCam amt = do
     (LookAt loc up dir) <- readIORef ioCam
     let rad  = norm (loc - dir)
         rad' = rad - amt
         loc' = lerp (rad' / rad) loc dir
+
     unless (rad' <= 0.001) (writeIORef ioCam (LookAt loc' up dir))
 
-putViewUniform :: IORef Camera -> [Shader] -> IO ()
+putViewUniform :: Camera -> [Shader] -> IO ()
 putViewUniform ioCam shaders = do
     (LookAt loc up dir) <- readIORef ioCam
     mat <- matrixUniform (lookAt loc dir up) "view"

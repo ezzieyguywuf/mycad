@@ -1,6 +1,5 @@
 module Main (main) where
 -- base
-import Data.IORef (IORef)
 import Control.Monad (unless)
 import Data.Bits ((.|.))
 
@@ -33,7 +32,7 @@ vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
 lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
 fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
 
-act :: IORef Camera -> GLFW.Window -> IO()
+act :: Camera -> GLFW.Window -> IO()
 act camera window = do
     -- Compile and like our shaders
     baseShader <- makeShader vshaderFPATH fshaderFPATH
