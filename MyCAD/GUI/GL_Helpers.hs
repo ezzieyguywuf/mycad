@@ -123,9 +123,7 @@ putUniform shader (Uniform name exec) = do
 
 _makeOpenGLTexture :: GLsizei -> GLsizei -> Ptr a -> IO GLuint
 _makeOpenGLTexture  w h ptr = do
-    textureP <- malloc
-    glGenTextures 1 textureP
-    texture <- peek textureP
+    texture <- getPointerVal (glGenTextures 1)
 
     glBindTexture GL_TEXTURE_2D texture
     glTexImage2D GL_TEXTURE_2D 0 GL_RGB w h 0 GL_RGB GL_UNSIGNED_BYTE (castPtr ptr)
@@ -188,9 +186,7 @@ linkShadersToProgram shader1 shader2 = do
     glAttachShader shaderProgram shader2
     glLinkProgram shaderProgram
 
-    linkingSuccessP <- malloc
-    glGetProgramiv shaderProgram GL_LINK_STATUS linkingSuccessP
-    linkingSuccess <- peek linkingSuccessP
+    linkingSuccess <- getPointerVal (glGetProgramiv shaderProgram GL_LINK_STATUS)
     when (linkingSuccess == GL_FALSE) $ do
         putStrLn "Program Linking Error:"
         let infoLength = 512
