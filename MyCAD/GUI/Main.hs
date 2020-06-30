@@ -3,6 +3,7 @@ module Main (main) where
 import Data.Bits ((.|.))
 import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TMVar(tryTakeTMVar)
+import System.FilePath ((</>))
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -21,9 +22,9 @@ winWIDTH      = 800
 winHEIGHT     = 600
 winASPECT     = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
 winTITLE      = "LearnOpenGL Hello CAD!"
-vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
-lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
-fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
+vshaderFPATH  = "MyCAD" </> "GUI" </> "VertexShader.glsl"
+lvshaderFPATH = "MyCAD" </> "GUI" </> "LineVShader.glsl"
+fshaderFPATH  = "MyCAD" </> "GUI" </> "FragmentShader.glsl"
 
 main :: IO ()
 main = do

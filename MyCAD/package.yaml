@@ -47,6 +47,7 @@ executables:
     - JuicyPixels
     - vector
     - stm
+    - filepath
 
   tui-exe:
     main: Main.hs
