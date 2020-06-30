@@ -46,30 +46,34 @@ act window = do
     floatUniform winASPECT "aspect" >>= putUniform lineShader
     floatUniform 5 "thickness" >>= putUniform lineShader
 
-    -- jump down below to see the first call to loop
-    let loop = do
-            bClose <- shouldClose window
-            unless bClose $ do
-                -- event poll
-                GLFW.pollEvents
-
-                -- drawing
-                --   Background
-                glClearColor 0.2 0.3 0.3 1.0
-                glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
-
-                -- Update our uniforms
-                putViewUniform (camera window) [baseShader, lineShader]
-
-                -- draw static objects
-                sequence_ $ fmap drawObject [cubeDrawer, lineDrawer, circleDrawer]
-
-                --rotateCameraNudge camera (-0.005) 0
-
-                -- swap buffers and go again
-                swapBuffers window
-                loop
 
     -- enter our main loop
-    loop
+    let shaders = [baseShader, lineShader]
+        drawers = [cubeDrawer, lineDrawer, circleDrawer]
+    loop window shaders drawers
+
     GLFW.terminate
+
+loop :: Window -> [Shader] -> [Drawer] -> IO ()
+loop window shaders drawers = do
+    bClose <- shouldClose window
+    unless bClose $ do
+        -- event poll
+        GLFW.pollEvents
+
+        -- drawing
+        --   Background
+        glClearColor 0.2 0.3 0.3 1.0
+        glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
+
+        -- Update our uniforms
+        putViewUniform (camera window) shaders
+
+        -- draw static objects
+        sequence_ $ fmap drawObject drawers
+
+        --rotateCameraNudge camera (-0.005) 0
+
+        -- swap buffers and go again
+        swapBuffers window
+        loop window shaders drawers
