@@ -51,7 +51,8 @@ act camera window = do
 
     -- jump down below to see the first call to loop
     let loop = do
-            GLFW.windowShouldClose window >>= flip unless (do
+            shouldClose <- GLFW.windowShouldClose window 
+            unless shouldClose $ do
                 -- event poll
                 GLFW.pollEvents
 
@@ -71,7 +72,6 @@ act camera window = do
                 -- swap buffers and go again
                 GLFW.swapBuffers window
                 loop
-                )
 
     -- enter our main loop
     loop
