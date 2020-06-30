@@ -3,23 +3,17 @@ module Main (main) where
 import Control.Monad (unless)
 import Data.Bits ((.|.))
 
--- GLFW-b, qualified for clarity
+-- third party
 import qualified Graphics.UI.GLFW as GLFW
-
--- helpers that we wrote
-import GLFW_Helpers
-import GL_Helpers
-import VertexData
-import ViewSpace
-
--- gl, all types and funcs here will already start with "gl"
 import Graphics.GL.Core33
 
-main :: IO ()
-main = do
-    mWindow <- glfwInit winWIDTH winHEIGHT winTITLE
-
-    maybe initFailMsg act mWindow
+-- internal
+import GLFW_Helpers (Window, camera, glfwInit, initFailMsg, shouldClose,
+                     swapBuffers)
+import GL_Helpers (Shader, Drawer, makeShader, makeObjectDrawer, floatUniform,
+                   putUniform,  drawObject)
+import VertexData (cube, line, circle)
+import ViewSpace (putProjectionUniform, putViewUniform)
 
 winWIDTH      = 800
 winHEIGHT     = 600
@@ -28,6 +22,12 @@ winTITLE      = "LearnOpenGL Hello CAD!"
 vshaderFPATH  = "MyCAD/GUI/VertexShader.glsl"
 lvshaderFPATH = "MyCAD/GUI/LineVShader.glsl"
 fshaderFPATH  = "MyCAD/GUI/FragmentShader.glsl"
+
+main :: IO ()
+main = do
+    mWindow <- glfwInit winWIDTH winHEIGHT winTITLE
+
+    maybe initFailMsg act mWindow
 
 act :: Window -> IO()
 act window = do
@@ -45,7 +45,6 @@ act window = do
 
     floatUniform winASPECT "aspect" >>= putUniform lineShader
     floatUniform 5 "thickness" >>= putUniform lineShader
-
 
     -- enter our main loop
     let shaders = [baseShader, lineShader]
