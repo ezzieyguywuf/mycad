@@ -18,6 +18,7 @@ import Foreign ( Ptr, nullPtr, castPtr, sizeOf
                , poke, peek
                , newArray, peekArray, mallocArray, withArray
                )
+import Foreign.Storable (Storable)
 import Foreign.C.String (withCAStringLen, newCString)
 
 -- Third party
@@ -47,20 +48,6 @@ data Uniform = Uniform { _uniformName :: String
 
 drawObject :: Drawer -> IO ()
 drawObject drawer = do
-    let (ObjectData (ElementData _ indices) pdatas) = _objectData drawer
-        vao = _vao drawer
-        len = fromIntegral $ length indices
-        makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
-        placements = map makeMat pdatas
-        draw x = x >> glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-        putUniforms = map (\x -> x >>= putUniform (_shader drawer)) placements
-    glUseProgram (_shaderID $ _shader drawer)
-    glBindVertexArray vao
-    sequence_ $ map draw putUniforms
-    glBindVertexArray 0
-
-_drawObjectLine :: Drawer -> IO ()
-_drawObjectLine drawer = do
     let (ObjectData (ElementData _ indices) pdatas) = _objectData drawer
         vao = _vao drawer
         len = fromIntegral $ length indices
@@ -219,8 +206,8 @@ linkShadersToProgram shader1 shader2 = do
 -- This sequence is performed often enough it's worth wrapping. The argument it
 -- takes it a partially applied glGenSomething function, where we'll provide
 -- the pointer and return the address
-getNewBufferID :: (Ptr GLuint -> IO ()) -> IO (GLuint)
-getNewBufferID f = do
+getPointerVal :: Storable a => (Ptr a -> IO ()) -> IO a
+getPointerVal f = do
     -- Haskell will use type inference to figure out what kind of pointer
     pointer <- malloc
     -- the openGL function will fill in our pointer for us
@@ -256,7 +243,7 @@ registerElementBufferObject vao indices = do
     -- let's us save space on the graphics memory.
     -- We sould do this after the VAO has been bound, because then ith VAO will
     -- automatically store a reference to this EBO
-    ebo <- getNewBufferID $ glGenBuffers 1
+    ebo <- getPointerVal $ glGenBuffers 1
     glBindVertexArray vao
     glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
@@ -265,11 +252,11 @@ putGraphicData :: ElementData -> IO GLuint
 putGraphicData edata = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
-    vbo <- getNewBufferID $ glGenBuffers 1
+    vbo <- getPointerVal $ glGenBuffers 1
 
     -- Next, we're going to create a Vertex Array Object, or VAO, which allows
     -- to reuse the data in our VBO over and over (or something like that)
-    vao <- getNewBufferID $ glGenVertexArrays 1
+    vao <- getPointerVal $ glGenVertexArrays 1
 
     -- OpenGL needs to know the size of the data we're going to give it
     let dataSize = getDataSize edata
