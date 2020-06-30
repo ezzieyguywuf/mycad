@@ -1,12 +1,12 @@
+{-# LANGUAGE TypeSynonymInstances,FlexibleInstances #-}
 module GL_Helpers
 (
-  Uniform(..)
+  GLUniform
 , Shader (..)
 , Drawer
+, makeUniform
 , makeObjectDrawer
 , makeShader
-, matrixUniform
-, floatUniform
 , putUniform
 , drawObject
 )where
@@ -32,7 +32,6 @@ import GraphicData (ObjectData(..), ElementData(..), PlacementData(..), Attribut
 
 -- | This will store the data necessary to execute a shader and draw something
 data Shader = Shader { _shaderID       :: GLuint
-                     , _shaderUniforms :: [Uniform]
                      }
 
 -- | This has all the information necessary to draw something to the screen
@@ -42,23 +41,28 @@ data Drawer = ObjectDrawer {
                            , _objectData :: ObjectData
                            }
 
-data Uniform = Uniform { _uniformName :: String
-                       , _uniformExec :: GLint -> IO()
-                       }
+data Uniform a = Uniform { _uniformName :: String
+                         , _uniformData :: a
+                         }
 
 drawObject :: Drawer -> IO ()
 drawObject drawer = do
     let (ObjectData (ElementData _ indices) pdatas) = _objectData drawer
         vao = _vao drawer
         len = fromIntegral $ length indices
-        makeMat (PlacementData rot trans) = matrixUniform (mkTransformation rot trans) "model"
-        placements = map makeMat pdatas
-        draw x = x >> glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-        putUniforms = map (\x -> x >>= putUniform (_shader drawer)) placements
-    glUseProgram (_shaderID $ _shader drawer)
+        shader = _shader drawer
+    glUseProgram (_shaderID $ shader)
     glBindVertexArray vao
-    sequence_ $ map draw putUniforms
+    sequence_ $ map (drawPlacement shader len) pdatas
     glBindVertexArray 0
+
+drawPlacement :: Shader -> GLsizei -> PlacementData -> IO ()
+drawPlacement shader len pdata = do
+    putUniform shader (makeUniform "model" pdata)
+    glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
+
+makeUniform :: GLUniform a => String -> a -> Uniform a
+makeUniform uniformName uniformData = Uniform uniformName uniformData
 
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
@@ -73,27 +77,15 @@ makeShader vpath fpath = do
     glDeleteShader vshader
     glDeleteShader fshader
 
-    pure $ Shader uid []
+    pure $ Shader uid
 
 makeObjectDrawer :: Shader -> ObjectData -> IO Drawer
 makeObjectDrawer shader oData@(ObjectData eData _) = do
     vao <- putGraphicData eData
     pure $ ObjectDrawer vao shader oData
 
-floatUniform :: Float -> String -> IO Uniform
-floatUniform val name = pure (Uniform name exec)
-    where exec = \loc -> glUniform1f loc val
-
-matrixUniform :: M44 Float -> String -> IO Uniform
-matrixUniform transMatrix name = do
-    transP <- malloc
-    poke transP transMatrix
-
-    let exec = \loc -> glUniformMatrix4fv loc 1 GL_FALSE (castPtr transP)
-    pure (Uniform name exec)
-
-putUniform :: Shader -> Uniform -> IO ()
-putUniform shader (Uniform name exec) = do
+putUniform :: GLUniform a => Shader -> Uniform a -> IO ()
+putUniform shader (Uniform name uniformData) = do
     let sid = _shaderID shader
 
     glUseProgram sid
@@ -103,11 +95,29 @@ putUniform shader (Uniform name exec) = do
 
     case compare loc 0 of
         LT -> putStrLn $ "Uniform with name '" <> name <> "' was not found"
-        _  -> exec loc
+        _  -> putData loc uniformData
 
 ------------------------------------------------------------------
 --          Private Free Functions
 ------------------------------------------------------------------
+class GLUniform a where
+    putData :: GLint -> a -> IO ()
+
+instance GLUniform Float where
+    putData uid val = glUniform1f uid val 
+
+instance GLUniform (M44 Float) where
+    putData uid transformationMatrix = do
+        transP <- malloc
+        poke transP transformationMatrix
+
+        glUniformMatrix4fv uid 1 GL_FALSE (castPtr transP)
+
+instance GLUniform PlacementData where
+    putData uid (PlacementData rot trans) = do
+        let mat = mkTransformation rot trans
+        putData uid mat
+
 -- TODO: If you want to use this, you'll need to finish fleshing out the
 --       Pictures module.
 --import qualified Data.Vector.Storable as VS

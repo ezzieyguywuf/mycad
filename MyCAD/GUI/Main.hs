@@ -13,8 +13,8 @@ import Linear.V3 (V3(..))
 -- internal
 import GLFW_Helpers (Window(..), glfwInit, closeIfNeeded, shutdownGLFW,
                      swapBuffers)
-import GL_Helpers (Shader, Drawer, makeShader, makeObjectDrawer, floatUniform,
-                   putUniform,  drawObject)
+import GL_Helpers ( Shader, Drawer, makeShader, makeObjectDrawer
+                  , makeUniform, putUniform,  drawObject)
 import VertexData (cube, line, circle)
 import ViewSpace (CameraData(..), putProjectionUniform, putViewUniform)
 
@@ -89,8 +89,8 @@ initShadersAndDrawers = do
     putProjectionUniform winASPECT baseShader
     putProjectionUniform winASPECT lineShader
 
-    floatUniform winASPECT "aspect"    >>= putUniform lineShader
-    floatUniform 5         "thickness" >>= putUniform lineShader
+    putUniform lineShader (makeUniform "aspect" winASPECT)
+    putUniform lineShader (makeUniform "thickness" (5 :: Float))
 
 
     cubeDrawer <- makeObjectDrawer baseShader cube

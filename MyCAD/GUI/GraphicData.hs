@@ -159,4 +159,3 @@ getRowSize gdata = fromIntegral $ sizeOf (0.0 :: GLfloat) * (length $ squashRow 
 makeOffset :: Int -> Ptr ()
 makeOffset n = castPtr $ plusPtr nullPtr (fromIntegral $ n*floatSize)
     where floatSize = sizeOf (0.0::GLfloat)
-

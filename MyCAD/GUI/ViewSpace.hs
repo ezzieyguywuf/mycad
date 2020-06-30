@@ -13,7 +13,7 @@ import Linear.Metric (normalize, dot, norm)
 import Linear.Vector (lerp)
 
 import Linear.Projection (lookAt, perspective)
-import GL_Helpers (Shader, matrixUniform, putUniform)
+import GL_Helpers (Shader, makeUniform, putUniform)
 
 
 -- | This is the actual data that our camera needs - this fully describes the
@@ -70,11 +70,13 @@ zoomCamera oldCam@(LookAt loc up dir) amt = newCam
 -- | Update the openGL \"Uniform\" matrix that specifies the View
 putViewUniform :: CameraData -> [Shader] -> IO ()
 putViewUniform (LookAt loc up dir) shaders = do
-    mat <- matrixUniform (lookAt loc dir up) "view"
-    sequence_ $ fmap (flip putUniform mat) shaders
+    let mat         = lookAt loc dir up
+        viewUniform = makeUniform "view" mat
+    sequence_ $ fmap (flip putUniform viewUniform) shaders
 
 
 -- | Update the openGL \"Uniform\" matrix that specifies the Projection
 putProjectionUniform :: Float -> Shader -> IO ()
-putProjectionUniform aspect shader = matrixUniform projectionMatrix "projection" >>= (putUniform shader)
+putProjectionUniform aspect shader = putUniform shader projectionUniform
     where projectionMatrix = perspective (pi/4.0) aspect 0.1 1000.0
+          projectionUniform = makeUniform "projection" projectionMatrix
