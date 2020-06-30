@@ -27,12 +27,12 @@ glfwInit camera width height title = do
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
     GLFW.init
     maybeWindow <- GLFW.createWindow width height title Nothing Nothing
-    case maybeWindow of
-        Nothing -> GLFW.terminate >> pure Nothing
-        Just window -> fmap Just (initWindow window camera)
+    let bail = GLFW.terminate >> pure Nothing
+        go   = initWindow camera
+    maybe bail go maybeWindow
 
-initWindow :: GLFW.Window -> Camera -> IO GLFW.Window
-initWindow window ioCam = do
+initWindow :: Camera -> GLFW.Window -> IO (Maybe GLFW.Window)
+initWindow ioCam window = do
     -- Initialise (global... :(  ) cursor info
     cursor <- newIORef $ CursorPosition 0 0
 
@@ -50,8 +50,9 @@ initWindow window ioCam = do
     -- enable depth testing
     glEnable GL_DEPTH_TEST
 
-    pure window
+    pure (Just window)
 
+-- | This message provides some useful output in case we can't initialize
 initFailMsg :: IO ()
 initFailMsg = do
     putStrLn "Failed to create a GLFW window!"
@@ -106,21 +107,22 @@ cursorMoved ioCursor camera _ x y = do
 
 -- | Callback for when the user presses a button in the window
 mouseButtonPressed :: Camera -> IORef CursorPosition -> GLFW.MouseButtonCallback
-mouseButtonPressed cam cursor window GLFW.MouseButton'1 state _ = do
-    if state == GLFW.MouseButtonState'Pressed
+mouseButtonPressed cam cursor window button state _ = do
+    let isPressed = state  == GLFW.MouseButtonState'Pressed
+        isMB1     = button == GLFW.MouseButton'1
+    if and [isMB1, isPressed]
        then do
+           -- track the cursor's movement
            (x, y) <- GLFW.getCursorPos window
            writeIORef cursor (CursorPosition (realToFrac x) (realToFrac y))
            GLFW.setCursorPosCallback window (Just (cursorMoved cursor cam))
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Disabled
        else do
+           -- stop tracking the cursor's movement
            GLFW.setCursorPosCallback window Nothing
            GLFW.setCursorInputMode window GLFW.CursorInputMode'Normal
-           -- re-enable the cursor
-mouseButtonPressed _ _ _ _ _ _ = pure ()
 
 -- | Callback for when the user scrolls the mouse wheel
 mouseScrolled :: Camera -> GLFW.ScrollCallback
-mouseScrolled camera _ _ dy = do
-    zoomCamera camera (realToFrac dy)
+mouseScrolled camera _ _ dy = zoomCamera camera (realToFrac dy)
 
