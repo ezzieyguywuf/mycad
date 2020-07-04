@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - linear
 - mtl
+- containers
 
 executables:
   MyCAD-exe:
@@ -61,5 +62,4 @@ executables:
     - Entity
     - Geometry
     - Topology
-    - containers
     - text

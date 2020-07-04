@@ -1,8 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module GL_Helpers
 (
-  GLUniform
-, Shader (..)
+  Shader
 , Drawer
 , makeUniform
 , makeObjectDrawer
@@ -27,7 +26,10 @@ import Graphics.GL.Types (GLuint, GLint, GLsizei, GLenum)
 import Linear.Matrix (M44, mkTransformation)
 
 -- internal
-import GraphicData (ObjectData(..), ElementData(..), PlacementData(..), AttributeData(..)
+import GraphicData ( ObjectData(..)
+                   , ElementData(..)
+                   , PlacementData(..)
+                   , AttributeData(..)
                    , getDataSize, flattenData, getDataAttributes)
 
 -- | This will store the data necessary to execute a shader and draw something
@@ -63,8 +65,9 @@ class GLUniform a where
 --   "PlacmentData" in the "Drawer"
 drawObject :: Drawer -> IO ()
 drawObject drawer = do
-    let (ObjectData (ElementData _ indices) pdatas) = _objectData drawer
+    let (ObjectData eData pdatas) = _objectData drawer
         vao = _vao drawer
+        indices = getElementIndices eData
         len = fromIntegral $ length indices
         shader = _shader drawer
     glUseProgram (_shaderID $ shader)
@@ -321,4 +324,3 @@ putGraphicData edata = do
     registerElementBufferObject vao (getElementIndices edata)
 
     pure vao
-

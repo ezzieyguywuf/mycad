@@ -10,6 +10,7 @@ module VertexData
 ) where
 
 -- gl, all types and funcs here will already start with "gl"
+import Linear.V1
 import Linear.V3
 import Linear.V4
 import Linear.Quaternion
@@ -20,23 +21,23 @@ import GraphicData ( ObjectData(..), ElementData(..)
 
 lineElement' :: Float -> V4 Float-> ElementData
 lineElement' len color = makeElementData vertices indices
-    where vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up 1]
-                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up (-1)]
-                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (1)]
-                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up 1]
-                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (1)]
-                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (-1)]
+    where vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up (V1 1)]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up (V1 (-1))]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (V1 1)]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color, Up (V1 1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (V1 1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color, Up (V1 (-1))]
                      ]
           indices = [0, 1, 2, 3, 4, 5]
 
 lineElement'' :: Float -> V4 Float -> V4 Float -> ElementData
 lineElement'' len color1 color2 = makeElementData vertices indices
-    where vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color1, Up 1]
-                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color1, Up (-1)]
-                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color1, Up (1)]
-                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color2, Up 1]
-                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color2, Up (1)]
-                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color2, Up (-1)]
+    where vertices = [ [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color1, Up (V1 1)]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color1, Up (V1 (-1))]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color1, Up (V1 1)]
+                     , [Position (V3 0 0 0 ), Direction (V3 1 0 0), Color color2, Up (V1 1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color2, Up (V1 1)]
+                     , [Position (V3 len 0 0 ), Direction (V3 1 0 0), Color color2, Up (V1 (-1))]
                      ]
           indices = [0, 1, 2, 3, 4, 5]
 

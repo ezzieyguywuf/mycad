@@ -13,8 +13,8 @@ import Linear.V3 (V3(..))
 -- internal
 import GLFW_Helpers (Window(..), glfwInit, closeIfNeeded, shutdownGLFW,
                      swapBuffers)
-import GL_Helpers ( Shader, Drawer, makeShader, makeObjectDrawer
-                  , makeUniform, putUniform,  drawObject)
+import GL_Helpers ( Shader, Drawer,
+                    makeObjectDrawer, drawObject, makeShader , makeUniform, putUniform)
 import VertexData (cube, line, circle)
 import ViewSpace (CameraData(..), putProjectionUniform, putViewUniform)
 
