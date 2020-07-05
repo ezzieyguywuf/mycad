@@ -21,7 +21,7 @@ import Graphics.GL.Types (GLuint)
 
 -- Internal
 import GLFW_Helpers (Window, swapBuffers)
-import GL_Helpers (Shader(..), makeShader, putGraphicData', putUniform, makeUniform)
+import GL_Helpers (Shader(..), makeShader, putGraphicData, putUniform, makeUniform)
 import GraphicData (ObjectData(..), getElementIndices)
 import ViewSpace (CameraData, putProjectionUniform, putViewUniform)
 
@@ -67,7 +67,7 @@ updateView camera renderer = do
 --   anything
 addObject :: Renderer -> ObjectData -> IO Renderer
 addObject (Renderer shader targets) oData = do
-    vao <- putGraphicData' oData
+    vao <- putGraphicData oData
     let target = RenderTarget vao oData
     pure $ Renderer shader (target : targets)
 

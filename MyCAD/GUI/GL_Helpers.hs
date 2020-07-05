@@ -2,18 +2,15 @@
 module GL_Helpers
 (
   Shader(..)
-, Drawer
 , makeUniform
-, makeObjectDrawer
 , makeShader
 , putUniform
-, drawObject
-, putGraphicData'
+, putGraphicData
 )where
 
 -- base
 import Control.Monad (when)
-import Foreign ( Ptr, nullPtr, castPtr, sizeOf
+import Foreign ( Ptr, castPtr, sizeOf
                , malloc, alloca, allocaBytes
                , poke, peek
                , newArray, peekArray, mallocArray, withArray
@@ -36,14 +33,6 @@ import GraphicData ( ObjectData(..)
 -- | This will store the data necessary to execute a shader and draw something
 data Shader = Shader { _shaderID       :: GLuint
                      }
-
--- | This has all the information necessary to draw something to the screen
-data Drawer = ObjectDrawer {
-                            _vao        :: GLuint
-                           , _shader     :: Shader
-                           , _objectData :: ObjectData
-                           }
-
 -- | This data type encapsulates a glUniform name, and some data to go along with it
 --
 --   Note that in order for this to be useful with, say, "putUniform", @a@ must
@@ -56,32 +45,6 @@ data Uniform a = Uniform { _uniformName :: String
 --   load it into an openGL context as a \"Uniform\"
 class GLUniform a where
     putData :: GLint -> a -> IO ()
-
--- | Draws some object(s) to the screen.
---
---   Please note: in the current implementation, it's actually
---   "makeObjectDrawer" that does most of the heavy lifting. Here, we simply
---   take the vertices that were already sent to openGL and draw them in
---   different locations and orientations, per the information provided by
---   "PlacmentData" in the "Drawer"
-drawObject :: Drawer -> IO ()
-drawObject drawer = do
-    let (ObjectData eData pdatas) = _objectData drawer
-        vao = _vao drawer
-        indices = getElementIndices eData
-        len = fromIntegral $ length indices
-        shader = _shader drawer
-    glUseProgram (_shaderID $ shader)
-    glBindVertexArray vao
-    sequence_ $ map (drawPlacement shader len) pdatas
-    glBindVertexArray 0
-
--- | this is not exported, but it's only used in drawObject so we'll keep it
---   here
-drawPlacement :: Shader -> GLsizei -> PlacementData -> IO ()
-drawPlacement shader len pdata = do
-    putUniform shader (makeUniform "model" pdata)
-    glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
 
 -- | Creates a Shader that can be used to draw things
 makeShader :: String        -- ^ Vertex Shader, path to a file
@@ -97,17 +60,6 @@ makeShader vpath fpath = do
     glDeleteShader fshader
 
     pure $ Shader uid
-
--- | This will not only create the "Drawer", but also send all the vertices to
---   openGL
---
---   The "drawer" will retain a UID to the Vertex Attribute Object (VAO) that
---   we can use to tell openGL "hey, remember those vertices I sent you? Let's
---   do something with them."
-makeObjectDrawer :: Shader -> ObjectData -> IO Drawer
-makeObjectDrawer shader oData@(ObjectData eData _) = do
-    vao <- putGraphicData eData
-    pure $ ObjectDrawer vao shader oData
 
 -- | Create a uniform with the given name and data
 makeUniform :: GLUniform a
@@ -288,11 +240,8 @@ registerElementBufferObject vao indices = do
     glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
 
-putGraphicData' :: ObjectData -> IO GLuint
-putGraphicData' (ObjectData eData _) = putGraphicData eData
-
-putGraphicData :: ElementData -> IO GLuint
-putGraphicData edata = do
+putGraphicData :: ObjectData -> IO GLuint
+putGraphicData (ObjectData eData _) = do
     -- First, make a Vertex Buffer Object. This is a place in openGL's memory
     -- where we can put all of our vertex data
     vbo <- getPointerVal $ glGenBuffers 1
@@ -302,8 +251,8 @@ putGraphicData edata = do
     vao <- getPointerVal $ glGenVertexArrays 1
 
     -- OpenGL needs to know the size of the data we're going to give it
-    let dataSize = getDataSize edata
-        flatData = flattenData edata
+    let dataSize = getDataSize eData
+        flatData = flattenData eData
 
     -- This makes a pointer to our data
     dataPointer <- newArray flatData
@@ -323,8 +272,8 @@ putGraphicData edata = do
     -- our data is laid out. Did you notice how we flattened the data earlier?
     -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
     -- know how to unflatten it.
-    sequence $ map registerVertexAttribute (getDataAttributes . getGraphicData $ edata)
+    sequence $ map registerVertexAttribute (getDataAttributes . getGraphicData $ eData)
     -- Finally, register the indices in the Element Buffer Object
-    registerElementBufferObject vao (getElementIndices edata)
+    registerElementBufferObject vao (getElementIndices eData)
 
     pure vao
