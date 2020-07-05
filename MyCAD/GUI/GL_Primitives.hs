@@ -6,7 +6,7 @@ module GL_Primitives
 -- Third-party
 import Linear.V1 (V1(V1))
 import Linear.V3 (V3(V3))
-import Linear.V4 (V4)
+import Linear.V4 (V4(V4))
 import Linear.Quaternion (axisAngle)
 
 -- internal
@@ -17,7 +17,7 @@ import GraphicData (ObjectData, VertexAttribute(..)
 makeLine ::   V3 Float    -- ^ from
            -> V3 Float    -- ^ to
            -> ObjectData  -- ^ drawable element
-makeLine c1 c2 p1 p2 = placeElement eData placement
+makeLine p1 p2 = placeElement eData placement
     where  eData    = makeElementData vertices indices
            vertices = [ [Position p1, Direction p2, Color c1, Up (V1   1) ]
                      , [Position p1, Direction p2, Color c1, Up (V1 (-1))]

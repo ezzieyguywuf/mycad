@@ -10,7 +10,8 @@ import Linear.V3 (V3(..))
 -- internal
 import GLFW_Helpers (Window(..), glfwInit, closeIfNeeded, shutdownGLFW)
 import ViewSpace (CameraData(..))
-import GL_Renderer (Renderer, initRenderer, render, updateView)
+import GL_Renderer (Renderer, initRenderer, render, updateView, addObject)
+import GL_Primitives (makeLine)
 
 winWIDTH      = 800
 winHEIGHT     = 600
@@ -28,6 +29,14 @@ act :: Window -> IO()
 act window = do
     -- initialize our renderer
     renderer <- initRenderer startCam winASPECT 5
+
+    -- Make a few lines - this is for testing
+    sequence_ $ fmap (addObject renderer)
+        [ makeLine (V3 0 0 0)    (V3 10 10 10)
+        , makeLine (V3 10 10 10) (V3 20 10 10)
+        , makeLine (V3 20 10 10) (V3 20 0 10)
+        , makeLine (V3 20 0 10)  (V3 20 0 0)
+        , makeLine (V3 20 0 0)   (V3 0 0 0)]
     -- enter our main loop
     loop window renderer
 
