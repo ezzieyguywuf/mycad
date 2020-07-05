@@ -37,6 +37,10 @@ act window = do
         , makeLine (V3 20 10 10) (V3 20 0 10)
         , makeLine (V3 20 0 10)  (V3 20 0 0)
         , makeLine (V3 20 0 0)   (V3 0 0 0)]
+
+    -- Initial render
+    updateView startCam renderer
+    render window renderer
     -- enter our main loop
     loop window renderer
 
