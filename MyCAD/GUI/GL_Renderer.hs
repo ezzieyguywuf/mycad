@@ -74,6 +74,7 @@ addObject (Renderer shader targets) oData = do
 -- | This will render every "ObjectData" that has been adding to the "Renderer"
 render :: Window -> Renderer -> IO ()
 render window (Renderer shader targets) = do
+    putStrLn "Rendering..."
     -- First, clear what was there
     glClearColor 0.2 0.3 0.3 1.0
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
@@ -97,8 +98,11 @@ render window (Renderer shader targets) = do
             -- Finally, draw the actual triangles
             -- TODO: Update this function to draw things other than just
             --       GL_TRIANGLES
-            glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr)
-        glBindVertexArray 0)
+            glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
+            )
+        glBindVertexArray 0
+        )
 
     -- swap the buffers
     swapBuffers window
+    putStrLn "...buffers swapped"

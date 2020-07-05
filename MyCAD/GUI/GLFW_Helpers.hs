@@ -5,6 +5,8 @@ module GLFW_Helpers
 , shutdownGLFW
 , swapBuffers
 , glfwInit
+, releaseContext
+, takeContext
 )where
 
 -- base
@@ -77,6 +79,14 @@ shutdownGLFW = GLFW.terminate
 
 swapBuffers :: Window -> IO ()
 swapBuffers window = GLFW.swapBuffers (getWindow window)
+
+-- | Releases the OpenGL \"Context\" from the current thread
+releaseContext :: IO ()
+releaseContext = GLFW.makeContextCurrent(Nothing)
+
+-- | Sets the OpenGL \"Context\" in the specified "Window" to the current thread.
+takeContext :: Window -> IO ()
+takeContext window = GLFW.makeContextCurrent(Just $ getWindow window)
 
 -- ===========================================================================
 --                            Callbacks

@@ -70,9 +70,11 @@ zoomCamera oldCam@(LookAt loc up dir) amt = newCam
 -- | Update the openGL \"Uniform\" matrix that specifies the View
 putViewUniform :: CameraData -> Shader -> IO ()
 putViewUniform (LookAt loc up dir) shader = do
+    putStrLn "Putting view uniform"
     let mat         = lookAt loc dir up
         viewUniform = makeUniform "view" mat
     putUniform shader viewUniform
+    putStrLn "view uniform put!!!"
 
 
 -- | Update the openGL \"Uniform\" matrix that specifies the Projection
