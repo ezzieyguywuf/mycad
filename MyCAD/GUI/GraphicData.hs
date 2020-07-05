@@ -9,6 +9,8 @@ module GraphicData
 , PlacementData (..)
 -- * Exported functions
 , flattenData
+, makePlacement
+, placeElement
 , makeElementData
 , getDataSize
 )where
@@ -68,7 +70,11 @@ data PlacementData =
 
 -- | Finally, any given \"Object\" that we are going to draw needs to include
 --   the data describing the \"Element\" along with its \"Placements\"
-data ObjectData = ObjectData ElementData [PlacementData] deriving (Show)
+data ObjectData =
+    ObjectData
+        { getElementData    :: ElementData
+        , getPlacementDatas :: [PlacementData]
+        }deriving (Show)
 
 -- | This describes the information needed to inform OpenGL how to read a
 --   single Vertex Attribute
@@ -82,7 +88,19 @@ data AttributeData = AttributeData
     }
     deriving (Show)
 
-makeElementData :: [DataRow] -> [GLuint] -> ElementData
+-- | By placing the "ElementData" in the \"world\", you create an "ObjectData"
+--   that can be rendered
+placeElement :: ElementData -> PlacementData -> ObjectData
+placeElement eData pData = ObjectData eData [pData]
+
+-- | A "Placement" can be described by a translation and a rotation
+makePlacement :: Quaternion Float -> V3 Float -> PlacementData
+makePlacement rot trans = PlacementData rot trans
+
+-- | The "ElementData" describes a single \"Element\" to be rendered in OpenGL
+makeElementData :: [DataRow]       -- ^ The data describing the Element
+                   -> [GLuint]     -- ^ The indices to render
+                   -> ElementData
 makeElementData rows indices = ElementData (makeGraphicData rows) indices
 
 -- | Flattens a GraphicData into a form that OpenGl can (almost) understand

@@ -1,13 +1,14 @@
 {-# LANGUAGE FlexibleInstances #-}
 module GL_Helpers
 (
-  Shader
+  Shader(..)
 , Drawer
 , makeUniform
 , makeObjectDrawer
 , makeShader
 , putUniform
 , drawObject
+, putGraphicData'
 )where
 
 -- base
@@ -286,6 +287,9 @@ registerElementBufferObject vao indices = do
     glBindVertexArray vao
     glBindBuffer GL_ELEMENT_ARRAY_BUFFER ebo
     glBufferData GL_ELEMENT_ARRAY_BUFFER indicesSize (castPtr indicesP) GL_STATIC_DRAW
+
+putGraphicData' :: ObjectData -> IO GLuint
+putGraphicData' (ObjectData eData _) = putGraphicData eData
 
 putGraphicData :: ElementData -> IO GLuint
 putGraphicData edata = do

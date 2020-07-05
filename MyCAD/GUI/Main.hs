@@ -1,30 +1,21 @@
 module Main (main) where
 -- base
-import Data.Bits ((.|.))
 import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TMVar(tryTakeTMVar)
-import System.FilePath ((</>))
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
-import Graphics.GL.Core33
 import Linear.V3 (V3(..))
 
 -- internal
-import GLFW_Helpers (Window(..), glfwInit, closeIfNeeded, shutdownGLFW,
-                     swapBuffers)
-import GL_Helpers ( Shader, Drawer,
-                    makeObjectDrawer, drawObject, makeShader , makeUniform, putUniform)
-import VertexData (cube, line, circle)
-import ViewSpace (CameraData(..), putProjectionUniform, putViewUniform)
+import GLFW_Helpers (Window(..), glfwInit, closeIfNeeded, shutdownGLFW)
+import ViewSpace (CameraData(..))
+import GL_Renderer (Renderer, initRenderer, render, updateView)
 
 winWIDTH      = 800
 winHEIGHT     = 600
 winASPECT     = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
 winTITLE      = "LearnOpenGL Hello CAD!"
-vshaderFPATH  = "MyCAD" </> "GUI" </> "VertexShader.glsl"
-lvshaderFPATH = "MyCAD" </> "GUI" </> "LineVShader.glsl"
-fshaderFPATH  = "MyCAD" </> "GUI" </> "FragmentShader.glsl"
 
 main :: IO ()
 main = do
@@ -35,38 +26,25 @@ main = do
 
 act :: Window -> IO()
 act window = do
-    (shaders, drawers) <- initShadersAndDrawers
-
+    -- initialize our renderer
+    renderer <- initRenderer startCam winASPECT 5
     -- enter our main loop
-    loop window shaders drawers
+    loop window renderer
 
     -- Just in case our loop didn't manage to get there
     shutdownGLFW
 
-loop :: Window -> [Shader] -> [Drawer] -> IO ()
-loop window shaders drawers = do
+loop :: Window -> Renderer -> IO ()
+loop window renderer = do
     closeIfNeeded window
     GLFW.pollEvents
 
-    -- Update our uniforms
     mTaken <- atomically $ tryTakeTMVar (cameraQueue window)
     case mTaken of
         Nothing         -> pure()
-        Just cameraData -> do putViewUniform cameraData shaders
-                              redraw window drawers
-    loop window shaders drawers
-
-redraw :: Window -> [Drawer] -> IO ()
-redraw window drawers = do
-    -- First, clear what was there
-    glClearColor 0.2 0.3 0.3 1.0
-    glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
-
-    -- draw it again
-    sequence_ $ fmap drawObject drawers
-
-    -- swap the buffers
-    swapBuffers window
+        Just cameraData -> do updateView cameraData renderer
+                              render window renderer
+    loop window renderer
 
 -------------------------------------------------------------------------------
 --                    Consider moving this stuff elsewhere
@@ -78,26 +56,6 @@ startCam = LookAt { location  = V3 0 0 100 -- Where is the camera located
                   , up        = V3 0 1 0   -- Which way is "up" to the camera
                   , direction = V3 0 0 0   -- Where is it looking
                   }
-
-initShadersAndDrawers :: IO ([Shader], [Drawer])
-initShadersAndDrawers = do
-    -- Compile and link our shaders
-    baseShader <- makeShader vshaderFPATH fshaderFPATH
-    lineShader <- makeShader lvshaderFPATH fshaderFPATH
-
-    -- set static uniforms
-    putProjectionUniform winASPECT baseShader
-    putProjectionUniform winASPECT lineShader
-
-    putUniform lineShader (makeUniform "aspect" winASPECT)
-    putUniform lineShader (makeUniform "thickness" (5 :: Float))
-
-
-    cubeDrawer <- makeObjectDrawer baseShader cube
-    lineDrawer <- makeObjectDrawer lineShader line
-    circleDrawer <- makeObjectDrawer lineShader circle
-
-    pure ([baseShader, lineShader], [cubeDrawer, lineDrawer, circleDrawer])
 
 -- | This message provides some useful output in case we can't initialize
 initFailMsg :: IO ()
