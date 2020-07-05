@@ -33,7 +33,7 @@ data Renderer =
         , _objects :: [RenderTarget]
         }
 
--- | This contains the actual Vertex data to render
+-- | This contains the actual Vertex data to render. This is not exported
 data RenderTarget =
     RenderTarget
         { _getVAO        :: GLuint
