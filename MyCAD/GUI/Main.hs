@@ -17,7 +17,7 @@ import GL_Primitives (makeLine)
 
 winWIDTH      = 800
 winHEIGHT     = 600
-winASPECT     = (fromIntegral winWIDTH) / (fromIntegral winHEIGHT)
+winASPECT     = fromIntegral winWIDTH / (fromIntegral winHEIGHT)
 winTITLE      = "LearnOpenGL Hello CAD!"
 
 main :: IO ()
@@ -75,7 +75,7 @@ processCameraQueue renderer window = do
     check <- hasNewCameraData window
     when check $ do
         cameraDatas  <- getCameraData window
-        sequence_ $ fmap (flip updateView renderer) cameraDatas
+        mapM_ (`updateView` renderer) cameraDatas
         render window renderer
 
 -------------------------------------------------------------------------------
