@@ -39,6 +39,7 @@ act window = do
         >>= (flip addObject (makeLine (V3 20 10 10) (V3 20 0 10)))
         >>= (flip addObject (makeLine (V3 20 0 10)  (V3 20 0 0)))
         >>= (flip addObject (makeLine (V3 20 0 0)   (V3 0 0 0)))
+    render window renderer
 
     -- Check camera queue in  different thread
     releaseContext
