@@ -52,7 +52,6 @@ act window = do
          >>= (flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
          >>= (flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
          >>= (flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
-    render window renderer
 
     -- enter our main loop
     loop window renderer'

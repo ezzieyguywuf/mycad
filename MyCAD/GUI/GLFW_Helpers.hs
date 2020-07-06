@@ -55,6 +55,9 @@ initWindow camera glfwWindow = do
     camQueue <- atomically newTQueue :: IO (TQueue CameraData)
     let window = Window glfwWindow ioCam camQueue
 
+    -- This sets the initial camera view.
+    atomically $ writeTQueue camQueue camera
+
     -- enable callbacks
     GLFW.setKeyCallback glfwWindow (Just (keypressed window))
     GLFW.setFramebufferSizeCallback glfwWindow ( Just resize )
