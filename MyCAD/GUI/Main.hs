@@ -69,7 +69,7 @@ loop window renderer = forever $ do
     when check (processCameraQueue renderer window)
 
     -- 1,000 microseconds = 1 millisecond (threadDelay takes microseconds)
-    threadDelay 500
+    threadDelay 100
 
 processCameraQueue :: Renderer -> Window -> IO ()
 processCameraQueue renderer window = do
