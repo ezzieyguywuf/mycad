@@ -72,11 +72,11 @@ loop window renderer = forever $ do
 processCameraQueue :: Renderer -> Window -> IO ()
 processCameraQueue renderer window = do
     -- Only process the CameraQueue if there is data to process.
-    check <- hasNewCameraData window
-    when check $ do
-        cameraDatas  <- getCameraData window
-        mapM_ (`updateView` renderer) cameraDatas
-        render window renderer
+    hasNewCameraData window >>=
+        (`when` do cameraDatas  <- getCameraData window
+                   mapM_ (`updateView` renderer) cameraDatas
+                   render window renderer
+        )
 
 -------------------------------------------------------------------------------
 --                    Consider moving this stuff elsewhere
