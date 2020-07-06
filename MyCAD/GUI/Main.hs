@@ -64,18 +64,19 @@ loop window renderer = forever $ do
     closeIfNeeded window
     GLFW.pollEvents
 
-    -- Only process the CameraQueue if there is data to process.
-    check <- hasNewCameraData window
-    when check (processCameraQueue renderer window)
+    processCameraQueue renderer window
 
     -- 1,000 microseconds = 1 millisecond (threadDelay takes microseconds)
     threadDelay 100
 
 processCameraQueue :: Renderer -> Window -> IO ()
 processCameraQueue renderer window = do
-    cameraDatas  <- getCameraData window
-    sequence_ $ fmap (flip updateView renderer) cameraDatas
-    render window renderer
+    -- Only process the CameraQueue if there is data to process.
+    check <- hasNewCameraData window
+    when check $ do
+        cameraDatas  <- getCameraData window
+        sequence_ $ fmap (flip updateView renderer) cameraDatas
+        render window renderer
 
 -------------------------------------------------------------------------------
 --                    Consider moving this stuff elsewhere
