@@ -36,7 +36,6 @@
   not in getAttributeDataIndex
 - Update mouse rotation so that it's not so twitchy.
 - Allow simultaneous keys, i.e. arrows, to control things
-- Re-render whenever the window gains focus.
 - Fix window resize to also adjust aspectRatio, i.e. in the lineVShader
 
 # UX
