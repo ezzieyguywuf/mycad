@@ -1,7 +1,7 @@
 module Main (main) where
 -- base
 import Control.Monad (forever)
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO) --, threadDelay)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -55,6 +55,8 @@ loop :: Window -> Renderer -> IO ()
 loop window renderer = forever $ do
     closeIfNeeded window
     GLFW.pollEvents
+    -- TODO why does this cause crashes?
+    --threadDelay 1000
 
 checkCameraQueue :: Renderer -> Window -> IO ()
 checkCameraQueue renderer window = do
