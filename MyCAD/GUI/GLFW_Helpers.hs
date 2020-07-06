@@ -5,6 +5,7 @@ module GLFW_Helpers
 , shutdownGLFW
 , swapBuffers
 , glfwInit
+, hasNewCameraData
 , getCameraData
 , releaseContext
 , takeContext
@@ -15,7 +16,8 @@ import Control.Monad (when)
 import Data.IORef (IORef, readIORef, writeIORef, newIORef)
 import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TQueue (TQueue, newTQueue
-                                      , writeTQueue, readTQueue, flushTQueue)
+                                     , writeTQueue, readTQueue, flushTQueue
+                                     , isEmptyTQueue)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -81,6 +83,10 @@ shutdownGLFW = GLFW.terminate
 
 swapBuffers :: Window -> IO ()
 swapBuffers window = GLFW.swapBuffers (getWindow window)
+
+-- | Returns "True" if there is new camera data to be processed
+hasNewCameraData :: Window -> IO (Bool)
+hasNewCameraData window = atomically $ ((fmap not) . isEmptyTQueue) (cameraQueue window)
 
 -- | Get the next CameraData in the Queue. Blocks if the Queue is empty.
 getCameraData :: Window -> IO [CameraData]

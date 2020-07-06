@@ -1,7 +1,7 @@
 module Main (main) where
 -- base
-import Control.Monad (forever)
-import Control.Concurrent (forkIO) --, threadDelay)
+import Control.Monad (forever, when)
+import Control.Concurrent (forkIO, threadDelay)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -10,7 +10,8 @@ import Linear.V3 (V3(..))
 -- internal
 import GLFW_Helpers (Window(..)
                     , glfwInit, closeIfNeeded, shutdownGLFW
-                    , getCameraData, releaseContext, takeContext)
+                    , hasNewCameraData, getCameraData, releaseContext
+                    , takeContext)
 import ViewSpace (CameraData(..))
 import GL_Renderer (Renderer, initRenderer, render, updateView, addObject)
 import GL_Primitives (makeLine)
@@ -35,23 +36,19 @@ act window = do
     -- Make a few lines - this is for testing. This should be a wireframe cube
     -- (sort of)
     renderer' <-
-        addObject renderer  (makeLine (V3 0 0 0)    (V3 10  0  0))
-        >>= (flip addObject (makeLine (V3 10  0  0) (V3 10 10  0)))
-        >>= (flip addObject (makeLine (V3 10 10  0) (V3  0 10  0)))
-        >>= (flip addObject (makeLine (V3  0 10  0) (V3  0  0  0)))
-        >>= (flip addObject (makeLine (V3  0  0  0) (V3  0 0 10)))
-        >>= (flip addObject (makeLine (V3 10  0 0)  (V3 10 0 10)))
-        >>= (flip addObject (makeLine (V3 10 10 0)  (V3 10 10 10)))
-        >>= (flip addObject (makeLine (V3  0 10 0)  (V3  0 10 10)))
-        >>= (flip addObject (makeLine (V3  0  0 10) (V3 10  0 10)))
-        >>= (flip addObject (makeLine (V3 10  0 10) (V3 10 10 10)))
-        >>= (flip addObject (makeLine (V3 10 10 10) (V3  0 10 10)))
-        >>= (flip addObject (makeLine (V3  0 10 10) (V3  0  0 10)))
+        addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+        >>= (flip addObject (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
+        >>= (flip addObject (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
+        >>= (flip addObject (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
+        >>= (flip addObject (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
+        >>= (flip addObject (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
+        >>= (flip addObject (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
+        >>= (flip addObject (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
+        >>= (flip addObject (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
+        >>= (flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
+        >>= (flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
+        >>= (flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
     render window renderer
-
-    -- Check camera queue in  different thread
-    releaseContext
-    forkIO $ checkCameraQueue renderer' window
 
     -- enter our main loop
     loop window renderer'
@@ -63,16 +60,19 @@ loop :: Window -> Renderer -> IO ()
 loop window renderer = forever $ do
     closeIfNeeded window
     GLFW.pollEvents
-    -- TODO why does this cause crashes?
-    --threadDelay 1000
 
-checkCameraQueue :: Renderer -> Window -> IO ()
-checkCameraQueue renderer window = do
-    takeContext window
-    forever $ do
-        cameraDatas  <- getCameraData window
-        sequence_ $ fmap (flip updateView renderer) cameraDatas
-        render window renderer
+    -- Only process the CameraQueue if there is data to process.
+    check <- hasNewCameraData window
+    when check (processCameraQueue renderer window)
+
+    -- 1,000 microseconds = 1 millisecond (threadDelay takes microseconds)
+    threadDelay 500
+
+processCameraQueue :: Renderer -> Window -> IO ()
+processCameraQueue renderer window = do
+    cameraDatas  <- getCameraData window
+    sequence_ $ fmap (flip updateView renderer) cameraDatas
+    render window renderer
 
 -------------------------------------------------------------------------------
 --                    Consider moving this stuff elsewhere

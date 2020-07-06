@@ -30,5 +30,5 @@ makeLine p1 p2 = placeElement eData placement
            rotation    = axisAngle (V3 0 0 0) 0
            translation = V3 0 0 0
            placement   = makePlacement rotation translation
-           c1          = V4 0.2 0.7 0.2 1.0
-           c2          = V4 0.3 0.4 0.5 1.0
+           c1          = V4 0.0 0.0 0.0 1.0
+           c2          = V4 0.0 0.0 0.0 1.0
