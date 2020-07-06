@@ -30,27 +30,28 @@ main = do
 act :: Window -> IO()
 act window = do
     -- initialize our renderer
-    let lineThickness = 10
+    let lineThickness = 3
     renderer <- initRenderer window startCam winASPECT lineThickness
 
     -- Make a few lines - this is for testing. This should be a wireframe cube
     -- (sort of)
     renderer' <-
-        addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
-        >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
+        -- Two basic lines
+        --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
+        -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
         -- cube below
-        --addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-        -- >>= (flip addObject (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
-        -- >>= (flip addObject (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
-        -- >>= (flip addObject (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
-        -- >>= (flip addObject (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
-        -- >>= (flip addObject (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
-        -- >>= (flip addObject (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
-        -- >>= (flip addObject (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
-        -- >>= (flip addObject (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
-        -- >>= (flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
-        -- >>= (flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
-        -- >>= (flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
+        addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+         >>= (flip addObject (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
+         >>= (flip addObject (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
+         >>= (flip addObject (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
+         >>= (flip addObject (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
+         >>= (flip addObject (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
+         >>= (flip addObject (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
+         >>= (flip addObject (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
+         >>= (flip addObject (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
+         >>= (flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
+         >>= (flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
+         >>= (flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
     render window renderer
 
     -- enter our main loop
