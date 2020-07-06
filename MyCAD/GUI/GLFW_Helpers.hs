@@ -86,8 +86,8 @@ swapBuffers :: Window -> IO ()
 swapBuffers window = GLFW.swapBuffers (getWindow window)
 
 -- | Returns "True" if there is new camera data to be processed
-hasNewCameraData :: Window -> IO (Bool)
-hasNewCameraData window = atomically $ ((fmap not) . isEmptyTQueue) (cameraQueue window)
+hasNewCameraData :: Window -> IO Bool
+hasNewCameraData window = atomically $ (fmap not . isEmptyTQueue) (cameraQueue window)
 
 -- | Get the next CameraData in the Queue. Blocks if the Queue is empty.
 getCameraData :: Window -> IO [CameraData]
@@ -101,7 +101,7 @@ getCameraData window = atomically $ do
 
 -- | Releases the OpenGL \"Context\" from the current thread
 releaseContext :: IO ()
-releaseContext = GLFW.makeContextCurrent(Nothing)
+releaseContext = GLFW.makeContextCurrent Nothing
 
 -- | Sets the OpenGL \"Context\" in the specified "Window" to the current thread.
 takeContext :: Window -> IO ()
@@ -123,11 +123,11 @@ keypressed window glfwWindow key _ keyState _ = do
         isLeft      = key == GLFW.Key'Left
         isRight     = key == GLFW.Key'Right
 
-    when (and [isPressed, isEscape]) (GLFW.setWindowShouldClose glfwWindow True)
-    when (and [isUp,    or [isPressed, isRepeating]]) (bumpCamera window 0        delta)
-    when (and [isDown,  or [isPressed, isRepeating]]) (bumpCamera window 0        (-delta))
-    when (and [isRight, or [isPressed, isRepeating]]) (bumpCamera window (-delta) 0)
-    when (and [isLeft,  or [isPressed, isRepeating]]) (bumpCamera window delta    0)
+    when (isPressed && isEscape) (GLFW.setWindowShouldClose glfwWindow True)
+    when (isUp    && (isPressed || isRepeating)) (bumpCamera window 0   delta)
+    when (isDown  && (isPressed || isRepeating)) (bumpCamera window 0 (-delta))
+    when (isRight && (isPressed || isRepeating)) (bumpCamera window (-delta) 0)
+    when (isLeft  && (isPressed || isRepeating)) (bumpCamera window   delta  0)
 
 bumpCamera :: Window -> Float -> Float -> IO ()
 bumpCamera window dx dy = do
@@ -190,7 +190,7 @@ mouseButtonPressed :: Window -> IORef CursorPosition -> GLFW.MouseButtonCallback
 mouseButtonPressed window cursor glfwWindow button state _ = do
     let isPressed = state  == GLFW.MouseButtonState'Pressed
         isMB1     = button == GLFW.MouseButton'1
-    if and [isMB1, isPressed]
+    if isMB1 && isPressed
        then do
            -- track the cursor's movement
            (x, y) <- GLFW.getCursorPos glfwWindow

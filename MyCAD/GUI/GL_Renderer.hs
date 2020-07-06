@@ -70,8 +70,7 @@ initRenderer window camera aspectRatio lineThickness = do
 
 -- | Updates the view matrix using the provided "CameraData"
 updateView :: CameraData -> Renderer -> IO ()
-updateView camera renderer = do
-    putViewUniform camera (_shader renderer)
+updateView camera renderer = putViewUniform camera (_shader renderer)
 
 -- | This adds a renderable "ObjectData" to a renderer. It still does not draw
 --   anything
@@ -89,28 +88,33 @@ render window (Renderer shader targets) = do
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
 
     -- Next, we have to make sure our "Shader" is active
-    glUseProgram (_shaderID $ shader)
-    sequence_ $ flip fmap targets (\rtarget -> do
-        let vao    = _getVAO rtarget
-            oData  = _getObjectData rtarget
-            eData  = getElementData oData
-            pDatas = getPlacementDatas oData
-            len    = fromIntegral $ length (getElementIndices eData)
-        -- bind the Vertex Attribute Object, which (among other things)
-        -- contains the memory location on the GPU where the Vertex data is
-        -- stored
-        glBindVertexArray vao
-        sequence_ $ flip fmap pDatas (\placement -> do
-            -- A single Placement specifies the \"model\" transformation matrix
-            -- for the item in question
-            putUniform shader (makeUniform "model" placement)
-            -- Finally, draw the actual triangles
-            -- TODO: Update this function to draw things other than just
-            --       GL_TRIANGLES
-            glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-            )
-        glBindVertexArray 0
-        )
+    glUseProgram (_shaderID shader)
+
+    -- Render each target
+    mapM_ (renderTarget shader) targets
 
     -- swap the buffers
     swapBuffers window
+
+renderTarget :: Shader -> RenderTarget -> IO ()
+renderTarget shader rtarget = do
+    let vao    = _getVAO rtarget
+        oData  = _getObjectData rtarget
+        eData  = getElementData oData
+        pDatas = getPlacementDatas oData
+        len    = fromIntegral $ length (getElementIndices eData)
+    -- bind the Vertex Attribute Object, which (among other things)
+    -- contains the memory location on the GPU where the Vertex data is
+    -- stored
+    glBindVertexArray vao
+    -- render each "Placement"
+    sequence_ $ flip fmap pDatas (\placement -> do
+        -- A single Placement specifies the \"model\" transformation matrix
+        -- for the item in question
+        putUniform shader (makeUniform "model" placement)
+        -- Finally, draw the actual triangles
+        -- TODO: Update this function to draw things other than just
+        --       GL_TRIANGLES
+        glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
+        )
+    glBindVertexArray 0

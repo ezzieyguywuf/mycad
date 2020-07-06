@@ -95,17 +95,17 @@ placeElement eData pData = ObjectData eData [pData]
 
 -- | A "Placement" can be described by a translation and a rotation
 makePlacement :: Quaternion Float -> V3 Float -> PlacementData
-makePlacement rot trans = PlacementData rot trans
+makePlacement = PlacementData
 
 -- | The "ElementData" describes a single \"Element\" to be rendered in OpenGL
 makeElementData :: [DataRow]       -- ^ The data describing the Element
                    -> [GLuint]     -- ^ The indices to render
                    -> ElementData
-makeElementData rows indices = ElementData (makeGraphicData rows) indices
+makeElementData rows = ElementData (makeGraphicData rows)
 
 -- | Flattens a GraphicData into a form that OpenGl can (almost) understand
 flattenData :: ElementData -> [GLfloat]
-flattenData eData = concat (fmap squashRow rows)
+flattenData eData = concatMap squashRow rows
     where rows = getData $ getGraphicData eData
 
 -- | Returns the size of the entire GraphicData in a manner suitable to use in glBufferData
@@ -124,7 +124,7 @@ makeGraphicData rows = GraphicData attribData rows
 
 -- | This will return a list of data suitable for making calls to glVertexAttribPointer
 getRowData :: DataRow -> [AttributeData]
-getRowData row = snd $ mapAccumL (makeData $ stride) 0 row'
+getRowData row = snd $ mapAccumL (makeData stride) 0 row'
     where stride = fromIntegral $ getRowSize row :: GLsizei
           row'   = zip [0..] row
 
@@ -157,11 +157,11 @@ makeList (Up v)        = toList v
 
 -- | A helper, flattens out an entire 'DataRow'
 squashRow :: DataRow -> [GLfloat]
-squashRow row = concat $ fmap makeList row
+squashRow = concatMap makeList
 
 -- | Returns the size of the row in a manner suitable to use in glVertexAttribPointer
 getRowSize :: DataRow -> GLsizei
-getRowSize gdata = fromIntegral $ sizeOf (0.0 :: GLfloat) * (length $ squashRow gdata)
+getRowSize gdata = fromIntegral $ sizeOf (0.0 :: GLfloat) * length (squashRow gdata)
 
 -- | Generates an offset pointer suitable for use in glVertexAttribPointer
 makeOffset :: Int -> Ptr ()

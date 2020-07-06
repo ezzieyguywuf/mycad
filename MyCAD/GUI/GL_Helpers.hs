@@ -31,8 +31,8 @@ import GraphicData ( ObjectData(..)
                    , getDataSize, flattenData, getDataAttributes)
 
 -- | This will store the data necessary to execute a shader and draw something
-data Shader = Shader { _shaderID       :: GLuint
-                     }
+newtype Shader = Shader { _shaderID       :: GLuint
+                        }
 -- | This data type encapsulates a glUniform name, and some data to go along with it
 --
 --   Note that in order for this to be useful with, say, "putUniform", @a@ must
@@ -66,7 +66,7 @@ makeUniform :: GLUniform a
                => String     -- ^ The name of the uniform
                -> a          -- ^ The data
                -> Uniform a
-makeUniform uniformName uniformData = Uniform uniformName uniformData
+makeUniform = Uniform
 
 -- | Tries to load the uniform data with the given name.
 --
@@ -90,7 +90,7 @@ putUniform shader (Uniform name uniformData) = do
 --          Private Free Functions
 ------------------------------------------------------------------
 instance GLUniform Float where
-    putData uid val = glUniform1f uid val
+    putData = glUniform1f
 
 instance GLUniform (M44 Float) where
     putData uid transformationMatrix = do
@@ -155,7 +155,7 @@ loadShader shaderType source = do
                 glGetShaderiv shaderID GL_INFO_LOG_LENGTH logLenP
                 peek logLenP
             -- space for the info log
-            logBytes <- allocaBytes (fromIntegral logLen) $ \logP -> do
+            logBytes <- allocaBytes (fromIntegral logLen) $ \logP ->
                 -- space for the log reading result
                 alloca $ \resultP -> do
                     -- Try to obtain the log bytes
@@ -170,8 +170,7 @@ loadShader shaderType source = do
                     GL_GEOMETRY_SHADER -> "Geometry"
                     GL_FRAGMENT_SHADER -> "Fragment"
                     _ -> "Unknown Type"
-            putStrLn $ prefix ++ " Shader Error:" ++
-                        (map (toEnum.fromEnum) logBytes)
+            putStrLn $ prefix ++ " Shader Error:" ++ map (toEnum.fromEnum) logBytes
             pure 0
 
 linkShadersToProgram :: GLuint -> GLuint -> IO GLuint
@@ -228,7 +227,7 @@ registerVertexAttribute d = do
 registerElementBufferObject :: GLuint -> [GLuint] -> IO ()
 registerElementBufferObject vao indices = do
     -- Prep the indices for use in the EBO
-    let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * (length indices)
+    let indicesSize = fromIntegral $ sizeOf (0 :: GLuint) * length indices
     indicesP <- newArray indices
 
     -- The Element Buffer Object, or EBO, allows us to re-use vertices in the Buffer. this
@@ -272,7 +271,7 @@ putGraphicData (ObjectData eData _) = do
     -- our data is laid out. Did you notice how we flattened the data earlier?
     -- That's how OpenGL expects to recieve it.  But, afterwards, it needs to
     -- know how to unflatten it.
-    sequence $ map registerVertexAttribute (getDataAttributes . getGraphicData $ eData)
+    mapM_ registerVertexAttribute (getDataAttributes . getGraphicData $ eData)
     -- Finally, register the indices in the Element Buffer Object
     registerElementBufferObject vao (getElementIndices eData)
 

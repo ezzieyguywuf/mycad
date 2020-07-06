@@ -17,7 +17,7 @@ import GL_Primitives (makeLine)
 
 winWIDTH      = 800
 winHEIGHT     = 600
-winASPECT     = fromIntegral winWIDTH / (fromIntegral winHEIGHT)
+winASPECT     = fromIntegral winWIDTH / fromIntegral winHEIGHT
 winTITLE      = "LearnOpenGL Hello CAD!"
 
 main :: IO ()
@@ -41,17 +41,17 @@ act window = do
         -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
         -- cube below
         addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-         >>= (flip addObject (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
-         >>= (flip addObject (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
-         >>= (flip addObject (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
-         >>= (flip addObject (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
-         >>= (flip addObject (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
-         >>= (flip addObject (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
-         >>= (flip addObject (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
-         >>= (flip addObject (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
-         >>= (flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
-         >>= (flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
-         >>= (flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
+         >>= flip addObject (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
+         >>= flip addObject (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
+         >>= flip addObject (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
+         >>= flip addObject (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
+         >>= flip addObject (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
+         >>= flip addObject (makeLine (V3 10 10 (-10))  (V3 10 10 10))
+         >>= flip addObject (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
+         >>= flip addObject (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
+         >>= flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10))
+         >>= flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10))
+         >>= flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
 
     -- enter our main loop
     loop window renderer'
