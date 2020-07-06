@@ -1,7 +1,7 @@
 module Main (main) where
 -- base
 import Control.Monad (forever, when)
-import Control.Concurrent (forkIO, threadDelay)
+import Control.Concurrent (threadDelay)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -10,8 +10,7 @@ import Linear.V3 (V3(..))
 -- internal
 import GLFW_Helpers (Window(..)
                     , glfwInit, closeIfNeeded, shutdownGLFW
-                    , hasNewCameraData, getCameraData, releaseContext
-                    , takeContext)
+                    , hasNewCameraData, getCameraData)
 import ViewSpace (CameraData(..))
 import GL_Renderer (Renderer, initRenderer, render, updateView, addObject)
 import GL_Primitives (makeLine)
@@ -31,23 +30,27 @@ main = do
 act :: Window -> IO()
 act window = do
     -- initialize our renderer
-    renderer <- initRenderer window startCam winASPECT 5
+    let lineThickness = 10
+    renderer <- initRenderer window startCam winASPECT lineThickness
 
     -- Make a few lines - this is for testing. This should be a wireframe cube
     -- (sort of)
     renderer' <-
-        addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-        >>= (flip addObject (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
-        >>= (flip addObject (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
-        >>= (flip addObject (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
-        >>= (flip addObject (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
-        >>= (flip addObject (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
-        >>= (flip addObject (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
-        >>= (flip addObject (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
-        >>= (flip addObject (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
-        >>= (flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
-        >>= (flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
-        >>= (flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
+        addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
+        >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
+        -- cube below
+        --addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+        -- >>= (flip addObject (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
+        -- >>= (flip addObject (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
+        -- >>= (flip addObject (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
+        -- >>= (flip addObject (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
+        -- >>= (flip addObject (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
+        -- >>= (flip addObject (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
+        -- >>= (flip addObject (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
+        -- >>= (flip addObject (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
+        -- >>= (flip addObject (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
+        -- >>= (flip addObject (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
+        -- >>= (flip addObject (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
     render window renderer
 
     -- enter our main loop

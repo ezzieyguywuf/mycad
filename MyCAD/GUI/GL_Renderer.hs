@@ -15,7 +15,8 @@ import Foreign (nullPtr)
 -- Third-party
 import Graphics.GL.Core33 ( pattern GL_TRIANGLES, pattern GL_UNSIGNED_INT
                           , pattern GL_COLOR_BUFFER_BIT, pattern GL_DEPTH_BUFFER_BIT
-                          , glUseProgram, glBindVertexArray, glDrawElements
+                          , pattern GL_DEPTH_TEST
+                          , glEnable, glUseProgram, glBindVertexArray, glDrawElements
                           , glClearColor, glClear)
 import Graphics.GL.Types (GLuint)
 
@@ -61,6 +62,9 @@ initRenderer window camera aspectRatio lineThickness = do
 
     -- Render the initial scene
     render window renderer
+
+    -- enable depth testing
+    glEnable GL_DEPTH_TEST
 
     pure renderer
 

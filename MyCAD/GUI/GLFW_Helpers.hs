@@ -66,9 +66,6 @@ initWindow camera glfwWindow = do
     (x,y) <- GLFW.getFramebufferSize glfwWindow
     glViewport 0 0 (fromIntegral x) (fromIntegral y)
 
-    -- enable depth testing
-    glEnable GL_DEPTH_TEST
-
     pure $ Just window
 
 -- | Determine if the User or OS has requested for the window to close.
