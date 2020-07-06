@@ -31,13 +31,12 @@
   alert the coder.
 - infinite zoom.
 - Remove hard-coded paths - allow for configurable or something.
-- Use TQueue to only render when we need to.
 - Update Shader data type to actually use the Uniform data type 
 - Figure out why line thickness zooms - it shouldn't, it should always be the same
-- Update GraphicData stuff so that AttributeData index is defined by the user,
   not in getAttributeDataIndex
 - Update mouse rotation so that it's not so twitchy.
 - Allow simultaneous keys, i.e. arrows, to control things
+- Re-render whenever the window gains focus.
 
 # UX
 - Add icons to GUI
