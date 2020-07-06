@@ -5,6 +5,7 @@ module GLFW_Helpers
 , shutdownGLFW
 , swapBuffers
 , glfwInit
+, getCameraData
 , releaseContext
 , takeContext
 )where
@@ -13,7 +14,8 @@ module GLFW_Helpers
 import Control.Monad (when)
 import Data.IORef (IORef, readIORef, writeIORef, newIORef)
 import Control.Concurrent.STM (atomically)
-import Control.Concurrent.STM.TMVar (TMVar, newEmptyTMVar, putTMVar)
+import Control.Concurrent.STM.TQueue (TQueue, newTQueue
+                                      , writeTQueue, readTQueue, flushTQueue)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -26,7 +28,7 @@ import ViewSpace (CameraData, rotateCameraNudge, zoomCamera)
 --   information about the View
 data Window = Window { getWindow     :: GLFW.Window
                      , lastCamera  :: IORef CameraData
-                     , cameraQueue :: TMVar CameraData
+                     , cameraQueue :: TQueue CameraData
                      }
 
 -- | This data is used to determine how far the cursor has moved in callbacks
@@ -48,7 +50,7 @@ initWindow camera glfwWindow = do
     -- Initialize...well, global stuf :(
     ioCam  <- newIORef camera
     cursor <- newIORef $ CursorPosition 0 0
-    camQueue <- atomically newEmptyTMVar :: IO (TMVar CameraData)
+    camQueue <- atomically newTQueue :: IO (TQueue CameraData)
     let window = Window glfwWindow ioCam camQueue
 
     -- enable callbacks
@@ -79,6 +81,16 @@ shutdownGLFW = GLFW.terminate
 
 swapBuffers :: Window -> IO ()
 swapBuffers window = GLFW.swapBuffers (getWindow window)
+
+-- | Get the next CameraData in the Queue. Blocks if the Queue is empty.
+getCameraData :: Window -> IO [CameraData]
+getCameraData window = atomically $ do
+    let queue = cameraQueue window
+    -- This blocks
+    cameraData <- readTQueue queue
+    -- THis gets any other data available
+    moreData   <- flushTQueue queue
+    pure (cameraData : moreData)
 
 -- | Releases the OpenGL \"Context\" from the current thread
 releaseContext :: IO ()
@@ -123,7 +135,7 @@ bumpCamera window dx dy = do
     -- Update our lastCamera IORef
     writeIORef ioCam newCamData
     -- Let whoever's listening know that there's new data to use.
-    atomically $ putTMVar camQueue newCamData
+    atomically $ writeTQueue camQueue newCamData
 
 
 -- | callback for when the user resizes the window
@@ -171,4 +183,4 @@ mouseScrolled :: Window -> GLFW.ScrollCallback
 mouseScrolled window _ _ dy = do
     oldCamData <- readIORef (lastCamera window)
     let newCamData = zoomCamera oldCamData (realToFrac dy)
-    atomically $ putTMVar (cameraQueue window) newCamData
+    atomically $ writeTQueue (cameraQueue window) newCamData

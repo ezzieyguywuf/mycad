@@ -71,10 +71,9 @@ addObject (Renderer shader targets) oData = do
     let target = RenderTarget vao oData
     pure $ Renderer shader (target : targets)
 
--- | This will render every "ObjectData" that has been adding to the "Renderer"
+-- | This will render every "ObjectData" that has been added to the "Renderer"
 render :: Window -> Renderer -> IO ()
 render window (Renderer shader targets) = do
-    putStrLn "Rendering..."
     -- First, clear what was there
     glClearColor 0.2 0.3 0.3 1.0
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
@@ -105,4 +104,3 @@ render window (Renderer shader targets) = do
 
     -- swap the buffers
     swapBuffers window
-    putStrLn "...buffers swapped"

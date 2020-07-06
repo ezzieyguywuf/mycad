@@ -2,8 +2,6 @@ module Main (main) where
 -- base
 import Control.Monad (forever)
 import Control.Concurrent (forkIO)
-import Control.Concurrent.STM (atomically)
-import Control.Concurrent.STM.TMVar(tryTakeTMVar)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -12,7 +10,7 @@ import Linear.V3 (V3(..))
 -- internal
 import GLFW_Helpers (Window(..)
                     , glfwInit, closeIfNeeded, shutdownGLFW
-                    , releaseContext, takeContext)
+                    , getCameraData, releaseContext, takeContext)
 import ViewSpace (CameraData(..))
 import GL_Renderer (Renderer, initRenderer, render, updateView, addObject)
 import GL_Primitives (makeLine)
@@ -66,12 +64,9 @@ checkCameraQueue :: Renderer -> Window -> IO ()
 checkCameraQueue renderer window = do
     takeContext window
     forever $ do
-    mTaken <- atomically $ tryTakeTMVar (cameraQueue window)
-    case mTaken of
-        Nothing         -> pure()
-        Just cameraData -> do putStrLn "...got some!"
-                              updateView cameraData renderer
-                              render window renderer
+        cameraDatas  <- getCameraData window
+        sequence_ $ fmap (flip updateView renderer) cameraDatas
+        render window renderer
 
 -------------------------------------------------------------------------------
 --                    Consider moving this stuff elsewhere
