@@ -60,7 +60,7 @@ initWindow camera glfwWindow = do
 
     -- enable callbacks
     GLFW.setKeyCallback glfwWindow (Just (keypressed window))
-    GLFW.setFramebufferSizeCallback glfwWindow ( Just resize )
+    GLFW.setFramebufferSizeCallback glfwWindow ( Just (resize window))
     GLFW.setMouseButtonCallback glfwWindow (Just (mouseButtonPressed window cursor))
     GLFW.setScrollCallback glfwWindow ( Just (mouseScrolled window) )
 
@@ -145,8 +145,17 @@ bumpCamera window dx dy = do
 
 
 -- | callback for when the user resizes the window
-resize :: GLFW.FramebufferSizeCallback
-resize _ width height = do
+resize :: Window -> GLFW.FramebufferSizeCallback
+resize window _ width height = do
+    let ioCam    = lastCamera window
+        camQueue = cameraQueue window
+
+    -- Get the camera information
+    camData <- readIORef ioCam
+
+    -- Put it in the Queue, so that the window is redrawn
+    atomically $ writeTQueue camQueue camData
+
     glViewport 0 0 (fromIntegral width) (fromIntegral height)
 
 -- | callback for when the cursor is moved inside the window
