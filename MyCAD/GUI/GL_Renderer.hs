@@ -44,19 +44,25 @@ lvshaderFPATH = "MyCAD" </> "GUI" </> "LineVShader.glsl"
 fshaderFPATH  = "MyCAD" </> "GUI" </> "FragmentShader.glsl"
 
 -- | This will initialize a Renderer, which can later be used to draw things
-initRenderer :: CameraData -> Float -> Float -> IO Renderer
-initRenderer camera aspectRatio lineThickness = do
+initRenderer :: Window -> CameraData -> Float -> Float -> IO Renderer
+initRenderer window camera aspectRatio lineThickness = do
+    -- Compile our shader
     shader <- makeShader lvshaderFPATH fshaderFPATH
 
+    -- Set our static Uniform variables
     putUniform shader (makeUniform "aspect" aspectRatio)
     putUniform shader (makeUniform "thickness" lineThickness)
     putProjectionUniform aspectRatio shader
 
     let renderer = Renderer shader []
-    updateView camera renderer
-    pure renderer
 
-    pure $ Renderer shader []
+    -- Set the initial view
+    updateView camera renderer
+
+    -- Render the initial scene
+    render window renderer
+
+    pure renderer
 
 -- | Updates the view matrix using the provided "CameraData"
 updateView :: CameraData -> Renderer -> IO ()
