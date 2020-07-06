@@ -55,11 +55,9 @@ act window = do
     shutdownGLFW
 
 loop :: Window -> Renderer -> IO ()
-loop window renderer = do
+loop window renderer = forever $ do
     closeIfNeeded window
     GLFW.pollEvents
-
-    loop window renderer
 
 checkCameraQueue :: Renderer -> Window -> IO ()
 checkCameraQueue renderer window = do
