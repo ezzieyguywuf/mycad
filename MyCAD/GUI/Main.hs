@@ -32,13 +32,21 @@ act window = do
     -- initialize our renderer
     renderer <- initRenderer window startCam winASPECT 5
 
-    -- Make a few lines - this is for testing
+    -- Make a few lines - this is for testing. This should be a wireframe cube
+    -- (sort of)
     renderer' <-
-        addObject renderer  (makeLine (V3 0 0 0)    (V3 10 10 10))
-        >>= (flip addObject (makeLine (V3 10 10 10) (V3 20 10 10)))
-        >>= (flip addObject (makeLine (V3 20 10 10) (V3 20 0 10)))
-        >>= (flip addObject (makeLine (V3 20 0 10)  (V3 20 0 0)))
-        >>= (flip addObject (makeLine (V3 20 0 0)   (V3 0 0 0)))
+        addObject renderer  (makeLine (V3 0 0 0)    (V3 10  0  0))
+        >>= (flip addObject (makeLine (V3 10  0  0) (V3 10 10  0)))
+        >>= (flip addObject (makeLine (V3 10 10  0) (V3  0 10  0)))
+        >>= (flip addObject (makeLine (V3  0 10  0) (V3  0  0  0)))
+        >>= (flip addObject (makeLine (V3  0  0  0) (V3  0 0 10)))
+        >>= (flip addObject (makeLine (V3 10  0 0)  (V3 10 0 10)))
+        >>= (flip addObject (makeLine (V3 10 10 0)  (V3 10 10 10)))
+        >>= (flip addObject (makeLine (V3  0 10 0)  (V3  0 10 10)))
+        >>= (flip addObject (makeLine (V3  0  0 10) (V3 10  0 10)))
+        >>= (flip addObject (makeLine (V3 10  0 10) (V3 10 10 10)))
+        >>= (flip addObject (makeLine (V3 10 10 10) (V3  0 10 10)))
+        >>= (flip addObject (makeLine (V3  0 10 10) (V3  0  0 10)))
     render window renderer
 
     -- Check camera queue in  different thread
