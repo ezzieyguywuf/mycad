@@ -33,11 +33,12 @@ act window = do
     renderer <- initRenderer startCam winASPECT 5
 
     -- Make a few lines - this is for testing
-    renderer' <- addObject renderer  (makeLine (V3 0 0 0)    (V3 10 10 10))
-                 >>= (flip addObject (makeLine (V3 10 10 10) (V3 20 10 10)))
-                 >>= (flip addObject (makeLine (V3 20 10 10) (V3 20 0 10)))
-                 >>= (flip addObject (makeLine (V3 20 0 10)  (V3 20 0 0)))
-                 >>= (flip addObject (makeLine (V3 20 0 0)   (V3 0 0 0)))
+    renderer' <-
+        addObject renderer  (makeLine (V3 0 0 0)    (V3 10 10 10))
+        >>= (flip addObject (makeLine (V3 10 10 10) (V3 20 10 10)))
+        >>= (flip addObject (makeLine (V3 20 10 10) (V3 20 0 10)))
+        >>= (flip addObject (makeLine (V3 20 0 10)  (V3 20 0 0)))
+        >>= (flip addObject (makeLine (V3 20 0 0)   (V3 0 0 0)))
 
     -- Initial render
     updateView startCam renderer'
