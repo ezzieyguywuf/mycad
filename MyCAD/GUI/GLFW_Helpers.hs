@@ -28,7 +28,7 @@ import ViewSpace (CameraData, rotateCameraNudge, zoomCamera)
 
 -- | A Window includes the data needed to communicate with GLFW, as well as
 --   information about the View
-data Window = Window { getWindow     :: GLFW.Window
+data Window = Window { getWindow   :: GLFW.Window
                      , lastCamera  :: IORef CameraData
                      , cameraQueue :: TQueue CameraData
                      }
