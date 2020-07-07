@@ -24,17 +24,19 @@ main :: IO ()
 main = do
     putStrLn "executing main"
 
-    join getLoop
+    getRenderer >>= \case
+        Nothing       -> pure ()
+        Just renderer -> loop renderer
 
-getLoop :: IO (IO ())
-getLoop = do
+getRenderer :: IO (Maybe Renderer)
+getRenderer = do
     let lineThickness = 3
 
     glfwInit winWIDTH winHEIGHT winTITLE startCam >>= \case
-        Nothing -> pure initFailMsg
+        Nothing -> initFailMsg >> pure Nothing
         Just window -> do renderer <- initRenderer window startCam winASPECT lineThickness
                           debuggingLines renderer
-                          pure (loop renderer)
+                          pure (Just renderer)
 
 -- Make a few lines - this is for testing. This should be a wireframe cube
 -- (sort of)
