@@ -62,7 +62,7 @@ loop renderer = do
     checkClose renderer >>= \case
         False -> do GLFW.pollEvents
                     renderIfNecessary renderer
-                    -- 1,000 microseconds = 1 millisecond (threadDelay takes microseconds)
+                    -- 100 microseconds = 0.1 millisecond (threadDelay takes microseconds)
                     threadDelay 100
                     loop renderer
         True -> shutdownGLFW
