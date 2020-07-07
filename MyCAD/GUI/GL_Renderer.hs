@@ -6,9 +6,14 @@ module GL_Renderer
 , addObject
 , render
 , updateView
+, checkClose
+, renderIfNecessary
 )where
 -- base
 import Data.Bits ((.|.))
+import Control.Monad (when)
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TQueue (isEmptyTQueue, readTQueue, flushTQueue)
 import System.FilePath ((</>))
 import Foreign (nullPtr)
 
@@ -21,7 +26,7 @@ import Graphics.GL.Core33 ( pattern GL_TRIANGLES, pattern GL_UNSIGNED_INT
 import Graphics.GL.Types (GLuint)
 
 -- Internal
-import GLFW_Helpers (Window, swapBuffers)
+import GLFW_Helpers (Window (..), swapBuffers, shouldClose)
 import GL_Helpers (Shader(..), makeShader, putGraphicData, putUniform, makeUniform)
 import GraphicData (ObjectData(..), getElementIndices)
 import ViewSpace (CameraData, putProjectionUniform, putViewUniform)
@@ -81,6 +86,31 @@ addObject (Renderer shader targets window) oData = do
     let target = RenderTarget vao oData
     pure $ Renderer shader (target : targets) window
 
+-- | Will determine if it is necessayr to Render, and then do it as needed
+renderIfNecessary :: Renderer -> IO ()
+renderIfNecessary renderer = do
+    -- Only process the CameraQueue if there is data to process.
+    let window = _window renderer
+    hasNewCameraData window >>=
+        (`when` do cameraDatas  <- getCameraData window
+                   mapM_ (`updateView` renderer) cameraDatas
+                   render renderer
+        )
+
+-- | Returns "True" if there is new camera data to be processed
+hasNewCameraData :: Window -> IO Bool
+hasNewCameraData window = atomically $ (fmap not . isEmptyTQueue) (cameraQueue window)
+
+-- | Get the next CameraData in the Queue. Blocks if the Queue is empty.
+getCameraData :: Window -> IO [CameraData]
+getCameraData window = atomically $ do
+    let queue = cameraQueue window
+    -- This blocks
+    cameraData <- readTQueue queue
+    -- THis gets any other data available
+    moreData   <- flushTQueue queue
+    pure (cameraData : moreData)
+
 -- | This will render every "ObjectData" that has been added to the "Renderer"
 render :: Renderer -> IO ()
 render (Renderer shader targets window) = do
@@ -119,3 +149,7 @@ renderTarget shader rtarget = do
         glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
         )
     glBindVertexArray 0
+
+-- | Check with GLFW if the OS has requested to have the window closed
+checkClose :: Renderer -> IO Bool
+checkClose renderer = shouldClose (_window renderer)

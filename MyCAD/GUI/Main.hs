@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 module Main (main) where
 -- base
-import Control.Monad (join, when)
+import Control.Monad (join)
 import Control.Concurrent (threadDelay)
 
 -- third party
@@ -9,11 +9,10 @@ import qualified Graphics.UI.GLFW as GLFW
 import Linear.V3 (V3(..))
 
 -- internal
-import GLFW_Helpers (Window(..)
-                    , glfwInit, shouldClose, shutdownGLFW
-                    , hasNewCameraData, getCameraData)
+import GLFW_Helpers (glfwInit, shutdownGLFW)
 import ViewSpace (CameraData(..))
-import GL_Renderer (Renderer, initRenderer, render, updateView, addObject)
+import GL_Renderer (Renderer, initRenderer
+                   , addObject, checkClose, renderIfNecessary)
 import GL_Primitives (makeLine)
 
 winWIDTH      = 800
@@ -35,7 +34,7 @@ getLoop = do
         Nothing -> pure initFailMsg
         Just window -> do renderer <- initRenderer window startCam winASPECT lineThickness
                           debuggingLines renderer
-                          pure (loop window renderer)
+                          pure (loop renderer)
 
 -- Make a few lines - this is for testing. This should be a wireframe cube
 -- (sort of)
@@ -58,24 +57,15 @@ debuggingLines renderer =
      >>= (`addObject` (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
      >>= (`addObject` (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
 
-loop :: Window -> Renderer -> IO ()
-loop window renderer = do
-    shouldClose window >>= \case
+loop :: Renderer -> IO ()
+loop renderer = do
+    checkClose renderer >>= \case
         False -> do GLFW.pollEvents
-                    processCameraQueue renderer window
+                    renderIfNecessary renderer
                     -- 1,000 microseconds = 1 millisecond (threadDelay takes microseconds)
                     threadDelay 100
-                    loop window renderer
+                    loop renderer
         True -> shutdownGLFW
-
-processCameraQueue :: Renderer -> Window -> IO ()
-processCameraQueue renderer window = do
-    -- Only process the CameraQueue if there is data to process.
-    hasNewCameraData window >>=
-        (`when` do cameraDatas  <- getCameraData window
-                   mapM_ (`updateView` renderer) cameraDatas
-                   render renderer
-        )
 
 -------------------------------------------------------------------------------
 --                    Consider moving this stuff elsewhere
