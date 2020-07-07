@@ -60,11 +60,19 @@ debuggingLines renderer =
 loop :: Renderer -> IO ()
 loop renderer = do
     checkClose renderer >>= \case
-        False -> do GLFW.pollEvents
-                    renderIfNecessary renderer
-                    -- 100 microseconds = 0.1 millisecond (threadDelay takes microseconds)
-                    threadDelay 100
-                    loop renderer
+        False -> do
+            -- Might trigger a render
+            GLFW.pollEvents
+
+            -- Only renders when something has triggered a render
+            renderIfNecessary renderer
+
+            -- So we don't use up all the CPU.  100 microseconds = 0.1 millisecond
+            -- (threadDelay takes microseconds)
+            threadDelay 100
+
+            -- Go again!
+            loop renderer
         True -> shutdownGLFW
 
 -------------------------------------------------------------------------------
