@@ -32,6 +32,7 @@ data Renderer =
     Renderer
         { _shader  :: Shader
         , _objects :: [RenderTarget]
+        , _window  :: Window
         }
 
 -- | This contains the actual Vertex data to render. This is not exported
@@ -55,16 +56,16 @@ initRenderer window camera aspectRatio lineThickness = do
     putUniform shader (makeUniform "thickness" lineThickness)
     putProjectionUniform aspectRatio shader
 
-    let renderer = Renderer shader []
+    let renderer = Renderer shader [] window
 
     -- Set the initial view
     updateView camera renderer
 
-    -- Render the initial scene
-    render window renderer
-
     -- enable depth testing
     glEnable GL_DEPTH_TEST
+
+    -- Render the initial scene
+    render renderer
 
     pure renderer
 
@@ -75,14 +76,14 @@ updateView camera renderer = putViewUniform camera (_shader renderer)
 -- | This adds a renderable "ObjectData" to a renderer. It still does not draw
 --   anything
 addObject :: Renderer -> ObjectData -> IO Renderer
-addObject (Renderer shader targets) oData = do
+addObject (Renderer shader targets window) oData = do
     vao <- putGraphicData oData
     let target = RenderTarget vao oData
-    pure $ Renderer shader (target : targets)
+    pure $ Renderer shader (target : targets) window
 
 -- | This will render every "ObjectData" that has been added to the "Renderer"
-render :: Window -> Renderer -> IO ()
-render window (Renderer shader targets) = do
+render :: Renderer -> IO ()
+render (Renderer shader targets window) = do
     -- First, clear what was there
     glClearColor 0.2 0.3 0.3 1.0
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)

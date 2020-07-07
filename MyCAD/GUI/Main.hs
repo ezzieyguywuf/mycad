@@ -74,7 +74,7 @@ processCameraQueue renderer window = do
     hasNewCameraData window >>=
         (`when` do cameraDatas  <- getCameraData window
                    mapM_ (`updateView` renderer) cameraDatas
-                   render window renderer
+                   render renderer
         )
 
 -------------------------------------------------------------------------------
