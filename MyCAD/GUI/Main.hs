@@ -1,6 +1,7 @@
+{-# LANGUAGE LambdaCase #-}
 module Main (main) where
 -- base
-import Control.Monad (forever, when)
+import Control.Monad (join, when)
 import Control.Concurrent (threadDelay)
 
 -- third party
@@ -9,7 +10,7 @@ import Linear.V3 (V3(..))
 
 -- internal
 import GLFW_Helpers (Window(..)
-                    , glfwInit, closeIfNeeded, shutdownGLFW
+                    , glfwInit, shouldClose, shutdownGLFW
                     , hasNewCameraData, getCameraData)
 import ViewSpace (CameraData(..))
 import GL_Renderer (Renderer, initRenderer, render, updateView, addObject)
@@ -23,51 +24,49 @@ winTITLE      = "LearnOpenGL Hello CAD!"
 main :: IO ()
 main = do
     putStrLn "executing main"
-    mWindow <- glfwInit winWIDTH winHEIGHT winTITLE startCam
 
-    maybe initFailMsg act mWindow
+    join getLoop
 
-act :: Window -> IO()
-act window = do
-    -- initialize our renderer
+getLoop :: IO (IO ())
+getLoop = do
     let lineThickness = 3
-    renderer <- initRenderer window startCam winASPECT lineThickness
 
-    -- Make a few lines - this is for testing. This should be a wireframe cube
-    -- (sort of)
-    renderer' <-
-        -- Two basic lines
-        --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
-        -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
-        -- cube below
-        addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-         >>= (`addObject` (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
-         >>= (`addObject` (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
-         >>= (`addObject` (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
-         >>= (`addObject` (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
-         >>= (`addObject` (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
-         >>= (`addObject` (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
-         >>= (`addObject` (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
-         >>= (`addObject` (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
-         >>= (`addObject` (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
-         >>= (`addObject` (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
-         >>= (`addObject` (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
+    glfwInit winWIDTH winHEIGHT winTITLE startCam >>= \case
+        Nothing -> pure initFailMsg
+        Just window -> do renderer <- initRenderer window startCam winASPECT lineThickness
+                          debuggingLines renderer
+                          pure (loop window renderer)
 
-    -- enter our main loop
-    loop window renderer'
-
-    -- Just in case our loop didn't manage to get there
-    shutdownGLFW
+-- Make a few lines - this is for testing. This should be a wireframe cube
+-- (sort of)
+debuggingLines :: Renderer -> IO Renderer
+debuggingLines renderer =
+    -- Two basic lines
+    --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
+    -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
+    -- cube below
+    addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+     >>= (`addObject` (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
+     >>= (`addObject` (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
+     >>= (`addObject` (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
+     >>= (`addObject` (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
+     >>= (`addObject` (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
+     >>= (`addObject` (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
+     >>= (`addObject` (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
+     >>= (`addObject` (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
+     >>= (`addObject` (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
+     >>= (`addObject` (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
+     >>= (`addObject` (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
 
 loop :: Window -> Renderer -> IO ()
-loop window renderer = forever $ do
-    closeIfNeeded window
-    GLFW.pollEvents
-
-    processCameraQueue renderer window
-
-    -- 1,000 microseconds = 1 millisecond (threadDelay takes microseconds)
-    threadDelay 100
+loop window renderer = do
+    shouldClose window >>= \case
+        False -> do GLFW.pollEvents
+                    processCameraQueue renderer window
+                    -- 1,000 microseconds = 1 millisecond (threadDelay takes microseconds)
+                    threadDelay 100
+                    loop window renderer
+        True -> shutdownGLFW
 
 processCameraQueue :: Renderer -> Window -> IO ()
 processCameraQueue renderer window = do

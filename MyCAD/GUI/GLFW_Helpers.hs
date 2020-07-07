@@ -1,7 +1,7 @@
 module GLFW_Helpers
 (
   Window(..)
-, closeIfNeeded
+, shouldClose
 , shutdownGLFW
 , swapBuffers
 , glfwInit
@@ -73,10 +73,8 @@ initWindow camera glfwWindow = do
     pure $ Just window
 
 -- | Determine if the User or OS has requested for the window to close.
-closeIfNeeded :: Window -> IO ()
-closeIfNeeded window = do
-    bClose <- GLFW.windowShouldClose (getWindow window)
-    when bClose shutdownGLFW
+shouldClose :: Window -> IO Bool
+shouldClose window = GLFW.windowShouldClose (getWindow window)
 
 -- | Exit the GLFW stuff
 shutdownGLFW :: IO ()
