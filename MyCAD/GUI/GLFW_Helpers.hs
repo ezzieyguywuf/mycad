@@ -1,19 +1,20 @@
 module GLFW_Helpers
 (
-  Window(..)
+  Window
 , shouldClose
 , shutdownGLFW
 , swapBuffers
 , glfwInit
 , releaseContext
 , takeContext
+, getRenderQueue
 )where
 
 -- base
 import Control.Monad (when)
 import Data.IORef (IORef, readIORef, writeIORef, newIORef)
 import Control.Concurrent.STM (atomically)
-import Control.Concurrent.STM.TQueue (TQueue, newTQueue, writeTQueue)
+import Control.Concurrent.STM.TQueue (writeTQueue)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -21,12 +22,13 @@ import Graphics.GL.Core33
 
 -- internal
 import ViewSpace (CameraData, rotateCameraNudge, zoomCamera)
+import RenderQueue (RenderQueue, getCameraQueue, initRenderQueue)
 
 -- | A Window includes the data needed to communicate with GLFW, as well as
 --   information about the View
 data Window = Window { getWindow   :: GLFW.Window
                      , lastCamera  :: IORef CameraData
-                     , cameraQueue :: TQueue CameraData
+                     , getRenderQueue :: RenderQueue
                      }
 
 -- | This data is used to determine how far the cursor has moved in callbacks
@@ -34,25 +36,24 @@ data CursorPosition = CursorPosition Float Float
 
 -- | Initializes a GLFW window, including the openGL context
 glfwInit :: Int -> Int -> String -> CameraData -> IO (Maybe Window)
-glfwInit width height title camera = do
+glfwInit width height title cData = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
     GLFW.windowHint (GLFW.WindowHint'OpenGLProfile GLFW.OpenGLProfile'Core)
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
     GLFW.init
+
     maybeWindow <- GLFW.createWindow width height title Nothing Nothing
-    maybe (shutdownGLFW >> pure Nothing) (initWindow camera) maybeWindow
+    maybe (shutdownGLFW >> pure Nothing) (initWindow cData) maybeWindow
 
 initWindow :: CameraData -> GLFW.Window -> IO (Maybe Window)
-initWindow camera glfwWindow = do
+initWindow cData glfwWindow = do
     -- Initialize...well, global stuf :(
-    ioCam  <- newIORef camera
+    ioCam  <- newIORef cData
     cursor <- newIORef $ CursorPosition 0 0
-    camQueue <- atomically newTQueue :: IO (TQueue CameraData)
-    let window = Window glfwWindow ioCam camQueue
+    queue  <- initRenderQueue cData
 
-    -- This sets the initial camera view.
-    atomically $ writeTQueue camQueue camera
+    let window = Window glfwWindow ioCam queue
 
     -- enable callbacks
     GLFW.setKeyCallback glfwWindow (Just (keypressed window))
@@ -112,7 +113,7 @@ keypressed window glfwWindow key _ keyState _ = do
 bumpCamera :: Window -> Float -> Float -> IO ()
 bumpCamera window dx dy = do
     let ioCam    = lastCamera window
-        camQueue = cameraQueue window
+        camQueue = getCameraQueue (getRenderQueue window)
     -- Get the previous camera information
     oldCamData <- readIORef ioCam
 
@@ -139,7 +140,7 @@ refresh window _ = sendRedraw window
 sendRedraw :: Window -> IO ()
 sendRedraw window = do
     let ioCam    = lastCamera window
-        camQueue = cameraQueue window
+        camQueue = getCameraQueue (getRenderQueue window)
 
     -- Get the camera information
     camData <- readIORef ioCam
@@ -187,4 +188,5 @@ mouseScrolled :: Window -> GLFW.ScrollCallback
 mouseScrolled window _ _ dy = do
     oldCamData <- readIORef (lastCamera window)
     let newCamData = zoomCamera oldCamData (realToFrac dy)
-    atomically $ writeTQueue (cameraQueue window) newCamData
+        camQueue = getCameraQueue (getRenderQueue window)
+    atomically $ writeTQueue camQueue newCamData

@@ -3,8 +3,6 @@ module GL_Renderer
 (
   Renderer
 , initRenderer
-, queueCamera
-, queueObject
 , renderIfNecessary
 )where
 -- base
@@ -12,9 +10,7 @@ import Data.Bits ((.|.))
 import Data.Foldable (for_)
 import Control.Monad (when, join, foldM)
 import Control.Concurrent.STM (STM, atomically)
-import Control.Concurrent.STM.TQueue (
-    TQueue, writeTQueue, flushTQueue, newTQueue
-    )
+import Control.Concurrent.STM.TQueue (writeTQueue, flushTQueue)
 import System.FilePath ((</>))
 import Foreign (nullPtr)
 
@@ -30,6 +26,7 @@ import Graphics.GL.Types (GLuint)
 import GL_Helpers (Shader(..), makeShader, putGraphicData, putUniform, makeUniform)
 import GraphicData (ObjectData(..), getElementIndices)
 import ViewSpace (CameraData, putProjectionUniform)
+import RenderQueue (RenderQueue(..))
 
 -- | A renderer contains all of the data needed to render something
 data Renderer =
@@ -46,20 +43,12 @@ data RenderTarget =
         , _getObjectData :: ObjectData
         }
 
--- | This will manage any queue that should trigger a re-render
-data RenderQueue =
-    RenderQueue
-        { _objectQueue :: TQueue ObjectData
-        , _cameraQueue :: TQueue CameraData
-        }
-
-
 lvshaderFPATH = "MyCAD" </> "GUI" </> "LineVShader.glsl"
 fshaderFPATH  = "MyCAD" </> "GUI" </> "FragmentShader.glsl"
 
 -- | This will initialize a Renderer, which can later be used to draw things
-initRenderer :: CameraData -> Float -> Float -> IO Renderer
-initRenderer camera aspectRatio lineThickness = do
+initRenderer :: RenderQueue -> Float -> Float -> IO Renderer
+initRenderer queue aspectRatio lineThickness = do
     -- Compile our shader
     shader <- makeShader lvshaderFPATH fshaderFPATH
 
@@ -68,34 +57,12 @@ initRenderer camera aspectRatio lineThickness = do
     putUniform shader (makeUniform "thickness" lineThickness)
     putProjectionUniform aspectRatio shader
 
-    -- Initialize our queues
-    objectQueue <- atomically newTQueue
-    cameraQueue <- atomically newTQueue
-    atomically $ writeTQueue cameraQueue camera
-
     let renderer    = Renderer shader [] queue
-        queue       = RenderQueue objectQueue cameraQueue
-
-    -- Set the initial view
-    queueCamera renderer camera
 
     -- enable depth testing
     glEnable GL_DEPTH_TEST
 
-    -- Render the initial scene
-    render renderer
-
     pure renderer
-
--- | Adds the given "CameraData" to the render queue, to be processed later
-queueCamera :: Renderer -> CameraData -> IO ()
-queueCamera renderer cData = atomically $ writeTQueue cQueue cData
-    where cQueue = _cameraQueue (_queue renderer)
-
--- | Adds the given "ObjectData" to the render queue, to be processed later
-queueObject :: Renderer -> ObjectData -> IO ()
-queueObject renderer oData = atomically $ writeTQueue oQueue oData
-    where oQueue = _objectQueue (_queue renderer)
 
 -- | Will determine if it is necessary to Render, and then do it as needed. The
 --   "Renderer" returned may be different than the one passed in, i.e. if an
@@ -106,8 +73,8 @@ renderIfNecessary renderer = join $ atomically (checkQueues renderer)
 -- | Determines the correct "IO" action to take given the state of our Queues
 checkQueues :: Renderer -> STM (IO Renderer)
 checkQueues renderer = do
-    let objectQueue = _objectQueue (_queue renderer)
-        cameraQueue = _cameraQueue (_queue renderer)
+    let objectQueue = getObjectQueue (_queue renderer)
+        cameraQueue = getCameraQueue (_queue renderer)
 
     objects <- flushTQueue objectQueue
     cameras <- flushTQueue cameraQueue
@@ -130,7 +97,7 @@ addObject (Renderer shader targets queue) oData = do
 -- | Updates the view matrix using the provided "CameraData"
 updateView :: Renderer -> CameraData -> IO ()
 updateView renderer cData =
-    atomically $ writeTQueue (_cameraQueue (_queue renderer)) cData
+    atomically $ writeTQueue (getCameraQueue (_queue renderer)) cData
 
 
 -- | This will render every "ObjectData" that has been added to the "Renderer"

@@ -8,10 +8,10 @@ import qualified Graphics.UI.GLFW as GLFW
 import Linear.V3 (V3(..))
 
 -- internal
-import GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose)
+import GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose, getRenderQueue)
 import ViewSpace (CameraData(..))
-import GL_Renderer (Renderer, initRenderer
-                   , queueObject, renderIfNecessary)
+import RenderQueue (RenderQueue, queueObject)
+import GL_Renderer (Renderer, initRenderer, renderIfNecessary)
 import GL_Primitives (makeLine)
 
 winWIDTH      = 800
@@ -24,40 +24,41 @@ main = do
     putStrLn "executing main"
 
     getRenderer >>= \case
-        Nothing       -> pure ()
-        Just (window, renderer) -> do forkIO (debuggingLines renderer)
-                                      loop window renderer
+        Nothing                 -> pure ()
+        Just (window, renderer) -> loop window renderer
 
 getRenderer :: IO (Maybe (Window, Renderer))
 getRenderer = do
     let lineThickness = 3
 
-    -- TODO do we really ned startCam twice?
     glfwInit winWIDTH winHEIGHT winTITLE startCam >>= \case
         Nothing -> initFailMsg >> pure Nothing
-        Just window -> do renderer <- initRenderer startCam winASPECT lineThickness
-                          pure $ Just (window, renderer)
+        Just window -> do
+            let queue = getRenderQueue window
+            forkIO (debuggingLines queue)
+            renderer <- initRenderer queue winASPECT lineThickness
+            pure $ Just (window, renderer)
 
 -- Make a few lines - this is for testing. This should be a wireframe cube
 -- (sort of)
-debuggingLines :: Renderer -> IO ()
-debuggingLines renderer = do
+debuggingLines :: RenderQueue -> IO ()
+debuggingLines queue = do
     -- Two basic lines
     --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
     -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
     -- cube below
-    queueObject renderer (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-    queueObject renderer (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
-    queueObject renderer (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
-    queueObject renderer (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
-    queueObject renderer (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
-    queueObject renderer (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
-    queueObject renderer (makeLine (V3 10 10 (-10))  (V3 10 10 10))
-    queueObject renderer (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
-    queueObject renderer (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
-    queueObject renderer (makeLine (V3 10 (-10) 10) (V3 10 10 10))
-    queueObject renderer (makeLine (V3 10 10 10) (V3  (-10) 10 10))
-    queueObject renderer (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
+    queueObject queue (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+    queueObject queue (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
+    queueObject queue (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
+    queueObject queue (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
+    queueObject queue (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
+    queueObject queue (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
+    queueObject queue (makeLine (V3 10 10 (-10))  (V3 10 10 10))
+    queueObject queue (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
+    queueObject queue (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
+    queueObject queue (makeLine (V3 10 (-10) 10) (V3 10 10 10))
+    queueObject queue (makeLine (V3 10 10 10) (V3  (-10) 10 10))
+    queueObject queue (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
 
 loop :: Window -> Renderer -> IO ()
 loop window renderer = do
