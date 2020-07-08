@@ -3,10 +3,8 @@ module GL_Renderer
 (
   Renderer
 , initRenderer
-, render
 , queueCamera
 , queueObject
-, checkClose
 , renderIfNecessary
 )where
 -- base
@@ -29,7 +27,6 @@ import Graphics.GL.Core33 ( pattern GL_TRIANGLES, pattern GL_UNSIGNED_INT
 import Graphics.GL.Types (GLuint)
 
 -- Internal
-import GLFW_Helpers (Window, swapBuffers, shouldClose)
 import GL_Helpers (Shader(..), makeShader, putGraphicData, putUniform, makeUniform)
 import GraphicData (ObjectData(..), getElementIndices)
 import ViewSpace (CameraData, putProjectionUniform)
@@ -38,8 +35,7 @@ import ViewSpace (CameraData, putProjectionUniform)
 data Renderer =
     Renderer
         { _shader  :: Shader
-        , _objects :: [RenderTarget]
-        , _window  :: Window
+        , _targets :: [RenderTarget]
         , _queue   :: RenderQueue
         }
 
@@ -62,8 +58,8 @@ lvshaderFPATH = "MyCAD" </> "GUI" </> "LineVShader.glsl"
 fshaderFPATH  = "MyCAD" </> "GUI" </> "FragmentShader.glsl"
 
 -- | This will initialize a Renderer, which can later be used to draw things
-initRenderer :: Window -> CameraData -> Float -> Float -> IO Renderer
-initRenderer window camera aspectRatio lineThickness = do
+initRenderer :: CameraData -> Float -> Float -> IO Renderer
+initRenderer camera aspectRatio lineThickness = do
     -- Compile our shader
     shader <- makeShader lvshaderFPATH fshaderFPATH
 
@@ -77,7 +73,7 @@ initRenderer window camera aspectRatio lineThickness = do
     cameraQueue <- atomically newTQueue
     atomically $ writeTQueue cameraQueue camera
 
-    let renderer    = Renderer shader [] window queue
+    let renderer    = Renderer shader [] queue
         queue       = RenderQueue objectQueue cameraQueue
 
     -- Set the initial view
@@ -126,10 +122,10 @@ checkQueues renderer = do
 
 -- | Adds an "ObjectData" to our renderer
 addObject :: Renderer -> ObjectData -> IO Renderer
-addObject (Renderer shader targets window queue) oData = do
+addObject (Renderer shader targets queue) oData = do
     vao <- putGraphicData oData
     let target = RenderTarget vao oData
-    pure $ Renderer shader (target : targets) window queue
+    pure $ Renderer shader (target : targets) queue
 
 -- | Updates the view matrix using the provided "CameraData"
 updateView :: Renderer -> CameraData -> IO ()
@@ -139,7 +135,7 @@ updateView renderer cData =
 
 -- | This will render every "ObjectData" that has been added to the "Renderer"
 render :: Renderer -> IO ()
-render (Renderer shader targets window _) = do
+render (Renderer shader targets _) = do
     -- First, clear what was there
     glClearColor 0.2 0.3 0.3 1.0
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
@@ -151,7 +147,7 @@ render (Renderer shader targets window _) = do
     mapM_ (renderTarget shader) targets
 
     -- swap the buffers
-    swapBuffers window
+    --swapBuffers window
 
 renderTarget :: Shader -> RenderTarget -> IO ()
 renderTarget shader rtarget = do
@@ -175,7 +171,3 @@ renderTarget shader rtarget = do
         glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
         )
     glBindVertexArray 0
-
--- | Check with GLFW if the OS has requested to have the window closed
-checkClose :: Renderer -> IO Bool
-checkClose renderer = shouldClose (_window renderer)

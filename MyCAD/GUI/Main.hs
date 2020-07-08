@@ -8,10 +8,10 @@ import qualified Graphics.UI.GLFW as GLFW
 import Linear.V3 (V3(..))
 
 -- internal
-import GLFW_Helpers (glfwInit, shutdownGLFW)
+import GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose)
 import ViewSpace (CameraData(..))
 import GL_Renderer (Renderer, initRenderer
-                   , queueObject, checkClose, renderIfNecessary)
+                   , queueObject, renderIfNecessary)
 import GL_Primitives (makeLine)
 
 winWIDTH      = 800
@@ -25,17 +25,18 @@ main = do
 
     getRenderer >>= \case
         Nothing       -> pure ()
-        Just renderer -> do forkIO (debuggingLines renderer)
-                            loop renderer
+        Just (window, renderer) -> do forkIO (debuggingLines renderer)
+                                      loop window renderer
 
-getRenderer :: IO (Maybe Renderer)
+getRenderer :: IO (Maybe (Window, Renderer))
 getRenderer = do
     let lineThickness = 3
 
     -- TODO do we really ned startCam twice?
     glfwInit winWIDTH winHEIGHT winTITLE startCam >>= \case
         Nothing -> initFailMsg >> pure Nothing
-        Just window -> initRenderer window startCam winASPECT lineThickness >>= pure . Just
+        Just window -> do renderer <- initRenderer startCam winASPECT lineThickness
+                          pure $ Just (window, renderer)
 
 -- Make a few lines - this is for testing. This should be a wireframe cube
 -- (sort of)
@@ -58,9 +59,9 @@ debuggingLines renderer = do
     queueObject renderer (makeLine (V3 10 10 10) (V3  (-10) 10 10))
     queueObject renderer (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
 
-loop :: Renderer -> IO ()
-loop renderer = do
-    checkClose renderer >>= \case
+loop :: Window -> Renderer -> IO ()
+loop window renderer = do
+    shouldClose window >>= \case
         False -> do
             -- Might trigger a render
             GLFW.pollEvents
@@ -73,7 +74,7 @@ loop renderer = do
             threadDelay 100
 
             -- Go again!
-            loop renderer
+            loop window renderer
         True -> shutdownGLFW
 
 -------------------------------------------------------------------------------
@@ -94,4 +95,3 @@ initFailMsg = do
     putStrLn "  are you sure glfw is installed?"
     putStrLn "  If you're using Intel, you may need to enable software rendering"
     putStrLn "  If you're using a terminal, you may need to set DISPLAY."
-
