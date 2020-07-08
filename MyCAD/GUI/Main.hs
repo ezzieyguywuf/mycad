@@ -1,8 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 module Main (main) where
 -- base
-import Control.Monad (join)
-import Control.Concurrent (threadDelay)
+import Control.Concurrent (threadDelay, forkIO)
 
 -- third party
 import qualified Graphics.UI.GLFW as GLFW
@@ -12,7 +11,7 @@ import Linear.V3 (V3(..))
 import GLFW_Helpers (glfwInit, shutdownGLFW)
 import ViewSpace (CameraData(..))
 import GL_Renderer (Renderer, initRenderer
-                   , addObject, checkClose, renderIfNecessary)
+                   , queueObject, checkClose, renderIfNecessary)
 import GL_Primitives (makeLine)
 
 winWIDTH      = 800
@@ -26,38 +25,38 @@ main = do
 
     getRenderer >>= \case
         Nothing       -> pure ()
-        Just renderer -> loop renderer
+        Just renderer -> do forkIO (debuggingLines renderer)
+                            loop renderer
 
 getRenderer :: IO (Maybe Renderer)
 getRenderer = do
     let lineThickness = 3
 
+    -- TODO do we really ned startCam twice?
     glfwInit winWIDTH winHEIGHT winTITLE startCam >>= \case
         Nothing -> initFailMsg >> pure Nothing
-        Just window -> do renderer <- initRenderer window startCam winASPECT lineThickness
-                          debuggingLines renderer
-                          pure (Just renderer)
+        Just window -> initRenderer window startCam winASPECT lineThickness >>= pure . Just
 
 -- Make a few lines - this is for testing. This should be a wireframe cube
 -- (sort of)
-debuggingLines :: Renderer -> IO Renderer
-debuggingLines renderer =
+debuggingLines :: Renderer -> IO ()
+debuggingLines renderer = do
     -- Two basic lines
     --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
     -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
     -- cube below
-    addObject renderer  (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-     >>= (`addObject` (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10))))
-     >>= (`addObject` (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10))))
-     >>= (`addObject` (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10))))
-     >>= (`addObject` (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10)))
-     >>= (`addObject` (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10)))
-     >>= (`addObject` (makeLine (V3 10 10 (-10))  (V3 10 10 10)))
-     >>= (`addObject` (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10)))
-     >>= (`addObject` (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10)))
-     >>= (`addObject` (makeLine (V3 10 (-10) 10) (V3 10 10 10)))
-     >>= (`addObject` (makeLine (V3 10 10 10) (V3  (-10) 10 10)))
-     >>= (`addObject` (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10)))
+    queueObject renderer (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+    queueObject renderer (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
+    queueObject renderer (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
+    queueObject renderer (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
+    queueObject renderer (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
+    queueObject renderer (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
+    queueObject renderer (makeLine (V3 10 10 (-10))  (V3 10 10 10))
+    queueObject renderer (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
+    queueObject renderer (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
+    queueObject renderer (makeLine (V3 10 (-10) 10) (V3 10 10 10))
+    queueObject renderer (makeLine (V3 10 10 10) (V3  (-10) 10 10))
+    queueObject renderer (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
 
 loop :: Renderer -> IO ()
 loop renderer = do

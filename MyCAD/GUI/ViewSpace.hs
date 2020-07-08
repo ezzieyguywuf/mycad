@@ -3,7 +3,6 @@ module ViewSpace
   CameraData(..)
 , rotateCameraNudge
 , zoomCamera
-, putViewUniform
 , putProjectionUniform
 )where
 
@@ -12,7 +11,7 @@ import Linear.Quaternion (axisAngle, rotate)
 import Linear.Metric (normalize, dot, norm)
 import Linear.Vector (lerp)
 
-import Linear.Projection (lookAt, perspective)
+import Linear.Projection (perspective)
 import GL_Helpers (Shader, makeUniform, putUniform)
 
 
@@ -66,14 +65,6 @@ zoomCamera oldCam@(LookAt loc up dir) amt = newCam
           newCam = if rad' <= 0.001
                       then oldCam
                       else LookAt loc' up dir
-
--- | Update the openGL \"Uniform\" matrix that specifies the View
-putViewUniform :: CameraData -> Shader -> IO ()
-putViewUniform (LookAt loc up dir) shader = do
-    let mat         = lookAt loc dir up
-        viewUniform = makeUniform "view" mat
-    putUniform shader viewUniform
-
 
 -- | Update the openGL \"Uniform\" matrix that specifies the Projection
 putProjectionUniform :: Float -> Shader -> IO ()
