@@ -7,9 +7,10 @@ module GL_Renderer
 -- Base
 import Data.Bits ((.|.))
 import Data.Foldable (for_)
-import Control.Monad (when, join, foldM)
+import Control.Monad (when, join)
 import Control.Concurrent.STM (STM, atomically)
 import Control.Concurrent.STM.TQueue (flushTQueue)
+import Control.Concurrent.STM.TVar (readTVar, writeTVar)
 import Foreign (nullPtr)
 
 -- Third-party
@@ -42,20 +43,23 @@ checkQueues window renderData = do
     cameras <- flushTQueue cameraQueue
 
     pure $ do -- this is IO
-        renderData'  <- foldM addObject renderData objects
-        for_ cameras (updateView renderData')
+        for_ objects (addObject renderData)
+        for_ cameras (updateView renderData)
 
-        when (not (null objects) || not (null cameras)) (render window renderData')
+        when (not (null objects) || not (null cameras)) (render window renderData)
 
-        pure renderData'
+        pure renderData
 
 -- | Adds an "ObjectData" to our "RenderData"
-addObject :: RenderData -> ObjectData -> IO RenderData
-addObject (RenderData shader targets queue) oData = do
+addObject :: RenderData -> ObjectData -> IO ()
+addObject rData oData = do
     putStrLn "Adding object"
     vao <- putGraphicData oData
     let target = RenderTarget vao oData
-    pure $ RenderData shader (target : targets) queue
+    atomically $ do
+        let targetsVar = _targets rData
+        targets <- readTVar targetsVar
+        writeTVar targetsVar (target : targets)
 
 -- | Updates the view matrix using the provided "CameraData"
 updateView :: RenderData -> CameraData -> IO ()
@@ -63,7 +67,7 @@ updateView renderData cData = putViewUniform cData (_shader renderData)
 
 -- | This will render every "ObjectData" that has been added to the "RenderData"
 render :: Window -> RenderData -> IO ()
-render window (RenderData shader targets _) = do
+render window (RenderData shader targetsVar _) = do
     -- First, clear what was there
     glClearColor 0.2 0.3 0.3 1.0
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
@@ -72,6 +76,7 @@ render window (RenderData shader targets _) = do
     glUseProgram (_shaderID shader)
 
     -- Render each target
+    targets <- atomically (readTVar targetsVar)
     mapM_ (renderTarget shader) targets
 
     -- swap the buffers

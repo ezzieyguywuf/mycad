@@ -7,6 +7,8 @@ module GL_RenderData
 )where
 -- base
 import System.FilePath ((</>))
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TVar (TVar, newTVar)
 
 -- Third-party
 import Graphics.GL.Core33 ( pattern GL_DEPTH_TEST, glEnable)
@@ -16,13 +18,13 @@ import Graphics.GL.Types (GLuint)
 import GL_Helpers (Shader(..), makeShader, putUniform, makeUniform)
 import GraphicData (ObjectData(..))
 import ViewSpace (putProjectionUniform)
-import RenderQueue (RenderQueue(..))
+import RenderQueue (RenderQueue)
 
 -- | A RenderData contains all of the data needed to render something
 data RenderData =
     RenderData
         { _shader  :: Shader
-        , _targets :: [RenderTarget]
+        , _targets :: TVar [RenderTarget]
         , _queue   :: RenderQueue
         }
 
@@ -47,9 +49,11 @@ initRenderData queue aspectRatio lineThickness = do
     putUniform shader (makeUniform "thickness" lineThickness)
     putProjectionUniform aspectRatio shader
 
-    let rData = RenderData shader [] queue
+    targets <- atomically $ newTVar []
+    let rData = RenderData shader targets queue
 
     -- enable depth testing
     glEnable GL_DEPTH_TEST
 
     pure rData
+

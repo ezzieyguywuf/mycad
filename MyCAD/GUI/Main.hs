@@ -36,8 +36,8 @@ getRenderData = do
         Nothing -> initFailMsg >> pure Nothing
         Just window -> do
             let queue = getRenderQueue window
-            forkIO (debuggingLines queue)
             renderData <- initRenderData queue winASPECT lineThickness
+            forkIO (debuggingLines queue)
             pure $ Just (window, renderData)
 
 -- Make a few lines - this is for testing. This should be a wireframe cube
