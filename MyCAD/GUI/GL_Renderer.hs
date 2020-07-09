@@ -59,9 +59,7 @@ addObject (RenderData shader targets queue) oData = do
 
 -- | Updates the view matrix using the provided "CameraData"
 updateView :: RenderData -> CameraData -> IO ()
-updateView renderData cData = do
-    putStrLn "updatingView"
-    putViewUniform cData (_shader renderData)
+updateView renderData cData = putViewUniform cData (_shader renderData)
 
 -- | This will render every "ObjectData" that has been added to the "RenderData"
 render :: Window -> RenderData -> IO ()
