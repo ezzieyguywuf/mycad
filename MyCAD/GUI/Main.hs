@@ -11,8 +11,9 @@ import Linear.V3 (V3(..))
 import GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose, getRenderQueue)
 import ViewSpace (CameraData(..))
 import RenderQueue (RenderQueue, queueObject)
-import GL_RenderData (Renderer, initRenderer, renderIfNecessary)
+import GL_RenderData (RenderData, initRenderData)
 import GL_Primitives (makeLine)
+import GL_Renderer (renderIfNecessary)
 
 winWIDTH      = 800
 winHEIGHT     = 600
@@ -23,12 +24,12 @@ main :: IO ()
 main = do
     putStrLn "executing main"
 
-    getRenderer >>= \case
+    getRenderData >>= \case
         Nothing                 -> pure ()
-        Just (window, renderer) -> loop window renderer
+        Just (window, renderData) -> loop window renderData
 
-getRenderer :: IO (Maybe (Window, Renderer))
-getRenderer = do
+getRenderData :: IO (Maybe (Window, RenderData))
+getRenderData = do
     let lineThickness = 3
 
     glfwInit winWIDTH winHEIGHT winTITLE startCam >>= \case
@@ -36,8 +37,8 @@ getRenderer = do
         Just window -> do
             let queue = getRenderQueue window
             forkIO (debuggingLines queue)
-            renderer <- initRenderer queue winASPECT lineThickness
-            pure $ Just (window, renderer)
+            renderData <- initRenderData queue winASPECT lineThickness
+            pure $ Just (window, renderData)
 
 -- Make a few lines - this is for testing. This should be a wireframe cube
 -- (sort of)
@@ -60,22 +61,22 @@ debuggingLines queue = do
     queueObject queue (makeLine (V3 10 10 10) (V3  (-10) 10 10))
     queueObject queue (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
 
-loop :: Window -> Renderer -> IO ()
-loop window renderer = do
+loop :: Window -> RenderData -> IO ()
+loop window renderData = do
     shouldClose window >>= \case
         False -> do
             -- Might trigger a render
             GLFW.pollEvents
 
             -- Only renders when something has triggered a render
-            renderIfNecessary renderer
+            renderIfNecessary renderData
 
             -- So we don't use up all the CPU.  100 microseconds = 0.1 millisecond
             -- (threadDelay takes microseconds)
             threadDelay 100
 
             -- Go again!
-            loop window renderer
+            loop window renderData
         True -> shutdownGLFW
 
 -------------------------------------------------------------------------------
