@@ -69,7 +69,7 @@ loop window renderData = do
             GLFW.pollEvents
 
             -- Only renders when something has triggered a render
-            renderIfNecessary renderData
+            renderIfNecessary window renderData
 
             -- So we don't use up all the CPU.  100 microseconds = 0.1 millisecond
             -- (threadDelay takes microseconds)

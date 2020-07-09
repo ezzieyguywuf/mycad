@@ -24,16 +24,17 @@ import RenderQueue (getObjectQueue, getCameraQueue)
 import GraphicData (ObjectData(..), getElementIndices)
 import ViewSpace (CameraData, putViewUniform)
 import GL_Helpers (Shader(..), putGraphicData, putUniform, makeUniform)
+import GLFW_Helpers (Window, swapBuffers)
 
 -- | Will determine if it is necessary to render, and then do it as needed. The
 --   "RenderData" returned may be different than the one passed in, i.e. if an
 --   "ObjectData" was queued to be rendered, it is added to the RenderData
-renderIfNecessary :: RenderData -> IO RenderData
-renderIfNecessary renderData = join $ atomically (checkQueues renderData)
+renderIfNecessary :: Window -> RenderData -> IO RenderData
+renderIfNecessary window renderData = join $ atomically (checkQueues window renderData)
 
 -- | Determines the correct "IO" action to take given the state of our Queues
-checkQueues :: RenderData -> STM (IO RenderData)
-checkQueues renderData = do
+checkQueues :: Window -> RenderData -> STM (IO RenderData)
+checkQueues window renderData = do
     let objectQueue = getObjectQueue (_queue renderData)
         cameraQueue = getCameraQueue (_queue renderData)
 
@@ -44,7 +45,7 @@ checkQueues renderData = do
         renderData'  <- foldM addObject renderData objects
         for_ cameras (updateView renderData')
 
-        when (not (null objects) || not (null cameras)) (render renderData')
+        when (not (null objects) || not (null cameras)) (render window renderData')
 
         pure renderData'
 
@@ -63,8 +64,8 @@ updateView renderData cData = do
     putViewUniform cData (_shader renderData)
 
 -- | This will render every "ObjectData" that has been added to the "RenderData"
-render :: RenderData -> IO ()
-render (RenderData shader targets _) = do
+render :: Window -> RenderData -> IO ()
+render window (RenderData shader targets _) = do
     -- First, clear what was there
     glClearColor 0.2 0.3 0.3 1.0
     glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT)
@@ -76,7 +77,7 @@ render (RenderData shader targets _) = do
     mapM_ (renderTarget shader) targets
 
     -- swap the buffers
-    --swapBuffers window
+    swapBuffers window
 
 renderTarget :: Shader -> RenderTarget -> IO ()
 renderTarget shader rtarget = do
