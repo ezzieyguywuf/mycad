@@ -11,7 +11,7 @@ import Linear.V3 (V3(..))
 import GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose, getRenderQueue)
 import ViewSpace (CameraData(..))
 import RenderQueue (RenderQueue, queueObject)
-import GL_Renderer (Renderer, initRenderer, renderIfNecessary)
+import GL_RenderData (Renderer, initRenderer, renderIfNecessary)
 import GL_Primitives (makeLine)
 
 winWIDTH      = 800

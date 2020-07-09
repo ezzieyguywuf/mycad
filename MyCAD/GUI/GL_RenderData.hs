@@ -1,5 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
-module GL_Renderer
+module GL_RenderData
 (
   Renderer
 , initRenderer
@@ -10,7 +10,7 @@ import Data.Bits ((.|.))
 import Data.Foldable (for_)
 import Control.Monad (when, join, foldM)
 import Control.Concurrent.STM (STM, atomically)
-import Control.Concurrent.STM.TQueue (writeTQueue, flushTQueue)
+import Control.Concurrent.STM.TQueue (flushTQueue)
 import System.FilePath ((</>))
 import Foreign (nullPtr)
 

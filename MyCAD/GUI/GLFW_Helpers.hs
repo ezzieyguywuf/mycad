@@ -122,6 +122,7 @@ bumpCamera window dx dy = do
 
     -- Update our lastCamera IORef
     writeIORef ioCam newCamData
+
     -- Let whoever's listening know that there's new data to use.
     atomically $ writeTQueue camQueue newCamData
 
