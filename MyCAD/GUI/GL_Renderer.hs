@@ -25,7 +25,7 @@ import Graphics.GL.Types (GLuint)
 -- Internal
 import GL_Helpers (Shader(..), makeShader, putGraphicData, putUniform, makeUniform)
 import GraphicData (ObjectData(..), getElementIndices)
-import ViewSpace (CameraData, putProjectionUniform)
+import ViewSpace (CameraData, putViewUniform, putProjectionUniform)
 import RenderQueue (RenderQueue(..))
 
 -- | A renderer contains all of the data needed to render something
@@ -90,15 +90,16 @@ checkQueues renderer = do
 -- | Adds an "ObjectData" to our renderer
 addObject :: Renderer -> ObjectData -> IO Renderer
 addObject (Renderer shader targets queue) oData = do
+    putStrLn "Adding object"
     vao <- putGraphicData oData
     let target = RenderTarget vao oData
     pure $ Renderer shader (target : targets) queue
 
 -- | Updates the view matrix using the provided "CameraData"
 updateView :: Renderer -> CameraData -> IO ()
-updateView renderer cData =
-    atomically $ writeTQueue (getCameraQueue (_queue renderer)) cData
-
+updateView renderer cData = do
+    putStrLn "updatingView"
+    putViewUniform cData (_shader renderer)
 
 -- | This will render every "ObjectData" that has been added to the "Renderer"
 render :: Renderer -> IO ()
