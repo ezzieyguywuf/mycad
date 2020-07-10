@@ -27,8 +27,6 @@
 
 # GUI
 - Add lighting/shading
-- do bounds check on getUniformLocation: if it fails, do nothing (maybe?) or
-  alert the coder.
 - infinite zoom.
 - Remove hard-coded paths - allow for configurable or something.
 - Update Shader data type to actually use the Uniform data type 
@@ -38,6 +36,7 @@
 - Allow simultaneous keys, i.e. arrows, to control things
 - Update resize technique so that there are no visual artifacts.
 - Fix window resize to also adjust aspectRatio, i.e. in the lineVShader
+- Refactor main so that we don't have to pass a Window around.
 
 # UX
 - Add icons to GUI
