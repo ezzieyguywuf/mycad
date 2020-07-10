@@ -18,56 +18,7 @@ The Except monad (from mtl: again, rather ubiquitous) is used for error handling
 -}
 module Main (main) where
 
--- | External imports
-import Control.Monad.Except (runExcept)
-import Control.Monad.State  (runState)
-import qualified System.Console.Haskeline as HL
+import LaunchTUI (launch)
 
--- | Internal imports
-import CommandParser (parseInput, commandCompletions)
-import CommandRunner (runCommand)
-import Errors (getErrorString)
-import Entity (Entity, nullEntity)
-
--- | Entry point for program.
 main :: IO ()
-main = do
-    putStrLn "Welcome to mycad. [Ctrl-d] to exit."
-    HL.runInputT settings (mainLoop (nullEntity :: Entity Float))
-
--- | Exit gracefully
-exit :: HL.InputT IO ()
-exit = HL.outputStrLn "exiting."
-
--- | Entry point for main loop
-mainLoop :: (Show p, Fractional p) => Entity p -> HL.InputT IO ()
-mainLoop entity = do
-    input <- HL.getInputLine "mycad> "
-    maybe exit (loopAgain entity) input
-
--- | Determine if we should loop again or bail out.
-loopAgain :: (Show p, Fractional p) => Entity p -> String -> HL.InputT IO ()
-loopAgain entity input =
-    case runExcept (parseInput input) of
-        Left  err     -> HL.outputStrLn (getErrorString err) >> mainLoop entity
-        Right command -> case runState (runCommand entity command) entity of
-                           (Nothing, _)        -> exit
-                           (Just msg, entity') -> HL.outputStrLn msg >> mainLoop entity'
-
--- ----------------------------------------------------------------------------
---                   Haskeline-Specific Setup Stuff. You can probably ignore
--- ----------------------------------------------------------------------------
-
--- | Provides setting information to InputT
-settings :: HL.Settings IO
-settings = 
-    HL.Settings { HL.complete = HL.completeWord Nothing [' ', '\t'] completer
-                , HL.historyFile = Nothing
-                , HL.autoAddHistory = True
-                }
-
--- | Provides tab-completion to Haskeline's InputT
-completer :: String -> IO [HL.Completion]
-completer s = pure $ map makeComplete (commandCompletions s)
-    where makeComplete :: String -> HL.Completion
-          makeComplete s = HL.Completion s s False
+main = launch
