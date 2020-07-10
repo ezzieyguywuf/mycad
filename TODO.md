@@ -45,3 +45,4 @@
 - Allow run-time determination (is this a good idea?) of the parametrization of
   `Command a` in CommandParser. Right now, we hard-code a `Geo.Point Float`,
   but it'd be nice for this to be configurable by the User somehow
+- Clean up Main - should we use `catchError`? (probably)
