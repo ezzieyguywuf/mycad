@@ -1,4 +1,6 @@
 module Main (main) where
 
+import qualified TUI.Main
+
 main :: IO ()
-main = putStrLn "Hello, MyCAD"
+main = TUI.Main.main
