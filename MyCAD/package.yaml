@@ -46,8 +46,10 @@ executables:
         - Paths_MyCAD
 
   gui-exe:
-    main: Main.hs
-    source-dirs: GUI
+    main: MyCAD_Gui.hs
+    source-dirs:
+        - GUI
+        - app
     ghc-options:
     - -threaded
     - -rtsopts
@@ -60,3 +62,14 @@ executables:
     - vector
     - stm
     - filepath
+    other-modules:
+        - GL_Helpers
+        - GL_Primitives
+        - GL_RenderData
+        - GL_Renderer
+        - GLFW_Helpers
+        - GraphicData
+        - Pictures
+        - RenderQueue
+        - ViewSpace
+        - Paths_MyCAD
