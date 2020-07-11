@@ -45,7 +45,7 @@ executables:
         - TUI.LaunchTUI
         - Paths_MyCAD
 
-  gui-exe:
+  MyCAD-gui:
     main: MyCAD_Gui.hs
     source-dirs:
         - GUI
