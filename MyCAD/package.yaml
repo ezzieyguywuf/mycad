@@ -27,8 +27,8 @@ dependencies:
 
 executables:
   MyCAD-exe:
-    main: Main.hs
-    source-dirs: MyCAD
+    main: MyCAD.hs
+    source-dirs: app
     ghc-options:
     - -threaded
     - -rtsopts
@@ -51,15 +51,16 @@ executables:
     - filepath
 
   tui-exe:
-    main: Main.hs
-    source-dirs: TUI
+    main: TUI.hs
+    source-dirs:
+        - TUI
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+        - -threaded
+        - -rtsopts
+        - -with-rtsopts=-N
     dependencies:
-    - haskeline
-    - Entity
-    - Geometry
-    - Topology
-    - text
+        - haskeline
+        - Entity
+        - Geometry
+        - Topology
+        - text
