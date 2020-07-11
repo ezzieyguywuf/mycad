@@ -35,8 +35,8 @@ data RenderTarget =
         , _getObjectData :: ObjectData
         }
 
-lvshaderFPATH = "MyCAD" </> "GUI" </> "LineVShader.glsl"
-fshaderFPATH  = "MyCAD" </> "GUI" </> "FragmentShader.glsl"
+lvshaderFPATH = "MyCAD" </> "app" </> "GUI" </> "LineVShader.glsl"
+fshaderFPATH  = "MyCAD" </> "app" </> "GUI" </> "FragmentShader.glsl"
 
 -- | This will initialize a RenderDat, which can later be used to Render things
 initRenderData :: RenderQueue -> Float -> Float -> IO RenderData
