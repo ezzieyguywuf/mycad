@@ -10,7 +10,7 @@ Portability : POSIX
 The error handling is actually accomplished using the tried-and-true "Except"
 monad.
 -}
-module Errors
+module TUI.Errors
 (
 -- * Data Types
   Error

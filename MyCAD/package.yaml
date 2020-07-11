@@ -24,15 +24,26 @@ dependencies:
 - linear
 - mtl
 - containers
+- haskeline
+- Entity
+- Geometry
+- Topology
+- text
 
 executables:
   MyCAD-exe:
     main: MyCAD.hs
     source-dirs: app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+        - -threaded
+        - -rtsopts
+        - -with-rtsopts=-N
+    other-modules:
+        - TUI.CommandParser
+        - TUI.CommandRunner
+        - TUI.Errors
+        - TUI.LaunchTUI
+        - Paths_MyCAD
 
   gui-exe:
     main: Main.hs
@@ -49,18 +60,3 @@ executables:
     - vector
     - stm
     - filepath
-
-  tui-exe:
-    main: TUI.hs
-    source-dirs:
-        - TUI
-    ghc-options:
-        - -threaded
-        - -rtsopts
-        - -with-rtsopts=-N
-    dependencies:
-        - haskeline
-        - Entity
-        - Geometry
-        - Topology
-        - text

@@ -16,7 +16,7 @@ some point in the future.
 As it stands, it uses the Except monad to handle errors, and typically falls
 back to a "Help" command when things go wrong.
 -}
-module CommandParser
+module TUI.CommandParser
 (
 -- * Data Types
   Command (..)
@@ -35,7 +35,7 @@ import Data.Text (Text, pack, unpack, words, strip, intercalate)
 import Data.Text.Read (rational)
 import Linear.V3
 
-import Errors (Error, MyError(..))
+import TUI.Errors (Error, MyError(..))
 
 -- | A "Command" includes all the information necessary to execute an "Action"
 data Command a = Help (Maybe Action)

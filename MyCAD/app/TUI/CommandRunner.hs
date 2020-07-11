@@ -19,14 +19,14 @@ As it stands, the design is relatively simple:
     3. A "String" is generated in order to provide feedback on the result of
        running the Action
 -}
-module CommandRunner
+module TUI.CommandRunner
 (
 -- * Exported functions
   runCommand
 )where
 
 -- | Internal imports
-import CommandParser (Command(..), Action(..))
+import TUI.CommandParser (Command(..), Action(..))
 import Entity (Entity, EntityState, addVertex, prettyPrintEntity)
 
 -- | This will execute the "Command".

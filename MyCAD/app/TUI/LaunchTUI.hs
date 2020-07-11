@@ -15,7 +15,7 @@ ubiquitous ghci using Haskeline behind-the-scene somewhere.
 
 The Except monad (from mtl: again, rather ubiquitous) is used for error handling.
 -}
-module LaunchTUI (launch) where
+module TUI.LaunchTUI (launch) where
 
 -- | External imports
 import Control.Monad.Except (runExcept)
@@ -23,9 +23,9 @@ import Control.Monad.State  (runState)
 import qualified System.Console.Haskeline as HL
 
 -- | Internal imports
-import CommandParser (parseInput, commandCompletions)
-import CommandRunner (runCommand)
-import Errors (getErrorString)
+import TUI.CommandParser (parseInput, commandCompletions)
+import TUI.CommandRunner (runCommand)
+import TUI.Errors (getErrorString)
 import Entity (Entity, nullEntity)
 
 -- | Entry point for program.

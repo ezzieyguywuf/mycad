@@ -11,7 +11,7 @@ This is the main entry-point for the MyCAD TUI application.
 -}
 module Main (main) where
 
-import LaunchTUI (launch)
+import TUI.LaunchTUI (launch)
 
 main :: IO ()
 main = launch
