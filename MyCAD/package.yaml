@@ -31,7 +31,7 @@ dependencies:
 - text
 
 executables:
-  MyCAD-tui:
+  mycad-tui:
     main: MyCAD.hs
     source-dirs: app
     ghc-options:
@@ -45,8 +45,35 @@ executables:
         - TUI.LaunchTUI
         - Paths_MyCAD
 
-  MyCAD-gui:
+  mycad-gui:
     main: MyCAD_Gui.hs
+    source-dirs: app
+    ghc-options:
+        - -threaded
+        - -rtsopts
+        - -with-rtsopts=-N
+    dependencies:
+        - GLFW-b
+        - gl
+        - ansi-terminal
+        - JuicyPixels
+        - vector
+        - stm
+        - filepath
+    other-modules:
+        - GUI.GL.Helpers
+        - GUI.GL.Primitives
+        - GUI.GL.RenderData
+        - GUI.GL.Renderer
+        - GUI.GL.Pictures
+        - GUI.GLFW_Helpers
+        - GUI.GraphicData
+        - GUI.RenderQueue
+        - GUI.ViewSpace
+        - Paths_MyCAD
+
+  mycad:
+    main: MyCAD.hs
     source-dirs: app
     ghc-options:
         - -threaded
