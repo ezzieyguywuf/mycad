@@ -11,9 +11,9 @@ import Linear.V3 (V3(..))
 import GUI.GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose, getRenderQueue)
 import GUI.ViewSpace (CameraData(..))
 import GUI.RenderQueue (RenderQueue, queueObject)
-import GUI.GL_RenderData (RenderData, initRenderData)
-import GUI.GL_Primitives (makeLine)
-import GUI.GL_Renderer (renderIfNecessary)
+import GUI.GL.RenderData (RenderData, initRenderData)
+import GUI.GL.Primitives (makeLine)
+import GUI.GL.Renderer (renderIfNecessary)
 
 winWIDTH      = 800
 winHEIGHT     = 600

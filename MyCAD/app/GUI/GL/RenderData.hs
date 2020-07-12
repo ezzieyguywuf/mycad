@@ -1,5 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
-module GUI.GL_RenderData
+module GUI.GL.RenderData
 (
   RenderData(..)
 , RenderTarget(..)
@@ -15,7 +15,7 @@ import Graphics.GL.Core33 ( pattern GL_DEPTH_TEST, glEnable)
 import Graphics.GL.Types (GLuint)
 
 -- Internal
-import GUI.GL_Helpers (Shader(..), makeShader, putUniform, makeUniform)
+import GUI.GL.Helpers (Shader(..), makeShader, putUniform, makeUniform)
 import GUI.GraphicData (ObjectData(..))
 import GUI.ViewSpace (putProjectionUniform)
 import GUI.RenderQueue (RenderQueue)

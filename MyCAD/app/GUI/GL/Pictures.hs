@@ -1,4 +1,4 @@
-module GUI.Pictures
+module GUI.GL.Pictures
 (
   loadRGB8
 )

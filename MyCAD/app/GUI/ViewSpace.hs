@@ -13,7 +13,7 @@ import Linear.Metric (normalize, dot, norm)
 import Linear.Vector (lerp)
 
 import Linear.Projection (perspective, lookAt)
-import GUI.GL_Helpers (Shader, makeUniform, putUniform)
+import GUI.GL.Helpers (Shader, makeUniform, putUniform)
 
 
 -- | This is the actual data that our camera needs - this fully describes the

@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
-module GUI.GL_Helpers
+module GUI.GL.Helpers
 (
   Shader(..)
 , makeUniform

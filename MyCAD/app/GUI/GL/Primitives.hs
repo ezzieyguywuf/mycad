@@ -1,4 +1,4 @@
-module GUI.GL_Primitives
+module GUI.GL.Primitives
 (
   makeLine
 )where

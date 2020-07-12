@@ -61,13 +61,13 @@ executables:
     - stm
     - filepath
     other-modules:
-        - GUI.GL_Helpers
-        - GUI.GL_Primitives
-        - GUI.GL_RenderData
-        - GUI.GL_Renderer
+        - GUI.GL.Helpers
+        - GUI.GL.Primitives
+        - GUI.GL.RenderData
+        - GUI.GL.Renderer
+        - GUI.GL.Pictures
         - GUI.GLFW_Helpers
         - GUI.GraphicData
-        - GUI.Pictures
         - GUI.RenderQueue
         - GUI.ViewSpace
         - Paths_MyCAD

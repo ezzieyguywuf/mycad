@@ -1,5 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
-module GUI.GL_Renderer
+module GUI.GL.Renderer
 (
   renderIfNecessary
 )where
@@ -20,11 +20,11 @@ import Graphics.GL.Core33 ( pattern GL_TRIANGLES, pattern GL_UNSIGNED_INT
                           , glClearColor, glClear)
 
 -- Internal
-import GUI.GL_RenderData (RenderData(..), RenderTarget(..))
+import GUI.GL.RenderData (RenderData(..), RenderTarget(..))
+import GUI.GL.Helpers (Shader(..), putGraphicData, putUniform, makeUniform)
 import GUI.RenderQueue (getObjectQueue, getCameraQueue)
 import GUI.GraphicData (ObjectData(..), getElementIndices)
 import GUI.ViewSpace (CameraData, putViewUniform)
-import GUI.GL_Helpers (Shader(..), putGraphicData, putUniform, makeUniform)
 import GUI.GLFW_Helpers (Window, swapBuffers)
 
 -- | Will determine if it is necessary to render, and then do it as needed. The
