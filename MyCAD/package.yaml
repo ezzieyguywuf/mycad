@@ -48,6 +48,7 @@ executables:
   MyCAD-gui:
     main: MyCAD_Gui.hs
     source-dirs:
+        - app
         - app/GUI
     ghc-options:
     - -threaded
