@@ -28,7 +28,7 @@
 # GUI
 - Add lighting/shading
 - infinite zoom.
-- Remove hard-coded paths - allow for configurable or something.
+- Remove hard-coded paths - allow for configurable or something. Maybe use file-embed
 - Update Shader data type to actually use the Uniform data type 
 - Figure out why line thickness zooms - it shouldn't, it should always be the same
   not in getAttributeDataIndex
