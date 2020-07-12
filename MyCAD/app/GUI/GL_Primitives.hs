@@ -1,4 +1,4 @@
-module GL_Primitives
+module GUI.GL_Primitives
 (
   makeLine
 )where
@@ -10,8 +10,8 @@ import Linear.V4 (V4(V4))
 import Linear.Quaternion (axisAngle)
 
 -- internal
-import GraphicData (ObjectData, VertexAttribute(..)
-                   , makeElementData, placeElement, makePlacement)
+import GUI.GraphicData (ObjectData, VertexAttribute(..)
+                       , makeElementData, placeElement, makePlacement)
 
 -- | Create the "ObjectData" needed to render a line through the two points
 makeLine ::   V3 Float    -- ^ from

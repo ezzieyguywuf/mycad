@@ -1,4 +1,4 @@
-module GraphicData
+module GUI.GraphicData
 (
 -- * Exported Data types
   VertexAttribute(..)

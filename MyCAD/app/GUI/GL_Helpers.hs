@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
-module GL_Helpers
+module GUI.GL_Helpers
 (
   Shader(..)
 , makeUniform
@@ -24,11 +24,11 @@ import Graphics.GL.Types (GLuint, GLint, GLsizei, GLenum)
 import Linear.Matrix (M44, mkTransformation)
 
 -- internal
-import GraphicData ( ObjectData(..)
-                   , ElementData(..)
-                   , PlacementData(..)
-                   , AttributeData(..)
-                   , getDataSize, flattenData, getDataAttributes)
+import GUI.GraphicData ( ObjectData(..)
+                       , ElementData(..)
+                       , PlacementData(..)
+                       , AttributeData(..)
+                       , getDataSize, flattenData, getDataAttributes)
 
 -- | This will store the data necessary to execute a shader and draw something
 newtype Shader = Shader { _shaderID       :: GLuint

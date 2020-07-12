@@ -1,4 +1,4 @@
-module RenderQueue
+module GUI.RenderQueue
 (
   RenderQueue
 , initRenderQueue
@@ -13,8 +13,8 @@ import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TQueue (TQueue, newTQueue, writeTQueue)
 
 -- internal imports
-import GraphicData (ObjectData)
-import ViewSpace   (CameraData)
+import GUI.GraphicData (ObjectData)
+import GUI.ViewSpace   (CameraData)
 
 -- | This will manage any queue that should trigger a re-render
 data RenderQueue =

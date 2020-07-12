@@ -1,4 +1,4 @@
-module GLFW_Helpers
+module GUI.GLFW_Helpers
 (
   Window
 , shouldClose
@@ -21,8 +21,8 @@ import qualified Graphics.UI.GLFW as GLFW
 import Graphics.GL.Core33
 
 -- internal
-import ViewSpace (CameraData, rotateCameraNudge, zoomCamera)
-import RenderQueue (RenderQueue, getCameraQueue, initRenderQueue)
+import GUI.ViewSpace (CameraData, rotateCameraNudge, zoomCamera)
+import GUI.RenderQueue (RenderQueue, getCameraQueue, initRenderQueue)
 
 -- | A Window includes the data needed to communicate with GLFW, as well as
 --   information about the View

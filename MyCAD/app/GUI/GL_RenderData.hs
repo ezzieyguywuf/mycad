@@ -1,5 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
-module GL_RenderData
+module GUI.GL_RenderData
 (
   RenderData(..)
 , RenderTarget(..)
@@ -15,10 +15,10 @@ import Graphics.GL.Core33 ( pattern GL_DEPTH_TEST, glEnable)
 import Graphics.GL.Types (GLuint)
 
 -- Internal
-import GL_Helpers (Shader(..), makeShader, putUniform, makeUniform)
-import GraphicData (ObjectData(..))
-import ViewSpace (putProjectionUniform)
-import RenderQueue (RenderQueue)
+import GUI.GL_Helpers (Shader(..), makeShader, putUniform, makeUniform)
+import GUI.GraphicData (ObjectData(..))
+import GUI.ViewSpace (putProjectionUniform)
+import GUI.RenderQueue (RenderQueue)
 
 -- | A RenderData contains all of the data needed to render something
 data RenderData =
