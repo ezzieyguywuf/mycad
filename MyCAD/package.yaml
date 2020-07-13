@@ -29,6 +29,7 @@ dependencies:
 - Geometry
 - Topology
 - text
+- stm
 
 executables:
   mycad-tui:
@@ -58,7 +59,6 @@ executables:
         - ansi-terminal
         - JuicyPixels
         - vector
-        - stm
         - filepath
     other-modules:
         - GUI.GL.Helpers

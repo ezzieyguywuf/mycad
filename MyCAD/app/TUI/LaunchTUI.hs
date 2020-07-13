@@ -17,6 +17,11 @@ The Except monad (from mtl: again, rather ubiquitous) is used for error handling
 -}
 module TUI.LaunchTUI (launch) where
 
+-- | Base
+import Control.Monad.IO.Class (liftIO)
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TMVar (TMVar, newTMVar, takeTMVar, putTMVar)
+
 -- | External imports
 import Control.Monad.Except (runExcept)
 import Control.Monad.State  (runState)
@@ -32,26 +37,32 @@ import Entity (Entity, nullEntity)
 launch :: IO ()
 launch = do
     putStrLn "Welcome to mycad. [Ctrl-d] to exit."
-    HL.runInputT settings (mainLoop (nullEntity :: Entity Float))
+    entityVar <- atomically $ newTMVar (nullEntity :: Entity Float)
+    HL.runInputT settings (mainLoop entityVar)
 
 -- | Exit gracefully
 exit :: HL.InputT IO ()
 exit = HL.outputStrLn "exiting."
 
 -- | Entry point for main loop
-mainLoop :: (Show p, Fractional p) => Entity p -> HL.InputT IO ()
-mainLoop entity = do
+mainLoop :: (Show p, Fractional p) => TMVar (Entity p) -> HL.InputT IO ()
+mainLoop entityVar = do
     input <- HL.getInputLine "mycad> "
-    maybe exit (loopAgain entity) input
+    maybe exit (loopAgain entityVar) input
 
 -- | Determine if we should loop again or bail out.
-loopAgain :: (Show p, Fractional p) => Entity p -> String -> HL.InputT IO ()
-loopAgain entity input =
+loopAgain :: (Show p, Fractional p) => TMVar (Entity p) -> String -> HL.InputT IO ()
+loopAgain entityVar input =
     case runExcept (parseInput input) of
-        Left  err     -> HL.outputStrLn (getErrorString err) >> mainLoop entity
-        Right command -> case runState (runCommand entity command) entity of
-                           (Nothing, _)        -> exit
-                           (Just msg, entity') -> HL.outputStrLn msg >> mainLoop entity'
+        Left  err     -> HL.outputStrLn (getErrorString err) >> mainLoop entityVar
+        Right command -> do
+            entity <- liftIO (atomically $ takeTMVar entityVar)
+            case runState (runCommand entity command) entity of
+                (Nothing, _)        -> exit
+                (Just msg, entity') -> do
+                    HL.outputStrLn msg
+                    liftIO (atomically $ putTMVar entityVar entity')
+                    mainLoop entityVar
 
 -- ----------------------------------------------------------------------------
 --                   Haskeline-Specific Setup Stuff. You can probably ignore
