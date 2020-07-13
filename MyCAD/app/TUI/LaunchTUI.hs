@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-|
 Module      : LaunchTUI
 Description : Launches MyCAD's Textual User Interface
@@ -15,7 +16,7 @@ ubiquitous ghci using Haskeline behind-the-scene somewhere.
 
 The Except monad (from mtl: again, rather ubiquitous) is used for error handling.
 -}
-module TUI.LaunchTUI (launch) where
+module TUI.LaunchTUI (initialize, launch) where
 
 -- | Base
 import Control.Monad.IO.Class (liftIO)
@@ -33,36 +34,37 @@ import TUI.CommandRunner (runCommand)
 import TUI.Errors (getErrorString)
 import Entity (Entity, nullEntity)
 
--- | Entry point for program.
-launch :: IO ()
-launch = do
-    putStrLn "Welcome to mycad. [Ctrl-d] to exit."
-    entityVar <- atomically $ newTMVar (nullEntity :: Entity Float)
-    HL.runInputT settings (mainLoop entityVar)
+-- | Initializes the variables needed
+initialize :: IO (TMVar (Entity p))
+initialize = do
+    putStrLn "Welcome to mycad. [Ctrl-d] or quit to exit."
+    atomically $ newTMVar nullEntity
 
 -- | Exit gracefully
 exit :: HL.InputT IO ()
 exit = HL.outputStrLn "exiting."
 
 -- | Entry point for main loop
-mainLoop :: (Show p, Fractional p) => TMVar (Entity p) -> HL.InputT IO ()
-mainLoop entityVar = do
-    input <- HL.getInputLine "mycad> "
-    maybe exit (loopAgain entityVar) input
+launch :: (Show p, Fractional p) => TMVar (Entity p) -> IO ()
+launch entityVar = HL.runInputT settings (loop entityVar)
 
 -- | Determine if we should loop again or bail out.
-loopAgain :: (Show p, Fractional p) => TMVar (Entity p) -> String -> HL.InputT IO ()
-loopAgain entityVar input =
-    case runExcept (parseInput input) of
-        Left  err     -> HL.outputStrLn (getErrorString err) >> mainLoop entityVar
-        Right command -> do
-            entity <- liftIO (atomically $ takeTMVar entityVar)
-            case runState (runCommand entity command) entity of
-                (Nothing, _)        -> exit
-                (Just msg, entity') -> do
-                    HL.outputStrLn msg
-                    liftIO (atomically $ putTMVar entityVar entity')
-                    mainLoop entityVar
+loop :: (Show p, Fractional p) => TMVar (Entity p) -> HL.InputT IO ()
+loop entityVar = do
+    HL.getInputLine "mycad> " >>= \case
+        Nothing    -> exit
+        Just input -> case runExcept (parseInput input) of
+            Left  err     -> do
+                HL.outputStrLn (getErrorString err)
+                loop entityVar
+            Right command -> do
+                entity <- liftIO (atomically $ takeTMVar entityVar)
+                case runState (runCommand entity command) entity of
+                    (Nothing, _)        -> exit
+                    (Just msg, entity') -> do
+                        HL.outputStrLn msg
+                        liftIO (atomically $ putTMVar entityVar entity')
+                        loop entityVar
 
 -- ----------------------------------------------------------------------------
 --                   Haskeline-Specific Setup Stuff. You can probably ignore

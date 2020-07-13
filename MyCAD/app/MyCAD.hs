@@ -8,5 +8,6 @@ import qualified TUI.LaunchTUI as TUI
 import qualified GUI.LaunchGUI as GUI
 
 main :: IO ()
-main = do forkIO TUI.launch
+main = do entity <- TUI.initialize
+          forkIO (TUI.launch entity)
           GUI.launch

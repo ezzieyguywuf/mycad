@@ -1,7 +1,7 @@
 module Main (main) where
 
-import TUI.LaunchTUI (launch)
+import TUI.LaunchTUI (initialize, launch)
 
 main :: IO ()
 main = do putStrLn "Hello, MyCAD!"
-          launch
+          initialize >>= launch
