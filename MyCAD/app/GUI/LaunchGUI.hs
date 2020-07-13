@@ -56,27 +56,6 @@ getRenderData = do
             forkIO (debuggingLines queue)
             pure $ Just (window, renderData)
 
--- Make a few lines - this is for testing. This should be a wireframe cube
--- (sort of)
-debuggingLines :: RenderQueue -> IO ()
-debuggingLines queue = do
-    -- Two basic lines
-    --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
-    -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
-    -- cube below
-    queueObject queue (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-    queueObject queue (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
-    queueObject queue (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
-    queueObject queue (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
-    queueObject queue (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
-    queueObject queue (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
-    queueObject queue (makeLine (V3 10 10 (-10))  (V3 10 10 10))
-    queueObject queue (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
-    queueObject queue (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
-    queueObject queue (makeLine (V3 10 (-10) 10) (V3 10 10 10))
-    queueObject queue (makeLine (V3 10 10 10) (V3  (-10) 10 10))
-    queueObject queue (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
-
 loop :: Window -> RenderData -> IO ()
 loop window renderData = do
     shouldClose window >>= \case
@@ -113,3 +92,24 @@ initFailMsg = do
     putStrLn "  are you sure glfw is installed?"
     putStrLn "  If you're using Intel, you may need to enable software rendering"
     putStrLn "  If you're using a terminal, you may need to set DISPLAY."
+
+-- Make a few lines - this is for testing. This should be a wireframe cube
+-- (sort of)
+debuggingLines :: RenderQueue -> IO ()
+debuggingLines queue = do
+    -- Two basic lines
+    --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
+    -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
+    -- cube below
+    queueObject queue (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+    queueObject queue (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
+    queueObject queue (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
+    queueObject queue (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
+    queueObject queue (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
+    queueObject queue (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
+    queueObject queue (makeLine (V3 10 10 (-10))  (V3 10 10 10))
+    queueObject queue (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
+    queueObject queue (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
+    queueObject queue (makeLine (V3 10 (-10) 10) (V3 10 10 10))
+    queueObject queue (makeLine (V3 10 10 10) (V3  (-10) 10 10))
+    queueObject queue (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
