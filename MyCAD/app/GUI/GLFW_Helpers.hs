@@ -35,8 +35,8 @@ data Window = Window { getWindow   :: GLFW.Window
 data CursorPosition = CursorPosition Float Float
 
 -- | Initializes a GLFW window, including the openGL context
-glfwInit :: Int -> Int -> String -> CameraData -> IO (Maybe Window)
-glfwInit width height title cData = do
+glfwInit :: Int -> Int -> String -> RenderQueue -> CameraData -> IO (Maybe Window)
+glfwInit width height title queue cData = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
     GLFW.windowHint (GLFW.WindowHint'OpenGLProfile GLFW.OpenGLProfile'Core)
@@ -44,14 +44,13 @@ glfwInit width height title cData = do
     GLFW.init
 
     maybeWindow <- GLFW.createWindow width height title Nothing Nothing
-    maybe (shutdownGLFW >> pure Nothing) (initWindow cData) maybeWindow
+    maybe (shutdownGLFW >> pure Nothing) (initWindow queue cData) maybeWindow
 
-initWindow :: CameraData -> GLFW.Window -> IO (Maybe Window)
-initWindow cData glfwWindow = do
+initWindow :: RenderQueue -> CameraData -> GLFW.Window -> IO (Maybe Window)
+initWindow queue cData glfwWindow = do
     -- Initialize...well, global stuf :(
     ioCam  <- newIORef cData
     cursor <- newIORef $ CursorPosition 0 0
-    queue  <- initRenderQueue cData
 
     let window = Window glfwWindow ioCam queue
 

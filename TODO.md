@@ -2,6 +2,7 @@
 - ADD INTERNATIONALIZATION!!!!
 - Add gitlab CI integration back, using the haskell stuff.
 - Figure out how to host haddock documentation on gitlab
+- Make it so that `quit` in TUI will close GUI as well.
 - Update build instructions for haskell - should be cross-platform automatically!
   build system
 - Update all imports to "explicit", i.e. `import SomeModule (f1, f2, etc...)`

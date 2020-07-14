@@ -47,7 +47,7 @@ executables:
         - Paths_MyCAD
 
   mycad-gui:
-    main: MyCAD_gui.hs
+    main: MyCAD_Gui.hs
     source-dirs: app
     ghc-options:
         - -threaded

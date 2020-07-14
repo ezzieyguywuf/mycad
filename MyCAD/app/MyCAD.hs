@@ -9,5 +9,7 @@ import qualified GUI.LaunchGUI as GUI
 
 main :: IO ()
 main = do entity <- TUI.initialize
+          queue  <- GUI.initialize
+
           forkIO (TUI.launch entity)
-          GUI.launch
+          GUI.launch queue

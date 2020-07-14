@@ -14,7 +14,7 @@ interface using Haskell bindings to the popular glfw library.
 glfw seems very mature, as well as actively maintained. It is also a rather
 lightweight dependency, as far as gui libraries are concerned.
 -}
-module GUI.LaunchGUI (launch) where
+module GUI.LaunchGUI (initialize, launch) where
 
 -- base
 import Control.Concurrent (threadDelay, forkIO)
@@ -26,7 +26,7 @@ import Linear.V3 (V3(..))
 -- internal
 import GUI.GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose, getRenderQueue)
 import GUI.ViewSpace (CameraData(..))
-import GUI.RenderQueue (RenderQueue, queueObject)
+import GUI.RenderQueue (RenderQueue, queueObject, initRenderQueue)
 import GUI.GL.RenderData (RenderData, initRenderData)
 import GUI.GL.Primitives (makeLine)
 import GUI.GL.Renderer (renderIfNecessary)
@@ -36,25 +36,20 @@ winHEIGHT     = 600
 winASPECT     = fromIntegral winWIDTH / fromIntegral winHEIGHT
 winTITLE      = "LearnOpenGL Hello CAD!"
 
-launch :: IO ()
-launch = do
-    putStrLn "executing main"
+initialize :: IO RenderQueue
+initialize = initRenderQueue startCam
 
-    getRenderData >>= \case
-        Nothing                 -> pure ()
-        Just (window, renderData) -> loop window renderData
-
-getRenderData :: IO (Maybe (Window, RenderData))
-getRenderData = do
+launch :: RenderQueue -> IO ()
+launch queue = do
     let lineThickness = 3
 
-    glfwInit winWIDTH winHEIGHT winTITLE startCam >>= \case
-        Nothing -> initFailMsg >> pure Nothing
+    glfwInit winWIDTH winHEIGHT winTITLE queue startCam >>= \case
+        Nothing -> initFailMsg
         Just window -> do
             let queue = getRenderQueue window
             renderData <- initRenderData queue winASPECT lineThickness
             forkIO (debuggingLines queue)
-            pure $ Just (window, renderData)
+            loop window renderData
 
 loop :: Window -> RenderData -> IO ()
 loop window renderData = do

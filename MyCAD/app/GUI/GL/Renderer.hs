@@ -53,7 +53,6 @@ checkQueues window renderData = do
 -- | Adds an "ObjectData" to our "RenderData"
 addObject :: RenderData -> ObjectData -> IO ()
 addObject rData oData = do
-    putStrLn "Adding object"
     vao <- putGraphicData oData
     let target = RenderTarget vao oData
     atomically $ do
