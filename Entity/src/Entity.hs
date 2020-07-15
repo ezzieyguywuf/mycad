@@ -68,7 +68,7 @@ import Control.Monad.State (State, get, runState, put)
 -- ===========================================================================
 --                               Data Types
 -- ===========================================================================
--- | This looks similar to "Topolog.Vertex" but is distinct, as it includes
+-- | This looks similar to "Topology.Vertex" but is distinct, as it includes
 --   "Geometry" information. This data type is parametrized over the type of
 --   "Geo.Point".
 --
@@ -110,12 +110,17 @@ type EntityState p a = State (Entity p) a
 -- ===========================================================================
 
 
+-- | Returns an Entity that has nothing in it.
 nullEntity :: Entity a
 nullEntity = Entity [] [] Topo.emptyTopology
 
 emptyEntityState :: EntityState a ()
 emptyEntityState = pure ()
 
+-- | Adds a "Vertex" to the "Entity".
+--
+--   A "Vertex" has both a "Geometry" (a "Point"), and a "Topology" (a
+--   "Topology.Vertex")
 addVertex :: Fractional a => Geo.Point a -> EntityState a (Vertex a)
 addVertex p = do
     (Entity vs es t) <- get
@@ -125,6 +130,10 @@ addVertex p = do
     put $ Entity vs' es t'
     pure newVertex
 
+-- | Adds an "Edge" to the "Entity".
+--
+--   An "Edge" has both a "Geometry" (a "Curve"), and a "Topology" (a
+--   "Topology.Edge")
 addEdge :: Fractional a => Vertex a -> Geo.Point a -> EntityState a (Edge a)
 addEdge (Vertex p1 v1) p2 = do
     (Entity vs es t) <- get
