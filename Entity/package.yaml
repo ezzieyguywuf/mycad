@@ -25,6 +25,7 @@ dependencies:
 - Topology
 - prettyprinter
 - mtl
+- linear
 
 library:
   source-dirs: src
@@ -32,7 +33,7 @@ library:
       - Entity
 
 tests:
-  HaskellCAD-test:
+  Entity-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
