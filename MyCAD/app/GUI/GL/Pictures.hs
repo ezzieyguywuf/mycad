@@ -9,7 +9,6 @@ import Codec.Picture ( readImage
                      , generateImage
                      --, convertRGB8
                      , DynamicImage(..)
-                     , Image(..)
                      , PixelRGB8(..))
 
 -- TODO: This will need to be fleshed out to be used by _loadTexture in
