@@ -149,15 +149,14 @@ addEdge (Vertex p1 v1) p2 = do
 getPoint :: Vertex a -> Geo.Point a
 getPoint = getGeoPoint
 
+-- | Returns the "Entity.Vertex" at the give "Point"
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
 getVertex entity point = find pred (getVertices entity)
     where pred v = (getGeoPoint v) == point
 
-getCurve :: Entity a -> Edge a -> Maybe (Geo.Line a)
-getCurve entity (Edge line edge) = do
-    find pred (getEdges entity)
-    pure line
-    where pred e = (getTopoEdge e) == edge
+-- | Returns the underlying geometric "Curve" of the "Edge'"
+getCurve :: Edge a -> Geo.Line a
+getCurve = getGeoLine
 
 oppositeVertex :: Eq a => Entity a -> Vertex a -> Edge a -> Maybe (Vertex a)
 oppositeVertex e@(Entity _ _ t) (Vertex _ v1) (Edge _ ed) = v2

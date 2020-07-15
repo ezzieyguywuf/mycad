@@ -35,7 +35,7 @@ spec = do
             (length $ E.getVertices entity) `shouldBe` 2
         it "Creates a line from v1 to the newly created Vertex" $
             let line = Geo.makeLine p1 p2
-            in (E.getCurve entity edge) `shouldBe` Just line
+            in (E.getCurve edge) `shouldBe` line
     describe "oppositeVertex" $ do
         let (v1, e0) = runState (E.addVertex p1) nullE
             (edge, e1) = runState (E.addEdge v1 p2) e0
