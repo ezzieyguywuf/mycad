@@ -145,11 +145,9 @@ addEdge (Vertex p1 v1) p2 = do
     put $ Entity vs' es' t''
     pure $ Edge line e
 
-getPoint :: Entity a -> Vertex a -> Maybe (Geo.Point a)
-getPoint entity vertex = do
-    mPoint <- find pred (getVertices entity)
-    pure $ getGeoPoint mPoint
-    where pred v = (getTopoVertex v) == (getTopoVertex vertex)
+-- | Returns the underlying geometric "Point" of the "Vertex"
+getPoint :: Vertex a -> Geo.Point a
+getPoint = getGeoPoint
 
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
 getVertex entity point = find pred (getVertices entity)
