@@ -26,7 +26,7 @@ spec = do
         it "allows Vertex to be retrieved using Geometry" $
             E.getVertex e p `shouldBe` Just v
     describe "addEdge" $ do
-        let (edge, entity) = runState (E.addVertex p1 >>= flip E.addEdge p2) nullE
+        let (edge, entity) = runState (E.addVertex p1 >>= (`E.addEdge` p2)) nullE
             p1 = V3 10 10 10
             p2 = V3 20 20 20
         it "Adds a single Edge to the Entity" $
