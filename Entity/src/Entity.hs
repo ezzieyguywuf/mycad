@@ -158,6 +158,14 @@ getVertex entity point = find pred (getVertices entity)
 getCurve :: Edge a -> Geo.Line a
 getCurve = getGeoLine
 
+-- | Returns the opposite "Vertex".
+--
+--   In this context, \"opposite\" means that it is on the other side of the
+--   "Edge".
+--
+--   Any given "Edge" can only ever have two "Vertex" attached to it (this is
+--   enforced by the "Topology" module), and such there is only ever one
+--   \"opposite\" "Vertex"
 oppositeVertex :: Eq a => Entity a -> Vertex a -> Edge a -> Maybe (Vertex a)
 oppositeVertex e@(Entity _ _ t) (Vertex _ v1) (Edge _ ed) = v2
     where xs = Topo.adjVertToEdge t ed
