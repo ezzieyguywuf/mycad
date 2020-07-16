@@ -34,6 +34,7 @@ type Parser = Parsec Void Text
 -- | A "Command" is an action that can be performed by the user.
 data Command = Help (Maybe Command)
              | Quit
+             | Show
                deriving (Show, Eq)
 
 parseInput :: Parser Command
@@ -43,7 +44,9 @@ parseInput =
 
 parseCommand :: Parser Command
 parseCommand =
-        Quit <$ string "quit" <?> "valid command"
+        Quit <$ string "quit"
+    <|> Show <$ string "show"
+    <?> "valid command"
 
 parseHelp :: Parser Command
 parseHelp = do
