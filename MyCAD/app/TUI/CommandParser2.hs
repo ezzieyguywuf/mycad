@@ -26,7 +26,7 @@ import Data.Map (Map, fromList, assocs)
 
 -- Third-Party
 import Data.Text (Text)
-import Text.Megaparsec ((<?>), Parsec, eof, choice)
+import Text.Megaparsec ((<?>), Parsec, eof, choice, try)
 import Text.Megaparsec.Char (string, space1)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -49,9 +49,12 @@ parseCommand =
     <?> "valid command"
 
 parseHelp :: Parser Command
-parseHelp = do
-    cmd <- optional parseCommand
-    pure (Help cmd)
+parseHelp =
+    try
+        (do word "help"
+            pure (Help (Just (Help Nothing))))
+    <|> do cmd <- optional parseCommand
+           pure (Help cmd)
 
 -------------------------------------------------------------------------------
 --                      Internal stuff
