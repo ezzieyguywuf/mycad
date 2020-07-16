@@ -22,10 +22,11 @@ module TUI.CommandParser2
 -- Base
 import Data.Void (Void)
 import Control.Applicative ((<|>), optional, empty)
+import Data.Map (Map, fromList, assocs)
 
 -- Third-Party
 import Data.Text (Text)
-import Text.Megaparsec ((<?>), Parsec, eof)
+import Text.Megaparsec ((<?>), Parsec, eof, choice)
 import Text.Megaparsec.Char (string, space1)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -44,19 +45,28 @@ parseInput =
 
 parseCommand :: Parser Command
 parseCommand =
-        Quit <$ string "quit"
-    <|> Show <$ string "show"
+        choice (fmap checkCommand (assocs knownCommands))
     <?> "valid command"
 
 parseHelp :: Parser Command
 parseHelp = do
-    lexeme "help"
     cmd <- optional parseCommand
     pure (Help cmd)
 
 -------------------------------------------------------------------------------
 --                      Internal stuff
 -------------------------------------------------------------------------------
+knownCommands :: Map Text (Parser Command)
+knownCommands = fromList
+    [ ("help", parseHelp)
+    , ("quit", pure Quit)
+    , ("show", pure Show)
+    ]
+
+-- | Tries to parse (String, Parser a) pair
+checkCommand :: (Text, Parser Command) -> Parser Command
+checkCommand (text, parser) = word text >> parser
+
 -- | This will....consume space
 spaceConsumer :: Parser ()
 spaceConsumer = Lexer.space space1 empty empty
@@ -64,3 +74,7 @@ spaceConsumer = Lexer.space space1 empty empty
 -- | Use the given parser to parse a lexeme, consuming any space after
 lexeme :: Parser a -> Parser a
 lexeme = Lexer.lexeme spaceConsumer
+
+-- | Use to parse a single word
+word :: Text -> Parser Text
+word = lexeme . string
