@@ -26,11 +26,13 @@ import Data.Map (Map, fromList, assocs)
 
 -- Third-Party
 import Data.Text (Text)
-import Text.Megaparsec ((<?>), Parsec, eof, choice, try)
+import Text.Megaparsec ((<?>), Parsec, parse, eof, choice, try)
 import Text.Megaparsec.Char (string, space1)
+import Text.Megaparsec.Error (ParseErrorBundle)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 type Parser = Parsec Void Text
+type ParseError = ParseErrorBundle Text Void
 
 -- | A "Command" is an action that can be performed by the user.
 data Command = Help (Maybe Command)
@@ -38,12 +40,16 @@ data Command = Help (Maybe Command)
              | Show
                deriving (Show, Eq)
 
--- | This will parse an abritrary line if input from the User.
+-- | This will run our parser on the given input, generating a "Command"
+parseInput :: Text -> Either ParseError Command
+parseInput = parse parseInput' ""
+
+-- | This will parse an abritrary line of input from the User.
 --
 --   Note that this will only parse a single line, which must issue some
 --   "Command"
-parseInput :: Parser Command
-parseInput = lexeme parseCommand <* eof
+parseInput' :: Parser Command
+parseInput' = lexeme parseCommand <* eof
 
 -------------------------------------------------------------------------------
 --                      Internal stuff

@@ -1,15 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main (main) where
 
+import Data.Text (Text)
 import TUI.CommandParser2 (parseInput)
-import Text.Megaparsec (parseTest)
+import Text.Megaparsec.Error (errorBundlePretty)
 
 main :: IO ()
 main = do
-    parseTest parseInput "help"
-    parseTest parseInput "help help"
-    parseTest parseInput "help help help"
-    parseTest parseInput "help quit"
-    parseTest parseInput "help show"
-    parseTest parseInput "quit"
-    parseTest parseInput "show"
+    runParser "help"
+    runParser "help help"
+    runParser "help help help"
+    runParser "help quit"
+    runParser "help show"
+    runParser "quit"
+    runParser "show"
+
+runParser :: Text -> IO ()
+runParser text =
+    case parseInput text of
+        Left err  -> putStrLn (errorBundlePretty err)
+        Right cmd -> putStrLn . show $ cmd
