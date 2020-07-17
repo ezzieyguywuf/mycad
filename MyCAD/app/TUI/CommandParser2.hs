@@ -42,14 +42,14 @@ data Command = Help (Maybe Command)
 
 -- | This will run our parser on the given input, generating a "Command"
 parseInput :: Text -> Either ParseError Command
-parseInput = parse parseInput' ""
+parseInput = parse startParsing ""
 
 -- | This will parse an abritrary line of input from the User.
 --
 --   Note that this will only parse a single line, which must issue some
 --   "Command"
-parseInput' :: Parser Command
-parseInput' = lexeme parseCommand <* eof
+startParsing :: Parser Command
+startParsing = lexeme parseCommand <* eof
 
 -------------------------------------------------------------------------------
 --                      Internal stuff
