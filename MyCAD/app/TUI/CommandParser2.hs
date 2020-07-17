@@ -39,9 +39,17 @@ data Command = Help (Maybe Command)
                deriving (Show, Eq)
 
 parseInput :: Parser Command
-parseInput =
-        lexeme parseCommand <* eof
-    <|> lexeme parseHelp <* eof
+parseInput = lexeme parseCommand <* eof
+
+-------------------------------------------------------------------------------
+--                      Internal stuff
+-------------------------------------------------------------------------------
+knownCommands :: Map Text (Parser Command)
+knownCommands = fromList
+    [ ("help", parseHelp)
+    , ("quit", pure Quit)
+    , ("show", pure Show)
+    ]
 
 parseCommand :: Parser Command
 parseCommand =
@@ -56,15 +64,6 @@ parseHelp =
     <|> do cmd <- optional parseCommand
            pure (Help cmd)
 
--------------------------------------------------------------------------------
---                      Internal stuff
--------------------------------------------------------------------------------
-knownCommands :: Map Text (Parser Command)
-knownCommands = fromList
-    [ ("help", parseHelp)
-    , ("quit", pure Quit)
-    , ("show", pure Show)
-    ]
 
 -- | Tries to parse (String, Parser a) pair
 checkCommand :: (Text, Parser Command) -> Parser Command
