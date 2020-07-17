@@ -56,7 +56,7 @@ startParsing = lexeme parseCommand <* eof
 -------------------------------------------------------------------------------
 knownCommands :: Map Text (Parser Command)
 knownCommands = fromList
-    [ ("help", parseHelp)
+    [ ("help", parseHelpArgs)
     , ("quit", pure Quit)
     , ("show", pure Show)
     ]
@@ -71,8 +71,8 @@ parseCommand =
     <?> "valid command"
 
 -- | This parses any arguments to the \"help\" command
-parseHelp :: Parser Command
-parseHelp =
+parseHelpArgs :: Parser Command
+parseHelpArgs =
     try
         (do word "help"
             pure (Help (Just (Help Nothing))))
