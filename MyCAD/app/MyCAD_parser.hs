@@ -13,7 +13,7 @@ main = do
     runParser "help quit"
     runParser "help show"
     runParser "quit"
-    runParser "show"
+    runParser "    show"
 
 runParser :: Text -> IO ()
 runParser text =

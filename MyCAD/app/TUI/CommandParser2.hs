@@ -49,7 +49,7 @@ parseInput = parse startParsing ""
 --   Note that this will only parse a single line, which must issue some
 --   "Command"
 startParsing :: Parser Command
-startParsing = lexeme parseCommand <* eof
+startParsing = spaceConsumer *> lexeme parseCommand <* eof
 
 -------------------------------------------------------------------------------
 --                      Internal stuff
