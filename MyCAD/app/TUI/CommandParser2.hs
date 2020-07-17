@@ -38,6 +38,10 @@ data Command = Help (Maybe Command)
              | Show
                deriving (Show, Eq)
 
+-- | This will parse an abritrary line if input from the User.
+--
+--   Note that this will only parse a single line, which must issue some
+--   "Command"
 parseInput :: Parser Command
 parseInput = lexeme parseCommand <* eof
 
@@ -51,11 +55,16 @@ knownCommands = fromList
     , ("show", pure Show)
     ]
 
+-- | Try to parse each key in the "knownCommands" "Data.Map"
+--
+--   If the parse succeeds, it will return the accompanying "Command" in the
+--   value associated with said key.
 parseCommand :: Parser Command
 parseCommand =
         choice (fmap checkCommand (assocs knownCommands))
     <?> "valid command"
 
+-- | This parses any arguments to the \"help\" command
 parseHelp :: Parser Command
 parseHelp =
     try
