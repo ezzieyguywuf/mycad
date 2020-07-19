@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
 {-|
-Module      : CommandParser2
+Module      : CommandParser
 Description : Parses string commands to be used in the MyCAD application
 Copyright   : (c) Wolfgang E. Sanyer, 2020
 License     : MPL2
@@ -15,7 +15,7 @@ the MyCAD application.
 This second attempt uses megaparsec for the parsing, rather than rolling our
 own parser as we did at first
 -}
-module TUI.CommandParser2
+module TUI.CommandParser
 (
   parseInput
 )where

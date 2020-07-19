@@ -32,15 +32,16 @@ dependencies:
 - stm
 
 executables:
-  mycad-parser:
-    main : MyCAD_parser.hs
+  mycad-dev:
+    main : MyCAD_dev.hs
     source-dirs: app
     ghc-options:
         - -threaded
         - -rtsopts
         - -with-rtsopts=-N
     other-modules:
-        - TUI.CommandParser2
+        - TUI.CommandParser
+        - TUI.CommandRunner
     dependencies:
         - megaparsec
 
