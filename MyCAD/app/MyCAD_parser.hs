@@ -14,6 +14,9 @@ main = do
     runParser "help show"
     runParser "quit"
     runParser "    show"
+    runParser "add vertex 10 20 30"
+    runParser "add vertex 10 20. 30"
+    runParser "add vertex 10 20 .30"
 
 runParser :: Text -> IO ()
 runParser text =
