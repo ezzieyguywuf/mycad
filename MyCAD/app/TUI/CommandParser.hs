@@ -17,7 +17,8 @@ own parser as we did at first
 -}
 module TUI.CommandParser
 (
-  parseInput
+  Command(..)
+, parseInput
 )where
 
 -- Base

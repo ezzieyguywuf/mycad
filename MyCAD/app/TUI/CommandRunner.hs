@@ -26,7 +26,7 @@ module TUI.CommandRunner
 )where
 
 -- | Internal imports
-import TUI.CommandParser (Command(..), Action(..))
+import TUI.CommandParser (Command(..))
 import Entity (Entity, EntityState, addVertex, prettyPrintEntity)
 
 -- | This will execute the "Command".
