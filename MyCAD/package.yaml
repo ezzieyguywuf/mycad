@@ -30,6 +30,7 @@ dependencies:
 - Topology
 - text
 - stm
+- megaparsec
 
 executables:
   mycad-dev:
@@ -42,8 +43,6 @@ executables:
     other-modules:
         - TUI.CommandParser
         - TUI.CommandRunner
-    dependencies:
-        - megaparsec
 
   mycad-tui:
     main: MyCAD_Tui.hs

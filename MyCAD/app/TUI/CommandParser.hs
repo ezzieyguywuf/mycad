@@ -20,15 +20,17 @@ module TUI.CommandParser
   Command(..)
 , Item(..)
 , parseInput
+, commandCompletions
 )where
 
 -- Base
 import Data.Void (Void)
 import Control.Applicative ((<|>), optional, empty, some)
-import Data.Map (Map, fromList, assocs)
+import Data.Map (Map, keys, fromList, assocs)
+import Data.List (isPrefixOf)
 
 -- Third-Party
-import Data.Text (Text, pack)
+import Data.Text (Text, pack, unpack)
 import Data.Text.Read (rational)
 import Text.Megaparsec ((<?>), Parsec, parse, eof, choice, try)
 import Text.Megaparsec.Char (string, space1, char, digitChar)
@@ -64,6 +66,14 @@ parseInput = parse startParsing ""
 --   "Command"
 startParsing :: Fractional a => Parser (Command a)
 startParsing = spaceConsumer *> lexeme parseCommand <* eof
+
+-- | Given some string, determines if this partially matches any of our known "Command"
+--
+--   There's an opportunity to allow for fuzzy matching, but that's not
+--   currently implemented.
+commandCompletions :: String -> [String]
+commandCompletions string = filter (isPrefixOf string) commands
+    where commands = map unpack $ keys knownCommands
 
 -------------------------------------------------------------------------------
 --                      Internal stuff

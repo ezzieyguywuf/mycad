@@ -19,19 +19,19 @@ The Except monad (from mtl: again, rather ubiquitous) is used for error handling
 module TUI.LaunchTUI (initialize, launch) where
 
 -- | Base
+import Data.Text (pack)
 import Control.Monad.IO.Class (liftIO)
 import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TMVar (TMVar, newTMVar, takeTMVar, putTMVar)
 
 -- | External imports
-import Control.Monad.Except (runExcept)
 import Control.Monad.State  (runState)
 import qualified System.Console.Haskeline as HL
+import Text.Megaparsec.Error (errorBundlePretty)
 
 -- | Internal imports
 import TUI.CommandParser (parseInput, commandCompletions)
 import TUI.CommandRunner (runCommand)
-import TUI.Errors (getErrorString)
 import Entity (Entity, nullEntity)
 
 -- | Initializes the variables needed
@@ -53,9 +53,9 @@ loop :: (Show p, Fractional p) => TMVar (Entity p) -> HL.InputT IO ()
 loop entityVar = do
     HL.getInputLine "mycad> " >>= \case
         Nothing    -> exit
-        Just input -> case runExcept (parseInput input) of
+        Just input -> case (parseInput (pack input)) of
             Left  err     -> do
-                HL.outputStrLn (getErrorString err)
+                HL.outputStrLn (errorBundlePretty err)
                 loop entityVar
             Right command -> do
                 entity <- liftIO (atomically $ takeTMVar entityVar)

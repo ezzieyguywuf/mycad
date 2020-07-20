@@ -47,3 +47,5 @@
   `Command a` in CommandParser. Right now, we hard-code a `Geo.Point Float`,
   but it'd be nice for this to be configurable by the User somehow
 - Clean up Main - should we use `catchError`? (probably)
+- Start using TUI.Errors again, we got rid of it when we started using
+  megaparsec
