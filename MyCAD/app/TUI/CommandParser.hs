@@ -47,11 +47,11 @@ type ParseError = ParseErrorBundle Text Void
 data Command a = Help (Maybe (Command a))
                | Quit
                | Show
-               | Add (AddToken a)
+               | Add (Item a)
                  deriving (Show)
 
 -- | Something that can be added
-data AddToken a = Vertex (Point a) deriving (Show)
+data Item a = Vertex (Point a) deriving (Show)
 
 -- | This will run our parser on the given input, generating a "Command"
 parseInput :: Fractional a => Text -> Either ParseError (Command a)
