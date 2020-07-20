@@ -51,7 +51,7 @@ data Command a = Help (Maybe (Command a))
                  deriving (Show)
 
 -- | Something that can be added
-data Item a = Vertex (Point a) deriving (Show)
+data Item a = VertexItem (Point a) deriving (Show)
 
 -- | This will run our parser on the given input, generating a "Command"
 parseInput :: Fractional a => Text -> Either ParseError (Command a)
@@ -98,7 +98,7 @@ parseAddArgs :: Fractional a => Parser (Command a)
 parseAddArgs = do
     word "vertex"
     point <- parsePoint
-    pure $ Add (Vertex point)
+    pure $ Add (VertexItem point)
 
 -- | This parses a 3-dimensional point x y z
 parsePoint :: Fractional a => Parser (Point a)
