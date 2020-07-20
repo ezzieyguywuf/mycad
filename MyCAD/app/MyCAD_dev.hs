@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main (main) where
 
-import Data.Text (Text)
 import Control.Monad.State  (runState)
 import TUI.CommandParser (parseInput)
-import TUI.CommandRunner (runCommad)
-import Entity (nullEntity)
+import TUI.CommandRunner (runCommand)
+import Entity (nullEntity, prettyPrintEntity)
 import Text.Megaparsec.Error (errorBundlePretty)
 
 main :: IO ()
@@ -17,4 +16,4 @@ main = do
                 (Nothing, _)        -> putStrLn "I guess you want to quit?"
                 (Just msg, entity') -> do
                     putStrLn msg
-                    putStrLn (show entity')
+                    putStrLn (show $ prettyPrintEntity entity')

@@ -18,6 +18,7 @@ own parser as we did at first
 module TUI.CommandParser
 (
   Command(..)
+, Item(..)
 , parseInput
 )where
 

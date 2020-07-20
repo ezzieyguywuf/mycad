@@ -26,7 +26,7 @@ module TUI.CommandRunner
 )where
 
 -- | Internal imports
-import TUI.CommandParser (Command(..))
+import TUI.CommandParser (Command(..), Item(..))
 import Entity (Entity, EntityState, addVertex, prettyPrintEntity)
 
 -- | This will execute the "Command".
@@ -40,23 +40,25 @@ runCommand :: (Show p, Fractional p) => Entity p -> Command p -> EntityState p (
 runCommand entity cmd = do
     pure entity
     case cmd of
-        Help arg        -> pure (Just $ getHelpString arg)
-        AddVertex point -> addVertex point >> pure (Just "added a vertex")
-        Show            -> pure $ Just (show (prettyPrintEntity entity))
-        Quit            -> pure Nothing
-        --_               -> pure $ (Just $ "There is no runner for " <> show cmd)
+        Help arg -> pure (Just $ getHelpString arg)
+        Add item -> addItem entity item
+        Show     -> pure $ Just (show (prettyPrintEntity entity))
+        Quit     -> pure Nothing
 
-getHelpString :: Maybe Action -> String
-getHelpString maction =
-    case maction of
-        Nothing     -> help
-        Just action -> actionHelp action
+addItem :: (Fractional p) => Entity p -> Item p-> EntityState p (Maybe String)
+addItem entity (VertexItem point) = addVertex point >> pure (Just "Added a vertex")
+
+getHelpString :: Maybe (Command a) -> String
+getHelpString mcommand =
+    case mcommand of
+        Nothing      -> help
+        Just command -> commandHelp command
 
 help :: String
 help = "This is Help"
 
-actionHelp :: Action -> String
-actionHelp action =
-    case action of
-        MakeVertex -> "This is addVertex help"
-        _          -> help
+commandHelp :: Command a -> String
+commandHelp command =
+    case command of
+        Add _ -> "This is add help"
+        _     -> help
