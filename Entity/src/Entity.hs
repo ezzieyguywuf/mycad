@@ -59,11 +59,16 @@ module Entity
 , prettyPrintEdge
 ) where
 
-import qualified Geometry as Geo
-import qualified Topology as Topo
-import Data.Text.Prettyprint.Doc (Doc, nest, vsep, pretty, line)
+-- Base
 import Data.List (find)
 import Control.Monad.State (State, get, runState, put)
+
+-- Third-party
+import Data.Text.Prettyprint.Doc (Doc, nest, vsep, pretty, line)
+
+-- Internal
+import qualified Geometry as Geo
+import qualified Topology as Topo
 
 -- ===========================================================================
 --                               Data Types
@@ -149,7 +154,7 @@ addEdge (Vertex p1 v1) p2 = do
 getPoint :: Vertex a -> Geo.Point a
 getPoint = getGeoPoint
 
--- | Returns the "Entity.Vertex" at the give "Point"
+-- | Tries to find an "Entity.Vertex" at the give "Point"
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
 getVertex entity point = find check (getVertices entity)
     where check v = (getGeoPoint v) == point
