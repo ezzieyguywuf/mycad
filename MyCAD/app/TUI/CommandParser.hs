@@ -20,7 +20,6 @@ module TUI.CommandParser
   Command(..)
 , CommandToken(..)
 , AddCommand(..)
-, LineArg(..)
 , parseInput
 , commandCompletions
 )where
@@ -33,7 +32,7 @@ import Data.List (isPrefixOf)
 
 -- Third-Party
 import Data.Text (Text, pack, unpack)
-import Data.Text.Read (rational)
+import Data.Text.Read (rational, decimal)
 import Text.Megaparsec ((<?>), Parsec, parse, eof, choice, try)
 import Text.Megaparsec.Char (string, space1, char, digitChar, letterChar
                             , alphaNumChar)
@@ -63,13 +62,8 @@ data AddToken a = VertexToken
 
 -- | This is a sub-command that goes allong with the "Add" "Command".
 data AddCommand a = AddVertex (Point a)
-                  | AddLine (LineArg a) (LineArg a)
+                  | AddEdge Int (Point a)
                     deriving (Show)
-
--- | This is an argument recognized by the "AddLine" command
-data LineArg a = LArgIdent Identifier
-               | LArgPoint (Point a)
-                 deriving (Show)
 
 -- | This is used to identify a topological item, i.e. \"V0\" would be the
 --   zeroeth "Topology.Vertex"
@@ -134,27 +128,21 @@ parseAdd :: (Fractional a) => AddToken a -> Parser (Command a)
 parseAdd token =
     case token of
         VertexToken -> parsePoint >>= pure . Add . AddVertex
-        EdgeToken   -> parseAddLine
+        EdgeToken   -> parseAddEdge
 
 -- | Tries to parse the appropriate arguments for the \"add line\" command "
-parseAddLine :: Fractional a => Parser (Command a)
-parseAddLine = do
-    x <- lexeme parseLineArg
-    y <- lexeme parseLineArg
-    pure $ Add (AddLine x y)
-
--- | Parses a single argument to the \"add line\" commad"
-parseLineArg :: Fractional a => Parser (LineArg a)
-parseLineArg =
-    try (identifier >>= pure . LArgIdent)
-    <|> (parsePoint >>= pure . LArgPoint)
+parseAddEdge :: Fractional a => Parser (Command a)
+parseAddEdge = do
+    from <- lexeme integerNumber
+    to   <- lexeme parsePoint
+    pure $ Add (AddEdge from to)
 
 -- | Parses a single identifier.
 --
 --   For our purposes, an identifier starts with a single alpha charcter,
 --   followed by zero or more alpha-numeric characters
-identifier :: Parser Identifier
-identifier = do
+_identifier :: Parser Identifier
+_identifier = do
     x  <- letterChar
     xs <- many alphaNumChar
     pure (Identifier . pack $ x : xs)
@@ -233,5 +221,13 @@ number :: Fractional a => Parser a
 number = do
     text <- float
     case rational . pack $ text of
+        Left err       -> fail err
+        Right (val, _) -> pure val
+
+-- | Parses an Integer and converts as well
+integerNumber :: Parser Int
+integerNumber = do
+    text <- integer
+    case decimal . pack $ text of
         Left err       -> fail err
         Right (val, _) -> pure val
