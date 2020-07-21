@@ -152,10 +152,10 @@ addRayEdge (Vertex n) = do
     if isValidNode t n
         then do
             e <- addNode EEdge
-            t <- get
-            let m = connectNodes (n, e) t
+            t' <- get
+            let m = connectNodes (n, e) t'
             case m of
-                Just t' -> put t' >> pure (Just (Edge e))
+                Just t'' -> put t'' >> pure (Just (Edge e))
                 Nothing -> pure Nothing
         else
             pure Nothing
@@ -172,11 +172,11 @@ makeRayEdge (Edge e)= do
     if isValidNode t e && not (hasNeighbors t e)
         then do
             v <- addNode EVertex
-            t <- get
-            let m = connectNodes (v, e) t
+            t' <- get
+            let m = connectNodes (v, e) t'
             case m of
-                Just t' -> do put t'
-                              pure $ Just (Vertex v)
+                Just t'' -> do put t''
+                               pure $ Just (Vertex v)
                 Nothing -> pure Nothing
         else
             pure Nothing
@@ -187,11 +187,11 @@ closeRayEdge (Edge e) = do
     if isValidNode t e && ((length (Graph.neighbors (unTopology t) e)) == 1)
         then do
             v <- addNode EVertex
-            t <- get
-            let m = connectNodes (e, v) t
+            t' <- get
+            let m = connectNodes (e, v) t'
             case m of
-                Just t' -> do put t'
-                              pure $ Just (Vertex v)
+                Just t'' -> do put t''
+                               pure $ Just (Vertex v)
                 Nothing -> pure Nothing
         else
             pure Nothing
@@ -289,9 +289,10 @@ addNode e = do
     let t' = unTopology t
         n  = length $ Graph.nodes t'
         e' = (e, countNode f t)
-        f | e == EVertex = isVertex
-          | e == EEdge   = isEdge
-          | e == EFace   = isFace
+        f = case e of
+                EVertex -> isVertex
+                EEdge   -> isEdge
+                EFace   -> isFace
     put $ Topology $ Graph.insNode (n, e') t'
     pure n
 

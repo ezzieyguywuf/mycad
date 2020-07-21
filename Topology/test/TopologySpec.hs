@@ -43,30 +43,30 @@ spec = do
             property (prop_doesNotModifyFaces run')
         context "an Edge that is not a 'Free' Edge is provided'" $ do
             let prep' = prep >>= makeRayEdge' >>= vertToAdjEdge
-                run = T.makeRayEdge
+                rayRun = T.makeRayEdge
             it "returns Nothing" $
-                property (prop_returnsNothing $ prep' >>= run)
+                property (prop_returnsNothing $ prep' >>= rayRun)
             it "does not modify the Vertices" $
-                property (prop_doesNotModifyVertices' prep' run)
+                property (prop_doesNotModifyVertices' prep' rayRun)
             it "does not modify the Edges" $
-                property (prop_doesNotModifyEdges' prep' run)
+                property (prop_doesNotModifyEdges' prep' rayRun)
             it "does not modify the Faces" $
-                property (prop_doesNotModifyFaces' prep' run)
+                property (prop_doesNotModifyFaces' prep' rayRun)
         context "an invalid Edge is provided" $ do
             let prep' = do
                     t <- get
                     a <-prep
                     put t
                     pure a
-                run = T.makeRayEdge
+                rayRun = T.makeRayEdge
             it "returns Nothing" $
-                property (prop_returnsNothing $ prep' >>= run)
+                property (prop_returnsNothing $ prep' >>= rayRun)
             it "does not modify the Vertices" $
-                property (prop_doesNotModifyVertices $ prep' >>= run)
+                property (prop_doesNotModifyVertices $ prep' >>= rayRun)
             it "does not modify the Edges" $
-                property (prop_doesNotModifyEdges $ prep' >>= run)
+                property (prop_doesNotModifyEdges $ prep' >>= rayRun)
             it "does not modify the Faces" $
-                property (prop_doesNotModifyFaces $ prep' >>= run)
+                property (prop_doesNotModifyFaces $ prep' >>= rayRun)
     describe "closeRayEdge" $ do
         let prep = T.addFreeEdge >>= makeRayEdge' >>= vertToAdjEdge
             run  = T.closeRayEdge

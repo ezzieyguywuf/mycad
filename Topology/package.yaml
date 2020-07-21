@@ -34,7 +34,7 @@ library:
       - Topology
 
 tests:
-  HaskellCAD-test:
+  Topology-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
