@@ -69,20 +69,13 @@ data CommandToken  = HelpT
 -- | This will run our parser on the given line of input, generating a "Command"
 parseInput :: Fractional a => Text -> Either ParseError (Command a)
 parseInput = parse (spaceConsumer *> parseThings <* eof) ""
-    where parseThings = lexeme (parseCommand <?> "valid command") >>= parseArgs
-
--- | This will parse an abritrary line of input from the User.
---
---   Note that this will only parse a single line, which must issue some
---   "Command"
-parseCommand :: Parser CommandToken
-parseCommand = lexeme lexCommand
+    where parseThings = lexeme lexCommand >>= parseCommand
 
 -- | Parses the arguments for the given command
-parseArgs :: Fractional a => CommandToken -> Parser (Command a)
-parseArgs token =
+parseCommand :: Fractional a => CommandToken -> Parser (Command a)
+parseCommand token =
     case token of
-        HelpT -> parseHelpArgs
+        HelpT -> parseHelp
         QuitT -> pure Quit
         ShowT -> pure Show
         AddT  -> lexeme lexAdd >>= parseAdd
@@ -113,11 +106,11 @@ addCommands = fromList
 
 -- | Tries to parse a single "CommandToken"
 lexCommand :: Parser CommandToken
-lexCommand = checkMap knownCommands
+lexCommand = checkMap knownCommands <?> "known command. Check help"
 
 -- | Tries to parse a single "AddToken"
 lexAdd :: Parser (AddToken a)
-lexAdd = checkMap addCommands <?> "known \"add\" sub-command"
+lexAdd = checkMap addCommands <?> "known \"add\" sub-command. Check \"help add\""
 
 -- | Tries to parse the given \"add\" sub-command's arguments
 parseAdd :: (Fractional a) => AddToken a -> Parser (Command a)
@@ -132,11 +125,8 @@ checkMap m = choice (fmap check (assocs m))
     where check (key, a) = string key >> pure a
 
 -- | This parses any arguments to the \"help\" command
-parseHelpArgs :: Fractional a => Parser (Command a)
-parseHelpArgs =
-    try $ do string "help"
-             pure (Help (Just HelpT))
-    <|> (optional (lexeme parseCommand) >>= pure . Help)
+parseHelp :: Fractional a => Parser (Command a)
+parseHelp = optional (lexeme lexCommand) >>= pure . Help
 
 -- | This parses a 3-dimensional point x y z
 parsePoint :: Fractional a => Parser (Point a)

@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main (main) where
 
+import Data.Text (Text)
 import Control.Monad.State  (runState)
 import TUI.CommandParser (parseInput)
 import TUI.CommandRunner (runCommand)
@@ -9,7 +10,17 @@ import Text.Megaparsec.Error (errorBundlePretty)
 
 main :: IO ()
 main = do
-    case parseInput "add vertex 10 20 30" of
+    parseThings "adpd vertex 10 20 30"
+    parseThings "add vpertex 10 20 30"
+    parseThings "add vertex 1a0 20 30"
+    parseThings "add vertex 10 20 30"
+    parseThings "help"
+    parseThings "help ae"
+    parseThings "help help"
+
+parseThings :: Text -> IO ()
+parseThings text =
+    case  parseInput text of
         Left err  -> putStrLn (errorBundlePretty err)
         Right cmd -> do
             case runState (runCommand nullEntity cmd) nullEntity of
