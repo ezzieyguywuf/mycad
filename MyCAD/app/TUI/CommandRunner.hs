@@ -26,8 +26,11 @@ module TUI.CommandRunner
 )where
 
 -- | Internal imports
-import TUI.CommandParser (Command(..), CommandToken(..), AddCommand(..))
-import Entity (Entity, EntityState, addVertex, prettyPrintEntity)
+import TUI.CommandParser ( Command(..), CommandToken(..), AddCommand(..)
+                         , LineArg(..))
+import Entity (Entity, EntityState, Vertex, addVertex, addEdge
+              , prettyPrintEntity)
+import Geometry (Point)
 
 -- | This will execute the "Command".
 --
@@ -49,7 +52,20 @@ runAdd :: (Fractional p) => AddCommand p-> EntityState p (Maybe String)
 runAdd cmd =
     case cmd of
         AddVertex point -> addVertex point >> pure (Just "Added a vertex")
-        AddLine _ _     -> undefined
+        AddLine x y     -> runAddLine x y
+
+runAddLine :: Fractional p => LineArg p -> LineArg p -> EntityState p (Maybe String)
+runAddLine x y = addEdge from to >> pure (Just "Added a line")
+    where from = getLineFrom x
+          to   = getLineTo   y
+
+getLineFrom :: LineArg p -> Vertex p
+getLineFrom _ = undefined
+
+getLineTo :: LineArg p -> Point p
+getLineTo _ = undefined
+    --case p of
+        --LArgIdent (Identifier x') -> 
 
 getHelpString :: Maybe CommandToken -> String
 getHelpString mcommand =
