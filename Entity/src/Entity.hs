@@ -61,7 +61,7 @@ module Entity
 
 import qualified Geometry as Geo
 import qualified Topology as Topo
-import Data.Text.Prettyprint.Doc
+import Data.Text.Prettyprint.Doc (Doc, nest, vsep, pretty, line)
 import Data.List (find)
 import Control.Monad.State (State, get, runState, put)
 
@@ -137,13 +137,13 @@ addVertex p = do
 addEdge :: Fractional a => Vertex a -> Geo.Point a -> EntityState a (Edge a)
 addEdge (Vertex p1 v1) p2 = do
     (Entity vs es t) <- get
-    let line   = Geo.makeLine p1 p2
+    let gline   = Geo.makeLine p1 p2
         (Just e, t')  = runState (Topo.addRayEdge v1) t
         (Just v2, t'')   = runState (Topo.closeRayEdge e) t'
         vs' = (Vertex p2 v2) : vs
-        es' = (Edge line e) : es
+        es' = (Edge gline e) : es
     put $ Entity vs' es' t''
-    pure $ Edge line e
+    pure $ Edge gline e
 
 -- | Returns the underlying geometric "Point" of the "Vertex"
 getPoint :: Vertex a -> Geo.Point a
@@ -151,8 +151,8 @@ getPoint = getGeoPoint
 
 -- | Returns the "Entity.Vertex" at the give "Point"
 getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe (Vertex a)
-getVertex entity point = find pred (getVertices entity)
-    where pred v = (getGeoPoint v) == point
+getVertex entity point = find check (getVertices entity)
+    where check v = (getGeoPoint v) == point
 
 -- | Returns the underlying geometric "Curve" of the "Edge'"
 getCurve :: Edge a -> Geo.Line a
