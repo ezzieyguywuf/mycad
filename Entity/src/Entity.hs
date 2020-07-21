@@ -37,8 +37,7 @@ make useful data.
 -}
 module Entity
 ( -- * Exported Types
-  Edge
-, Entity
+  Entity
 , EntityState
   -- * Creation and Modification
 , nullEntity
@@ -54,7 +53,6 @@ module Entity
 , oppositeVertex
   -- * Pretty Printing
 , prettyPrintEntity
-, prettyPrintEdge
 ) where
 
 -- Base
@@ -63,7 +61,7 @@ import Control.Monad.State (State, get, runState, put)
 
 -- Third-party
 import qualified Data.Map as Map
-import Data.Text.Prettyprint.Doc (Doc, nest, vsep, pretty)
+import Data.Text.Prettyprint.Doc (Doc)
 
 -- Internal
 import qualified Geometry as Geo
@@ -75,16 +73,8 @@ import qualified Topology as Topo
 -- | This maps a "Topology.Vertex" to a specfic "Geometry.Point".
 type VertexMap p = Map.Map Topo.Vertex (Geo.Point p)
 
--- | Similar to "Vertex", this provides extra "Geometry" information that is
---   not present in "Topology.Edge"
---
---   Also like "Vertex", the parametrization specifies the precision of the
---   "Geo.Point"
-data Edge   p = Edge {
-                       getGeoLine  :: (Geo.Line p)
-                     , getTopoEdge :: Topo.Edge
-                     }
-                     deriving (Show, Eq)
+-- | This maps a "Topology.Edge" to a specific "Geometry.Curve"
+type EdgeMap p = Map.Map Topo.Edge (Geo.Line p)
 
 -- | The main data type, encapsulating an entire "Topology" and associated
 --   "Geometry"
@@ -93,7 +83,7 @@ data Edge   p = Edge {
 --   "Topology.Vertex" nor "Topology.Edge". Rather, these are primitive
 --   "Entity" data types that encapsulate both "Topology" and "Geometry"
 data Entity p = Entity { getVertexMap :: VertexMap p
-                       , getEdges :: [Edge p]
+                       , getEdgeMap   :: EdgeMap p
                        , _getTopology :: Topo.Topology
                        } deriving (Show)
 
@@ -107,7 +97,7 @@ type EntityState p a = State (Entity p) a
 
 -- | Returns an Entity that has nothing in it.
 nullEntity :: Entity a
-nullEntity = Entity Map.empty [] Topo.emptyTopology
+nullEntity = Entity Map.empty Map.empty Topo.emptyTopology
 
 emptyEntityState :: EntityState a ()
 emptyEntityState = pure ()
@@ -116,25 +106,29 @@ emptyEntityState = pure ()
 getVertices :: Entity a -> [Topo.Vertex]
 getVertices = Topo.getVertices . _getTopology
 
+-- | Returns a list of all the "Topology.Edge" in the "Entity"
+getEdges :: Entity a -> [Topo.Edge]
+getEdges = Topo.getEdges . _getTopology
+
 -- | Adds a "Vertex" to the "Entity".
 --
 --   A "Vertex" has both a "Geometry" (a "Point"), and a "Topology" (a
 --   "Topology.Vertex")
 addVertex :: Fractional a => Geo.Point a -> EntityState a Topo.Vertex
 addVertex p = do
-    (Entity vmap es t) <- get
+    (Entity vmap emap t) <- get
     let (v, t')  = runState Topo.addFreeVertex t
         vmap' = Map.insert v p vmap
-    put $ Entity vmap' es t'
+    put $ Entity vmap' emap t'
     pure v
 
 -- | Adds an "Edge" to the "Entity".
 --
 --   An "Edge" has both a "Geometry" (a "Curve"), and a "Topology" (a
 --   "Topology.Edge")
-addEdge :: Fractional a => Geo.Point a -> Geo.Point a -> EntityState a (Edge a)
+addEdge :: Fractional a => Geo.Point a -> Geo.Point a -> EntityState a Topo.Edge
 addEdge p1 p2 = do
-    (Entity vmap es t) <- get
+    (Entity vmap emap t) <- get
     let ((v1,v2,edge), t') = runState topoState t
         topoState = do
             -- First, add a "free" vertex
@@ -150,9 +144,9 @@ addEdge p1 p2 = do
         -- "Edge" that was created earlier
         gline   = Geo.makeLine p1 p2
         -- Update the edge list
-        es' = (Edge gline (fromJust edge)) : es
-    put $ Entity vmap' es' t'
-    pure $ Edge gline (fromJust edge)
+        emap' = Map.insert (fromJust edge) gline emap
+    put $ Entity vmap' emap' t'
+    pure $ (fromJust edge)
 
 -- | Returns the underlying geometric "Point" of the "Vertex"
 getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)
@@ -163,8 +157,8 @@ getVertex :: Eq a => Entity a -> Geo.Point a -> [Topo.Vertex]
 getVertex entity point = Map.keys $ Map.filter ((==) point) (getVertexMap entity)
 
 -- | Returns the underlying geometric "Curve" of the "Edge'"
-getCurve :: Edge a -> Geo.Line a
-getCurve = getGeoLine
+getCurve :: Entity a -> Topo.Edge -> Maybe (Geo.Line a)
+getCurve e = (`Map.lookup` (getEdgeMap e))
 
 -- | Returns the opposite "Vertex".
 --
@@ -174,7 +168,7 @@ getCurve = getGeoLine
 --   Any given "Edge" can only ever have two "Vertex" attached to it (this is
 --   enforced by the "Topology" module), and such there is only ever one
 --   \"opposite\" "Vertex"
-oppositeVertex :: Eq a => Entity a -> Topo.Vertex -> Edge a -> Maybe Topo.Vertex
+oppositeVertex :: Eq a => Entity a -> Topo.Vertex -> Topo.Edge -> Maybe Topo.Vertex
 oppositeVertex = undefined
 --oppositeVertex e@(Entity _ _ t) (Vertex _ v1) (Edge _ ed) = v2
     --where xs = Topo.adjVertToEdge t ed
@@ -184,11 +178,6 @@ oppositeVertex = undefined
              -- | otherwise      = Nothing
              --where a = xs !! 0
                    --b = xs !! 1
-
-prettyPrintEdge :: Show a => Entity a -> Edge a -> Doc ann
-prettyPrintEdge (Entity _ _ t) (Edge _ e) =
-    nest 4 $ vsep [e', pretty "Line"]
-    where e' = Topo.prettyPrintEdge t e
 
 prettyPrintEntity :: Show a => Entity a -> Doc ann
 prettyPrintEntity _ = undefined
