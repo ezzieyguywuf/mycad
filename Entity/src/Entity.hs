@@ -166,7 +166,7 @@ getCurve e = (`Map.lookup` (getEdgeMap e))
 --   "Edge".
 --
 --   Any given "Edge" can only ever have two "Vertex" attached to it (this is
---   enforced by the "Topology" module), and such there is only ever one
+--   enforced by the "Topology" module), and as such there is only ever one
 --   \"opposite\" "Vertex"
 oppositeVertex :: Eq a => Entity a -> Topo.Vertex -> Topo.Edge -> Maybe Topo.Vertex
 oppositeVertex = undefined

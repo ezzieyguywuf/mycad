@@ -26,21 +26,25 @@ spec = do
         it "allows Vertex to be retrieved using Geometry" $
             v `shouldSatisfy` (`elem` E.getVertex e p)
     describe "addEdge" $ do
-        let (edge, entity) = runState (E.addEdge p1 p2) nullE
+        let ((v1, v2, edge), entity0) = runState state nullE
             p1 = V3 10 10 10
             p2 = V3 20 20 20
+            state = do
+                _v1   <- E.addVertex p1
+                _v2   <- E.addVertex p2
+                _edge <- E.addEdge _v1 _v2
+                pure (_v1, _v2, _edge)
         it "Adds a single Edge to the Entity" $
             (length $ E.getEdges entity) `shouldBe` 1
-        it "Adds a single Vertex to Entity" $
+        it "Does not modify the number of Vertex in the Entity" $
             (length $ E.getVertices entity) `shouldBe` 2
-        it "Creates a line from v1 to the newly created Vertex" $ do
+        it "Creates a line from v1 to v2" $ do
             let line = Geo.makeLine p1 p2
             E.getCurve entity edge `shouldBe` Just line
     --describe "oppositeVertex" $ do
-        --let (v1, e0) = runState (E.addVertex p1) nullE
-            --(edge, e1) = runState (E.addEdge v1 p2) e0
-            --v2 = E.getVertex e1 p2
+        --let (edge, entity) = runState (E.addEdge p1 p2) nullE
             --p1 = V3 10 20 30
             --p2 = V3 5 10 5
+            --v1 = 
         --it "Returns the Vertex on the other side of the Edge" $
             --Just (E.oppositeVertex e1 v1 edge) `shouldBe` Just v2
