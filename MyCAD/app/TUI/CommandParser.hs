@@ -18,6 +18,7 @@ own parser as we did at first
 module TUI.CommandParser
 (
   Command(..)
+, CommandToken(..)
 , Item(..)
 , parseInput
 , commandCompletions
@@ -47,7 +48,7 @@ type ParseError = ParseErrorBundle Text Void
 -- | A "Command" is an action that can be performed by the user.
 --
 --   This is parametrized over the type of Point to use
-data Command a = Help (Maybe (Command a))
+data Command a = Help (Maybe CommandToken)
                | Quit
                | Show
                | Add (Item a)
@@ -56,16 +57,33 @@ data Command a = Help (Maybe (Command a))
 -- | Something that can be added
 data Item a = VertexItem (Point a) deriving (Show)
 
--- | This will run our parser on the given input, generating a "Command"
+-- | Tokenize a user's "Text" input into a recognizable commad.
+data CommandToken  = HelpToken
+                   | QuitToken
+                   | ShowToken
+                   | AddToken
+                   deriving (Show)
+
+-- | This will run our parser on the given line of input, generating a "Command"
 parseInput :: Fractional a => Text -> Either ParseError (Command a)
-parseInput = parse startParsing ""
+parseInput = parse (spaceConsumer *> parseThings <* eof) ""
+    where parseThings = lexeme (parseCommand <?> "valid command") >>= parseArgs
 
 -- | This will parse an abritrary line of input from the User.
 --
 --   Note that this will only parse a single line, which must issue some
 --   "Command"
-startParsing :: Fractional a => Parser (Command a)
-startParsing = spaceConsumer *> lexeme parseCommand <* eof
+parseCommand :: Parser CommandToken
+parseCommand = lexeme lexCommand
+
+-- | Parses the arguments for the given command
+parseArgs :: Fractional a => CommandToken -> Parser (Command a)
+parseArgs token =
+    case token of
+        HelpToken -> parseHelpArgs
+        QuitToken -> pure Quit
+        ShowToken -> pure Show
+        AddToken  -> parseAddArgs
 
 -- | Given some string, determines if this partially matches any of our known "Command"
 --
@@ -78,50 +96,40 @@ commandCompletions string = filter (isPrefixOf string) commands
 -------------------------------------------------------------------------------
 --                      Internal stuff
 -------------------------------------------------------------------------------
-knownCommands :: Fractional a => Map Text (Parser (Command a))
+knownCommands :: Map Text CommandToken
 knownCommands = fromList
-    [ ("help", parseHelpArgs)
-    , ("quit", pure Quit)
-    , ("show", pure Show)
-    , ("add" , parseAddArgs)
+    [ ("help", HelpToken)
+    , ("quit", QuitToken)
+    , ("show", ShowToken)
+    , ("add" , AddToken)
     ]
 
--- | Try to parse each key in the "knownCommands" "Data.Map"
---
---   If the parse succeeds, it will return the accompanying "Command" in the
---   value associated with said key.
-parseCommand :: Fractional a => Parser (Command a)
-parseCommand =
-        choice (fmap checkCommand (assocs knownCommands))
-    <?> "valid command"
+-- | Tries to parse a single "CommandToken"
+lexCommand :: Parser CommandToken
+lexCommand = choice (fmap check (assocs knownCommands))
+    where check (key, token) = string key >> pure token
 
 -- | This parses any arguments to the \"help\" command
 parseHelpArgs :: Fractional a => Parser (Command a)
 parseHelpArgs =
-    try
-        (do word "help"
-            pure (Help (Just (Help Nothing))))
-    <|> do cmd <- optional parseCommand
-           pure (Help cmd)
+    try $ do string "help"
+             pure (Help (Just HelpToken))
+    <|> (optional (lexeme parseCommand) >>= pure . Help)
 
 -- | This parses any arguments to the \"add\" command
 parseAddArgs :: Fractional a => Parser (Command a)
 parseAddArgs = do
-    word "vertex"
+    lexeme $ string "vertex"
     point <- parsePoint
     pure $ Add (VertexItem point)
 
 -- | This parses a 3-dimensional point x y z
 parsePoint :: Fractional a => Parser (Point a)
 parsePoint = do
-    x <- number
-    y <- number
-    z <- number
+    x <- lexeme number
+    y <- lexeme number
+    z <- lexeme number
     pure (V3 x y z)
-
--- | Tries to parse (String, Parser a) pair
-checkCommand :: (Text, Parser (Command a)) -> Parser (Command a)
-checkCommand (text, parser) = word text >> parser
 
 -- | This will....consume space
 spaceConsumer :: Parser ()
@@ -130,10 +138,6 @@ spaceConsumer = Lexer.space space1 empty empty
 -- | Use the given parser to parse a lexeme, consuming any space after
 lexeme :: Parser a -> Parser a
 lexeme = Lexer.lexeme spaceConsumer
-
--- | Use to parse a single word
-word :: Text -> Parser Text
-word = lexeme . string
 
 -- | Use to parse an integer
 integer :: Parser String
@@ -180,7 +184,7 @@ float = try floatLeading
 
 -- | Use to parse a number
 number :: Fractional a => Parser a
-number = lexeme $ do
+number = do
     text <- float
     case rational . pack $ text of
         Left err       -> fail err
