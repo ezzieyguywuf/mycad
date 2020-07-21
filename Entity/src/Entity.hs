@@ -58,6 +58,7 @@ module Entity
 ) where
 
 -- Base
+import Data.Maybe (fromJust)
 import Control.Monad.State (State, get, runState, put)
 
 -- Third-party
@@ -132,23 +133,34 @@ addVertex p = do
 --   An "Edge" has both a "Geometry" (a "Curve"), and a "Topology" (a
 --   "Topology.Edge")
 addEdge :: Fractional a => Geo.Point a -> Geo.Point a -> EntityState a (Edge a)
-addEdge _ _ = undefined
-    --(Entity vmap es t) <- get
-    --let gline   = Geo.makeLine p1 p2
-        --(Just e, t')  = runState (Topo.addRayEdge v1) t
-        --(Just v2, t'')   = runState (Topo.closeRayEdge e) t'
-        --vs' = (Vertex p2 v2) : vs
-        --es' = (Edge gline e) : es
-    --put $ Entity vs' es' t''
-    --pure $ Edge gline e
+addEdge p1 p2 = do
+    (Entity vmap es t) <- get
+    let ((v1,v2,edge), t') = runState topoState t
+        topoState = do
+            -- First, add a "free" vertex
+            v1' <- Topo.addFreeVertex
+            -- Next, extend a "ray" edge from that vertex
+            edge' <- Topo.addRayEdge v1
+            -- finally, close the "ray" edge
+            v2' <- Topo.closeRayEdge (fromJust edge)
+            pure (v1', v2', edge')
+        -- Update the VertexMap to include the new vertices
+        vmap' = Map.insert v1 p1 (Map.insert (fromJust v2) p2 vmap)
+        -- We need to construct the geometric "Line" that goes along with the
+        -- "Edge" that was created earlier
+        gline   = Geo.makeLine p1 p2
+        -- Update the edge list
+        es' = (Edge gline (fromJust edge)) : es
+    put $ Entity vmap' es' t'
+    pure $ Edge gline (fromJust edge)
 
 -- | Returns the underlying geometric "Point" of the "Vertex"
-getPoint :: Topo.Vertex -> Geo.Point a
-getPoint = undefined
+getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)
+getPoint e v = Map.lookup v (getVertexMap e)
 
--- | Tries to find an "Topology.Vertex" at the give "Point"
-getVertex :: Eq a => Entity a -> Geo.Point a -> Maybe Topo.Vertex
-getVertex _ _ = undefined
+-- | Returns any "Vertex" that have the given "Geometry"
+getVertex :: Eq a => Entity a -> Geo.Point a -> [Topo.Vertex]
+getVertex entity point = Map.keys $ Map.filter ((==) point) (getVertexMap entity)
 
 -- | Returns the underlying geometric "Curve" of the "Edge'"
 getCurve :: Edge a -> Geo.Line a
