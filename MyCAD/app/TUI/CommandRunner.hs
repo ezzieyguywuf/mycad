@@ -26,7 +26,7 @@ module TUI.CommandRunner
 )where
 
 -- | Internal imports
-import TUI.CommandParser (Command(..), CommandToken(..), Item(..))
+import TUI.CommandParser (Command(..), CommandToken(..), AddCommand(..))
 import Entity (Entity, EntityState, addVertex, prettyPrintEntity)
 
 -- | This will execute the "Command".
@@ -41,12 +41,14 @@ runCommand entity cmd = do
     pure entity
     case cmd of
         Help arg -> pure (Just $ getHelpString arg)
-        Add item -> addItem entity item
+        Add cmd -> runAdd entity cmd
         Show     -> pure $ Just (show (prettyPrintEntity entity))
         Quit     -> pure Nothing
 
-addItem :: (Fractional p) => Entity p -> Item p-> EntityState p (Maybe String)
-addItem entity (VertexItem point) = addVertex point >> pure (Just "Added a vertex")
+runAdd :: (Fractional p) => Entity p -> AddCommand p-> EntityState p (Maybe String)
+runAdd entity cmd =
+    case cmd of
+        AddVertex point -> addVertex point >> pure (Just "Added a vertex")
 
 getHelpString :: Maybe CommandToken -> String
 getHelpString mcommand =
@@ -60,5 +62,5 @@ help = "This is Help"
 commandHelp :: CommandToken -> String
 commandHelp token =
     case token of
-        AddToken -> "This is add help"
-        _        -> help
+        AddT -> "This is add help"
+        _    -> help

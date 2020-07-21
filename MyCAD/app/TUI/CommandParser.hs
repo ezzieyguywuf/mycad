@@ -19,7 +19,7 @@ module TUI.CommandParser
 (
   Command(..)
 , CommandToken(..)
-, Item(..)
+, AddCommand(..)
 , parseInput
 , commandCompletions
 )where
@@ -51,17 +51,19 @@ type ParseError = ParseErrorBundle Text Void
 data Command a = Help (Maybe CommandToken)
                | Quit
                | Show
-               | Add (Item a)
+               | Add (AddCommand a)
                  deriving (Show)
 
--- | Something that can be added
-data Item a = VertexItem (Point a) deriving (Show)
+-- | Tokenizes user's "Text" input into a recognizable \"add\" sub-command
+data AddToken a = VertexToken deriving (Show)
+
+data AddCommand a = AddVertex (Point a) deriving (Show)
 
 -- | Tokenize a user's "Text" input into a recognizable commad.
-data CommandToken  = HelpToken
-                   | QuitToken
-                   | ShowToken
-                   | AddToken
+data CommandToken  = HelpT
+                   | QuitT
+                   | ShowT
+                   | AddT
                    deriving (Show)
 
 -- | This will run our parser on the given line of input, generating a "Command"
@@ -80,10 +82,10 @@ parseCommand = lexeme lexCommand
 parseArgs :: Fractional a => CommandToken -> Parser (Command a)
 parseArgs token =
     case token of
-        HelpToken -> parseHelpArgs
-        QuitToken -> pure Quit
-        ShowToken -> pure Show
-        AddToken  -> parseAddArgs
+        HelpT -> parseHelpArgs
+        QuitT -> pure Quit
+        ShowT -> pure Show
+        AddT  -> lexeme lexAdd >>= parseAdd
 
 -- | Given some string, determines if this partially matches any of our known "Command"
 --
@@ -98,30 +100,43 @@ commandCompletions string = filter (isPrefixOf string) commands
 -------------------------------------------------------------------------------
 knownCommands :: Map Text CommandToken
 knownCommands = fromList
-    [ ("help", HelpToken)
-    , ("quit", QuitToken)
-    , ("show", ShowToken)
-    , ("add" , AddToken)
+    [ ("help", HelpT)
+    , ("quit", QuitT)
+    , ("show", ShowT)
+    , ("add" , AddT)
     ]
+
+-- | This is a list of the sub-commands recognized by the add "Command"
+addCommands :: Map Text (AddToken a)
+addCommands = fromList
+    [ ("vertex", VertexToken) ]
 
 -- | Tries to parse a single "CommandToken"
 lexCommand :: Parser CommandToken
-lexCommand = choice (fmap check (assocs knownCommands))
-    where check (key, token) = string key >> pure token
+lexCommand = checkMap knownCommands
+
+-- | Tries to parse a single "AddToken"
+lexAdd :: Parser (AddToken a)
+lexAdd = checkMap addCommands <?> "known \"add\" sub-command"
+
+-- | Tries to parse the given \"add\" sub-command's arguments
+parseAdd :: (Fractional a) => AddToken a -> Parser (Command a)
+parseAdd token =
+    case token of
+        VertexToken -> parsePoint >>= pure . Add . AddVertex
+
+-- | Takes a "Map Text a" as input, and tries to parse each key. On success,
+--   returns the coresponding value
+checkMap :: Map Text a -> Parser a
+checkMap m = choice (fmap check (assocs m))
+    where check (key, a) = string key >> pure a
 
 -- | This parses any arguments to the \"help\" command
 parseHelpArgs :: Fractional a => Parser (Command a)
 parseHelpArgs =
     try $ do string "help"
-             pure (Help (Just HelpToken))
+             pure (Help (Just HelpT))
     <|> (optional (lexeme parseCommand) >>= pure . Help)
-
--- | This parses any arguments to the \"add\" command
-parseAddArgs :: Fractional a => Parser (Command a)
-parseAddArgs = do
-    lexeme $ string "vertex"
-    point <- parsePoint
-    pure $ Add (VertexItem point)
 
 -- | This parses a 3-dimensional point x y z
 parsePoint :: Fractional a => Parser (Point a)
