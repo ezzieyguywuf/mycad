@@ -35,7 +35,10 @@ data RenderTarget =
         , _getObjectData :: ObjectData
         }
 
+lvshaderFPATH :: FilePath
 lvshaderFPATH = "MyCAD" </> "app" </> "GUI" </> "LineVShader.glsl"
+
+fshaderFPATH :: FilePath
 fshaderFPATH  = "MyCAD" </> "app" </> "GUI" </> "FragmentShader.glsl"
 
 -- | This will initialize a RenderDat, which can later be used to Render things

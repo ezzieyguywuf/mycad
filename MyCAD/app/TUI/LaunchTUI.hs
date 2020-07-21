@@ -82,4 +82,4 @@ settings =
 completer :: String -> IO [HL.Completion]
 completer s = pure $ map makeComplete (commandCompletions s)
     where makeComplete :: String -> HL.Completion
-          makeComplete s = HL.Completion s s False
+          makeComplete s' = HL.Completion s' s' False

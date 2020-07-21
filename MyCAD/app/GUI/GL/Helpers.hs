@@ -184,7 +184,7 @@ linkShadersToProgram shader1 shader2 = do
     linkingSuccess <- getPointerVal (glGetProgramiv shaderProgram GL_LINK_STATUS)
     when (linkingSuccess == GL_FALSE) $ do
         putStrLn "Program Linking Error:"
-        let infoLength = 512
+        let infoLength = 512 :: Integer
         resultP <- malloc
         infoLog <- mallocArray (fromIntegral infoLength)
         glGetProgramInfoLog shaderProgram (fromIntegral infoLength) resultP infoLog

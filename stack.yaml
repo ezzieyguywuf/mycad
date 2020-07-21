@@ -45,6 +45,8 @@ extra-deps:
 #
 # extra-deps: []
 
+ghc-options:
+    "$targets": -Werror -Wall -O2 -Wno-unused-do-bind
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

@@ -18,9 +18,9 @@ import GUI.GL.Helpers (Shader, makeUniform, putUniform)
 
 -- | This is the actual data that our camera needs - this fully describes the
 --   transformation needed to change the view
-data CameraData = LookAt { location  :: V3 Float -- ^ Where is the camera located?
-                         , up        :: V3 Float -- ^ which way is up for the camera?
-                         , direction :: V3 Float -- ^ Which way is the camera looking?
+data CameraData = LookAt { getLoc :: V3 Float -- ^ Where is the camera located?
+                         , getUp  :: V3 Float -- ^ which way is up for the camera?
+                         , getDir :: V3 Float -- ^ Which way is the camera looking?
                          }
 
 -- | Rotates the camera.

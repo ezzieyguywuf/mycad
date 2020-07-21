@@ -17,6 +17,7 @@ import Codec.Picture ( readImage
 --data GLImage = GLImage { getData :: }
 
 -- TODO: this will probably want to be `loadRGB8 :: String -> GLImage`
+loadRGB8 :: String -> IO DynamicImage
 loadRGB8 = getDynImage
 
 -- | Loads an image from a file - if it can't find it, loads a gradient instead
@@ -24,7 +25,7 @@ getDynImage :: String -> IO DynamicImage
 getDynImage fname = do
     check <- readImage fname
     case check of
-        Left msg -> pure generateGradient
+        Left _ -> pure generateGradient
         Right rawData -> pure rawData
 
 -- | Generates a gradient.

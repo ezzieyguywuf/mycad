@@ -24,16 +24,23 @@ import qualified Graphics.UI.GLFW as GLFW
 import Linear.V3 (V3(..))
 
 -- internal
-import GUI.GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose, getRenderQueue)
+import GUI.GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose)
 import GUI.ViewSpace (CameraData(..))
 import GUI.RenderQueue (RenderQueue, queueObject, initRenderQueue)
 import GUI.GL.RenderData (RenderData, initRenderData)
 import GUI.GL.Primitives (makeLine)
 import GUI.GL.Renderer (renderIfNecessary)
 
+winWIDTH :: Int
 winWIDTH      = 800
+
+winHEIGHT :: Int
 winHEIGHT     = 600
+
+winASPECT :: Float
 winASPECT     = fromIntegral winWIDTH / fromIntegral winHEIGHT
+
+winTITLE :: String
 winTITLE      = "LearnOpenGL Hello CAD!"
 
 initialize :: IO RenderQueue
@@ -46,7 +53,6 @@ launch queue = do
     glfwInit winWIDTH winHEIGHT winTITLE queue startCam >>= \case
         Nothing -> initFailMsg
         Just window -> do
-            let queue = getRenderQueue window
             renderData <- initRenderData queue winASPECT lineThickness
             forkIO (debuggingLines queue)
             loop window renderData
@@ -75,9 +81,9 @@ loop window renderData = do
 
 -- | This will initialize the camera.
 startCam :: CameraData
-startCam = LookAt { location  = V3 0 0 100 -- Where is the camera located
-                  , up        = V3 0 1 0   -- Which way is "up" to the camera
-                  , direction = V3 0 0 0   -- Where is it looking
+startCam = LookAt { getLoc = V3 0 0 100 -- Where is the camera located
+                  , getUp  = V3 0 1 0   -- Which way is "up" to the camera
+                  , getDir = V3 0 0 0   -- Where is it looking
                   }
 
 -- | This message provides some useful output in case we can't initialize

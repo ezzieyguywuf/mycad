@@ -55,7 +55,9 @@ data Command a = Help (Maybe CommandToken)
                  deriving (Show)
 
 -- | Tokenizes user's "Text" input into a recognizable \"add\" sub-command
-data AddToken a = VertexToken deriving (Show)
+data AddToken a = VertexToken
+                | LineToken
+                  deriving (Show)
 
 data AddCommand a = AddVertex (Point a) deriving (Show)
 
@@ -85,7 +87,7 @@ parseCommand token =
 --   There's an opportunity to allow for fuzzy matching, but that's not
 --   currently implemented.
 commandCompletions :: String -> [String]
-commandCompletions string = filter (isPrefixOf string) commands
+commandCompletions text = filter (isPrefixOf text) commands
     where commands = map unpack $ keys knownCommands
 
 -------------------------------------------------------------------------------
@@ -102,7 +104,8 @@ knownCommands = fromList
 -- | This is a list of the sub-commands recognized by the add "Command"
 addCommands :: Map Text (AddToken a)
 addCommands = fromList
-    [ ("vertex", VertexToken) ]
+    [ ("vertex", VertexToken)
+    , ("line"  , LineToken)]
 
 -- | Tries to parse a single "CommandToken"
 lexCommand :: Parser CommandToken
@@ -117,6 +120,7 @@ parseAdd :: (Fractional a) => AddToken a -> Parser (Command a)
 parseAdd token =
     case token of
         VertexToken -> parsePoint >>= pure . Add . AddVertex
+        LineToken   -> undefined
 
 -- | Takes a "Map Text a" as input, and tries to parse each key. On success,
 --   returns the coresponding value
