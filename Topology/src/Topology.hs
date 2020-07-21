@@ -71,7 +71,7 @@ newtype Topology =
 
 type TopoState a = St.State Topology a
 
-newtype Vertex = Vertex Int deriving (Show, Eq)
+newtype Vertex = Vertex Int deriving (Show, Eq, Ord)
 data Edge = Edge {getEdgeID :: Int}
             deriving (Show, Eq)
 newtype Face = Face Int deriving (Show, Eq)
