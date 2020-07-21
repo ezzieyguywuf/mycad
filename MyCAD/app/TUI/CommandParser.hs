@@ -26,7 +26,7 @@ module TUI.CommandParser
 
 -- Base
 import Data.Void (Void)
-import Control.Applicative ((<|>), optional, empty, some)
+import Control.Applicative ((<|>), optional, empty, some, many)
 import Data.Map (Map, keys, fromList, assocs)
 import Data.List (isPrefixOf)
 
@@ -34,7 +34,8 @@ import Data.List (isPrefixOf)
 import Data.Text (Text, pack, unpack)
 import Data.Text.Read (rational)
 import Text.Megaparsec ((<?>), Parsec, parse, eof, choice, try)
-import Text.Megaparsec.Char (string, space1, char, digitChar)
+import Text.Megaparsec.Char (string, space1, char, digitChar, letterChar
+                            , alphaNumChar)
 import Text.Megaparsec.Error (ParseErrorBundle)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 import Linear.V3 (V3(V3))
@@ -56,10 +57,22 @@ data Command a = Help (Maybe CommandToken)
 
 -- | Tokenizes user's "Text" input into a recognizable \"add\" sub-command
 data AddToken a = VertexToken
-                | LineToken
+                | EdgeToken
                   deriving (Show)
 
-data AddCommand a = AddVertex (Point a) deriving (Show)
+-- | This is a sub-command that goes allong with the "Add" "Command".
+data AddCommand a = AddVertex (Point a)
+                  | AddLine (LineArg a) (LineArg a)
+                    deriving (Show)
+
+-- | This is an argument recognized by the "AddLine" command
+data LineArg a = LArgIdent Identifier
+               | LArgPoint (Point a)
+                 deriving (Show)
+
+-- | This is used to identify a topological item, i.e. \"V0\" would be the
+--   zeroeth "Topology.Vertex"
+data Identifier = Identifier Text deriving (Show)
 
 -- | Tokenize a user's "Text" input into a recognizable commad.
 data CommandToken  = HelpT
@@ -105,7 +118,7 @@ knownCommands = fromList
 addCommands :: Map Text (AddToken a)
 addCommands = fromList
     [ ("vertex", VertexToken)
-    , ("line"  , LineToken)]
+    , ("line"  , EdgeToken)]
 
 -- | Tries to parse a single "CommandToken"
 lexCommand :: Parser CommandToken
@@ -120,7 +133,30 @@ parseAdd :: (Fractional a) => AddToken a -> Parser (Command a)
 parseAdd token =
     case token of
         VertexToken -> parsePoint >>= pure . Add . AddVertex
-        LineToken   -> undefined
+        EdgeToken   -> parseAddLine
+
+-- | Tries to parse the appropriate arguments for the \"add line\" command "
+parseAddLine :: Fractional a => Parser (Command a)
+parseAddLine = do
+    x <- lexeme parseLineArg
+    y <- lexeme parseLineArg
+    pure $ Add (AddLine x y)
+
+-- | Parses a single argument to the \"add line\" commad"
+parseLineArg :: Fractional a => Parser (LineArg a)
+parseLineArg =
+    try (identifier >>= pure . LArgIdent)
+    <|> (parsePoint >>= pure . LArgPoint)
+
+-- | Parses a single identifier.
+--
+--   For our purposes, an identifier starts with a single alpha charcter,
+--   followed by zero or more alpha-numeric characters
+identifier :: Parser Identifier
+identifier = do
+    x  <- letterChar
+    xs <- many alphaNumChar
+    pure (Identifier . pack $ x : xs)
 
 -- | Takes a "Map Text a" as input, and tries to parse each key. On success,
 --   returns the coresponding value
