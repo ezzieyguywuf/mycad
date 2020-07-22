@@ -3,27 +3,34 @@ module TopologySpec (spec) where
 import Topology
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
-import Control.Monad.State (execState)
+import Control.Monad.State (execState, runState)
 
 spec :: Spec
 spec = do
     describe "addFreeVertex" $
-        it "Is inversed by removeVertex" $
-            property (prop_stateIdentity (addFreeVertex >>= removeVertex))
+        it "Is inversed by removeVertex" $ do
+            let run = addFreeVertex >>= removeVertex
+            property (prop_stateIdentity run)
     describe "addEdge" $
         it "Is inversed by removeEdge" $ do
-            let run = do v1 <- addFreeVertex
-                         v2 <- addFreeVertex
-                         addEdge v1 v2
-            property (prop_stateIdentity run)
-
+            let prep = do v1 <- addFreeVertex
+                          v2 <- addFreeVertex
+                          pure (v1, v2)
+                run a = (uncurry addEdge) a >>= removeEdge
+            property (prop_prepStateIdentity prep run)
 
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
 prop_stateIdentity :: TopoState a -> TestTopology -> Bool
-prop_stateIdentity run testTopology = topology == execState run topology
-    where topology = unTestTopology testTopology
+prop_stateIdentity run = prop_prepStateIdentity prep run'
+    where prep  = pure ()
+          run' a = const prep a >> run
+
+prop_prepStateIdentity :: TopoState a -> (a -> TopoState b) -> TestTopology -> Bool
+prop_prepStateIdentity prep run testTopology = initialState == finalState
+    where (args, initialState) = runState prep (unTestTopology testTopology)
+          finalState = execState (run args) initialState
 
 -- ===========================================================================
 --                            Helper Functions

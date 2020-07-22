@@ -136,11 +136,8 @@ addEdge (Vertex v1) (Vertex v2) = do
     pure $ Edge edge
 
 -- | If the Edge does not exist, does nothing.
-removeEdge :: Edge -> TopoState ()
-removeEdge _ = undefined
-    --t <- gets unTopology
-    --put (Topology $ delNode n t)
-    --pure ()
+removeEdge :: Edge -> TopoState Bool
+removeEdge = deleteNode . getEdgeID
 
 -- | Returns all the 'Vertex' in the 'Topology'
 getVertices :: Topology -> [Vertex]
