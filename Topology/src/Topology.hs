@@ -26,10 +26,7 @@ module Topology
   -- * Mutating functions
 , emptyTopology
 , addFreeVertex
-, addFreeEdge
-, addRayEdge
-, makeRayEdge
-, closeRayEdge
+, addEdge
 , removeVertex
 , removeEdge
   -- * Inspection functions
@@ -141,60 +138,9 @@ removeVertex (Vertex n) = do
     put $ Topology $ Graph.delNode n t
     pure ()
 
-addFreeEdge :: TopoState Edge
-addFreeEdge = do
-    e <- addNode EEdge
-    pure $ Edge e
-
-addRayEdge :: Vertex -> TopoState (Maybe Edge)
-addRayEdge (Vertex n) = do
-    t <- get
-    if isValidNode t n
-        then do
-            e <- addNode EEdge
-            t' <- get
-            let m = connectNodes (n, e) t'
-            case m of
-                Just t'' -> put t'' >> pure (Just (Edge e))
-                Nothing -> pure Nothing
-        else
-            pure Nothing
-
--- | Takes a "free" 'Edge' - that is, one with zero adjacencies - and creates a new
---   'Vertex' that it is adajacent to
---
---   We call it a "Ray Edge" because we can conceptually visualize the relationship of an
---   'Edge' with a single 'Vertex' as a "ray" that has a starting point but goes on
---   forever.
-makeRayEdge :: Edge -> TopoState (Maybe Vertex)
-makeRayEdge (Edge e)= do
-    t <- get
-    if isValidNode t e && not (hasNeighbors t e)
-        then do
-            v <- addNode EVertex
-            t' <- get
-            let m = connectNodes (v, e) t'
-            case m of
-                Just t'' -> do put t''
-                               pure $ Just (Vertex v)
-                Nothing -> pure Nothing
-        else
-            pure Nothing
-
-closeRayEdge :: Edge -> TopoState (Maybe Vertex)
-closeRayEdge (Edge e) = do
-    t <- get
-    if isValidNode t e && ((length (Graph.neighbors (unTopology t) e)) == 1)
-        then do
-            v <- addNode EVertex
-            t' <- get
-            let m = connectNodes (e, v) t'
-            case m of
-                Just t'' -> do put t''
-                               pure $ Just (Vertex v)
-                Nothing -> pure Nothing
-        else
-            pure Nothing
+-- | Adds an Edge adjacent to both Vertex
+addEdge :: Vertex -> Vertex -> TopoState Edge
+addEdge _ _ = undefined
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
@@ -298,16 +244,16 @@ addNode e = do
 
 -- | This relationship is directional - i.e. this will establish a relationship
 -- __from__ @a@ __to__ @b@
-connectNodes :: (Int, Int) -> Topology -> Maybe Topology
-connectNodes (a, b) t = do
+_connectNodes :: (Int, Int) -> Topology -> Maybe Topology
+_connectNodes (a, b) t = do
     let t' = unTopology t
     Just $ Topology $ Graph.insEdge (a, b, BridgeLabel ()) t'
 
-isValidNode :: Topology -> Int -> Bool
-isValidNode (Topology g) n = Graph.gelem n g
+_isValidNode :: Topology -> Int -> Bool
+_isValidNode (Topology g) n = Graph.gelem n g
 
-hasNeighbors :: Topology -> Int -> Bool
-hasNeighbors (Topology g) n = (not . null) $ Graph.neighbors g n
+_hasNeighbors :: Topology -> Int -> Bool
+_hasNeighbors (Topology g) n = (not . null) $ Graph.neighbors g n
 
 -- | How many nodes are in the Topology matching this predicate?
 countNode :: (NodeLabel -> Bool) -> Topology -> Int
@@ -374,15 +320,7 @@ prettyPrintElement EFace   = pretty "F"
 --                            Instances
 -- ===========================================================================
 instance Arbitrary Topology where
-    arbitrary = elements [t0, t1, t2, t3, t4, t5, t6]
+    arbitrary = elements [t0, t1, t2]
         where t0 = emptyTopology
               t1 = execState addFreeVertex emptyTopology -- Single free vertex
               t2 = execState addFreeVertex t1            -- Two free vertex
-              t3 = execState addEdge t0                  -- Single HalfEdge
-              t4 = execState addFreeVertex t2            -- HalfEdge plus two free Vertex
-              t5 = execState addEdge t3                  -- Two independent HalfEdge
-              t6 = execState addEdge t4                  -- two independent HalfEdge, two free Vertex
-              addEdge = addFreeEdge >>= makeRayEdge' >>= closeRayEdge
-              makeRayEdge' e = do
-                    makeRayEdge e
-                    pure e

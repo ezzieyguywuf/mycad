@@ -4,7 +4,6 @@ import Test.Hspec
 import Test.QuickCheck
 import qualified Topology as T
 import Control.Monad.State
-import Data.Maybe (fromJust, isNothing)
 
 spec :: Spec
 spec = do
@@ -32,16 +31,10 @@ spec = do
         it "Adds a single Edge" $
             property (prop_addsOneEdge (prep >>= run))
         it "does not modify the Faces" $
-            property (prop_doesNotModifyFaces $ prep' >>= run)
+            property (prop_doesNotModifyFaces $ prep >>= run)
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
-prop_returnsNothing :: T.TopoState (Maybe a) -> T.Topology -> Bool
-prop_returnsNothing s t = evalState test t
-    where test = do
-            m <- s
-            pure $ isNothing m
-
 prop_addRemoveIdentity :: T.TopoState a -> T.Topology -> Bool
 prop_addRemoveIdentity run t = evalState test t
     where test = do
@@ -60,29 +53,11 @@ prop_addRemoveIdentity' prep run t = evalState test t
 prop_addsOneVertex :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneVertex = deltaXIsN T.getVertices 1
 
-prop_addsOneVertex' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_addsOneVertex' = prep_deltaXIsN T.getVertices 1
-
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
 
 prop_doesNotAddOrRemoveVertices :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
 prop_doesNotAddOrRemoveVertices = prep_deltaXIsN T.getVertices 0
-
-prop_doesNotAddOrRemoveEdges :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotAddOrRemoveEdges = prep_deltaXIsN T.getEdges 0
-
-prop_doesNotModifyVertices :: T.TopoState a -> T.Topology -> Bool
-prop_doesNotModifyVertices = doesNotModifyX T.getVertices
-
-prop_doesNotModifyVertices' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyVertices' = prep_doesNotModifyX T.getVertices
-
-prop_doesNotModifyEdges' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyEdges' = prep_doesNotModifyX T.getEdges
-
-prop_doesNotModifyFaces' :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prop_doesNotModifyFaces' = prep_doesNotModifyX T.getFaces
 
 prop_doesNotModifyEdges :: T.TopoState a -> T.Topology -> Bool
 prop_doesNotModifyEdges = doesNotModifyX T.getEdges
@@ -99,16 +74,16 @@ _prop_doesNotAddOrDeleteEdges prep run t0 = evalState test t0
             es' <- (length . T.getEdges) <$> get
             pure (es == es')
 
-prop_addAdjacencyToEdge :: T.TopoState T.Edge -> TopoMod T.Edge T.Vertex -> T.Topology -> Bool
-prop_addAdjacencyToEdge prep run initial = evalState test initial
+_prop_addAdjacencyToEdge :: T.TopoState T.Edge -> TopoMod T.Edge T.Vertex -> T.Topology -> Bool
+_prop_addAdjacencyToEdge prep run initial = evalState test initial
     where test = do
             e <- prep
             v <- run e
             t <- get
             pure $ elem v $ T.edgeAdjacentVertices t e
 
-prop_addAdjacencyToVertex :: T.TopoState T.Vertex -> TopoMod T.Vertex T.Edge -> T.Topology -> Bool
-prop_addAdjacencyToVertex prep run initial = evalState test initial
+_prop_addAdjacencyToVertex :: T.TopoState T.Vertex -> TopoMod T.Vertex T.Edge -> T.Topology -> Bool
+_prop_addAdjacencyToVertex prep run initial = evalState test initial
     where test = do
             v <- prep
             e <- run v
@@ -140,15 +115,15 @@ doesNotModifyX getter run initial = evalState test initial
             xs' <- run >> gets getter
             pure (xs' == xs)
 
-prep_doesNotModifyX :: Eq c => TopoGetter c -> T.TopoState a -> TopoMod a b -> T.Topology -> Bool
-prep_doesNotModifyX getter prep run initial = evalState test initial
+_prep_doesNotModifyX :: Eq c => TopoGetter c -> T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+_prep_doesNotModifyX getter prep run initial = evalState test initial
     where test = do
             a <- prep
             xs  <- gets getter
             xs' <- run a >> gets getter
             pure (xs == xs')
 
-vertToAdjEdge :: T.Vertex -> T.TopoState T.Edge
-vertToAdjEdge v = do
+_vertToAdjEdge :: T.Vertex -> T.TopoState T.Edge
+_vertToAdjEdge v = do
     t <- get
     pure . head $ T.vertexAdjacentEdges t v
