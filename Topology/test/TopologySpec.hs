@@ -3,7 +3,7 @@ module TopologySpec (spec) where
 import Topology
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
-import Control.Monad.State (evalState, execState, get)
+import Control.Monad.State (execState)
 
 spec :: Spec
 spec = do
@@ -15,18 +15,15 @@ spec = do
 --                            Properties
 -- ===========================================================================
 prop_stateIdentity :: TopoState a -> TestTopology -> Bool
-prop_stateIdentity run (TestTopology topology )= evalState test topology
-    where test = do
-            s  <- get
-            s' <- run >> get
-            pure $ s == s'
+prop_stateIdentity run testTopology = topology == execState run topology
+    where topology = unTestTopology testTopology
 
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
 -- | In order to fix an orphaned instance warning, we'll wrap this in newtype
 --   before defining a new instance
-newtype TestTopology = TestTopology Topology deriving (Show)
+newtype TestTopology = TestTopology {unTestTopology :: Topology} deriving (Show)
 
 -- | This will generate a random Topology
 instance Arbitrary TestTopology where
