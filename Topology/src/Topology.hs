@@ -43,8 +43,7 @@ module Topology
 -- third-party
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter)
 import Data.Graph.Inductive.PatriciaTree (Gr)
-import Test.QuickCheck (Arbitrary, arbitrary, elements)
-import Control.Monad.State (State, gets, put, modify, execState)
+import Control.Monad.State (State, gets, put, modify)
 
 -- ===========================================================================
 --                               Data Types
@@ -193,12 +192,3 @@ filterGraph element = gets $ labfilter (isElement element) . unTopology
 -- | Checks if a particular NodeLabel is of the "Element" type
 isElement :: Element -> NodeLabel -> Bool
 isElement element label = element == (getElement label)
-
--- ===========================================================================
---                            Instances
--- ===========================================================================
-instance Arbitrary Topology where
-    arbitrary = elements [t0, t1, t2]
-        where t0 = emptyTopology
-              t1 = execState addFreeVertex emptyTopology -- Single free vertex
-              t2 = execState addFreeVertex t1            -- Two free vertex
