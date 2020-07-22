@@ -187,4 +187,5 @@ newEID entity = filterGraph entity >>= pure . length . nodes
 
 -- | Returns a sub-graph in which the nodes are all of the given "Entity" type
 filterGraph :: EntityType -> TopoState TopoGraph
-filterGraph entity = gets $ labfilter ((entity == ) . getEntityType) . unTopology
+filterGraph entity = gets (labfilter predicate . unTopology)
+    where predicate = (entity ==) . getEntityType
