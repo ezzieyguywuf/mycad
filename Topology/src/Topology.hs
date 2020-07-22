@@ -81,8 +81,8 @@ newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 --   we did someting like add two vertices and then put an edge between them,
 --   the edge would be numbered "3" since it is the third node in the graph,
 --   and this is not what we want.
-data NodeLabel = NodeLabel { getEntity   :: EntityType
-                           , getEntityID :: Int
+data NodeLabel = NodeLabel { getEntityType :: EntityType
+                           , getEntityID   :: Int
                            } deriving (Show, Eq)
 
 -- | These are the fundamental topological entities that our graph will be
@@ -187,8 +187,4 @@ newEID entity = filterGraph entity >>= pure . length . nodes
 
 -- | Returns a sub-graph in which the nodes are all of the given "Entity" type
 filterGraph :: EntityType -> TopoState TopoGraph
-filterGraph entity = gets $ labfilter (isEntity entity) . unTopology
-
--- | Checks if a particular NodeLabel is of the "Entity" type
-isEntity :: EntityType -> NodeLabel -> Bool
-isEntity entity label = entity == (getEntity label)
+filterGraph entity = gets $ labfilter ((entity == ) . getEntityType) . unTopology
