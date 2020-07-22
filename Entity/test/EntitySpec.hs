@@ -26,14 +26,14 @@ spec = do
         it "allows Vertex to be retrieved using Geometry" $
             v `shouldSatisfy` (`elem` E.getVertex e p)
     describe "addEdge" $ do
-        let ((v1, v2, edge), entity0) = runState state nullE
+        let ((_, _, edge), entity) = runState estate nullE
             p1 = V3 10 10 10
             p2 = V3 20 20 20
-            state = do
-                _v1   <- E.addVertex p1
-                _v2   <- E.addVertex p2
-                _edge <- E.addEdge _v1 _v2
-                pure (_v1, _v2, _edge)
+            estate = do
+                 _v1   <- E.addVertex p1
+                 _v2   <- E.addVertex p2
+                 _edge <- E.addEdge _v1 _v2
+                 pure (_v1, _v2, _edge)
         it "Adds a single Edge to the Entity" $
             (length $ E.getEdges entity) `shouldBe` 1
         it "Does not modify the number of Vertex in the Entity" $

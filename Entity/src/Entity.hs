@@ -56,7 +56,6 @@ module Entity
 ) where
 
 -- Base
-import Data.Maybe (fromJust)
 import Control.Monad.State (State, get, runState, put)
 
 -- Third-party
@@ -127,7 +126,7 @@ addVertex p = do
 --   An "Edge" has both a "Geometry" (a "Curve"), and a "Topology" (a
 --   "Topology.Edge")
 addEdge :: Fractional a => Topo.Vertex -> Topo.Vertex -> EntityState a Topo.Edge
-addEdge v1 v2 = undefined
+addEdge _ _ = undefined
     --do
     --entity <- get
     --let p1 = getPoint entity v1
