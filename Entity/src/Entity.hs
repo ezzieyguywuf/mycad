@@ -84,7 +84,7 @@ type EdgeMap p = Map.Map Topo.Edge (Geo.Line p)
 data Entity p = Entity { getVertexMap :: VertexMap p
                        , getEdgeMap   :: EdgeMap p
                        , _getTopology :: Topo.Topology
-                       } deriving (Show)
+                       } deriving (Show, Eq)
 
 -- | The will carry the state of an Entity, parametrized over Geo.Point type @p@
 type EntityState p a = State (Entity p) a
