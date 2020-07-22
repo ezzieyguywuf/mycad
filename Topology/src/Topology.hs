@@ -141,7 +141,7 @@ getFaces :: Topology -> [Face]
 getFaces _ = undefined
 
 -- ===========================================================================
---                        Private Free Functions
+--                        Private, Non-Exported stuff
 -- ===========================================================================
 -- | The 'Node' is the basic building block of a 'Graph'. Any given Node can
 --   have zero or more adjacencies.
@@ -157,6 +157,8 @@ getFaces _ = undefined
 --  The LID is only incremented when an item of the same type is added, so in
 --  this same example, the two vertices and edge will have LID of 0, 1, and 0
 --  respectively.
+--
+--  The return value is the GID
 addNode :: EntityType -> TopoState Int
 addNode entity = do
     gid <- newGID
