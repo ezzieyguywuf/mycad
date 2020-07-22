@@ -42,7 +42,7 @@ module Topology
 
 -- third-party
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
-                                  , gelem)
+                                  , gelem, insEdge)
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Control.Monad.State (State, gets, put, modify)
 
@@ -105,7 +105,7 @@ data EntityType = VertexEntity
 
 -- | Our Bridge can also contain a piece of data, but we don't need any data
 --   here so we juset it to ()
-newtype BridgeLabel = BridgeLabel () deriving (Show, Ord, Eq)
+type BridgeLabel = ()
 
 -- ===========================================================================
 --                               Free Functions
@@ -129,7 +129,11 @@ removeVertex = deleteNode . getVertexID
 
 -- | Adds an Edge adjacent to both Vertex
 addEdge :: Vertex -> Vertex -> TopoState Edge
-addEdge _ _ = undefined
+addEdge (Vertex v1) (Vertex v2) = do
+    edge <- addNode FaceEntity
+    connectNode v1 edge
+    connectNode edge v2
+    pure $ Edge edge
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
@@ -176,12 +180,18 @@ addNode entity = do
     modify (Topology . insNode (gid, label) . unTopology)
     pure gid
 
+-- | This removes the Node from the Graph.
 deleteNode :: Int -> TopoState Bool
 deleteNode n = do
     graph <- gets unTopology
     case gelem n graph of
         False -> pure False
         True  -> put (Topology $ delNode n graph) >> pure True
+
+-- | Creates a Bridge *from* n1 *to* n2
+connectNode :: Int -> Int -> TopoState ()
+connectNode n1 n2 = modify (Topology . insEdge (n1, n2, ()) . unTopology)
+
 
 -- | The GID is the Graph IDentifier, which is used to uniquely identify each
 --   node in the data graph. This is required by the fgl library.
