@@ -32,6 +32,8 @@ library:
   source-dirs: src
   exposed-modules:
       - Topology
+  other-modules:
+      - Paths_Topology
 
 tests:
   Topology-test:
