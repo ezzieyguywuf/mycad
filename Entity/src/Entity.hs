@@ -126,27 +126,27 @@ addVertex p = do
 --
 --   An "Edge" has both a "Geometry" (a "Curve"), and a "Topology" (a
 --   "Topology.Edge")
-addEdge :: Fractional a => Geo.Point a -> Geo.Point a -> EntityState a Topo.Edge
-addEdge p1 p2 = do
-    (Entity vmap emap t) <- get
-    let ((v1,v2,edge), t') = runState topoState t
-        topoState = do
-            -- First, add a "free" vertex
-            v1' <- Topo.addFreeVertex
-            -- Next, extend a "ray" edge from that vertex
-            edge' <- Topo.addRayEdge v1
-            -- finally, close the "ray" edge
-            v2' <- Topo.closeRayEdge (fromJust edge)
-            pure (v1', v2', edge')
-        -- Update the VertexMap to include the new vertices
-        vmap' = Map.insert v1 p1 (Map.insert (fromJust v2) p2 vmap)
-        -- We need to construct the geometric "Line" that goes along with the
-        -- "Edge" that was created earlier
-        gline   = Geo.makeLine p1 p2
-        -- Update the edge list
-        emap' = Map.insert (fromJust edge) gline emap
-    put $ Entity vmap' emap' t'
-    pure $ (fromJust edge)
+addEdge :: Fractional a => Topo.Vertex -> Topo.Vertex -> EntityState a Topo.Edge
+addEdge v1 v2 = undefined
+    --do
+    --entity <- get
+    --let p1 = getPoint entity v1
+        --p2 = getPoint entity v2
+        --topoState = do
+            ---- First add a \"free\" "Edge"
+            --_edge <- Topo.addFreeEdge >>= Topo.makeRayEdge
+            ---- \"close\" one end of it with the first of our vertices
+            --v2' <- Topo.closeRayEdge (fromJust edge)
+            --pure (v1', v2', edge')
+        ---- Update the VertexMap to include the new vertices
+        --vmap' = Map.insert v1 p1 (Map.insert (fromJust v2) p2 vmap)
+        ---- We need to construct the geometric "Line" that goes along with the
+        ---- "Edge" that was created earlier
+        --gline   = Geo.makeLine p1 p2
+        ---- Update the edge list
+        --emap' = Map.insert (fromJust edge) gline emap
+    --put $ Entity vmap' emap' t'
+    --pure $ (fromJust edge)
 
 -- | Returns the underlying geometric "Point" of the "Vertex"
 getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)

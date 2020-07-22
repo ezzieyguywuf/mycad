@@ -8,7 +8,6 @@ import Data.Maybe (fromJust, isNothing)
 
 spec :: Spec
 spec = do
-    let makeRayEdge' e = fmap fromJust (T.makeRayEdge e)
     describe "addFreeVertex" $ do
         it "Is inversed by removeVertex, resulting in original state" $
             property (prop_addRemoveIdentity (T.addFreeVertex >>= T.removeVertex))
@@ -18,97 +17,22 @@ spec = do
             property (prop_doesNotModifyEdges T.addFreeVertex)
         it "Does not modify the Faces" $
             property (prop_doesNotModifyFaces T.addFreeVertex)
-    describe "addFreeEdge" $ do
-        it "Is inversed by removeEdge, resulting in the original state" $
-            property (prop_addRemoveIdentity (T.addFreeEdge >>= T.removeEdge))
-        it "Does not modify the Vertices" $
-            property (prop_doesNotModifyVertices T.addFreeEdge)
-        it "Adds a single new Edge" $
-            property (prop_addsOneEdge T.addFreeEdge)
-        it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces T.addFreeEdge)
-    describe "makeRayEdge" $ do
-        let prep  = T.addFreeEdge
-            run = makeRayEdge' >=> T.removeVertex
-            run'  = T.addFreeEdge >>= makeRayEdge'
-        it "Is inversed by removeVertex, resulting in the original state" $
-            property (prop_addRemoveIdentity' prep run)
-        it "Adds one vertex" $
-            property (prop_addsOneVertex run')
-        it "Makes the Edge adjacent to the added Vertex" $
-            property (prop_addAdjacencyToEdge prep makeRayEdge')
-        it "Does not add or subtract any Edges" $
-            property (prop_doesNotAddOrRemoveEdges prep T.makeRayEdge)
-        it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces run')
-        context "an Edge that is not a 'Free' Edge is provided'" $ do
-            let prep' = prep >>= makeRayEdge' >>= vertToAdjEdge
-                rayRun = T.makeRayEdge
-            it "returns Nothing" $
-                property (prop_returnsNothing $ prep' >>= rayRun)
-            it "does not modify the Vertices" $
-                property (prop_doesNotModifyVertices' prep' rayRun)
-            it "does not modify the Edges" $
-                property (prop_doesNotModifyEdges' prep' rayRun)
-            it "does not modify the Faces" $
-                property (prop_doesNotModifyFaces' prep' rayRun)
-        context "an invalid Edge is provided" $ do
-            let prep' = do
-                    t <- get
-                    a <-prep
-                    put t
-                    pure a
-                rayRun = T.makeRayEdge
-            it "returns Nothing" $
-                property (prop_returnsNothing $ prep' >>= rayRun)
-            it "does not modify the Vertices" $
-                property (prop_doesNotModifyVertices $ prep' >>= rayRun)
-            it "does not modify the Edges" $
-                property (prop_doesNotModifyEdges $ prep' >>= rayRun)
-            it "does not modify the Faces" $
-                property (prop_doesNotModifyFaces $ prep' >>= rayRun)
-    describe "closeRayEdge" $ do
-        let prep = T.addFreeEdge >>= makeRayEdge' >>= vertToAdjEdge
-            run  = T.closeRayEdge
-            remove' = T.removeVertex . fromJust
-            run' e = fmap fromJust (T.closeRayEdge e)
-        it "Is inversed by removeVertex, resulting in the orignal state" $
-            property (prop_addRemoveIdentity'  prep (run >=> remove'))
-        it "Adds one vertex" $
-            property (prop_addsOneVertex' prep run)
-        it "Makes the Edge adjacent to the added Vertex" $
-            property (prop_addAdjacencyToEdge prep run')
-        it "does not modify the Faces" $
-            property (prop_doesNotModifyFaces $ prep >>= run)
-    describe "addRayEdge" $ do
-        let prep   = T.addFreeVertex
-            run    = T.addRayEdge
-            run'   = T.addRayEdge >=> (pure . fromJust)
+    describe "addEdge" $ do
+        let prep = do
+                v1 <- T.addFreeVertex
+                v2 <- T.addFreeVertex
+                pure (v1, v2)
+            run = uncurry T.addEdge
             remove = T.removeEdge
         it "Is inversed by removeEdge, resulting in the orignal state" $
-            property (prop_addRemoveIdentity'  prep (run >=> (remove . fromJust)))
-        it "Does not modify the Vertices" $
-            property (prop_doesNotModifyVertices' prep run)
+            property (prop_addRemoveIdentity' prep (run >=> remove))
+        it "Does not add or remove any Vertex" $
+            property (prop_doesNotAddOrRemoveVertices prep run)
+        -- it "Makes each previously \"open\" vertex \"closed\""
         it "Adds a single Edge" $
             property (prop_addsOneEdge (prep >>= run))
-        it "Makes the Vertex adjacent to the added Edge" $
-            property (prop_addAdjacencyToVertex prep run')
-        it "Does not modify the Faces" $
-            property (prop_doesNotModifyFaces' prep run)
-        context "an invalid Edge is provided" $ do
-            let prep' = do
-                    t <- get
-                    a <-prep
-                    put t
-                    pure a
-            it "returns Nothing" $
-                property (prop_returnsNothing $ prep' >>= run)
-            it "does not modify the Vertices" $
-                property (prop_doesNotModifyVertices $ prep' >>= run)
-            it "does not modify the Edges" $
-                property (prop_doesNotModifyEdges $ prep' >>= run)
-            it "does not modify the Faces" $
-                property (prop_doesNotModifyFaces $ prep' >>= run)
+        it "does not modify the Faces" $
+            property (prop_doesNotModifyFaces $ prep' >>= run)
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
@@ -141,6 +65,9 @@ prop_addsOneVertex' = prep_deltaXIsN T.getVertices 1
 
 prop_addsOneEdge :: T.TopoState a -> T.Topology -> Bool
 prop_addsOneEdge = deltaXIsN T.getEdges 1
+
+prop_doesNotAddOrRemoveVertices :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
+prop_doesNotAddOrRemoveVertices = prep_deltaXIsN T.getVertices 0
 
 prop_doesNotAddOrRemoveEdges :: T.TopoState a -> TopoMod a b -> T.Topology -> Bool
 prop_doesNotAddOrRemoveEdges = prep_deltaXIsN T.getEdges 0
