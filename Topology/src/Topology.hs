@@ -70,9 +70,9 @@ newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 --   of data. This data is referred to as a \"Label\", and thus we have "LNode"
 --   (labelled node) and "LEdge" (labelled edge, which we call a bridge)
 --
---   For our Nodes, our data contains an "Element" type, identifying it as a
+--   For our Nodes, our data contains an "Entity" type, identifying it as a
 --   Vertex, Edge, or Face, as well as an integer specifying which n of that
---   data type it is. For example, `NodeLabel (VertexElement 2)` means that this
+--   data type it is. For example, `NodeLabel (VertexEntity 2)` means that this
 --   Node is the second Vertex in the Graph
 --
 --   Although fgl does maintain its own "Int" identifier for each node
@@ -81,16 +81,16 @@ newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 --   we did someting like add two vertices and then put an edge between them,
 --   the edge would be numbered "3" since it is the third node in the graph,
 --   and this is not what we want.
-data NodeLabel = NodeLabel { getElement   :: Element
-                           , getElementID :: Int
+data NodeLabel = NodeLabel { getEntity   :: EntityType
+                           , getEntityID :: Int
                            } deriving (Show, Eq)
 
 -- | These are the fundamental topological entities that our graph will be
 --   built from
-data Element = VertexElement
-             | EdgeElement
-             | FaceElement
-               deriving (Show, Eq)
+data EntityType = VertexEntity
+                | EdgeEntity
+                | FaceEntity
+                  deriving (Show, Eq)
 
 -- | Our Bridge can also contain a piece of data, but we don't need any data
 --   here so we juset it to ()
@@ -108,7 +108,7 @@ emptyTopology = Topology empty
 -- | Adds a single "free" Vertex to the 'Topology'. In this context, "free"
 --   means that it is does not have any entities adjacent to it.
 addFreeVertex :: TopoState Vertex
-addFreeVertex = addNode VertexElement >>= pure . Vertex
+addFreeVertex = addNode VertexEntity >>= pure . Vertex
 
 -- | If the Vertex does not exist, this does nothing
 removeVertex :: Vertex -> TopoState ()
@@ -157,10 +157,10 @@ getFaces _ = undefined
 --  The LID is only incremented when an item of the same type is added, so in
 --  this same example, the two vertices and edge will have LID of 0, 1, and 0
 --  respectively.
-addNode :: Element -> TopoState Int
-addNode element = do
+addNode :: EntityType -> TopoState Int
+addNode entity = do
     gid <- newGID
-    label <- newLabel element
+    label <- newLabel entity
     modify (Topology . insNode (gid, label) . unTopology)
     pure gid
 
@@ -171,24 +171,24 @@ newGID = gets $ length . nodes . unTopology
 
 -- | The label is the data "payload" that our node will cary.
 --
---   Currently, it only includes a counter for the element type, so that we
---   know which was the first, second, third, etc. of the "Element" added to
+--   Currently, it only includes a counter for the Entity type, so that we
+--   know which was the first, second, third, etc. of the "Entity" added to
 --   the graph
-newLabel :: Element -> TopoState NodeLabel
-newLabel element = newEID element >>= pure . NodeLabel element
+newLabel :: EntityType -> TopoState NodeLabel
+newLabel entity = newEID entity >>= pure . NodeLabel entity
 
--- | The EID is the Element IDentifier, and it specifies which of the given
---   Element a particular node is.
+-- | The EID is the Entity IDentifier, and it specifies which of the given
+--   Entity a particular node is.
 --
---   For example, an EID of 2 for a "VertexElement" means it is the second
+--   For example, an EID of 2 for a "VertexEntity" means it is the second
 --   "Vertex" in the graph
-newEID :: Element -> TopoState Int
-newEID element = filterGraph element >>= pure . length . nodes
+newEID :: EntityType -> TopoState Int
+newEID entity = filterGraph entity >>= pure . length . nodes
 
--- | Returns a sub-graph in which the nodes are all of the given "Element" type
-filterGraph :: Element -> TopoState TopoGraph
-filterGraph element = gets $ labfilter (isElement element) . unTopology
+-- | Returns a sub-graph in which the nodes are all of the given "Entity" type
+filterGraph :: EntityType -> TopoState TopoGraph
+filterGraph entity = gets $ labfilter (isEntity entity) . unTopology
 
--- | Checks if a particular NodeLabel is of the "Element" type
-isElement :: Element -> NodeLabel -> Bool
-isElement element label = element == (getElement label)
+-- | Checks if a particular NodeLabel is of the "Entity" type
+isEntity :: EntityType -> NodeLabel -> Bool
+isEntity entity label = entity == (getEntity label)
