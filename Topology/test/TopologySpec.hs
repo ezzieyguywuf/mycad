@@ -2,7 +2,7 @@ module TopologySpec (spec) where
 
 import Topology
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Arbitrary, arbitrary, property, elements)
+import Test.QuickCheck (Arbitrary, arbitrary, property)
 import Control.Monad.State (evalState, execState, get)
 
 spec :: Spec
@@ -30,7 +30,7 @@ newtype TestTopology = TestTopology Topology deriving (Show)
 
 -- | This will generate a random Topology
 instance Arbitrary TestTopology where
-    arbitrary = elements $ fmap TestTopology [t0, t1, t2]
-        where t0 = emptyTopology
-              t1 = execState addFreeVertex emptyTopology
-              t2 = execState addFreeVertex t1
+    arbitrary = do
+        nVertices <- arbitrary
+        let topoState = sequence . replicate nVertices $ addFreeVertex
+        pure $ TestTopology (execState topoState emptyTopology)
