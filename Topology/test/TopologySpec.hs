@@ -1,9 +1,9 @@
 module TopologySpec (spec) where
 
-import Test.Hspec
-import Test.QuickCheck
 import Topology
-import Control.Monad.State
+import Test.Hspec (Spec, describe, it)
+import Test.QuickCheck (Arbitrary, arbitrary, property, elements)
+import Control.Monad.State (evalState, execState, get)
 
 spec :: Spec
 spec = do
