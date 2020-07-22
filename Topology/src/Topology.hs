@@ -40,10 +40,11 @@ module Topology
 , getFaces
 )where
 
-import qualified Data.Graph.Inductive.Graph as Graph
+-- third-party
+import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter)
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
-import Control.Monad.State as St
+import Control.Monad.State (State, gets, put, modify, execState)
 
 -- ===========================================================================
 --                               Data Types
@@ -60,7 +61,7 @@ newtype Topology = Topology {unTopology :: TopoGraph}
 
 type TopoGraph = Gr NodeLabel BridgeLabel
 
-type TopoState a = St.State Topology a
+type TopoState a = State Topology a
 
 newtype Vertex = Vertex {getVertexID :: Int} deriving (Show, Eq, Ord)
 newtype Edge   = Edge   {getEdgeID   :: Int} deriving (Show, Eq, Ord)
@@ -103,7 +104,7 @@ newtype BridgeLabel = BridgeLabel () deriving (Show, Ord, Eq)
 --   constructors for 'Topology' are exported, this is the only way to create
 --   one.
 emptyTopology :: Topology
-emptyTopology = Topology Graph.empty
+emptyTopology = Topology empty
 
 -- | Adds a single "free" Vertex to the 'Topology'. In this context, "free"
 --   means that it is does not have any entities adjacent to it.
@@ -114,7 +115,7 @@ addFreeVertex = addNode VertexElement >>= pure . Vertex
 removeVertex :: Vertex -> TopoState ()
 removeVertex (Vertex n) = do
     topology <- gets unTopology
-    put $ Topology $ Graph.delNode n topology
+    put $ Topology $ delNode n topology
     pure ()
 
 -- | Adds an Edge adjacent to both Vertex
@@ -125,7 +126,7 @@ addEdge _ _ = undefined
 removeEdge :: Edge -> TopoState ()
 removeEdge _ = undefined
     --t <- gets unTopology
-    --put (Topology $ Graph.delNode n t)
+    --put (Topology $ delNode n t)
     --pure ()
 
 -- | Returns all the 'Vertex' in the 'Topology'
@@ -161,13 +162,13 @@ addNode :: Element -> TopoState Int
 addNode element = do
     gid <- newGID
     label <- newLabel element
-    modify (Topology . Graph.insNode (gid, label) . unTopology)
+    modify (Topology . insNode (gid, label) . unTopology)
     pure gid
 
 -- | The GID is the Graph IDentifier, which is used to uniquely identify each
 --   node in the data graph. This is required by the fgl library.
 newGID :: TopoState Int
-newGID = gets $ length . Graph.nodes . unTopology
+newGID = gets $ length . nodes . unTopology
 
 -- | The label is the data "payload" that our node will cary.
 --
@@ -183,11 +184,11 @@ newLabel element = newEID element >>= pure . NodeLabel element
 --   For example, an EID of 2 for a "VertexElement" means it is the second
 --   "Vertex" in the graph
 newEID :: Element -> TopoState Int
-newEID element = filterGraph element >>= pure . length . Graph.nodes
+newEID element = filterGraph element >>= pure . length . nodes
 
 -- | Returns a sub-graph in which the nodes are all of the given "Element" type
 filterGraph :: Element -> TopoState TopoGraph
-filterGraph element = gets $ Graph.labfilter (isElement element) . unTopology
+filterGraph element = gets $ labfilter (isElement element) . unTopology
 
 -- | Checks if a particular NodeLabel is of the "Element" type
 isElement :: Element -> NodeLabel -> Bool
