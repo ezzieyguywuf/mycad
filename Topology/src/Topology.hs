@@ -41,7 +41,8 @@ module Topology
 )where
 
 -- third-party
-import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter)
+import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
+                                  , gelem)
 import Data.Graph.Inductive.PatriciaTree (Gr)
 import Control.Monad.State (State, gets, put, modify)
 
@@ -60,10 +61,20 @@ newtype Topology = Topology {unTopology :: TopoGraph}
 
 type TopoGraph = Gr NodeLabel BridgeLabel
 
+-- | Used to manage the State of the Topology
 type TopoState a = State Topology a
 
+-- | A Vertex can be adjacent:
+--
+--       - zero or more Edge
+--       - zero or more Face
 newtype Vertex = Vertex {getVertexID :: Int} deriving (Show, Eq, Ord)
+-- | An Edge can be adjacent to:
+--
+--       - zero, one, or two Vertex
+--       - Zero, one, or two Face
 newtype Edge   = Edge   {getEdgeID   :: Int} deriving (Show, Eq, Ord)
+-- | A Face will be adjacent to at least one Edge, and at least one Vertex
 newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 
 -- | In fgl, each Node and Bridge in the Graph can contain an arbitrary piece
@@ -110,12 +121,11 @@ emptyTopology = Topology empty
 addFreeVertex :: TopoState Vertex
 addFreeVertex = addNode VertexEntity >>= pure . Vertex
 
--- | If the Vertex does not exist, this does nothing
-removeVertex :: Vertex -> TopoState ()
-removeVertex (Vertex n) = do
-    topology <- gets unTopology
-    put $ Topology $ delNode n topology
-    pure ()
+-- | If the Vertex does not exist, this does nothing.
+--
+--   The return value specifies whether or not anything was removed
+removeVertex :: Vertex -> TopoState Bool
+removeVertex = deleteNode . getVertexID
 
 -- | Adds an Edge adjacent to both Vertex
 addEdge :: Vertex -> Vertex -> TopoState Edge
@@ -143,8 +153,8 @@ getFaces _ = undefined
 -- ===========================================================================
 --                        Private, Non-Exported stuff
 -- ===========================================================================
--- | The 'Node' is the basic building block of a 'Graph'. Any given Node can
---   have zero or more adjacencies.
+-- | The "Graph.Node" is the basic building block of a "Graph.Graph". Any given
+--   Node can have zero or more adjacencies.
 --
 --   Note that any Node that is added has two distinct identifiers:
 --
@@ -165,6 +175,13 @@ addNode entity = do
     label <- newLabel entity
     modify (Topology . insNode (gid, label) . unTopology)
     pure gid
+
+deleteNode :: Int -> TopoState Bool
+deleteNode n = do
+    graph <- gets unTopology
+    case gelem n graph of
+        False -> pure False
+        True  -> put (Topology $ delNode n graph) >> pure True
 
 -- | The GID is the Graph IDentifier, which is used to uniquely identify each
 --   node in the data graph. This is required by the fgl library.
