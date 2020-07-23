@@ -1,10 +1,11 @@
 module EntitySpec (spec) where
 
-import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
 import Entity
+import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
+import Test.QuickCheck (Arbitrary, arbitrary, listOf)
 import qualified Geometry as Geo
 import Linear.V3 (V3(V3))
-import Control.Monad.State (runState)
+import Control.Monad.State (runState, execState)
 
 nullE :: Entity Float
 nullE = nullEntity
@@ -36,3 +37,26 @@ spec = do
             --v1 = 
         --it "Returns the Vertex on the other side of the Edge" $
             --Just (oppositeVertex e1 v1 edge) `shouldBe` Just v2
+            --
+-- ===========================================================================
+--                            Helper Functions
+-- ===========================================================================
+-- | In order to fix an orphaned instance warning, we'll wrap this in newtype
+--   before defining a new instance
+newtype TestEntity a = TestEntity {unTestEntity :: Entity a} deriving (Show)
+newtype TestPoint  a = TestPoint {unTestPoint :: Geo.Point a} deriving (Show)
+
+-- | This will generate a random Entity
+instance (Fractional a, Arbitrary a) => Arbitrary (TestEntity a) where
+    arbitrary = do
+        points <- listOf arbitrary
+        let entityState = sequence_ (fmap (addVertex . unTestPoint) points)
+        pure $ TestEntity (execState entityState nullEntity)
+
+-- | This will generate a random Point
+instance Arbitrary a => Arbitrary (TestPoint a) where
+    arbitrary = do
+        x <- arbitrary
+        y <- arbitrary
+        z <- arbitrary
+        pure . TestPoint $ (V3 x y z)
