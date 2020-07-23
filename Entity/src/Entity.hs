@@ -60,7 +60,7 @@ import qualified Data.Map as Map
 import Data.Text.Prettyprint.Doc (Doc)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
-import Control.Monad.State (State, get, gets, runState, evalState, put)
+import Control.Monad.State (State, get, gets, runState, evalState, execState, put)
 
 -- Internal
 import qualified Geometry as Geo
@@ -87,7 +87,7 @@ data Entity p = Entity { getVertexMap :: VertexMap p
                        } deriving (Show, Eq)
 
 -- | The will carry the state of an Entity, parametrized over Geo.Point type @p@
-type EntityState p a = State (Entity p) a
+type EntityState p = State (Entity p)
 
 -- ===========================================================================
 --                       Exported Free Functions
@@ -139,20 +139,25 @@ addVertex p = do
 addEdge :: Fractional a => Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe Topo.Edge)
 addEdge v1 v2 = runMaybeT $ do
     -- First, retrieve the current state
-    (Entity vmap emap t) <- lift get
+    (Entity vmap emap _) <- lift get
 
-    p1 <- MaybeT (getPoint' v1)
-    p2 <- MaybeT (getPoint' v2)
+    -- Try to retrieve the points associated with these Vertices
+    p1   <- MaybeT (getPoint' v1) :: MaybeT (EntityState a) (Geo.Point a)
+    p2   <- MaybeT (getPoint' v2) :: MaybeT (EntityState a) (Geo.Point a)
+
+    -- Try to add the Edge to the topology
+    (edge, t') <- MaybeT (addEdge' v1 v2)
+        :: MaybeT (EntityState a) (Topo.Edge, Topo.Topology)
 
     let -- We'll make a geometric straight line between the two points
         line = Geo.makeLine p1 p2
-        -- Add the Edge to the topology
-        (edge, t')  = runState (Topo.addEdge v1 v2) t
         -- Pair the topological Edge with the line we made earlier
         emap' = Map.insert edge line emap
 
     -- Update our state with the new information
     lift (put (Entity vmap emap' t'))
+
+    -- Give the user a reference to the new Edge
     pure edge
 
 -- | Returns the underlying geometric Point of the Vertex
@@ -166,6 +171,14 @@ getPoint entity vertex = evalState (getPoint' vertex) entity
 --   Return Nothing if the Vertex is not part of this Entity
 getPoint' :: Topo.Vertex -> EntityState a (Maybe (Geo.Point a))
 getPoint' vertex = gets getVertexMap >>= pure . (Map.lookup vertex)
+
+addEdge' :: Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe (Topo.Edge, Topo.Topology))
+addEdge' v1 v2 = runMaybeT $ do
+    topology <- lift (gets _getTopology)
+    edge <- MaybeT . pure $ (evalState (Topo.addEdge v1 v2) topology)
+        :: MaybeT (EntityState a) (Topo.Edge)
+    let topology' = execState (Topo.addEdge v1 v2) topology
+    pure (edge, topology')
 
 -- | Returns any "Vertex" that have the given "Geometry"
 getVertex :: Eq a => Entity a -> Geo.Point a -> [Topo.Vertex]
