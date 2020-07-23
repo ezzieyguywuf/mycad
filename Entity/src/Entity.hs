@@ -58,9 +58,9 @@ module Entity
 -- Third-party
 import qualified Data.Map as Map
 import Data.Text.Prettyprint.Doc (Doc)
---import Control.Monad.Trans.Class (lift)
---import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
-import Control.Monad.State (State, get, runState, put)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Control.Monad.State (State, get, gets, runState, evalState, put)
 
 -- Internal
 import qualified Geometry as Geo
@@ -137,32 +137,35 @@ addVertex p = do
 --   The created Edge will geometrically have a straight line between the two
 --   Vertex
 addEdge :: Fractional a => Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe Topo.Edge)
-addEdge v1 v2 = do
+addEdge v1 v2 = runMaybeT $ do
     -- First, retrieve the current state
-    (Entity vmap emap t) <- get
+    (Entity vmap emap t) <- lift get
 
-    -- Try to retrieve the Geometry.Point assoctiated with each Topology.Vertex
-    case (Map.lookup v1 vmap) of
-        Nothing -> pure Nothing
-        Just p1 -> 
-            case (Map.lookup v2 vmap) of
-                Nothing -> pure Nothing
-                Just p2 -> do let -- We'll make a geometric straight line
-                                  -- between the two points
-                                  line = Geo.makeLine p1 p2
-                                  -- Add the Edge to the topology
-                                  (edge, t')  = runState (Topo.addEdge v1 v2) t
-                                  -- Pair the topological Edge with the line we
-                                  -- made earlier
-                                  emap' = Map.insert edge line emap
+    p1 <- MaybeT (getPoint' v1)
+    p2 <- MaybeT (getPoint' v2)
 
-                              -- Update our state with the new information
-                              put (Entity vmap emap' t')
-                              pure $ Just edge
+    let -- We'll make a geometric straight line between the two points
+        line = Geo.makeLine p1 p2
+        -- Add the Edge to the topology
+        (edge, t')  = runState (Topo.addEdge v1 v2) t
+        -- Pair the topological Edge with the line we made earlier
+        emap' = Map.insert edge line emap
 
--- | Returns the underlying geometric "Point" of the "Vertex"
+    -- Update our state with the new information
+    lift (put (Entity vmap emap' t'))
+    pure edge
+
+-- | Returns the underlying geometric Point of the Vertex
+--   
+--   Returns Nothing if the Vertex is not part of this Entity
 getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)
-getPoint e v = Map.lookup v (getVertexMap e)
+getPoint entity vertex = evalState (getPoint' vertex) entity
+
+-- | Returns the Point associated with the given Vertex
+--
+--   Return Nothing if the Vertex is not part of this Entity
+getPoint' :: Topo.Vertex -> EntityState a (Maybe (Geo.Point a))
+getPoint' vertex = gets getVertexMap >>= pure . (Map.lookup vertex)
 
 -- | Returns any "Vertex" that have the given "Geometry"
 getVertex :: Eq a => Entity a -> Geo.Point a -> [Topo.Vertex]
