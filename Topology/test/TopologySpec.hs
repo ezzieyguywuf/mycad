@@ -4,7 +4,7 @@ import Topology
 import Data.Maybe (fromJust)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
-import Control.Monad.State (execState, runState)
+import Control.Monad.State (execState, runState, get, put, evalState)
 
 spec :: Spec
 spec = do
@@ -12,26 +12,49 @@ spec = do
         it "Is inversed by removeVertex" $ do
             let run = addFreeVertex >>= removeVertex
             property (prop_stateIdentity run)
-    describe "addEdge" $
+    describe "addEdge" $ do
         it "Is inversed by removeEdge" $ do
             let prep = do v1 <- addFreeVertex
                           v2 <- addFreeVertex
                           pure (v1, v2)
                 run a = (uncurry addEdge) a >>= removeEdge . fromJust
             property (prop_prepStateIdentity prep run)
+        it "returns Nothing if either Vertex does not exist" $ do
+            let prep = do v1 <- addFreeVertex
+                          oneVertex <- get
+                          v2 <- addFreeVertex
+                          put oneVertex -- v2 is invalid now
+                          pure (v1, v2)
+                run   = uncurry addEdge
+            property (prop_prepStateExpect prep run Nothing)
 
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
+-- Represents a function that modifie the topological state
+type TopoMod a b= a -> TopoState b
+
+-- The given state should not modify anything when executed
 prop_stateIdentity :: TopoState a -> TestTopology -> Bool
 prop_stateIdentity run = prop_prepStateIdentity prep run'
     where prep  = pure ()
           run' a = const prep a >> run
 
-prop_prepStateIdentity :: TopoState a -> (a -> TopoState b) -> TestTopology -> Bool
+-- The state will first be "prepared" using prep, the output of which is passed
+-- on to the TopoMod.
+--
+-- The TopoMod should not modify the state
+prop_prepStateIdentity :: TopoState a -> TopoMod a b -> TestTopology -> Bool
 prop_prepStateIdentity prep run testTopology = initialState == finalState
     where (args, initialState) = runState prep (unTestTopology testTopology)
           finalState = execState (run args) initialState
+
+-- The given TopoMod should produce the given output. The TopoMod is "prepped"
+-- by running the prep state, and passing along the result
+prop_prepStateExpect :: Eq b => TopoState a -> TopoMod a b -> b -> TestTopology -> Bool
+prop_prepStateExpect prep run val testTopology = val == producedVal
+    where producedVal = evalState (prep >>= run) (unTestTopology testTopology)
+
 
 -- ===========================================================================
 --                            Helper Functions
