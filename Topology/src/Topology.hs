@@ -40,10 +40,13 @@ module Topology
 , getFaces
 )where
 
+-- Base
+import Control.Monad (void)
+
 -- third-party
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
-import Control.Monad.State (State, gets, put, modify)
+import Control.Monad.State (State, gets, modify)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
                                   , gelem, insEdge)
 import Data.Graph.Inductive.PatriciaTree (Gr)
@@ -124,10 +127,8 @@ addFreeVertex :: TopoState Vertex
 addFreeVertex = addNode VertexEntity >>= pure . Vertex
 
 -- | If the Vertex does not exist, this does nothing.
---
---   The return value specifies whether or not anything was removed
-removeVertex :: Vertex -> TopoState Bool
-removeVertex = deleteNode . getVertexID
+removeVertex :: Vertex -> TopoState ()
+removeVertex = void . deleteNode . getVertexID
 
 -- | Adds an Edge adjacent to both Vertex
 --
@@ -142,8 +143,8 @@ addEdge v1 v2 = runMaybeT $ do
     pure $ Edge edge
 
 -- | If the Edge does not exist, does nothing.
-removeEdge :: Edge -> TopoState Bool
-removeEdge = deleteNode . getEdgeID
+removeEdge :: Edge -> TopoState ()
+removeEdge = void . deleteNode . getEdgeID
 
 -- | Returns all the 'Vertex' in the 'Topology'
 getVertices :: Topology -> [Vertex]
@@ -186,12 +187,8 @@ addNode entity = do
     pure gid
 
 -- | This removes the Node from the Graph.
-deleteNode :: Int -> TopoState Bool
-deleteNode n = do
-    graph <- gets unTopology
-    case gelem n graph of
-        False -> pure False
-        True  -> put (Topology $ delNode n graph) >> pure True
+deleteNode :: Int -> TopoState ()
+deleteNode n = modify (Topology . delNode n . unTopology) >> pure ()
 
 -- | Creates a Bridge *from* n1 *to* n2
 connectNode :: Int -> Int -> TopoState ()
