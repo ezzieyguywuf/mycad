@@ -178,8 +178,10 @@ getFaces _ = undefined
 --  The return value is the GID
 addNode :: EntityType -> TopoState Int
 addNode entity = do
-    gid <- gets (length . nodes . unTopology)
-    label <- newLabel entity
+    graph <- gets unTopology
+    let gid   = length . nodes $ graph
+        eid   = length . nodes $ filterGraph entity graph
+        label = NodeLabel entity eid
     modify (Topology . insNode (gid, label) . unTopology)
     pure gid
 
@@ -203,23 +205,7 @@ getVertexNode (Vertex gid) = do
         True  -> pure . Just $ gid
         False -> pure Nothing
 
--- | The label is the data "payload" that our node will cary.
---
---   Currently, it only includes a counter for the Entity type, so that we
---   know which was the first, second, third, etc. of the "Entity" added to
---   the graph
-newLabel :: EntityType -> TopoState NodeLabel
-newLabel entity = newEID entity >>= pure . NodeLabel entity
-
--- | The EID is the Entity IDentifier, and it specifies which of the given
---   Entity a particular node is.
---
---   For example, an EID of 2 for a "VertexEntity" means it is the second
---   "Vertex" in the graph
-newEID :: EntityType -> TopoState Int
-newEID entity = filterGraph entity >>= pure . length . nodes
-
 -- | Returns a sub-graph in which the nodes are all of the given "Entity" type
-filterGraph :: EntityType -> TopoState TopoGraph
-filterGraph entity = gets (labfilter predicate . unTopology)
+filterGraph :: EntityType -> TopoGraph -> TopoGraph
+filterGraph entity graph = labfilter predicate graph
     where predicate = (entity ==) . getEntityType
