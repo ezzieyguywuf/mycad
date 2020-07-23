@@ -2,7 +2,8 @@ module TopologySpec (spec) where
 
 import Topology
 import Data.Maybe (fromJust)
-import Test.Hspec (Spec, describe, it)
+import Data.Tuple (swap)
+import Test.Hspec (Spec, describe, it, context)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
 import Control.Monad.State (execState, runState, get, put, evalState)
 
@@ -19,14 +20,17 @@ spec = do
                           pure (v1, v2)
                 run a = (uncurry addEdge) a >>= removeEdge . fromJust
             property (prop_prepStateIdentity prep run)
-        it "returns Nothing if either Vertex does not exist" $ do
+        context "returns Nothing if" $ do
             let prep = do v1 <- addFreeVertex
                           oneVertex <- get
                           v2 <- addFreeVertex
                           put oneVertex -- v2 is invalid now
                           pure (v1, v2)
                 run   = uncurry addEdge
-            property (prop_prepStateExpect prep run Nothing)
+            it "the first vertex doesn't exist" $
+                property (prop_prepStateExpect prep run Nothing)
+            it "the second vertex doesn't exist" $
+                property (prop_prepStateExpect prep (run . swap) Nothing)
 
 -- ===========================================================================
 --                            Properties
