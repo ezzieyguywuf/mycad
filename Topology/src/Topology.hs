@@ -135,9 +135,9 @@ removeVertex = void . deleteNode . getVertexID
 --   Returns Nothing if either Vertex is not already part of the Topology
 addEdge :: Vertex -> Vertex -> TopoState (Maybe Edge)
 addEdge v1 v2 = runMaybeT $ do
-    edge <- lift (addNode EdgeEntity)
     gid1 <- MaybeT (getVertexNode v1)
     gid2 <- MaybeT (getVertexNode v2)
+    edge <- lift (addNode EdgeEntity)
     lift (connectNode gid1 edge)
     lift (connectNode edge gid2)
     pure $ Edge edge
