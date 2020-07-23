@@ -147,7 +147,6 @@ addEdge v1 v2 = runMaybeT $ do
 
     -- Try to add the Edge to the topology
     (edge, t') <- MaybeT (addEdge' v1 v2)
-        :: MaybeT (EntityState a) (Topo.Edge, Topo.Topology)
 
     let -- We'll make a geometric straight line between the two points
         line = Geo.makeLine p1 p2
@@ -176,7 +175,6 @@ addEdge' :: Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe (Topo.Edge, Topo.
 addEdge' v1 v2 = runMaybeT $ do
     topology <- lift (gets _getTopology)
     edge <- MaybeT . pure $ (evalState (Topo.addEdge v1 v2) topology)
-        :: MaybeT (EntityState a) (Topo.Edge)
     let topology' = execState (Topo.addEdge v1 v2) topology
     pure (edge, topology')
 
