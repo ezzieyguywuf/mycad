@@ -60,7 +60,7 @@ import qualified Data.Map as Map
 import Data.Text.Prettyprint.Doc (Doc)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
-import Control.Monad.State (State, get, gets, runState, evalState, execState, put)
+import Control.Monad.State (State, get, gets, runState, evalState, put)
 
 -- Internal
 import qualified Geometry as Geo
@@ -173,10 +173,15 @@ getPoint' vertex = gets getVertexMap >>= pure . (Map.lookup vertex)
 
 addEdge' :: Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe (Topo.Edge, Topo.Topology))
 addEdge' v1 v2 = runMaybeT $ do
+    -- Unwrap the Topology from the EntityState
     topology <- lift (gets _getTopology)
-    edge <- MaybeT . pure $ (evalState (Topo.addEdge v1 v2) topology)
-    let topology' = execState (Topo.addEdge v1 v2) topology
-    pure (edge, topology')
+
+    -- Try to add the given Edge
+    let (maybeEdge, t') = runState (Topo.addEdge v1 v2) topology
+    edge <- MaybeT . pure $ maybeEdge
+
+    -- Return the added Edge and the updated Topology
+    pure (edge, t')
 
 -- | Returns any "Vertex" that have the given "Geometry"
 getVertex :: Eq a => Entity a -> Geo.Point a -> [Topo.Vertex]
