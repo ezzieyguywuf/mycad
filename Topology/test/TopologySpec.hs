@@ -1,6 +1,7 @@
 module TopologySpec (spec) where
 
 import Topology
+import Data.Maybe (fromJust)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
 import Control.Monad.State (execState, runState)
@@ -16,7 +17,7 @@ spec = do
             let prep = do v1 <- addFreeVertex
                           v2 <- addFreeVertex
                           pure (v1, v2)
-                run a = (uncurry addEdge) a >>= removeEdge
+                run a = (uncurry addEdge) a >>= removeEdge . fromJust
             property (prop_prepStateIdentity prep run)
 
 -- ===========================================================================

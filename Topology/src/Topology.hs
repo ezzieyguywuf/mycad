@@ -130,7 +130,7 @@ removeVertex = deleteNode . getVertexID
 -- | Adds an Edge adjacent to both Vertex
 addEdge :: Vertex -> Vertex -> TopoState Edge
 addEdge (Vertex v1) (Vertex v2) = do
-    edge <- addNode FaceEntity
+    edge <- addNode EdgeEntity
     connectNode v1 edge
     connectNode edge v2
     pure $ Edge edge
