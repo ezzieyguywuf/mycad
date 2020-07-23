@@ -58,6 +58,7 @@ module Entity
 -- Third-party
 import qualified Data.Map as Map
 import Data.Text.Prettyprint.Doc (Doc)
+import Control.Monad (when, mzero)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State (State, get, gets, runState, evalState, put)
@@ -136,7 +137,7 @@ addVertex p = do
 --
 --   The created Edge will geometrically have a straight line between the two
 --   Vertex
-addEdge :: Fractional a => Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe Topo.Edge)
+addEdge :: (Fractional a, Eq a) => Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe Topo.Edge)
 addEdge v1 v2 = runMaybeT $ do
     -- First, retrieve the current state
     (Entity vmap emap _) <- lift get
@@ -144,6 +145,9 @@ addEdge v1 v2 = runMaybeT $ do
     -- Try to retrieve the points associated with these Vertices
     p1   <- MaybeT (getPoint' v1) :: MaybeT (EntityState a) (Geo.Point a)
     p2   <- MaybeT (getPoint' v2) :: MaybeT (EntityState a) (Geo.Point a)
+
+    -- Bail out if the two points are geometrically equivalent
+    when (p1 == p2) mzero
 
     -- Try to add the Edge to the topology
     (edge, t') <- MaybeT (addEdge' v1 v2)
