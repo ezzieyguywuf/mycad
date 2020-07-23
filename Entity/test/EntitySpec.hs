@@ -4,7 +4,7 @@ import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
 import Entity
 import qualified Geometry as Geo
 import Linear.V3 (V3(V3))
-import Control.Monad.State (runState)
+import Control.Monad.State (runState, evalState)
 
 nullE :: Entity Float
 nullE = nullEntity
@@ -29,7 +29,9 @@ spec = do
         it "Creates a line from v1 to v2" $ do
             let line = Geo.makeLine p1 p2
             getCurve entity edge `shouldBe` Just line
-        --it "Returns Nothing if the two vertices are the same" $
+        it "Returns Nothing if the two vertices are the same" $ do
+            let prep' = prep >>= \(x, _) -> pure (x, x)
+            evalState (prep' >>= run) nullE `shouldBe` Nothing
     --describe "oppositeVertex" $ do
         --let (edge, entity) = runState (addEdge p1 p2) nullE
             --p1 = V3 10 20 30

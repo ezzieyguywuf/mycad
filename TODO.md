@@ -28,6 +28,9 @@
   to the caller, for instance if an Edge gets accidentally turned into an
   infinite Edge (because it only has one Vertex)
 
+# Entity
+- Add Arbitrary instance for Entity and update tests to use QuickCheck
+
 # GUI
 - Add lighting/shading
 - infinite zoom.
