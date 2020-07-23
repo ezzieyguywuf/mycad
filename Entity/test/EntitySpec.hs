@@ -12,14 +12,12 @@ nullE = nullEntity
 spec :: Spec
 spec = do
     describe "addVertex" $ do
-        let (v, e) = runState (addVertex p) nullE
-            p = V3 10 20 0
-        it "Adds a single Vertex to the Entity" $
-            (length $ getVertices e) `shouldBe` 1
+        let (vertex, entity) = runState (addVertex point) nullE
+            point = V3 10 20 0
         it "Creates a Vertex at the given Geometry" $
-            getPoint e v `shouldBe` Just p
+            getPoint entity vertex `shouldBe` Just point
         it "allows Vertex to be retrieved using Geometry" $
-            v `shouldSatisfy` (`elem` getVertex e p)
+            vertex `shouldSatisfy` (`elem` getVertex entity point)
     describe "addEdge" $ do
         let ((_, _, edge), entity) = runState estate nullE
             p1 = V3 10 10 10
