@@ -178,7 +178,7 @@ getFaces _ = undefined
 --  The return value is the GID
 addNode :: EntityType -> TopoState Int
 addNode entity = do
-    gid <- newGID
+    gid <- gets (length . nodes . unTopology)
     label <- newLabel entity
     modify (Topology . insNode (gid, label) . unTopology)
     pure gid
@@ -202,11 +202,6 @@ getVertexNode (Vertex gid) = do
     case gelem gid graph of
         True  -> pure . Just $ gid
         False -> pure Nothing
-
--- | The GID is the Graph IDentifier, which is used to uniquely identify each
---   node in the data graph. This is required by the fgl library.
-newGID :: TopoState Int
-newGID = gets $ length . nodes . unTopology
 
 -- | The label is the data "payload" that our node will cary.
 --
