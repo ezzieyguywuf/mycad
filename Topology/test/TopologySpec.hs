@@ -25,7 +25,7 @@ spec = do
                           oneVertex <- get
                           v2 <- addFreeVertex
                           put oneVertex -- v2 is invalid now
-                          pure (v1, v2)
+                          pure (v2, v1)
                 run   = uncurry addEdge
             it "the first vertex doesn't exist" $
                 property (prop_prepStateExpect prep run Nothing)
