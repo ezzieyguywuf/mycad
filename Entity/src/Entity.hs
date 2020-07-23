@@ -59,6 +59,7 @@ module Entity
 import qualified Data.Map as Map
 import Data.Text.Prettyprint.Doc (Doc)
 --import Control.Monad.Trans.Class (lift)
+--import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State (State, get, runState, put)
 
 -- Internal
@@ -135,12 +136,29 @@ addVertex p = do
 --
 --   The created Edge will geometrically have a straight line between the two
 --   Vertex
-addEdge :: Fractional a => Geo.Point a -> Geo.Point a -> EntityState a Topo.Edge
-addEdge p1 p2 = do
-    addVertex p1
-    addVertex p2
-    let _line = Geo.makeLine p1 p2
-    undefined
+addEdge :: Fractional a => Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe Topo.Edge)
+addEdge v1 v2 = do
+    -- First, retrieve the current state
+    (Entity vmap emap t) <- get
+
+    -- Try to retrieve the Geometry.Point assoctiated with each Topology.Vertex
+    case (Map.lookup v1 vmap) of
+        Nothing -> pure Nothing
+        Just p1 -> 
+            case (Map.lookup v2 vmap) of
+                Nothing -> pure Nothing
+                Just p2 -> do let -- We'll make a geometric straight line
+                                  -- between the two points
+                                  line = Geo.makeLine p1 p2
+                                  -- Add the Edge to the topology
+                                  (edge, t')  = runState (Topo.addEdge v1 v2) t
+                                  -- Pair the topological Edge with the line we
+                                  -- made earlier
+                                  emap' = Map.insert edge line emap
+
+                              -- Update our state with the new information
+                              put (Entity vmap emap' t')
+                              pure $ Just edge
 
 -- | Returns the underlying geometric "Point" of the "Vertex"
 getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)

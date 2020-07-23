@@ -19,10 +19,14 @@ spec = do
         it "allows Vertex to be retrieved using Geometry" $
             vertex `shouldSatisfy` (`elem` getVertex entity point)
     describe "addEdge" $ do
-        let (edge, entity) = runState (addEdge p1 p2) nullE
+        let (Just edge, entity) = runState estate nullE
             p1 = V3 10 10 10
             p2 = V3 20 20 20
-        it "Creates a line from p1 to p2" $ do
+            estate = do
+                 v1 <- addVertex p1
+                 v2 <- addVertex p2
+                 addEdge v1 v2
+        it "Creates a line from v1 to v2" $ do
             let line = Geo.makeLine p1 p2
             getCurve entity edge `shouldBe` Just line
     --describe "oppositeVertex" $ do
