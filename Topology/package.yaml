@@ -25,6 +25,7 @@ dependencies:
 - prettyprinter
 - linear
 - mtl
+- transformers
 - fgl
 
 library:

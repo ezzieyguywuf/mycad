@@ -41,10 +41,12 @@ module Topology
 )where
 
 -- third-party
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Control.Monad.State (State, gets, put, modify)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
                                   , gelem, insEdge)
 import Data.Graph.Inductive.PatriciaTree (Gr)
-import Control.Monad.State (State, gets, put, modify)
 
 -- ===========================================================================
 --                               Data Types
@@ -128,11 +130,15 @@ removeVertex :: Vertex -> TopoState Bool
 removeVertex = deleteNode . getVertexID
 
 -- | Adds an Edge adjacent to both Vertex
-addEdge :: Vertex -> Vertex -> TopoState Edge
-addEdge (Vertex v1) (Vertex v2) = do
-    edge <- addNode EdgeEntity
-    connectNode v1 edge
-    connectNode edge v2
+--
+--   Returns Nothing if either Vertex is not already part of the Topology
+addEdge :: Vertex -> Vertex -> TopoState (Maybe Edge)
+addEdge v1 v2 = runMaybeT $ do
+    edge <- lift (addNode EdgeEntity)
+    gid1 <- MaybeT (getVertexNode v1)
+    gid2 <- MaybeT (getVertexNode v2)
+    lift (connectNode gid1 edge)
+    lift (connectNode edge gid2)
     pure $ Edge edge
 
 -- | If the Edge does not exist, does nothing.
@@ -189,6 +195,13 @@ deleteNode n = do
 connectNode :: Int -> Int -> TopoState ()
 connectNode n1 n2 = modify (Topology . insEdge (n1, n2, ()) . unTopology)
 
+-- | Returns Just the Node in our Graph, if it exists
+getVertexNode :: Vertex -> TopoState (Maybe Int)
+getVertexNode (Vertex gid) = do
+    graph <- gets unTopology
+    case gelem gid graph of
+        True  -> pure . Just $ gid
+        False -> pure Nothing
 
 -- | The GID is the Graph IDentifier, which is used to uniquely identify each
 --   node in the data graph. This is required by the fgl library.
