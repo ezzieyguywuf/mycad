@@ -55,12 +55,11 @@ module Entity
 , prettyPrintEntity
 ) where
 
--- Base
-import Control.Monad.State (State, get, runState, put)
-
 -- Third-party
 import qualified Data.Map as Map
 import Data.Text.Prettyprint.Doc (Doc)
+--import Control.Monad.Trans.Class (lift)
+import Control.Monad.State (State, get, runState, put)
 
 -- Internal
 import qualified Geometry as Geo
@@ -121,31 +120,18 @@ addVertex p = do
     put $ Entity vmap' emap t'
     pure v
 
--- | Adds an "Edge" to the "Entity".
+-- | Adds an Edge to the Entity.
 --
---   An "Edge" has both a "Geometry" (a "Curve"), and a "Topology" (a
---   "Topology.Edge")
-addEdge :: Fractional a => Topo.Vertex -> Topo.Vertex -> EntityState a Topo.Edge
-addEdge _ _ = undefined
-    --do
-    --entity <- get
-    --let p1 = getPoint entity v1
-        --p2 = getPoint entity v2
-        --topoState = do
-            ---- First add a \"free\" "Edge"
-            --_edge <- Topo.addFreeEdge >>= Topo.makeRayEdge
-            ---- \"close\" one end of it with the first of our vertices
-            --v2' <- Topo.closeRayEdge (fromJust edge)
-            --pure (v1', v2', edge')
-        ---- Update the VertexMap to include the new vertices
-        --vmap' = Map.insert v1 p1 (Map.insert (fromJust v2) p2 vmap)
-        ---- We need to construct the geometric "Line" that goes along with the
-        ---- "Edge" that was created earlier
-        --gline   = Geo.makeLine p1 p2
-        ---- Update the edge list
-        --emap' = Map.insert (fromJust edge) gline emap
-    --put $ Entity vmap' emap' t'
-    --pure $ (fromJust edge)
+--   If either or both of the supplied "Topology.Vertex" are not currently
+--   present in the Entity, Nothing is returned.
+--
+--   The created Edge will geometrically have a straight line between the two
+--   Vertex
+addEdge :: Fractional a => Geo.Point a -> Geo.Point a -> EntityState a Topo.Edge
+addEdge p1 p2 = do
+    addVertex p1
+    addVertex p2
+    undefined
 
 -- | Returns the underlying geometric "Point" of the "Vertex"
 getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)

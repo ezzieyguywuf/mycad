@@ -20,6 +20,8 @@ spec = do
             vertex `shouldSatisfy` (`elem` getVertex entity point)
     describe "addEdge" $ do
         let (edge, entity) = runState (addEdge p1 p2) nullE
+            p1 = V3 10 10 10
+            p2 = V3 20 20 20
         it "Creates a line from p1 to p2" $ do
             let line = Geo.makeLine p1 p2
             getCurve entity edge `shouldBe` Just line
