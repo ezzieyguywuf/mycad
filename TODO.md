@@ -24,7 +24,9 @@
 - re-evaluate if Geometry needs typeclasses (probably not)
 
 # Topology
-- use Set as. We can then get rid of hasAny
+- Update removeXXX to return a list of modified topology. This should be useful
+  to the caller, for instance if an Edge gets accidentally turned into an
+  infinite Edge (because it only has one Vertex)
 
 # GUI
 - Add lighting/shading
