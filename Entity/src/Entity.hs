@@ -114,10 +114,18 @@ getEdges = Topo.getEdges . _getTopology
 --   "Topology.Vertex")
 addVertex :: Fractional a => Geo.Point a -> EntityState a Topo.Vertex
 addVertex p = do
+    -- First, retrieve the current state
     (Entity vmap emap t) <- get
-    let (v, t')  = runState Topo.addFreeVertex t
-        vmap' = Map.insert v p vmap
-    put $ Entity vmap' emap t'
+
+    let -- Add a Vertex to the Topology
+        (v, t')  = runState Topo.addFreeVertex t
+        -- Pair the topological Vertex with the provided geometric Point
+        vmap'    = Map.insert v p vmap
+
+    -- Update our state with the new information
+    put (Entity vmap' emap t')
+
+    -- Give the user the generated "Topology.Vertex"
     pure v
 
 -- | Adds an Edge to the Entity.
@@ -131,6 +139,7 @@ addEdge :: Fractional a => Geo.Point a -> Geo.Point a -> EntityState a Topo.Edge
 addEdge p1 p2 = do
     addVertex p1
     addVertex p2
+    let _line = Geo.makeLine p1 p2
     undefined
 
 -- | Returns the underlying geometric "Point" of the "Vertex"
