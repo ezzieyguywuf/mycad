@@ -15,8 +15,10 @@ spec = do
         it "Creates a Vertex at the given Geometry" $ do
             property prop_addVertexGetPoint
     describe "addEdge" $ do
-        it "Creates an Edge with an underlying Line from v1 to v2" $ do
+        it "Creates an Edge with an underlying Line from v1 to v2" $
             property prop_addEdgeGetLine
+        it "Fails if the two points are equal" $
+            property prop_addEdgeFail
     --describe "oppositeVertex" $ do
         --let (edge, entity) = runState (addEdge p1 p2) nullE
             --p1 = V3 10 20 30
@@ -43,6 +45,11 @@ prop_addEdgeGetLine (TestPoint p1) (TestPoint p2) (TestEntity entity) =
               MaybeT (gets (`getCurve` edge))
 
           line = Geo.makeLine p1 p2
+
+prop_addEdgeFail :: TestPoint Float -> TestEntity Float -> Bool
+prop_addEdgeFail (TestPoint point) (TestEntity entity) =
+    evalState eState entity == Nothing
+    where eState = addVertex point >>= \v -> addEdge v v
 
 -- ===========================================================================
 --                            Helper Functions
