@@ -48,7 +48,6 @@ module Entity
 , getVertices
 , getEdges
 , getPoint
-, getVertex
 , getCurve
 , oppositeVertex
   -- * Pretty Printing
@@ -184,10 +183,6 @@ addEdge' v1 v2 = runMaybeT $ do
 
     -- Return the added Edge and the updated Topology
     pure (edge, t')
-
--- | Returns any "Vertex" that have the given "Geometry"
-getVertex :: Eq a => Entity a -> Geo.Point a -> [Topo.Vertex]
-getVertex entity point = Map.keys $ Map.filter ((==) point) (getVertexMap entity)
 
 -- | Returns the underlying geometric "Curve" of the "Edge'"
 getCurve :: Entity a -> Topo.Edge -> Maybe (Geo.Line a)

@@ -15,8 +15,6 @@ spec = do
     describe "addVertex" $ do
         it "Creates a Vertex at the given Geometry" $ do
             property prop_addVertexGetPoint
-        --it "allows Vertex to be retrieved using Geometry" $
-            --vertex `shouldSatisfy` (`elem` getVertex entity point)
     describe "addEdge" $ do
         let (Just edge, entity) = runState (prep >>= run) nullE
             p1 = V3 10 10 10
