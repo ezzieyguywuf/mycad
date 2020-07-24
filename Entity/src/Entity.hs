@@ -169,9 +169,7 @@ addEdge v1 v2 = runMaybeT $ do
 getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)
 getPoint entity vertex = evalState (getPoint' vertex) entity
 
--- | Returns the Point associated with the given Vertex
---
---   Return Nothing if the Vertex is not part of this Entity
+-- | A stateful version of "getPoint".
 getPoint' :: Topo.Vertex -> EntityState a (Maybe (Geo.Point a))
 getPoint' vertex = gets getVertexMap >>= pure . (Map.lookup vertex)
 

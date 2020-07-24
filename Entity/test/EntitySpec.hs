@@ -1,8 +1,8 @@
 module EntitySpec (spec) where
 
 import Entity
-import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
-import Test.QuickCheck (Arbitrary, arbitrary, listOf)
+import Test.Hspec (Spec, describe, it, shouldBe)
+import Test.QuickCheck (Arbitrary, arbitrary, listOf, property)
 import qualified Geometry as Geo
 import Linear.V3 (V3(V3))
 import Control.Monad.State (runState, execState)
@@ -13,12 +13,10 @@ nullE = nullEntity
 spec :: Spec
 spec = do
     describe "addVertex" $ do
-        let (vertex, entity) = runState (addVertex point) nullE
-            point = V3 10 20 0
-        it "Creates a Vertex at the given Geometry" $
-            getPoint entity vertex `shouldBe` Just point
-        it "allows Vertex to be retrieved using Geometry" $
-            vertex `shouldSatisfy` (`elem` getVertex entity point)
+        it "Creates a Vertex at the given Geometry" $ do
+            property prop_addVertexGetPoint
+        --it "allows Vertex to be retrieved using Geometry" $
+            --vertex `shouldSatisfy` (`elem` getVertex entity point)
     describe "addEdge" $ do
         let (Just edge, entity) = runState (prep >>= run) nullE
             p1 = V3 10 10 10
@@ -38,6 +36,14 @@ spec = do
         --it "Returns the Vertex on the other side of the Edge" $
             --Just (oppositeVertex e1 v1 edge) `shouldBe` Just v2
             --
+
+-- ===========================================================================
+--                            Test Properties
+-- ===========================================================================
+prop_addVertexGetPoint :: TestPoint Float -> TestEntity Float -> Bool
+prop_addVertexGetPoint (TestPoint p) (TestEntity e) = (getPoint e' v) == (Just p)
+    where (v, e') = runState (addVertex p) e
+
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
