@@ -49,7 +49,6 @@ module Entity
 , getEdges
 , getPoint
 , getCurve
-, oppositeVertex
   -- * Pretty Printing
 , prettyPrintEntity
 ) where
@@ -145,7 +144,8 @@ addEdge v1 v2 = runMaybeT $ do
     p1   <- MaybeT (getPoint' v1) :: MaybeT (EntityState a) (Geo.Point a)
     p2   <- MaybeT (getPoint' v2) :: MaybeT (EntityState a) (Geo.Point a)
 
-    -- Bail out if the two points are geometrically equivalent
+    -- Bail out if the two points are geometrically equivalent - how would you
+    -- make a line then?!
     when (p1 == p2) mzero
 
     -- Try to add the Edge to the topology
@@ -187,25 +187,6 @@ addEdge' v1 v2 = runMaybeT $ do
 -- | Returns the underlying geometric "Curve" of the "Edge'"
 getCurve :: Entity a -> Topo.Edge -> Maybe (Geo.Line a)
 getCurve e = (`Map.lookup` (getEdgeMap e))
-
--- | Returns the opposite "Vertex".
---
---   In this context, \"opposite\" means that it is on the other side of the
---   "Edge".
---
---   Any given "Edge" can only ever have two "Vertex" attached to it (this is
---   enforced by the "Topology" module), and as such there is only ever one
---   \"opposite\" "Vertex"
-oppositeVertex :: Eq a => Entity a -> Topo.Vertex -> Topo.Edge -> Maybe Topo.Vertex
-oppositeVertex = undefined
---oppositeVertex e@(Entity _ _ t) (Vertex _ v1) (Edge _ ed) = v2
-    --where xs = Topo.adjVertToEdge t ed
-          --v2 | (length xs) /= 2 = Nothing
-             -- | a == v1        = getVertex' e b
-             -- | b == v1        = getVertex' e a
-             -- | otherwise      = Nothing
-             --where a = xs !! 0
-                   --b = xs !! 1
 
 prettyPrintEntity :: Show a => Entity a -> Doc ann
 prettyPrintEntity _ = undefined

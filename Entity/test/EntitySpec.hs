@@ -19,14 +19,6 @@ spec = do
             property prop_addEdgeGetLine
         it "Fails if the two points are equal" $
             property prop_addEdgeFail
-    --describe "oppositeVertex" $ do
-        --let (edge, entity) = runState (addEdge p1 p2) nullE
-            --p1 = V3 10 20 30
-            --p2 = V3 5 10 5
-            --v1 = 
-        --it "Returns the Vertex on the other side of the Edge" $
-            --Just (oppositeVertex e1 v1 edge) `shouldBe` Just v2
-            --
 
 -- ===========================================================================
 --                            Test Properties
