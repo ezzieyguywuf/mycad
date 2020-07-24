@@ -1,14 +1,13 @@
 module EntitySpec (spec) where
 
 import Entity
-import Test.Hspec (Spec, describe, it, shouldBe)
-import Test.QuickCheck (Arbitrary, arbitrary, listOf, property)
+import Test.Hspec (Spec, describe, it)
+import Test.QuickCheck ((==>), Arbitrary, arbitrary, listOf, property, Property)
 import qualified Geometry as Geo
 import Linear.V3 (V3(V3))
-import Control.Monad.State (runState, execState)
-
-nullE :: Entity Float
-nullE = nullEntity
+import Control.Monad.State (runState, execState, evalState, gets)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 
 spec :: Spec
 spec = do
@@ -16,16 +15,8 @@ spec = do
         it "Creates a Vertex at the given Geometry" $ do
             property prop_addVertexGetPoint
     describe "addEdge" $ do
-        let (Just edge, entity) = runState (prep >>= run) nullE
-            p1 = V3 10 10 10
-            p2 = V3 20 20 20
-            prep = do v1 <- addVertex p1
-                      v2 <- addVertex p2
-                      pure (v1, v2)
-            run = uncurry addEdge
-        it "Creates a line from v1 to v2" $ do
-            let line = Geo.makeLine p1 p2
-            getCurve entity edge `shouldBe` Just line
+        it "Creates an Edge with an underlying Line from v1 to v2" $ do
+            property prop_addEdgeGetLine
     --describe "oppositeVertex" $ do
         --let (edge, entity) = runState (addEdge p1 p2) nullE
             --p1 = V3 10 20 30
@@ -39,8 +30,19 @@ spec = do
 --                            Test Properties
 -- ===========================================================================
 prop_addVertexGetPoint :: TestPoint Float -> TestEntity Float -> Bool
-prop_addVertexGetPoint (TestPoint p) (TestEntity e) = (getPoint e' v) == (Just p)
+prop_addVertexGetPoint (TestPoint p) (TestEntity e) = getPoint e' v == Just p
     where (v, e') = runState (addVertex p) e
+
+prop_addEdgeGetLine :: TestPoint Float -> TestPoint Float -> TestEntity Float -> Property
+prop_addEdgeGetLine (TestPoint p1) (TestPoint p2) (TestEntity entity) =
+    p1 /= p2 ==> evalState eState entity == Just line
+    where eState = runMaybeT $ do
+              v1 <- lift . addVertex $ p1
+              v2 <- lift . addVertex $ p2
+              edge <- MaybeT (addEdge v1 v2)
+              MaybeT (gets (`getCurve` edge))
+
+          line = Geo.makeLine p1 p2
 
 -- ===========================================================================
 --                            Helper Functions
