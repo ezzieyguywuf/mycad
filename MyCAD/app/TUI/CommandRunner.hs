@@ -27,8 +27,7 @@ module TUI.CommandRunner
 
 -- | Internal imports
 import TUI.CommandParser ( Command(..), CommandToken(..), AddCommand(..))
-import Entity (Entity, EntityState, Vertex, addVertex, addEdge
-              , prettyPrintEntity)
+import Entity (Entity, EntityState, addVertex, addEdge , prettyPrintEntity)
 import Geometry (Point)
 
 -- | This will execute the "Command".

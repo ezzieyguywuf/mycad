@@ -18,6 +18,7 @@
   use a generic `add` which accepts a sub-command, i.e. `add vertex`
 - Allow for a "brief" and a "long" help message.
 - Add actual help messages
+- Add unit tests for parser
 
 # Geometry
 - run hlint on Geometry and GeometrySpec

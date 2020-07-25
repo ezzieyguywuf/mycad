@@ -34,10 +34,9 @@ module Topology
 , addEdge
 , removeVertex
 , removeEdge
-  -- * Inspecting
-, getVertices
-, getEdges
-, getFaces
+  -- * Serialization
+, vertexID
+, vertexFromID
 )where
 
 -- Base
@@ -146,17 +145,13 @@ addEdge v1 v2 = runMaybeT $ do
 removeEdge :: Edge -> TopoState ()
 removeEdge = void . deleteNode . getEdgeID
 
--- | Returns all the 'Vertex' in the 'Topology'
-getVertices :: Topology -> [Vertex]
-getVertices _ = undefined
+-- | Returns an Int ID that can be used to re-create the Vertex
+vertexID :: Vertex -> TopoState Int
+vertexID _ = undefined
 
--- | Returns all the 'Edge' in the 'Topology'
-getEdges :: Topology -> [Edge]
-getEdges _ = undefined
-
--- | Returns all the 'Face' in the 'Topology'
-getFaces :: Topology -> [Face]
-getFaces _ = undefined
+-- | Re-creates a Vertex from the given Int
+vertexFromID :: Int -> TopoState (Maybe Vertex)
+vertexFromID _ = undefined
 
 -- ===========================================================================
 --                        Private, Non-Exported stuff

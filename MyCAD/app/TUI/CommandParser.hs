@@ -130,7 +130,7 @@ parseAdd token =
         VertexToken -> parsePoint >>= pure . Add . AddVertex
         EdgeToken   -> parseAddEdge
 
--- | Tries to parse the appropriate arguments for the \"add line\" command "
+-- | Tries to parse the appropriate arguments for the \"add edge\" command "
 parseAddEdge :: Fractional a => Parser (Command a)
 parseAddEdge = do
     from <- lexeme integerNumber

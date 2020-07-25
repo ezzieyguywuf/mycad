@@ -13,6 +13,12 @@ spec = do
         it "Is inversed by removeVertex" $ do
             let run = addFreeVertex >>= removeVertex
             property (prop_stateIdentity run)
+    describe "vertexID" $
+        it "provides a numeric ID that can be used to re-create the Vertex" $ do
+            let run = do vertex  <- addFreeVertex
+                         vertex' <- vertexID vertex >>= vertexFromID
+                         pure (vertex' == Just vertex)
+            property (prop_stateExpect run True)
     describe "addEdge" $ do
         it "Is inversed by removeEdge" $ do
             let prep = do v1 <- addFreeVertex
@@ -52,6 +58,12 @@ prop_prepStateIdentity :: TopoState a -> TopoMod a b -> TestTopology -> Bool
 prop_prepStateIdentity prep run testTopology = initialState == finalState
     where (args, initialState) = runState prep (unTestTopology testTopology)
           finalState = execState (run args) initialState
+
+-- The given TopoMod should produce the given output.
+prop_stateExpect :: Eq a => TopoState a -> a -> TestTopology -> Bool
+prop_stateExpect run val = prop_prepStateExpect prep run' val
+    where prep = pure ()
+          run' _ = run
 
 -- The given TopoMod should produce the given output. The TopoMod is "prepped"
 -- by running the prep state, and passing along the result
