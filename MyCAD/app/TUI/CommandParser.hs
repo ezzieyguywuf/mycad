@@ -165,6 +165,12 @@ _identifier = do
     xs <- many alphaNumChar
     pure (Identifier . pack $ x : xs)
 
+-- | Parses a Vertex identifier
+parseVertex :: Parser Int
+parseVertex = lexeme $ do
+    char 'v'
+    pure integerNumber
+
 -- | This parses any arguments to the \"help\" command
 parseHelp :: Fractional a => Parser (Command a)
 parseHelp = optional (lexeme lexCommand) >>= pure . Help
