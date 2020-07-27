@@ -6,6 +6,8 @@ import Data.Tuple (swap)
 import Test.Hspec (Spec, describe, it, context)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
 import Control.Monad.State (execState, runState, get, put, evalState)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 
 spec :: Spec
 spec = do
@@ -15,10 +17,11 @@ spec = do
             property (prop_stateIdentity run)
     describe "vertexID" $
         it "provides a numeric ID that can be used to re-create the Vertex" $ do
-            let run = do vertex  <- addFreeVertex
-                         vertex' <- vertexID vertex >>= vertexFromID
-                         pure (vertex' == Just vertex)
-            property (prop_stateExpect run True)
+            let run = runMaybeT $ do vertex  <- lift addFreeVertex
+                                     vid     <- MaybeT (vertexID vertex)
+                                     vertex' <- MaybeT (vertexFromID vid)
+                                     pure (vertex == vertex')
+            property (prop_stateExpect run (Just True))
     describe "addEdge" $ do
         it "Is inversed by removeEdge" $ do
             let prep = do v1 <- addFreeVertex
