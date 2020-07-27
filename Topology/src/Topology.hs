@@ -43,6 +43,7 @@ module Topology
 import Control.Monad (void)
 
 -- third-party
+import Control.Monad (mzero)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State (State, gets, modify)
@@ -153,7 +154,12 @@ vertexID (Vertex gid) = runMaybeT $ do
 
 -- | Re-creates a Vertex from the given Int
 vertexFromID :: Int -> TopoState (Maybe Vertex)
-vertexFromID _ = undefined
+vertexFromID eid = runMaybeT $ do
+    gids <- lift . gets $ (nodes . labfilter ((eid == ) . getEntityID) . unTopology) 
+    case gids of
+        [gid] -> pure . Vertex $ gid
+        _          -> mzero
+
 
 -- ===========================================================================
 --                        Private, Non-Exported stuff
