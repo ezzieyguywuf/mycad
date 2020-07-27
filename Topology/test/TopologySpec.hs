@@ -15,13 +15,19 @@ spec = do
         it "Is inversed by removeVertex" $ do
             let run = addFreeVertex >>= removeVertex
             property (prop_stateIdentity run)
-    describe "vertexID" $
+    describe "vertexID" $ do
         it "provides a numeric ID that can be used to re-create the Vertex" $ do
             let run = runMaybeT $ do vertex  <- lift addFreeVertex
                                      vid     <- MaybeT (vertexID vertex)
                                      vertex' <- MaybeT (vertexFromID vid)
                                      pure (vertex == vertex')
             property (prop_stateExpect run (Just True))
+        it "returns Nothing if the numeric ID is invalid" $ do
+            let run = do topo    <- get
+                         vertex  <- addFreeVertex
+                         put topo -- vid should be invalid now
+                         vertexID vertex
+            property (prop_stateExpect run Nothing)
     describe "addEdge" $ do
         it "Is inversed by removeEdge" $ do
             let prep = do v1 <- addFreeVertex
