@@ -33,6 +33,7 @@
 
 # Entity
 - Add Arbitrary instance for Entity and update tests to use QuickCheck
+- Add prettyPrinter back!
 
 # GUI
 - Add lighting/shading
