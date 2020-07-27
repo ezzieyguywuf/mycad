@@ -28,6 +28,8 @@
 - Update removeXXX to return a list of modified topology. This should be useful
   to the caller, for instance if an Edge gets accidentally turned into an
   infinite Edge (because it only has one Vertex)
+- Update to use ErrorT, especially vertexFromID should have two different
+  errors, one from no nodes, one for more than one node
 
 # Entity
 - Add Arbitrary instance for Entity and update tests to use QuickCheck
