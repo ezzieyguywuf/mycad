@@ -62,7 +62,7 @@ data AddToken a = VertexToken
 
 -- | This is a sub-command that goes allong with the "Add" "Command".
 data AddCommand a = AddVertex (Point a)
-                  | AddEdge Int (Point a)
+                  | AddEdge Int Int
                     deriving (Show)
 
 -- | This is used to identify a topological item, i.e. \"V0\" would be the
@@ -151,8 +151,8 @@ parseAdd token =
 -- | Tries to parse the appropriate arguments for the \"add edge\" command "
 parseAddEdge :: Fractional a => Parser (Command a)
 parseAddEdge = do
-    from <- lexeme integerNumber
-    to   <- lexeme parsePoint
+    from <- lexeme parseVertex
+    to   <- lexeme parseVertex
     pure $ Add (AddEdge from to)
 
 -- | Parses a single identifier.
@@ -167,9 +167,7 @@ _identifier = do
 
 -- | Parses a Vertex identifier
 parseVertex :: Parser Int
-parseVertex = lexeme $ do
-    char 'v'
-    pure integerNumber
+parseVertex = char 'v' >> integerNumber
 
 -- | This parses any arguments to the \"help\" command
 parseHelp :: Fractional a => Parser (Command a)

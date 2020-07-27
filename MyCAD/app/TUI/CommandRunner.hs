@@ -25,10 +25,14 @@ module TUI.CommandRunner
   runCommand
 )where
 
+-- Third-party
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+
 -- | Internal imports
 import TUI.CommandParser ( Command(..), CommandToken(..), AddCommand(..))
-import Entity (Entity, EntityState, addVertex, addEdge , prettyPrintEntity)
-import Geometry (Point)
+import Entity (Entity, EntityState, addVertex, addEdge , prettyPrintEntity
+              , vertexFromID)
 
 -- | This will execute the "Command".
 --
@@ -37,7 +41,7 @@ import Geometry (Point)
 --   empty or a message
 --
 --   Error-handling is done using the "Except" monad.
-runCommand :: (Show p, Fractional p) => Entity p -> Command p -> EntityState p (Maybe String)
+runCommand :: (Show p, Fractional p, Eq p) => Entity p -> Command p -> EntityState p (Maybe String)
 runCommand entity cmd = do
     pure entity
     case cmd of
@@ -46,11 +50,15 @@ runCommand entity cmd = do
         Show     -> pure $ Just (show (prettyPrintEntity entity))
         Quit     -> pure Nothing
 
-runAdd :: (Fractional p) => AddCommand p-> EntityState p (Maybe String)
+runAdd :: (Fractional p, Eq p) => AddCommand p-> EntityState p (Maybe String)
 runAdd cmd =
     case cmd of
         AddVertex point -> addVertex point >> pure (Just "Added a vertex")
-        AddEdge i to -> addEdge i to >> pure (Just "Added a line")
+        AddEdge n1 n2   -> runMaybeT $ do
+            v1        <- MaybeT $ vertexFromID n1
+            v2        <- MaybeT $ vertexFromID n2
+            lift $ addEdge v1 v2 
+            pure ("Added a line")
 
 getHelpString :: Maybe CommandToken -> String
 getHelpString mcommand =

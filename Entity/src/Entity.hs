@@ -47,6 +47,7 @@ module Entity
   -- * Inspection
 , getPoint
 , getCurve
+, vertexFromID
   -- * Pretty Printing
 , prettyPrintEntity
 ) where
@@ -177,6 +178,12 @@ addEdge' v1 v2 = runMaybeT $ do
 -- | Returns the underlying geometric "Curve" of the "Edge'"
 getCurve :: Entity a -> Topo.Edge -> Maybe (Geo.Line a)
 getCurve e = (`Map.lookup` (getEdgeMap e))
+
+-- | Returns the Vertex with the given VertexID
+vertexFromID :: Int -> EntityState p (Maybe Topo.Vertex)
+vertexFromID n = do
+    topology <- gets _getTopology
+    pure $ evalState (Topo.vertexFromID n) topology
 
 prettyPrintEntity :: Show a => Entity a -> Doc ann
 prettyPrintEntity _ = undefined
