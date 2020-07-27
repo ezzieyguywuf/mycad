@@ -45,8 +45,6 @@ module Entity
 , addVertex
 , addEdge
   -- * Inspection
-, getVertices
-, getEdges
 , getPoint
 , getCurve
   -- * Pretty Printing
@@ -99,14 +97,6 @@ nullEntity = Entity Map.empty Map.empty Topo.emptyTopology
 
 emptyEntityState :: EntityState a ()
 emptyEntityState = pure ()
-
--- | Returns a list of all the "Topology.Vertex" in the "Entity"
-getVertices :: Entity a -> [Topo.Vertex]
-getVertices = Topo.getVertices . _getTopology
-
--- | Returns a list of all the "Topology.Edge" in the "Entity"
-getEdges :: Entity a -> [Topo.Edge]
-getEdges = Topo.getEdges . _getTopology
 
 -- | Adds a "Vertex" to the "Entity".
 --
