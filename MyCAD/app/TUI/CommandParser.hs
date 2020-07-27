@@ -99,7 +99,7 @@ commandCompletions text = filter (isPrefixOf text) commands
     where commands = map unpack $ keys knownCommands
 
 -------------------------------------------------------------------------------
---                      Internal stuff
+--                      Internal Helper Stuff
 -------------------------------------------------------------------------------
 knownCommands :: Map Text CommandToken
 knownCommands = fromList
@@ -114,6 +114,24 @@ addCommands :: Map Text (AddToken a)
 addCommands = fromList
     [ ("vertex", VertexToken)
     , ("line"  , EdgeToken)]
+
+-- | Takes a "Map Text a" as input, and tries to parse each key. On success,
+--   returns the coresponding value
+checkMap :: Map Text a -> Parser a
+checkMap m = choice (fmap check (assocs m))
+    where check (key, a) = string key >> pure a
+
+-- | This will....consume space
+spaceConsumer :: Parser ()
+spaceConsumer = Lexer.space space1 empty empty
+
+-- | Use the given parser to parse a lexeme, consuming any space after
+lexeme :: Parser a -> Parser a
+lexeme = Lexer.lexeme spaceConsumer
+
+-------------------------------------------------------------------------------
+--                      Actual Parsers and Lexers
+-------------------------------------------------------------------------------
 
 -- | Tries to parse a single "CommandToken"
 lexCommand :: Parser CommandToken
@@ -147,12 +165,6 @@ _identifier = do
     xs <- many alphaNumChar
     pure (Identifier . pack $ x : xs)
 
--- | Takes a "Map Text a" as input, and tries to parse each key. On success,
---   returns the coresponding value
-checkMap :: Map Text a -> Parser a
-checkMap m = choice (fmap check (assocs m))
-    where check (key, a) = string key >> pure a
-
 -- | This parses any arguments to the \"help\" command
 parseHelp :: Fractional a => Parser (Command a)
 parseHelp = optional (lexeme lexCommand) >>= pure . Help
@@ -164,14 +176,6 @@ parsePoint = do
     y <- lexeme number
     z <- lexeme number
     pure (V3 x y z)
-
--- | This will....consume space
-spaceConsumer :: Parser ()
-spaceConsumer = Lexer.space space1 empty empty
-
--- | Use the given parser to parse a lexeme, consuming any space after
-lexeme :: Parser a -> Parser a
-lexeme = Lexer.lexeme spaceConsumer
 
 -- | Use to parse an integer
 integer :: Parser String
