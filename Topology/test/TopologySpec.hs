@@ -3,7 +3,7 @@ module TopologySpec (spec) where
 import Topology
 import Data.Maybe (fromJust)
 import Data.Tuple (swap)
-import Test.Hspec (Spec, describe, it, context)
+import Test.Hspec (Spec, describe, it, context, pending)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
 import Control.Monad.State (execState, runState, get, put, evalState)
 import Control.Monad.Trans.Class (lift)
@@ -46,6 +46,9 @@ spec = do
                 property (prop_prepStateExpect prep run Nothing)
             it "the second vertex doesn't exist" $
                 property (prop_prepStateExpect prep (run . swap) Nothing)
+        context "creates an Edge adjacent to" $ do
+            it "the first vertex" pending
+            it "the second vertex" pending
 
 -- ===========================================================================
 --                            Properties
