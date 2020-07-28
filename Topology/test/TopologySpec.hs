@@ -1,11 +1,12 @@
 module TopologySpec (spec) where
 
 import Topology
-import Data.Maybe (fromJust)
 import Data.Tuple (swap)
-import Test.Hspec (Spec, describe, it, context, pending)
+import Data.Foldable (traverse_)
+import Test.Hspec (Spec, describe, it, context)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
-import Control.Monad.State (execState, runState, get, put, evalState)
+import Control.Monad ((>=>))
+import Control.Monad.State (execState, get, put, evalState)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 
@@ -29,26 +30,24 @@ spec = do
                          vertexID vertex
             property (prop_stateExpect run Nothing)
     describe "addEdge" $ do
-        it "Is inversed by removeEdge" $ do
-            let prep = do v1 <- addFreeVertex
-                          v2 <- addFreeVertex
-                          pure (v1, v2)
-                run a = (uncurry addEdge) a >>= removeEdge . fromJust
-            property (prop_prepStateIdentity prep run)
+        let prep = do v1 <- addFreeVertex
+                      v2 <- addFreeVertex
+                      pure (v1, v2)
+            run  = uncurry addEdge
+        it "is inversed by removeedge" $ do
+            let run' = run >=> traverse_ removeEdge
+            property (prop_prepStateIdentity prep run')
         context "returns Nothing if" $ do
-            let prep = do v1 <- addFreeVertex
-                          oneVertex <- get
-                          v2 <- addFreeVertex
-                          put oneVertex -- v2 is invalid now
-                          pure (v2, v1)
-                run   = uncurry addEdge
+            let prep' = prep >>= \vals -> removeVertex (snd vals) >> pure vals
             it "the first vertex doesn't exist" $
-                property (prop_prepStateExpect prep run Nothing)
+                property (prop_prepStateExpect prep' run Nothing)
             it "the second vertex doesn't exist" $
-                property (prop_prepStateExpect prep (run . swap) Nothing)
-        context "creates an Edge adjacent to" $ do
-            it "the first vertex" pending
-            it "the second vertex" pending
+                property (prop_prepStateExpect prep' (run . swap) Nothing)
+        --it "creates a relationship FROM v1 TO the created edge" $
+            --let prep = do v1 <- addFreeVertex
+                          --addFreeVertex
+                          --pure v1
+
 
 -- ===========================================================================
 --                            Properties
@@ -68,8 +67,9 @@ prop_stateIdentity run = prop_prepStateIdentity prep run'
 -- The TopoMod should not modify the state
 prop_prepStateIdentity :: TopoState a -> TopoMod a b -> TestTopology -> Bool
 prop_prepStateIdentity prep run testTopology = initialState == finalState
-    where (args, initialState) = runState prep (unTestTopology testTopology)
-          finalState = execState (run args) initialState
+    where topology = unTestTopology testTopology
+          initialState = execState prep topology
+          finalState = execState (prep >>= run) topology
 
 -- The given TopoMod should produce the given output.
 prop_stateExpect :: Eq a => TopoState a -> a -> TestTopology -> Bool
