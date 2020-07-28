@@ -28,12 +28,16 @@ module Topology
 , Vertex
 , Face
 , Edge
+, Adjacency(..)
   -- * Mutating
 , emptyTopology
 , addFreeVertex
 , addEdge
 , removeVertex
 , removeEdge
+  -- * Adjacency information - this is really the heart of this module. It's
+  --   kind of the whole "point" of Topology
+, vertexEdges
   -- * Serialization
 , vertexID
 , vertexFromID
@@ -48,7 +52,7 @@ import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State (State, gets, modify)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
-                                  , gelem, insEdge, lab)
+                                  , gelem, insEdge, lab, subgraph, suc, pre)
 import Data.Graph.Inductive.PatriciaTree (Gr)
 
 -- ===========================================================================
@@ -81,6 +85,14 @@ newtype Vertex = Vertex {getVertexID :: Int} deriving (Show, Eq, Ord)
 newtype Edge   = Edge   {getEdgeID   :: Int} deriving (Show, Eq, Ord)
 -- | A Face will be adjacent to at least one Edge, and at least one Vertex
 newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
+
+-- | Specifies a given pair of topological entities are related to each other
+--
+--   This is parametrized over the type of "Entity2".
+data Adjacency a = In    a -- ^ Entity1 ← Entity2, from Entity2 to Entity1
+                 | Out   a -- ^ Entity1 → Entity2, from Entity1 to Entity2
+                 | InOut a -- ^ Entity1 ↔ Entity2, both directions between the two
+                 deriving (Show, Eq)
 
 -- | In fgl, each Node and Bridge in the Graph can contain an arbitrary piece
 --   of data. This data is referred to as a \"Label\", and thus we have "LNode"
@@ -145,6 +157,34 @@ addEdge v1 v2 = runMaybeT $ do
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
 removeEdge = void . deleteNode . getEdgeID
+
+-- | Returns a list of Edges that are adjacent to the given Vertex
+vertexEdges :: Vertex -> TopoState [Adjacency Edge]
+vertexEdges _ = pure []
+
+-- | A helper that returns all the outgoing connections from the given GID of
+--   the given EntityType, e.g. "GID → Node" would be returned, but "Node →
+--   GID" would not be returned
+_filterOut :: Int -> EntityType -> TopoState [Int]
+_filterOut gid etype = do
+    -- first, unwrap the graph from the Topology data type
+    graph <- gets unTopology
+    -- next, create a sub-graph of the entities adjacent to the given Vertex
+    let graph' = subgraph (suc graph gid) graph
+    -- next, filter out just the nodes with the given EntityType and return the result
+    pure (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
+
+-- | A helper that returns all the incoming connections to the given GID of
+--   the given EntityType, e.g. "GID → Node" not be returned, but "Node →
+--   GID" would be returned
+_filterIn :: Int -> EntityType -> TopoState [Int]
+_filterIn gid etype = do
+    -- first, unwrap the graph from the Topology data type
+    graph <- gets unTopology
+    -- next, create a sub-graph of the entities adjacent to the given Vertex
+    let graph' = subgraph (pre graph gid) graph
+    -- next, filter out just the nodes with the given EntityType and return the result
+    pure (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)

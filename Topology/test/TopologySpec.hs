@@ -3,7 +3,7 @@ module TopologySpec (spec) where
 import Topology
 import Data.Tuple (swap)
 import Data.Foldable (traverse_)
-import Test.Hspec (Spec, describe, it, context)
+import Test.Hspec (Spec, describe, it, context, xit)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
 import Control.Monad ((>=>))
 import Control.Monad.State (execState, get, put, evalState)
@@ -43,11 +43,16 @@ spec = do
                 property (prop_prepStateExpect prep' run Nothing)
             it "the second vertex doesn't exist" $
                 property (prop_prepStateExpect prep' (run . swap) Nothing)
-        --it "creates a relationship FROM v1 TO the created edge" $
-            --let prep = do v1 <- addFreeVertex
-                          --addFreeVertex
-                          --pure v1
-
+        it "creates an Out adjacency from v1 → Edge" $ do
+            let run' vs@(v1,_)= runMaybeT $ do
+                    edge <- MaybeT (run vs)
+                    lift (vertexEdges v1) >>= pure . ([Out edge] ==)
+            property (prop_prepStateExpect prep run' (Just True))
+        xit "returns the same Edge if called twice with v1→v2" $ do
+            let run' args = do edge  <- run args
+                               edge' <- run args
+                               pure (edge == edge')
+            property (prop_prepStateExpect prep run' True)
 
 -- ===========================================================================
 --                            Properties
