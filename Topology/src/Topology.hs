@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-|
 Module      : Topology
 Description : Adjacency relationships for geometric data.
@@ -38,6 +39,7 @@ module Topology
   -- * Adjacency information - this is really the heart of this module. It's
   --   kind of the whole "point" of Topology
 , vertexEdges
+, edgeVertices
   -- * Serialization
 , vertexID
 , vertexFromID
@@ -93,7 +95,7 @@ newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 data Adjacency a = In    a -- ^ Entity1 ← Entity2, from Entity2 to Entity1
                  | Out   a -- ^ Entity1 → Entity2, from Entity1 to Entity2
                  | InOut a -- ^ Entity1 ↔ Entity2, both directions between the two
-                 deriving (Show, Eq)
+                 deriving (Show, Eq, Functor)
 
 -- | In fgl, each Node and Bridge in the Graph can contain an arbitrary piece
 --   of data. This data is referred to as a \"Label\", and thus we have "LNode"
@@ -161,40 +163,38 @@ removeEdge = void . deleteNode . getEdgeID
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
-vertexEdges (Vertex gid) = do
-    outGIDS <- outAdjacencies gid EdgeEntity
-    inGIDS  <- inAdjacencies  gid EdgeEntity
-    let outs = fmap (Out   . Edge) outGIDS'
-        ins  = fmap (In    . Edge) inGIDS'
-        both = fmap (InOut . Edge) inoutGIDS
-        inoutGIDS = outGIDS `intersect` inGIDS
-        inGIDS'  = inGIDS \\ inoutGIDS
-        outGIDS' = outGIDS \\ inoutGIDS
-    pure (outs ++ ins ++ both)
+vertexEdges (Vertex gid) = adjacencies gid EdgeEntity >>= pure . fmap (fmap Edge)
 
--- | A helper that returns all the outgoing connections from the given GID of
---   the given EntityType, e.g. "GID → Node" would be returned, but "Node →
---   GID" would not be returned
-outAdjacencies :: Int -> EntityType -> TopoState [Int]
-outAdjacencies gid etype = do
+-- | Returns the list ef Vertices that are adjacent to the given Edge
+edgeVertices :: Edge -> TopoState [Adjacency Vertex]
+edgeVertices (Edge gid) = (adjacencies gid VertexEntity) >>= pure . fmap (fmap Vertex)
+
+-- | A helper that returns all adjacency entities of the given type
+adjacencies :: Int           -- ^ The GID of the Node in question
+               -> EntityType -- ^ The type of the adjacent entities to check
+               -> TopoState [Adjacency Int]
+adjacencies gid etype = do
     -- first, unwrap the graph from the Topology data type
     graph <- gets unTopology
-    -- next, create a sub-graph of the entities adjacent to the given Vertex
-    let graph' = subgraph (suc graph gid) graph
-    -- next, filter out just the nodes with the given EntityType and return the result
-    pure $ (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
-
--- | A helper that returns all the incoming connections to the given GID of
---   the given EntityType, e.g. "GID → Node" not be returned, but "Node →
---   GID" would be returned
-inAdjacencies :: Int -> EntityType -> TopoState [Int]
-inAdjacencies gid etype = do
-    -- first, unwrap the graph from the Topology data type
-    graph <- gets unTopology
-    -- next, create a sub-graph of the entities adjacent to the given Vertex
-    let graph' = subgraph (pre graph gid) graph
-    -- next, filter out just the nodes with the given EntityType and return the result
-    pure $ (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
+        
+    let -- create a sub-graph of the entities "In" from our target
+        preGraph = subgraph (pre graph gid) graph
+        -- create a sub-graph of the entities "Out" from our target
+        sucGraph = subgraph (suc graph gid) graph
+        -- Create a list of Nodes of the given EntityType for each sub-graph
+        inIDs  = nodes (entityFilter preGraph)
+        outIDs = nodes (entityFilter sucGraph)
+        -- Figure out which are both In and Out
+        inoutIDs = inIDs `intersect` outIDs
+        -- Filter out InOut values from the separate In and Out lists
+        inIDs'  = inIDs \\ inoutIDs
+        outIDs' = outIDs \\ inoutIDs
+        entityFilter = labfilter ((etype ==) . getEntityType)
+        -- Wrap our GID's in the appropriate Adjacency, as well as Edge data types
+        allAdjacencies = (fmap In inIDs')
+                         <> (fmap Out outIDs')
+                         <> (fmap InOut inoutIDs)
+    pure allAdjacencies
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
