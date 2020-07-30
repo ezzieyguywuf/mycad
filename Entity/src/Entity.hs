@@ -54,7 +54,7 @@ module Entity
 
 -- Third-party
 import qualified Data.Map as Map
-import Data.Text.Prettyprint.Doc (Doc, pretty, line, emptyDoc)
+import Data.Text.Prettyprint.Doc (Doc, pretty, line, emptyDoc, indent)
 import Control.Monad (when, mzero)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
@@ -195,7 +195,7 @@ makePrettyVertex topology doc vertex point = doc
                                     <> pretty (show point)
                                     <> line
                                     <> case evalState (prettyPrintVertex vertex) topology of
-                                           Just _doc -> _doc <> line
+                                           Just _doc -> indent 4 _doc <> line
                                            Nothing  -> pretty "No vertices"
 
 -- ===========================================================================
