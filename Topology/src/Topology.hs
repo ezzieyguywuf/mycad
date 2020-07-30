@@ -44,6 +44,7 @@ module Topology
   -- * Serialization
 , vertexID
 , vertexFromID
+ , edgeID
 )where
 
 -- Base
@@ -204,6 +205,11 @@ vertexFromID eid = runMaybeT $ do
         [gid] -> pure . Vertex $ gid
         _          -> mzero
 
+-- | Returns an Int ID that can be used to re-create the Edge
+edgeID :: Edge -> TopoState (Maybe Int)
+edgeID (Edge gid) = runMaybeT $ do
+    label <- MaybeT (gets ((`lab` gid) . unTopology))
+    pure (getEntityID label)
 
 -- ===========================================================================
 --                        Private, Non-Exported stuff

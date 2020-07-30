@@ -10,21 +10,38 @@
 module Topology.PrettyPrint
 (
   prettyPrintVertex
+, prettyPrintEdge
+, prettyPrintTopology
 )where
 -- from: Tanisha
 --beautifulPrintEdge.run
 
+-- Base
+import Data.Maybe (catMaybes)
+
 -- Third-Party
-import Data.Text.Prettyprint.Doc ((<+>), Doc, pretty, vsep)
+import Data.Text.Prettyprint.Doc (Doc, pretty, vsep, align)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Control.Monad.State(evalState)
 
 -- Internal
-import Topology ( Vertex, Adjacency(..), TopoState
-                , vertexEdges, vertexID)
+import Topology ( Vertex, Edge, Adjacency(..), TopoState, Topology
+                , vertexEdges, edgeVertices, vertexID, edgeID, unAdjacency
+                , emptyTopology)
 
 -- | The document type used in our pretty printer
 type TopoDoc = Doc ()
+
+prettyShowEdge :: Edge -> TopoState (Maybe TopoDoc)
+prettyShowEdge edge = runMaybeT $ do
+    gid <- MaybeT (edgeID edge)
+    pure (pretty $ "Edge" <> show gid)
+
+prettyShowVertex :: Vertex -> TopoState (Maybe TopoDoc)
+prettyShowVertex vertex = runMaybeT $ do
+    gid <- MaybeT (vertexID vertex)
+    pure (pretty $ "Vertex" <> show gid)
 
 prettyPrintAdjacency :: Adjacency a -> TopoDoc
 prettyPrintAdjacency adjacency =
@@ -33,15 +50,33 @@ prettyPrintAdjacency adjacency =
         Out   _ -> pretty (" → ")
         InOut _ -> pretty (" ↔ ")
 
-prettyPrintAdjacencies :: [Adjacency a] -> TopoDoc
-prettyPrintAdjacencies = vsep . fmap prettyPrintAdjacency
-
 prettyPrintVertex :: Vertex -> TopoState (Maybe TopoDoc)
 prettyPrintVertex vertex = runMaybeT $ do
-    gid <- MaybeT (vertexID vertex)
+    showV           <- MaybeT (prettyShowVertex vertex)
     edgeAdjacencies <- lift (vertexEdges vertex)
-    let doc = pretty ("v" <> show gid) <+> prettyPrintAdjacencies edgeAdjacencies
-    pure doc
+    let getMaybePPEdges = sequence . fmap (prettyShowEdge . unAdjacency)
+    maybePPEdges    <- lift $ getMaybePPEdges edgeAdjacencies
+    let ppAdjacencies = fmap prettyPrintAdjacency edgeAdjacencies
+        ppEdges       = catMaybes maybePPEdges
+    pure (showV <> vsep (zipWith (<>) ppAdjacencies ppEdges))
+
+prettyPrintEdge :: Edge -> TopoState (Maybe TopoDoc)
+prettyPrintEdge edge = runMaybeT $ do
+    showE             <- MaybeT (prettyShowEdge edge)
+    vertexAdjacencies <- lift (edgeVertices edge)
+    let getMaybePPVertices = sequence . fmap (prettyShowVertex . unAdjacency)
+    maybePPVertices   <- lift $ getMaybePPVertices vertexAdjacencies
+    let ppAdjacencies = fmap prettyPrintAdjacency vertexAdjacencies
+        ppVertices    = catMaybes maybePPVertices
+    pure (showE <> (align . vsep) (zipWith (<>) ppAdjacencies ppVertices))
+
+prettyPrintTopology :: Topology -> TopoDoc
+prettyPrintTopology topology =
+    case emptyTopology == topology of
+        True -> pretty "empty topology"
+        False -> case Nothing of
+                     Just tstate -> evalState tstate topology
+                     Nothing  -> pretty "PrettyPrint error. TODO: Use Either"
 
 --prettyPrintVertex :: Topology -> Vertex -> Doc ann
 --prettyPrintVertex t (Vertex i) = prettyPrintNodeWithNeighbors t i
