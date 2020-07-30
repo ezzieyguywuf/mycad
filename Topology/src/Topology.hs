@@ -36,11 +36,16 @@ module Topology
 , addEdge
 , removeVertex
 , removeEdge
-  -- * Adjacency information - this is really the heart of this module. It's
-  --   kind of the whole "point" of Topology
+  -- * Adjacency information
+  -- | This is really the heart of this module. It's kind of the whole "point"
+  --   of Topology
 , vertexEdges
 , edgeVertices
 , unAdjacency
+  -- * Inspection
+  -- | Get information about the topology
+, getVertices
+, getEdges
   -- * Serialization
 , vertexID
 , vertexFromID
@@ -179,6 +184,13 @@ unAdjacency adjacency = case adjacency of
                             Out val   -> val
                             InOut val -> val
 
+-- | Returns all the Vertices in the Topology, in on particular order
+getVertices :: TopoState [Vertex]
+getVertices = gets ((fmap Vertex) . (filterNodes VertexEntity) . unTopology)
+
+getEdges :: TopoState [Edge]
+getEdges = gets ((fmap Edge) . (filterNodes EdgeEntity) . unTopology)
+
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
 removeEdge = void . deleteNode . getEdgeID
@@ -234,7 +246,7 @@ addNode :: EntityType -> TopoState Int
 addNode entity = do
     graph <- gets unTopology
     let gid   = length . nodes $ graph
-        eid   = length . nodes $ filterGraph entity graph
+        eid   = length $ filterNodes entity graph
         label = NodeLabel entity eid
     modify (Topology . insNode (gid, label) . unTopology)
     pure gid
@@ -255,9 +267,9 @@ getVertexNode (Vertex gid) = do
         True  -> pure . Just $ gid
         False -> pure Nothing
 
--- | Returns a sub-graph in which the nodes are all of the given "Entity" type
-filterGraph :: EntityType -> TopoGraph -> TopoGraph
-filterGraph entity graph = labfilter predicate graph
+-- | Returns all the Nodes in the graph of the given EntityType
+filterNodes :: EntityType -> TopoGraph -> [Int]
+filterNodes entity graph = nodes (labfilter predicate graph)
     where predicate = (entity ==) . getEntityType
 
 -- | A helper that returns all adjacency entities of the given type
@@ -273,14 +285,13 @@ adjacencies gid etype = do
         -- create a sub-graph of the entities "Out" from our target
         sucGraph = subgraph (suc graph gid) graph
         -- Create a list of Nodes of the given EntityType for each sub-graph
-        inIDs  = nodes (entityFilter preGraph)
-        outIDs = nodes (entityFilter sucGraph)
+        inIDs  = filterNodes etype preGraph
+        outIDs = filterNodes etype sucGraph
         -- Figure out which are both In and Out
         inoutIDs = inIDs `intersect` outIDs
         -- Filter out InOut values from the separate In and Out lists
         inIDs'  = inIDs \\ inoutIDs
         outIDs' = outIDs \\ inoutIDs
-        entityFilter = labfilter ((etype ==) . getEntityType)
         -- Wrap our GID's in the appropriate Adjacency, as well as Edge data types
         allAdjacencies = (fmap In inIDs')
                          <> (fmap Out outIDs')
