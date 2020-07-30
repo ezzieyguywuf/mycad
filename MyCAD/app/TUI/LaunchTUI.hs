@@ -59,7 +59,7 @@ loop entityVar = do
                 loop entityVar
             Right command -> do
                 entity <- liftIO (atomically $ takeTMVar entityVar)
-                case runState (runCommand entity command) entity of
+                case runState (runCommand command) entity of
                     (Nothing, _)        -> exit
                     (Just msg, entity') -> do
                         HL.outputStrLn msg

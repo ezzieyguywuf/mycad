@@ -31,7 +31,7 @@ import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 
 -- | Internal imports
 import TUI.CommandParser ( Command(..), CommandToken(..), AddCommand(..))
-import Entity (Entity, EntityState, addVertex, addEdge , prettyPrintEntity
+import Entity (EntityState, addVertex, addEdge -- , prettyPrintEntity
               , vertexFromID)
 
 -- | This will execute the "Command".
@@ -41,13 +41,12 @@ import Entity (Entity, EntityState, addVertex, addEdge , prettyPrintEntity
 --   empty or a message
 --
 --   Error-handling is done using the "Except" monad.
-runCommand :: (Show p, Fractional p, Eq p) => Entity p -> Command p -> EntityState p (Maybe String)
-runCommand entity cmd = do
-    pure entity
+runCommand :: (Show p, Fractional p, Eq p) => Command p -> EntityState p (Maybe String)
+runCommand cmd =
     case cmd of
         Help arg -> pure (Just $ getHelpString arg)
         Add acmd -> runAdd acmd
-        Show     -> pure $ Just (show (prettyPrintEntity entity))
+        Show     -> undefined -- pure $ Just (show (prettyPrintEntity entity))
         Quit     -> pure Nothing
 
 runAdd :: (Fractional p, Eq p) => AddCommand p-> EntityState p (Maybe String)
