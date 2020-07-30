@@ -28,10 +28,11 @@ module TUI.CommandRunner
 -- Third-party
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Control.Monad.State (gets)
 
 -- | Internal imports
 import TUI.CommandParser ( Command(..), CommandToken(..), AddCommand(..))
-import Entity (EntityState, addVertex, addEdge -- , prettyPrintEntity
+import Entity (EntityState, addVertex, addEdge, prettyPrintEntity
               , vertexFromID)
 
 -- | This will execute the "Command".
@@ -46,7 +47,7 @@ runCommand cmd =
     case cmd of
         Help arg -> pure (Just $ getHelpString arg)
         Add acmd -> runAdd acmd
-        Show     -> undefined -- pure $ Just (show (prettyPrintEntity entity))
+        Show     -> gets (Just . show . prettyPrintEntity)
         Quit     -> pure Nothing
 
 runAdd :: (Fractional p, Eq p) => AddCommand p-> EntityState p (Maybe String)

@@ -2,24 +2,29 @@
 module Main (main) where
 
 --import Data.Text (Text)
---import Control.Monad.State  (runState)
+import Control.Monad.State  (evalState)
 import TUI.CommandParser (Command, parseInput)
---import TUI.CommandRunner (runCommand)
---import Entity (Entity, nullEntity, prettyPrintEntity)
+import TUI.CommandRunner (runCommand)
+import Entity (Entity, nullEntity)
 --import Text.Megaparsec.Error (errorBundlePretty)
 import Data.Either (rights)
+import Data.Maybe (catMaybes)
 
 main :: IO ()
 main = do
     let to_parse = [  "add vertex 10 20 30"
                    ,  "add vertex 40 50 60"
-                   ,  "add line v1 v2"
+                   ,  "add line v0 v1"
                    ,  "help help"
                    ,  "show"
                    ]
         cmds = rights (fmap parseInput to_parse) :: [Command Float]
-        --let entity = nullEntity :: Entity Float
-    sequence_ (fmap (putStrLn . show) cmds)
+        states = fmap runCommand cmds
+        estate = sequence states
+        entity = nullEntity :: Entity Float
+        mStrings  = evalState estate entity  :: [Maybe String]
+        ios = fmap putStrLn (catMaybes mStrings)
+    sequence_ ios
 
 --parseThings :: Text -> IO ()
 --parseThings text =
