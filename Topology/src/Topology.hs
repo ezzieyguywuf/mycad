@@ -40,6 +40,7 @@ module Topology
   --   kind of the whole "point" of Topology
 , vertexEdges
 , edgeVertices
+, unAdjacency
   -- * Serialization
 , vertexID
 , vertexFromID
@@ -148,6 +149,10 @@ removeVertex = void . deleteNode . getVertexID
 -- | Adds an Edge adjacent to both Vertex
 --
 --   Returns Nothing if either Vertex is not already part of the Topology
+--
+--   Only adds an Edge if there is not already a "v1 → Edge → v2". If there is
+--   already an Edge, that same Edge is returned (i.e. the Topology is not
+--   modified)
 addEdge :: Vertex -> Vertex -> TopoState (Maybe Edge)
 addEdge v1 v2 = runMaybeT $ do
     gid1 <- MaybeT (getVertexNode v1)
@@ -166,6 +171,7 @@ addEdge v1 v2 = runMaybeT $ do
                      lift (connectNode edge gid2)
                      pure $ Edge edge
 
+-- | This is useful when you don't need to know the Adjacency information
 unAdjacency :: Adjacency a -> a
 unAdjacency adjacency = case adjacency of
                             In val    -> val
@@ -183,33 +189,6 @@ vertexEdges (Vertex gid) = adjacencies gid EdgeEntity >>= pure . fmap (fmap Edge
 -- | Returns the list ef Vertices that are adjacent to the given Edge
 edgeVertices :: Edge -> TopoState [Adjacency Vertex]
 edgeVertices (Edge gid) = (adjacencies gid VertexEntity) >>= pure . fmap (fmap Vertex)
-
--- | A helper that returns all adjacency entities of the given type
-adjacencies :: Int           -- ^ The GID of the Node in question
-               -> EntityType -- ^ The type of the adjacent entities to check
-               -> TopoState [Adjacency Int]
-adjacencies gid etype = do
-    -- first, unwrap the graph from the Topology data type
-    graph <- gets unTopology
-        
-    let -- create a sub-graph of the entities "In" from our target
-        preGraph = subgraph (pre graph gid) graph
-        -- create a sub-graph of the entities "Out" from our target
-        sucGraph = subgraph (suc graph gid) graph
-        -- Create a list of Nodes of the given EntityType for each sub-graph
-        inIDs  = nodes (entityFilter preGraph)
-        outIDs = nodes (entityFilter sucGraph)
-        -- Figure out which are both In and Out
-        inoutIDs = inIDs `intersect` outIDs
-        -- Filter out InOut values from the separate In and Out lists
-        inIDs'  = inIDs \\ inoutIDs
-        outIDs' = outIDs \\ inoutIDs
-        entityFilter = labfilter ((etype ==) . getEntityType)
-        -- Wrap our GID's in the appropriate Adjacency, as well as Edge data types
-        allAdjacencies = (fmap In inIDs')
-                         <> (fmap Out outIDs')
-                         <> (fmap InOut inoutIDs)
-    pure allAdjacencies
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
@@ -274,3 +253,31 @@ getVertexNode (Vertex gid) = do
 filterGraph :: EntityType -> TopoGraph -> TopoGraph
 filterGraph entity graph = labfilter predicate graph
     where predicate = (entity ==) . getEntityType
+
+-- | A helper that returns all adjacency entities of the given type
+adjacencies :: Int           -- ^ The GID of the Node in question
+               -> EntityType -- ^ The type of the adjacent entities to check
+               -> TopoState [Adjacency Int]
+adjacencies gid etype = do
+    -- first, unwrap the graph from the Topology data type
+    graph <- gets unTopology
+        
+    let -- create a sub-graph of the entities "In" from our target
+        preGraph = subgraph (pre graph gid) graph
+        -- create a sub-graph of the entities "Out" from our target
+        sucGraph = subgraph (suc graph gid) graph
+        -- Create a list of Nodes of the given EntityType for each sub-graph
+        inIDs  = nodes (entityFilter preGraph)
+        outIDs = nodes (entityFilter sucGraph)
+        -- Figure out which are both In and Out
+        inoutIDs = inIDs `intersect` outIDs
+        -- Filter out InOut values from the separate In and Out lists
+        inIDs'  = inIDs \\ inoutIDs
+        outIDs' = outIDs \\ inoutIDs
+        entityFilter = labfilter ((etype ==) . getEntityType)
+        -- Wrap our GID's in the appropriate Adjacency, as well as Edge data types
+        allAdjacencies = (fmap In inIDs')
+                         <> (fmap Out outIDs')
+                         <> (fmap InOut inoutIDs)
+    pure allAdjacencies
+
