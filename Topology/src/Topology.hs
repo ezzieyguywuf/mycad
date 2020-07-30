@@ -45,6 +45,7 @@ module Topology
 
 -- Base
 import Control.Monad (void)
+import Data.List ((\\), intersect)
 
 -- third-party
 import Control.Monad (mzero)
@@ -161,7 +162,15 @@ removeEdge = void . deleteNode . getEdgeID
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
 vertexEdges (Vertex gid) = do
-    outAdjacencies gid EdgeEntity >>= pure . fmap (Out . Edge)
+    outGIDS <- outAdjacencies gid EdgeEntity
+    inGIDS  <- inAdjacencies  gid EdgeEntity
+    let outs = fmap (Out   . Edge) outGIDS'
+        ins  = fmap (In    . Edge) inGIDS'
+        both = fmap (InOut . Edge) inoutGIDS
+        inoutGIDS = outGIDS `intersect` inGIDS
+        inGIDS'  = inGIDS \\ inoutGIDS
+        outGIDS' = outGIDS \\ inoutGIDS
+    pure (outs ++ ins ++ both)
 
 -- | A helper that returns all the outgoing connections from the given GID of
 --   the given EntityType, e.g. "GID → Node" would be returned, but "Node →
@@ -173,19 +182,19 @@ outAdjacencies gid etype = do
     -- next, create a sub-graph of the entities adjacent to the given Vertex
     let graph' = subgraph (suc graph gid) graph
     -- next, filter out just the nodes with the given EntityType and return the result
-    pure (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
+    pure $ (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
 
 -- | A helper that returns all the incoming connections to the given GID of
 --   the given EntityType, e.g. "GID → Node" not be returned, but "Node →
 --   GID" would be returned
-_filterIn :: Int -> EntityType -> TopoState [Int]
-_filterIn gid etype = do
+inAdjacencies :: Int -> EntityType -> TopoState [Int]
+inAdjacencies gid etype = do
     -- first, unwrap the graph from the Topology data type
     graph <- gets unTopology
     -- next, create a sub-graph of the entities adjacent to the given Vertex
     let graph' = subgraph (pre graph gid) graph
     -- next, filter out just the nodes with the given EntityType and return the result
-    pure (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
+    pure $ (nodes $ (labfilter ((etype ==) . getEntityType) graph'))
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
