@@ -24,8 +24,11 @@ main = do
         entity = nullEntity :: Entity Float
         mStrings  = evalState estate entity  :: [Maybe String]
         ios = fmap putStrLn (catMaybes mStrings)
+    putStrLn "Running the following commands: "
+    sequence_ $ fmap (putStrLn . show) cmds
+    putStrLn "-------- Starting -------------"
     sequence_ ios
-
+    putStrLn "-------- Done -------------"
 --parseThings :: Text -> IO ()
 --parseThings text =
     --case (parseInput text) of
