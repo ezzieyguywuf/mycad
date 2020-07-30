@@ -160,13 +160,14 @@ removeEdge = void . deleteNode . getEdgeID
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
-vertexEdges _ = pure []
+vertexEdges (Vertex gid) = do
+    outAdjacencies gid EdgeEntity >>= pure . fmap (Out . Edge)
 
 -- | A helper that returns all the outgoing connections from the given GID of
 --   the given EntityType, e.g. "GID → Node" would be returned, but "Node →
 --   GID" would not be returned
-_filterOut :: Int -> EntityType -> TopoState [Int]
-_filterOut gid etype = do
+outAdjacencies :: Int -> EntityType -> TopoState [Int]
+outAdjacencies gid etype = do
     -- first, unwrap the graph from the Topology data type
     graph <- gets unTopology
     -- next, create a sub-graph of the entities adjacent to the given Vertex
