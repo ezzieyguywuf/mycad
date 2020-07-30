@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 module TopologySpec (spec) where
 
 import Topology
@@ -65,7 +66,7 @@ spec = do
         it "creates a two Vertex adjacencies on edge" $ do
             let post ((_, _), edge) = edgeVertices edge >>= pure . (2 ==) . length
             property (prepRunMaybe post)
-        xit "returns the same Edge if called twice with v1→v2" $ do
+        it "returns the same Edge if called twice with v1→v2" $ do
             let run' args = do edge  <- run args
                                edge' <- run args
                                pure (edge == edge')
