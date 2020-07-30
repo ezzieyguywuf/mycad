@@ -45,11 +45,11 @@ exit :: HL.InputT IO ()
 exit = HL.outputStrLn "exiting."
 
 -- | Entry point for main loop
-launch :: (Show p, Fractional p) => TMVar (Entity p) -> IO ()
+launch :: (Show p, Fractional p, Eq p) => TMVar (Entity p) -> IO ()
 launch entityVar = HL.runInputT settings (loop entityVar)
 
 -- | Determine if we should loop again or bail out.
-loop :: (Show p, Fractional p) => TMVar (Entity p) -> HL.InputT IO ()
+loop :: (Show p, Fractional p, Eq p) => TMVar (Entity p) -> HL.InputT IO ()
 loop entityVar = do
     HL.getInputLine "mycad> " >>= \case
         Nothing    -> exit

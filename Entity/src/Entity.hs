@@ -54,7 +54,7 @@ module Entity
 
 -- Third-party
 import qualified Data.Map as Map
-import Data.Text.Prettyprint.Doc (Doc)
+import Data.Text.Prettyprint.Doc (Doc, pretty, line, emptyDoc)
 import Control.Monad (when, mzero)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
@@ -63,6 +63,7 @@ import Control.Monad.State (State, get, gets, runState, evalState, put)
 -- Internal
 import qualified Geometry as Geo
 import qualified Topology as Topo
+import Topology.PrettyPrint (prettyPrintVertex)
 
 -- ===========================================================================
 --                               Data Types
@@ -143,9 +144,9 @@ addEdge v1 v2 = runMaybeT $ do
     (edge, t') <- MaybeT (addEdge' v1 v2)
 
     let -- We'll make a geometric straight line between the two points
-        line = Geo.makeLine p1 p2
+        geoline = Geo.makeLine p1 p2
         -- Pair the topological Edge with the line we made earlier
-        emap' = Map.insert edge line emap
+        emap' = Map.insert edge geoline emap
 
     -- Update our state with the new information
     lift (put (Entity vmap emap' t'))
@@ -185,16 +186,17 @@ vertexFromID n = do
     topology <- gets _getTopology
     pure $ evalState (Topo.vertexFromID n) topology
 
-prettyPrintEntity :: Show a => Entity a -> Doc ann
-prettyPrintEntity _ = undefined
---prettyPrintEntity entity@(Entity vs es _) = undefined
-    --case show doc of
-        --"" -> pretty "null entity"
-        --_  -> doc
-    --where vs' = vsep $ reverse (map (prettyPrintVertex entity) vs)
-          --es' = vsep $ reverse (map (prettyPrintEdge entity) es)
-          --func d = if show d == "" then d else d <> line
-          --doc = foldMap func [vs',es']
+prettyPrintEntity :: Show a => Entity a -> Doc ()
+prettyPrintEntity (Entity vs _ topology) = doc
+    where doc = Map.foldlWithKey (makePrettyVertex topology) emptyDoc vs
+
+makePrettyVertex :: Show a => Topo.Topology -> Doc () -> Topo.Vertex -> Geo.Point a -> Doc ()
+makePrettyVertex topology doc vertex point = doc
+                                    <> pretty (show point)
+                                    <> line
+                                    <> case evalState (prettyPrintVertex vertex) topology of
+                                           Just _doc -> _doc
+                                           Nothing  -> pretty "No vertices"
 
 -- ===========================================================================
 --                       Private Free Functions

@@ -11,6 +11,7 @@ import Text.Megaparsec.Error (errorBundlePretty)
 main :: IO ()
 main = do
     parseThings "add vertex 10 20 30"
+    parseThings "add vertex 40 50 60"
     parseThings "add line v1 v2"
     parseThings "help help"
 
