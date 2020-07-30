@@ -34,6 +34,7 @@ spec = do
                       v2 <- addFreeVertex
                       pure (v1, v2)
             run  = uncurry addEdge
+            prepRunMaybe = prop_prepRunPostMaybeExpect prep run
         it "is inversed by removeedge" $ do
             let run' = run >=> traverse_ removeEdge
             property (prop_prepRunIdentity prep run')
@@ -45,16 +46,25 @@ spec = do
                 property (prop_prepRunExpect prep' (run . swap) Nothing)
         it "creates an Out adjacency from v1 → Edge" $ do
             let post ((v1, _), edge) = vertexEdges v1 >>= pure . ([Out edge] ==)
-            property (prop_prepRunPostMaybeExpect prep run post)
+            property (prepRunMaybe post)
         it "creates an In adjacency for Edge ← v1" $ do
             let post ((v1, _), edge) = edgeVertices edge >>= pure . (elem (In v1))
-            property (prop_prepRunPostMaybeExpect prep run post)
+            property (prepRunMaybe post)
         it "creates an Out adjacency for Edge → v2" $ do
             let post ((_, v2), edge) = edgeVertices edge >>= pure . (elem (Out v2))
-            property (prop_prepRunPostMaybeExpect prep run post)
+            property (prepRunMaybe post)
         it "creates an In adjacency from v2 ← Edge" $ do
             let post ((_, v2), edge) = vertexEdges v2 >>= pure . ([In edge] ==)
-            property (prop_prepRunPostMaybeExpect prep run post)
+            property (prepRunMaybe post)
+        it "creates a single Edge adjacency on v1" $ do
+            let post ((v1, _), _) = vertexEdges v1 >>= pure . (1 ==) . length
+            property (prepRunMaybe post)
+        it "creates a single Edge adjacency on v2" $ do
+            let post ((_, v2), _) = vertexEdges v2 >>= pure . (1 ==) . length
+            property (prepRunMaybe post)
+        it "creates a two Vertex adjacencies on edge" $ do
+            let post ((_, _), edge) = edgeVertices edge >>= pure . (2 ==) . length
+            property (prepRunMaybe post)
         xit "returns the same Edge if called twice with v1→v2" $ do
             let run' args = do edge  <- run args
                                edge' <- run args
