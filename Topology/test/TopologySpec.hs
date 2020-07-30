@@ -48,6 +48,11 @@ spec = do
                     edge <- MaybeT (run vs)
                     lift (vertexEdges v1) >>= pure . ([Out edge] ==)
             property (prop_prepStateExpect prep run' (Just True))
+        it "creates an In adjacency from v2 ← Edge" $ do
+            let run' vs@(_,v2)= runMaybeT $ do
+                    edge <- MaybeT (run vs)
+                    lift (vertexEdges v2) >>= pure . ([In edge] ==)
+            property (prop_prepStateExpect prep run' (Just True))
         xit "returns the same Edge if called twice with v1→v2" $ do
             let run' args = do edge  <- run args
                                edge' <- run args
