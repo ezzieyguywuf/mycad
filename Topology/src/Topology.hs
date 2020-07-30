@@ -152,10 +152,25 @@ addEdge :: Vertex -> Vertex -> TopoState (Maybe Edge)
 addEdge v1 v2 = runMaybeT $ do
     gid1 <- MaybeT (getVertexNode v1)
     gid2 <- MaybeT (getVertexNode v2)
-    edge <- lift (addNode EdgeEntity)
-    lift (connectNode gid1 edge)
-    lift (connectNode edge gid2)
-    pure $ Edge edge
+    -- Check if there's already an Edge between the two
+    v1Edges <- lift (vertexEdges v1)
+    v2Edges <- lift (vertexEdges v2)
+    let -- We don't need the adjacency information for this check
+        v1Edges' = fmap unAdjacency v1Edges
+        v2Edges' = fmap unAdjacency v2Edges
+        overlap  = v1Edges' `intersect` v2Edges'
+    case overlap of
+        [edge] -> pure edge
+        _      -> do edge <- lift (addNode EdgeEntity)
+                     lift (connectNode gid1 edge)
+                     lift (connectNode edge gid2)
+                     pure $ Edge edge
+
+unAdjacency :: Adjacency a -> a
+unAdjacency adjacency = case adjacency of
+                            In val    -> val
+                            Out val   -> val
+                            InOut val -> val
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
