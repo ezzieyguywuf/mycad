@@ -23,12 +23,12 @@ import Data.Maybe (catMaybes)
 import Data.Text.Prettyprint.Doc (Doc, pretty, vsep, align)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
-import Control.Monad.State(evalState)
+import Control.Monad.State(evalState, State)
 
 -- Internal
 import Topology ( Vertex, Edge, Adjacency(..), TopoState, Topology
                 , vertexEdges, edgeVertices, vertexID, edgeID, unAdjacency
-                , emptyTopology)
+                , emptyTopology, getVertices, getEdges)
 
 -- | The document type used in our pretty printer
 type TopoDoc = Doc ()
@@ -71,12 +71,21 @@ prettyPrintEdge edge = runMaybeT $ do
     pure (showE <> (align . vsep) (zipWith (<>) ppAdjacencies ppVertices))
 
 prettyPrintTopology :: Topology -> TopoDoc
-prettyPrintTopology topology =
-    case emptyTopology == topology of
-        True -> pretty "empty topology"
-        False -> case Nothing of
-                     Just tstate -> evalState tstate topology
-                     Nothing  -> pretty "PrettyPrint error. TODO: Use Either"
+prettyPrintTopology topology
+    | topology == emptyTopology = pretty "empty topology"
+    | otherwise =
+        case evalState maybeDoc topology of
+            Just doc -> doc
+            Nothing  -> pretty "PrettyPrint error. TODO: Use Either"
+        where maybeDoc = runMaybeT $ do
+                  vs <- lift getVertices :: MaybeT (State Topology) [Vertex]
+                  es <- lift getEdges
+                  vDocs <- lift (sequence . fmap prettyPrintVertex $ vs)
+                  eDocs <- lift (sequence . fmap prettyPrintEdge $ es)
+                  let vDocs' = catMaybes vDocs
+                      eDocs' = catMaybes eDocs
+                  pure (vsep $ vDocs' <> eDocs')  :: MaybeT (State Topology) TopoDoc
+
 
 --prettyPrintVertex :: Topology -> Vertex -> Doc ann
 --prettyPrintVertex t (Vertex i) = prettyPrintNodeWithNeighbors t i
