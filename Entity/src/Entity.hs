@@ -195,7 +195,7 @@ makePrettyVertex topology doc vertex point = doc
                                     <> pretty (show point)
                                     <> line
                                     <> case evalState (prettyPrintVertex vertex) topology of
-                                           Just _doc -> _doc
+                                           Just _doc -> _doc <> line
                                            Nothing  -> pretty "No vertices"
 
 -- ===========================================================================
