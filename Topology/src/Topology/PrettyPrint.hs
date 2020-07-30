@@ -15,17 +15,33 @@ module Topology.PrettyPrint
 --beautifulPrintEdge.run
 
 -- Third-Party
-import Data.Text.Prettyprint.Doc (Doc, pretty)
+import Data.Text.Prettyprint.Doc ((<+>), Doc, pretty, vsep)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 
 -- Internal
-import Topology (Topology, Vertex)
+import Topology ( Vertex, Adjacency(..), TopoState
+                , vertexEdges, vertexID)
 
 -- | The document type used in our pretty printer
 type TopoDoc = Doc ()
 
+prettyPrintAdjacency :: Adjacency a -> TopoDoc
+prettyPrintAdjacency adjacency =
+    case adjacency of
+        In    _ -> pretty (" ← ")
+        Out   _ -> pretty (" → ")
+        InOut _ -> pretty (" ↔ ")
 
-prettyPrintVertex :: Topology -> Vertex -> TopoDoc
-prettyPrintVertex _ _ = pretty "Vertices"
+prettyPrintAdjacencies :: [Adjacency a] -> TopoDoc
+prettyPrintAdjacencies = vsep . fmap prettyPrintAdjacency
+
+prettyPrintVertex :: Vertex -> TopoState (Maybe TopoDoc)
+prettyPrintVertex vertex = runMaybeT $ do
+    gid <- MaybeT (vertexID vertex)
+    edgeAdjacencies <- lift (vertexEdges vertex)
+    let doc = pretty ("v" <> show gid) <+> prettyPrintAdjacencies edgeAdjacencies
+    pure doc
 
 --prettyPrintVertex :: Topology -> Vertex -> Doc ann
 --prettyPrintVertex t (Vertex i) = prettyPrintNodeWithNeighbors t i
