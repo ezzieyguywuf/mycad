@@ -58,7 +58,7 @@ prettyPrintVertex vertex = runMaybeT $ do
     maybePPEdges    <- lift $ getMaybePPEdges edgeAdjacencies
     let ppAdjacencies = fmap prettyPrintAdjacency edgeAdjacencies
         ppEdges       = catMaybes maybePPEdges
-    pure (showV <> vsep (zipWith (<>) ppAdjacencies ppEdges))
+    pure (showV <> (align . vsep) (zipWith (<>) ppAdjacencies ppEdges))
 
 prettyPrintEdge :: Edge -> TopoState (Maybe TopoDoc)
 prettyPrintEdge edge = runMaybeT $ do

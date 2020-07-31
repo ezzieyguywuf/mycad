@@ -14,7 +14,13 @@ main :: IO ()
 main = do
     let to_parse = [  "add vertex 10 20 30"
                    ,  "add vertex 40 50 60"
+                   ,  "add vertex 70 80 90"
+                   ,  "add vertex 60 70 80"
+                   ,  "add vertex 50 60 70"
                    ,  "add line v0 v1"
+                   ,  "add line v1 v2"
+                   ,  "add line v2 v3"
+                   ,  "add line v3 v4"
                    ,  "help help"
                    ,  "show"
                    ]
