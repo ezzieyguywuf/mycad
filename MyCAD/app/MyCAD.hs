@@ -7,13 +7,14 @@ import Control.Concurrent.STM.TMVar (TMVar)
 -- Internal
 import qualified TUI.LaunchTUI as TUI
 import qualified GUI.LaunchGUI as GUI
+import GUI.RenderQueue (RenderQueue)
 import Entity (Entity)
 
 main :: IO ()
 main = do entity <- TUI.initialize :: IO (TMVar (Entity Float))
           queue  <- GUI.initialize
 
-          forkIO (runTUI entity)
+          forkIO (runTUI queue entity)
           GUI.launch queue
 
           -- TODO: Use GUI.RenderQueue.queueObject with queue well as
@@ -25,5 +26,8 @@ main = do entity <- TUI.initialize :: IO (TMVar (Entity Float))
           --
           -- TODO: Catch quit signal from TUI and shut down GUI.
 
-runTUI :: (Show a, Fractional a, Eq a) => TMVar (Entity a) -> IO ()
-runTUI = TUI.launch
+runTUI :: (Show a, Fractional a, Eq a)
+       => RenderQueue
+       -> TMVar (Entity a)
+       -> IO ()
+runTUI _ = TUI.launch
