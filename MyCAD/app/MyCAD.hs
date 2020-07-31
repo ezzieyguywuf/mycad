@@ -9,8 +9,10 @@ import Control.Concurrent.STM.TMVar (TMVar, readTMVar)
 -- Internal
 import qualified TUI.LaunchTUI as TUI
 import qualified GUI.LaunchGUI as GUI
-import GUI.RenderQueue (RenderQueue)
-import Entity (Entity)
+import GUI.RenderQueue (RenderQueue, queueObject)
+import GUI.GL.Primitives (makeLine)
+import Entity (Entity, getCurves)
+import Geometry (pointAtU)
 
 main :: IO ()
 main = do entity <- TUI.initialize :: IO (TMVar (Entity Float))
@@ -40,13 +42,16 @@ runTUI :: (Show a, Fractional a, Eq a)
        -> IO ()
 runTUI = TUI.launch
 
-renderEntity :: (Show a, Fractional a, Eq a)
-            => Entity a
-            -> TMVar (Entity a)
+renderEntity :: Entity Float
+            -> TMVar (Entity Float)
             -> RenderQueue
             -> IO ()
 renderEntity lastEntity entityVar queue = do
     entity <- atomically (readTMVar entityVar)
-    unless (entity == lastEntity) (putStrLn "Something changed!")
+    unless (entity == lastEntity) $ do
+        let points = fmap getPoints (getCurves entity)
+            getPoints line = (pointAtU line 0, pointAtU line 1)
+            objects = fmap (uncurry makeLine) points
+        mapM_ (queueObject queue) objects
     threadDelay 100
     renderEntity entity entityVar queue
