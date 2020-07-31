@@ -182,9 +182,7 @@ getCurve e = (`Map.lookup` getEdgeMap e)
 
 -- | Returns the Vertex with the given VertexID
 vertexFromID :: Int -> EntityState p (Maybe Topo.Vertex)
-vertexFromID n = do
-    topology <- gets _getTopology
-    pure $ evalState (Topo.vertexFromID n) topology
+vertexFromID n = evalState (Topo.vertexFromID n) <$> gets _getTopology
 
 prettyPrintEntity :: Show p => Entity p -> Doc ()
 prettyPrintEntity (Entity vs es topology) = doc
