@@ -20,6 +20,7 @@ module TUI.LaunchTUI (initialize, launch) where
 
 -- | Base
 import Data.Text (pack)
+import Data.Maybe (fromMaybe)
 import Control.Monad.IO.Class (liftIO)
 import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TMVar (TMVar, newTMVar, takeTMVar, putTMVar)

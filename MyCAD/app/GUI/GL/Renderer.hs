@@ -93,7 +93,7 @@ renderTarget shader rtarget = do
     -- stored
     glBindVertexArray vao
     -- render each "Placement"
-    sequence_ $ flip fmap pDatas (\placement -> do
+    sequence_ $ (\placement -> do
         -- A single Placement specifies the \"model\" transformation matrix
         -- for the item in question
         putUniform shader (makeUniform "model" placement)
@@ -101,5 +101,5 @@ renderTarget shader rtarget = do
         -- TODO: Update this function to draw things other than just
         --       GL_TRIANGLES
         glDrawElements GL_TRIANGLES len GL_UNSIGNED_INT nullPtr
-        )
+        ) <$> pDatas
     glBindVertexArray 0
