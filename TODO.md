@@ -57,3 +57,5 @@
 - Clean up Main - should we use `catchError`? (probably)
 - Start using TUI.Errors again, we got rid of it when we started using
   megaparsec
+- LaunchTUI.handleCommand could probably use `modify` or something to clean it
+  up a bit
