@@ -54,7 +54,7 @@ module Entity
 
 -- Third-party
 import qualified Data.Map as Map
-import Data.Text.Prettyprint.Doc (Doc, pretty, line, indent, viaShow, vsep)
+import Data.Text.Prettyprint.Doc (Doc, pretty, line, viaShow, vsep)
 import Control.Monad (when, mzero)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
@@ -63,7 +63,7 @@ import Control.Monad.State (State, get, gets, runState, evalState, put)
 -- Internal
 import qualified Geometry as Geo
 import qualified Topology as Topo
-import Topology.PrettyPrint (prettyPrintVertex, prettyPrintEdge)
+import Topology.PrettyPrint (prettyPrintTopology, prettyShowVertex, prettyShowEdge)
 
 -- ===========================================================================
 --                               Data Types
@@ -188,21 +188,17 @@ vertexFromID n = do
 
 prettyPrintEntity :: Show p => Entity p -> Doc ()
 prettyPrintEntity (Entity vs es topology) = doc
-    where vpretty v = evalState (prettyPrintVertex v) topology
-          epretty e = evalState (prettyPrintEdge e) topology
-          prettyVS  = makePretty vpretty (Map.assocs vs)
-          prettyES  = makePretty epretty (Map.assocs es)
-          doc = vsep $ prettyVS <> prettyES
+    where doc = (vsep $ vertices <> edges) <> line <> topo
+          vertices = fmap (maybeDoc prettyShowVertex') (Map.assocs vs)
+          edges = fmap (maybeDoc prettyShowEdge') (Map.assocs es)
+          topo = prettyPrintTopology topology
+          prettyShowVertex' v = evalState (prettyShowVertex v) topology
+          prettyShowEdge' e = evalState (prettyShowEdge e) topology
 
-makePretty :: (Show k, Show a)
-           => (k -> Maybe (Doc ()))
-           -> [(k, a)] -> [Doc ()]
-makePretty keyPretty kvs = fmap makeKeyValuePretty kvs
-        where makeKeyValuePretty (key, value) =
-                  viaShow value <> line <> indent 4 prettyKey
-                      where prettyKey = case keyPretty key of
-                              Just val -> val
-                              Nothing  -> pretty $ "Can't prettify " <> show key
+maybeDoc :: (Show k, Show v) => (k -> Maybe (Doc ())) -> (k,v) -> Doc ()
+maybeDoc func (key, value) = case func key of
+                        Just doc -> doc <> pretty ": " <> viaShow value
+                        Nothing  -> pretty $ "Unable to prettify " <> show key
 -- ===========================================================================
 --                       Private Free Functions
 -- ===========================================================================

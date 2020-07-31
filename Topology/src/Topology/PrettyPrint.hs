@@ -12,6 +12,8 @@ module Topology.PrettyPrint
   prettyPrintVertex
 , prettyPrintEdge
 , prettyPrintTopology
+, prettyShowVertex
+, prettyShowEdge
 )where
 -- from: Tanisha
 --beautifulPrintEdge.run
