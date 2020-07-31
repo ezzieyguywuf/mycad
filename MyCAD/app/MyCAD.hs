@@ -1,8 +1,10 @@
 module Main (main) where
 
 -- Base
+import Control.Monad (unless)
 import Control.Concurrent (forkIO, threadDelay)
-import Control.Concurrent.STM.TMVar (TMVar)
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TMVar (TMVar, readTMVar)
 
 -- Internal
 import qualified TUI.LaunchTUI as TUI
@@ -14,8 +16,14 @@ main :: IO ()
 main = do entity <- TUI.initialize :: IO (TMVar (Entity Float))
           queue  <- GUI.initialize
 
+          -- Run the TUI in a separate thread
           forkIO (runTUI entity)
-          forkIO (renderEntity entity queue)
+
+          -- renderEntity compares the Entity passed in to the current value in
+          -- the TMVar to determine if it needs to render. Therefore, we need
+          -- to grab an initial value to pass
+          initialEntity <- atomically (readTMVar entity)
+          forkIO (renderEntity initialEntity entity queue)
           GUI.launch queue
 
           -- TODO: Use GUI.RenderQueue.queueObject with queue well as
@@ -33,9 +41,12 @@ runTUI :: (Show a, Fractional a, Eq a)
 runTUI = TUI.launch
 
 renderEntity :: (Show a, Fractional a, Eq a)
-            => TMVar (Entity a)
+            => Entity a
+            -> TMVar (Entity a)
             -> RenderQueue
             -> IO ()
-renderEntity entityVar queue = do
+renderEntity lastEntity entityVar queue = do
+    entity <- atomically (readTMVar entityVar)
+    unless (entity == lastEntity) (putStrLn "Something changed!")
     threadDelay 100
-    renderEntity entityVar queue
+    renderEntity entity entityVar queue
