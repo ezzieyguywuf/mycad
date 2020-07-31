@@ -13,7 +13,7 @@ main :: IO ()
 main = do entity <- TUI.initialize :: IO (TMVar (Entity Float))
           queue  <- GUI.initialize
 
-          forkIO (TUI.launch entity)
+          forkIO (runTUI entity)
           GUI.launch queue
 
           -- TODO: Use GUI.RenderQueue.queueObject with queue well as
@@ -24,3 +24,6 @@ main = do entity <- TUI.initialize :: IO (TMVar (Entity Float))
           -- guess in he forked thread?
           --
           -- TODO: Catch quit signal from TUI and shut down GUI.
+
+runTUI :: (Show a, Fractional a, Eq a) => TMVar (Entity a) -> IO ()
+runTUI = TUI.launch
