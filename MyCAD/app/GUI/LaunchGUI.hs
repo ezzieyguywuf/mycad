@@ -58,7 +58,7 @@ launch queue = do
             loop window renderData
 
 loop :: Window -> RenderData -> IO ()
-loop window renderData = do
+loop window renderData =
     shouldClose window >>= \case
         False -> do
             -- Might trigger a render

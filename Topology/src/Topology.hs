@@ -53,11 +53,10 @@ module Topology
 )where
 
 -- Base
-import Control.Monad (void)
+import Control.Monad (void, mzero)
 import Data.List ((\\), intersect)
 
 -- third-party
-import Control.Monad (mzero)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State (State, gets, modify)
@@ -146,7 +145,7 @@ emptyTopology = Topology empty
 -- | Adds a single "free" Vertex to the 'Topology'. In this context, "free"
 --   means that it is does not have any entities adjacent to it.
 addFreeVertex :: TopoState Vertex
-addFreeVertex = addNode VertexEntity >>= pure . Vertex
+addFreeVertex = Vertex <$> addNode VertexEntity
 
 -- | If the Vertex does not exist, this does nothing.
 removeVertex :: Vertex -> TopoState ()
@@ -186,10 +185,10 @@ unAdjacency adjacency = case adjacency of
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
-getVertices = gets ((fmap Vertex) . (filterNodes VertexEntity) . unTopology)
+getVertices = gets (fmap Vertex . filterNodes VertexEntity . unTopology)
 
 getEdges :: TopoState [Edge]
-getEdges = gets ((fmap Edge) . (filterNodes EdgeEntity) . unTopology)
+getEdges = gets (fmap Edge . filterNodes EdgeEntity . unTopology)
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
@@ -197,11 +196,11 @@ removeEdge = void . deleteNode . getEdgeID
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
-vertexEdges (Vertex gid) = adjacencies gid EdgeEntity >>= pure . fmap (fmap Edge)
+vertexEdges (Vertex gid) = fmap (fmap Edge) <$> adjacencies gid EdgeEntity
 
 -- | Returns the list ef Vertices that are adjacent to the given Edge
 edgeVertices :: Edge -> TopoState [Adjacency Vertex]
-edgeVertices (Edge gid) = (adjacencies gid VertexEntity) >>= pure . fmap (fmap Vertex)
+edgeVertices (Edge gid) = fmap (fmap Vertex) <$> adjacencies gid VertexEntity
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
@@ -263,9 +262,9 @@ connectNode n1 n2 = modify (Topology . insEdge (n1, n2, ()) . unTopology)
 getVertexNode :: Vertex -> TopoState (Maybe Int)
 getVertexNode (Vertex gid) = do
     graph <- gets unTopology
-    case gelem gid graph of
-        True  -> pure . Just $ gid
-        False -> pure Nothing
+    if gelem gid graph
+       then pure . Just $ gid
+       else pure Nothing
 
 -- | Returns all the Nodes in the graph of the given EntityType
 filterNodes :: EntityType -> TopoGraph -> [Int]
@@ -293,8 +292,8 @@ adjacencies gid etype = do
         inIDs'  = inIDs \\ inoutIDs
         outIDs' = outIDs \\ inoutIDs
         -- Wrap our GID's in the appropriate Adjacency, as well as Edge data types
-        allAdjacencies = (fmap In inIDs')
-                         <> (fmap Out outIDs')
-                         <> (fmap InOut inoutIDs)
+        allAdjacencies = fmap In inIDs'
+                         <> fmap Out outIDs'
+                         <> fmap InOut inoutIDs
     pure allAdjacencies
 

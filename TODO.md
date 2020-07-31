@@ -21,7 +21,6 @@
 - Add unit tests for parser
 
 # Geometry
-- run hlint on Geometry and GeometrySpec
 - re-evaluate if Geometry needs typeclasses (probably not)
 
 # Topology

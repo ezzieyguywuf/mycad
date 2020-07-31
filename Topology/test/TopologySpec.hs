@@ -6,7 +6,7 @@ import Data.Tuple (swap)
 import Data.Foldable (traverse_)
 import Test.Hspec (Spec, describe, it, context, xit)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
-import Control.Monad ((>=>))
+import Control.Monad ((>=>), replicateM)
 import Control.Monad.State (execState, get, put, evalState)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
@@ -46,25 +46,25 @@ spec = do
             it "the second vertex doesn't exist" $
                 property (prop_prepRunExpect prep' (run . swap) Nothing)
         it "creates an Out adjacency from v1 → Edge" $ do
-            let post ((v1, _), edge) = vertexEdges v1 >>= pure . ([Out edge] ==)
+            let post ((v1, _), edge) = ([Out Edge] == ) <$> vertexEdges v1
             property (prepRunMaybe post)
         it "creates an In adjacency for Edge ← v1" $ do
-            let post ((v1, _), edge) = edgeVertices edge >>= pure . (elem (In v1))
+            let post ((v1, _), edge) = elem (In v1) <$> edgeVertices edge
             property (prepRunMaybe post)
         it "creates an Out adjacency for Edge → v2" $ do
-            let post ((_, v2), edge) = edgeVertices edge >>= pure . (elem (Out v2))
+            let post ((_, v2), edge) = elem (Out v2) <$> edgeVertices edge
             property (prepRunMaybe post)
         it "creates an In adjacency from v2 ← Edge" $ do
-            let post ((_, v2), edge) = vertexEdges v2 >>= pure . ([In edge] ==)
+            let post ((_, v2), edge) = ([In edge] ==) <$> vertexEdges v2
             property (prepRunMaybe post)
         it "creates a single Edge adjacency on v1" $ do
-            let post ((v1, _), _) = vertexEdges v1 >>= pure . (1 ==) . length
+            let post ((v1, _), _) = (1 ==) . length <$> vertexEdges v1
             property (prepRunMaybe post)
         it "creates a single Edge adjacency on v2" $ do
-            let post ((_, v2), _) = vertexEdges v2 >>= pure . (1 ==) . length
+            let post ((_, v2), _) = (1 ==) . length <$> vertexEdges v2
             property (prepRunMaybe post)
         it "creates a two Vertex adjacencies on edge" $ do
-            let post ((_, _), edge) = edgeVertices edge >>= pure . (2 ==) . length
+            let post ((_, _), edge) = (2 ==) . length <$> edgeVertices edge
             property (prepRunMaybe post)
         it "returns the same Edge if called twice with v1→v2" $ do
             let run' args = do edge  <- run args
@@ -82,11 +82,11 @@ type TopoMod a b= a -> TopoState b
 prop_runIdentity :: TopoState a -> TestTopology -> Bool
 prop_runIdentity run = prop_prepRunIdentity prep run'
     where prep  = pure ()
-          run' a = const prep a >> run
+          run' _ = prep >> run
 
 -- The given TopoMod should produce the given output.
 prop_runExpect :: Eq a => TopoState a -> a -> TestTopology -> Bool
-prop_runExpect run val = prop_prepRunExpect prep run' val
+prop_runExpect run = prop_prepRunExpect prep run'
     where prep = pure ()
           run' _ = run
 
@@ -134,8 +134,7 @@ prop_prepRunPostMaybeExpect :: TopoState a
                             -> TopoMod (a,b) Bool
                             -> TestTopology
                             -> Bool
-prop_prepRunPostMaybeExpect prep run post topology =
-    prop_prepRunPostExpect prep run post' topology
+prop_prepRunPostMaybeExpect prep run post= prop_prepRunPostExpect prep run post'
         where post' (a, maybeB) = case maybeB of
                                       Just b  -> post (a,b)
                                       Nothing -> pure False
@@ -151,5 +150,5 @@ newtype TestTopology = TestTopology {unTestTopology :: Topology} deriving (Show)
 instance Arbitrary TestTopology where
     arbitrary = do
         nVertices <- arbitrary
-        let topoState = sequence . replicate nVertices $ addFreeVertex
+        let topoState = replicateM nVertices addFreeVertex
         pure $ TestTopology (execState topoState emptyTopology)

@@ -58,13 +58,10 @@ runAdd cmd =
             v1        <- MaybeT $ vertexFromID n1
             v2        <- MaybeT $ vertexFromID n2
             lift $ addEdge v1 v2 
-            pure ("Added a line")
+            pure "Added a line"
 
 getHelpString :: Maybe CommandToken -> String
-getHelpString mcommand =
-    case mcommand of
-        Nothing    -> help
-        Just token -> commandHelp token
+getHelpString = maybe help commandHelp
 
 help :: String
 help = "This is Help"

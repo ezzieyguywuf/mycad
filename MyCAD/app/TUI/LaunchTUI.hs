@@ -50,10 +50,10 @@ launch entityVar = HL.runInputT settings (loop entityVar)
 
 -- | Determine if we should loop again or bail out.
 loop :: (Show p, Fractional p, Eq p) => TMVar (Entity p) -> HL.InputT IO ()
-loop entityVar = do
+loop entityVar =
     HL.getInputLine "mycad> " >>= \case
         Nothing    -> exit
-        Just input -> case (parseInput (pack input)) of
+        Just input -> case parseInput (pack input) of
             Left  err     -> do
                 HL.outputStrLn (errorBundlePretty err)
                 loop entityVar

@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
 {-|
 Module      : CommandParser
 Description : Parses string commands to be used in the MyCAD application
@@ -67,7 +66,7 @@ data AddCommand a = AddVertex (Point a)
 
 -- | This is used to identify a topological item, i.e. \"V0\" would be the
 --   zeroeth "Topology.Vertex"
-data Identifier = Identifier Text deriving (Show)
+newtype Identifier = Identifier Text deriving (Show)
 
 -- | Tokenize a user's "Text" input into a recognizable commad.
 data CommandToken  = HelpT
@@ -145,7 +144,7 @@ lexAdd = checkMap addCommands <?> "known \"add\" sub-command. Check \"help add\"
 parseAdd :: (Fractional a) => AddToken a -> Parser (Command a)
 parseAdd token =
     case token of
-        VertexToken -> parsePoint >>= pure . Add . AddVertex
+        VertexToken -> Add . AddVertex <$> parsePoint
         EdgeToken   -> parseAddEdge
 
 -- | Tries to parse the appropriate arguments for the \"add edge\" command "
@@ -171,7 +170,7 @@ parseVertex = char 'v' >> integerNumber
 
 -- | This parses any arguments to the \"help\" command
 parseHelp :: Fractional a => Parser (Command a)
-parseHelp = optional (lexeme lexCommand) >>= pure . Help
+parseHelp = Help <$> optional (lexeme lexCommand)
 
 -- | This parses a 3-dimensional point x y z
 parsePoint :: Fractional a => Parser (Point a)

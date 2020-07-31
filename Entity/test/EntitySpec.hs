@@ -8,11 +8,12 @@ import Linear.V3 (V3(V3))
 import Control.Monad.State (runState, execState, evalState, gets)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Data.Maybe (isNothing)
 
 spec :: Spec
 spec = do
-    describe "addVertex" $ do
-        it "Creates a Vertex at the given Geometry" $ do
+    describe "addVertex" $
+        it "Creates a Vertex at the given Geometry" $
             property prop_addVertexGetPoint
     describe "addEdge" $ do
         it "Creates an Edge with an underlying Line from v1 to v2" $
@@ -40,7 +41,7 @@ prop_addEdgeGetLine (TestPoint p1) (TestPoint p2) (TestEntity entity) =
 
 prop_addEdgeFail :: TestPoint Float -> TestEntity Float -> Bool
 prop_addEdgeFail (TestPoint point) (TestEntity entity) =
-    evalState eState entity == Nothing
+    isNothing (evalState eState entity)
     where eState = addVertex point >>= \v -> addEdge v v
 
 -- ===========================================================================
@@ -55,7 +56,7 @@ newtype TestPoint  a = TestPoint {unTestPoint :: Geo.Point a} deriving (Show)
 instance (Fractional a, Arbitrary a) => Arbitrary (TestEntity a) where
     arbitrary = do
         points <- listOf arbitrary
-        let entityState = sequence_ (fmap (addVertex . unTestPoint) points)
+        let entityState = mapM_ (addVertex . unTestPoint) points
         pure $ TestEntity (execState entityState nullEntity)
 
 -- | This will generate a random Point
@@ -64,4 +65,4 @@ instance Arbitrary a => Arbitrary (TestPoint a) where
         x <- arbitrary
         y <- arbitrary
         z <- arbitrary
-        pure . TestPoint $ (V3 x y z)
+        pure . TestPoint $ V3 x y z

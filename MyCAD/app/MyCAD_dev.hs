@@ -30,7 +30,7 @@ main = do
         mStrings  = evalState estate entity  :: [Maybe String]
         ios = fmap putStrLn (catMaybes mStrings)
     putStrLn "Running the following commands: "
-    sequence_ $ fmap (putStrLn . show) cmds
+    mapM_ print cmds
     putStrLn "-------- Starting -------------"
     sequence_ ios
     putStrLn "-------- Done -------------"

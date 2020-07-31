@@ -8,14 +8,14 @@ import Linear.V3
 spec :: Spec
 spec = do
     describe "makeLine" $ do
-        it "creates a parametrized Line with u=0 as P1 and u=1 as P2" $ do
+        it "creates a parametrized Line with u=0 as P1 and u=1 as P2" $
             property prop_lineParametricStartEnd
-        it "a Line has constant slope" $ do
+        it "a Line has constant slope" $
             property prop_lineConstantSlope
-        it "a Line is directional in u" $ do
+        it "a Line is directional in u" $
             property prop_lineDirectional
-    describe "pointIntersectsLine" $ do
-        it "Accurately determines whether or not a point lies on a line" $ do
+    describe "pointIntersectsLine" $
+        it "Accurately determines whether or not a point lies on a line" $
             property prop_pointIntersectsLine
         --describe "lineIntersectsLine" $ do
             --it "checks if a Line intersects another Line, returns the intersection Point if they do" $ do
@@ -35,31 +35,31 @@ prop_lineParametricStartEnd x1 y1 z1 x2 y2 z2 =
 
 prop_lineConstantSlope :: G.Line Rational -> Bool
 prop_lineConstantSlope l =
-    let m1 = (G.pointAtU l 1) - (G.pointAtU l 0)
-        m2 = (G.pointAtU l 2) - (G.pointAtU l 1)
-        m3 = (G.pointAtU l 3) - (G.pointAtU l 4)
+    let m1 = G.pointAtU l 1 - G.pointAtU l 0
+        m2 = G.pointAtU l 2 - G.pointAtU l 1
+        m3 = G.pointAtU l 3 - G.pointAtU l 4
         m  = G.slope l
         crosses = map (`cross` m) [m1, m2, m3]
     -- The cross product of parallel vectors is 0 (or one of them is the zero vector...)
-    in all (\n -> n == 0) crosses == True
+    in all (== 0) crosses
 
 prop_lineDirectional :: G.Line Rational -> Bool
 prop_lineDirectional l =
-    let m1 = (G.pointAtU l 0) - (G.pointAtU l 1)
-        m2 = (G.pointAtU l 1) - (G.pointAtU l 0)
+    let m1 = G.pointAtU l 0 - G.pointAtU l 1
+        m2 = G.pointAtU l 1 - G.pointAtU l 0
     in m1 == -m2
 
 -- Properties for intersection
 prop_pointIntersectsLine :: G.Line Rational -> [Rational] -> Property
 prop_pointIntersectsLine l us =
-    (length us > 0) ==>
+    not (null us) ==>
     let ps  = map (G.pointAtU l) us
         -- if we purpusefully move each point...
-        ps' = map (+ (V3 1 1 1)) ps
-        c1  = and $ map (G.pointIntersectsLine l) ps
+        ps' = map (+ V3 1 1 1) ps
+        c1  = all (G.pointIntersectsLine l) ps
         -- it should NOT intersect
         c2  = (not . and) $ map (G.pointIntersectsLine l) ps'
-    in and [c1, c2]
+    in (c1 && c2)
 
 --prop_intersectLineLine :: G.Line Rational -> Bool
 --prop_intersectLineLine l =

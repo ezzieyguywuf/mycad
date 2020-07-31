@@ -162,7 +162,7 @@ getPoint entity vertex = evalState (getPoint' vertex) entity
 
 -- | A stateful version of "getPoint".
 getPoint' :: Topo.Vertex -> EntityState a (Maybe (Geo.Point a))
-getPoint' vertex = gets getVertexMap >>= pure . (Map.lookup vertex)
+getPoint' vertex = Map.lookup vertex <$> gets getVertexMap
 
 addEdge' :: Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe (Topo.Edge, Topo.Topology))
 addEdge' v1 v2 = runMaybeT $ do
@@ -178,7 +178,7 @@ addEdge' v1 v2 = runMaybeT $ do
 
 -- | Returns the underlying geometric "Curve" of the "Edge'"
 getCurve :: Entity a -> Topo.Edge -> Maybe (Geo.Line a)
-getCurve e = (`Map.lookup` (getEdgeMap e))
+getCurve e = (`Map.lookup` getEdgeMap e)
 
 -- | Returns the Vertex with the given VertexID
 vertexFromID :: Int -> EntityState p (Maybe Topo.Vertex)
@@ -188,7 +188,7 @@ vertexFromID n = do
 
 prettyPrintEntity :: Show p => Entity p -> Doc ()
 prettyPrintEntity (Entity vs es topology) = doc
-    where doc = (vsep $ vertices <> edges) <> line <> topo
+    where doc = vsep (vertices <> edges) <> line <> topo
           vertices = fmap (maybeDoc prettyShowVertex') (Map.assocs vs)
           edges = fmap (maybeDoc prettyShowEdge') (Map.assocs es)
           topo = prettyPrintTopology topology

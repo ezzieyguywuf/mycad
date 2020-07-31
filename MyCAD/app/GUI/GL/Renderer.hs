@@ -10,7 +10,7 @@ import Data.Foldable (for_)
 import Control.Monad (when, join)
 import Control.Concurrent.STM (STM, atomically)
 import Control.Concurrent.STM.TQueue (flushTQueue)
-import Control.Concurrent.STM.TVar (readTVar, writeTVar)
+import Control.Concurrent.STM.TVar (readTVar, writeTVar, readTVarIO)
 import Foreign (nullPtr)
 
 -- Third-party
@@ -75,7 +75,7 @@ render window (RenderData shader targetsVar _) = do
     glUseProgram (_shaderID shader)
 
     -- Render each target
-    targets <- atomically (readTVar targetsVar)
+    targets <- readTVarIO targetsVar
     mapM_ (renderTarget shader) targets
 
     -- swap the buffers

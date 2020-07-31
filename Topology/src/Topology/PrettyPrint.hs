@@ -48,15 +48,15 @@ prettyShowVertex vertex = runMaybeT $ do
 prettyPrintAdjacency :: Adjacency a -> TopoDoc
 prettyPrintAdjacency adjacency =
     case adjacency of
-        In    _ -> pretty (" ← ")
-        Out   _ -> pretty (" → ")
-        InOut _ -> pretty (" ↔ ")
+        In    _ -> pretty " ← "
+        Out   _ -> pretty " → "
+        InOut _ -> pretty " ↔ "
 
 prettyPrintVertex :: Vertex -> TopoState (Maybe TopoDoc)
 prettyPrintVertex vertex = runMaybeT $ do
     showV           <- MaybeT (prettyShowVertex vertex)
     edgeAdjacencies <- lift (vertexEdges vertex)
-    let getMaybePPEdges = sequence . fmap (prettyShowEdge . unAdjacency)
+    let getMaybePPEdges = mapM (prettyShowEdge . unAdjacency)
     maybePPEdges    <- lift $ getMaybePPEdges edgeAdjacencies
     let ppAdjacencies = fmap prettyPrintAdjacency edgeAdjacencies
         ppEdges       = catMaybes maybePPEdges
@@ -66,7 +66,7 @@ prettyPrintEdge :: Edge -> TopoState (Maybe TopoDoc)
 prettyPrintEdge edge = runMaybeT $ do
     showE             <- MaybeT (prettyShowEdge edge)
     vertexAdjacencies <- lift (edgeVertices edge)
-    let getMaybePPVertices = sequence . fmap (prettyShowVertex . unAdjacency)
+    let getMaybePPVertices = mapM (prettyShowVertex . unAdjacency)
     maybePPVertices   <- lift $ getMaybePPVertices vertexAdjacencies
     let ppAdjacencies = fmap prettyPrintAdjacency vertexAdjacencies
         ppVertices    = catMaybes maybePPVertices
@@ -82,8 +82,8 @@ prettyPrintTopology topology
         where maybeDoc = runMaybeT $ do
                   vs <- lift getVertices :: MaybeT (State Topology) [Vertex]
                   es <- lift getEdges
-                  vDocs <- lift (sequence . fmap prettyPrintVertex $ vs)
-                  eDocs <- lift (sequence . fmap prettyPrintEdge $ es)
+                  vDocs <- lift (mapM prettyPrintVertex vs)
+                  eDocs <- lift (mapM prettyPrintEdge es)
                   let vDocs' = catMaybes vDocs
                       eDocs' = catMaybes eDocs
                   pure (vsep $ vDocs' <> eDocs')  :: MaybeT (State Topology) TopoDoc

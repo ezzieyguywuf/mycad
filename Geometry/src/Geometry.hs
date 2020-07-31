@@ -45,7 +45,7 @@ zeroVector :: (Num a) => Vector a
 zeroVector = V3 0 0 0
 
 makeLine :: (Fractional a) => Point a -> Point a -> Line a
-makeLine p1 p2 = Line p1 p2
+makeLine = Line
 
 slope :: (Fractional a) => Line a -> Vector a
 slope l = q - p
@@ -53,7 +53,7 @@ slope l = q - p
           q = pointAtU l 1
 
 makePlane :: (Fractional a) => Point a -> Point a -> Point a -> Plane a
-makePlane p1 p2 p3 = Plane p1 p2 p3
+makePlane = Plane
 
 -- | Parametrizes a component between u=0 and u=1
 pointAtU :: (Fractional a) => Line a -> a -> Point a
@@ -73,7 +73,7 @@ pointAtUV (Plane p1 p2 p3) u v =
 --                      Implementations (Instances)
 -- ===========================================================================
 pointIntersectsLine :: (Fractional a, Eq a) => Line a -> Point a -> Bool
-pointIntersectsLine l p = (m `cross` v) == (V3 0 0 0)
+pointIntersectsLine l p = (m `cross` v) == V3 0 0 0
     where u0 = pointAtU l 0
           v  = p - u0
           m  = slope l
