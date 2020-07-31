@@ -54,7 +54,7 @@ module Entity
 
 -- Third-party
 import qualified Data.Map as Map
-import Data.Text.Prettyprint.Doc (Doc, pretty, line, emptyDoc, indent)
+import Data.Text.Prettyprint.Doc (Doc, pretty, line, indent, viaShow, vsep)
 import Control.Monad (when, mzero)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
@@ -63,7 +63,7 @@ import Control.Monad.State (State, get, gets, runState, evalState, put)
 -- Internal
 import qualified Geometry as Geo
 import qualified Topology as Topo
-import Topology.PrettyPrint (prettyPrintVertex)
+import Topology.PrettyPrint (prettyPrintVertex, prettyPrintEdge)
 
 -- ===========================================================================
 --                               Data Types
@@ -155,7 +155,7 @@ addEdge v1 v2 = runMaybeT $ do
     pure edge
 
 -- | Returns the underlying geometric Point of the Vertex
---   
+--
 --   Returns Nothing if the Vertex is not part of this Entity
 getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)
 getPoint entity vertex = evalState (getPoint' vertex) entity
@@ -186,18 +186,25 @@ vertexFromID n = do
     topology <- gets _getTopology
     pure $ evalState (Topo.vertexFromID n) topology
 
-prettyPrintEntity :: Show a => Entity a -> Doc ()
-prettyPrintEntity (Entity vs _ topology) = doc
-    where doc = Map.foldlWithKey (makePrettyVertex topology) emptyDoc vs
+prettyPrintEntity :: Show p => Entity p -> Doc ()
+prettyPrintEntity (Entity vs es topology) = doc
+    where vpretty = (\v -> evalState (prettyPrintVertex v) topology)
+            :: Topo.Vertex -> Maybe (Doc ())
+          epretty = (\e -> evalState (prettyPrintEdge e) topology)
+            :: Topo.Edge -> Maybe (Doc ())
+          prettyVS  = makePretty vpretty (Map.assocs vs)
+          prettyES  = makePretty epretty (Map.assocs es)
+          doc = vsep $ prettyVS <> prettyES
 
-makePrettyVertex :: Show a => Topo.Topology -> Doc () -> Topo.Vertex -> Geo.Point a -> Doc ()
-makePrettyVertex topology doc vertex point = doc
-                                    <> pretty (show point)
-                                    <> line
-                                    <> case evalState (prettyPrintVertex vertex) topology of
-                                           Just _doc -> indent 4 _doc <> line
-                                           Nothing  -> pretty "No vertices"
-
+makePretty :: (Show k, Show a)
+           => (k -> Maybe (Doc ()))
+           -> [(k, a)] -> [Doc ()]
+makePretty keyPretty kvs = fmap makeKeyValuePretty kvs
+        where makeKeyValuePretty (key, value) =
+                  viaShow value <> line <> indent 4 prettyKey
+                      where prettyKey = case keyPretty key of
+                              Just val -> val
+                              Nothing  -> pretty $ "Can't prettify " <> show key
 -- ===========================================================================
 --                       Private Free Functions
 -- ===========================================================================
