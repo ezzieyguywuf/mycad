@@ -1,4 +1,4 @@
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-|
 Module      : LaunchTUI
 Description : Launches MyCAD's Textual User Interface
@@ -30,7 +30,7 @@ import qualified System.Console.Haskeline as HL
 import Text.Megaparsec.Error (errorBundlePretty)
 
 -- | Internal imports
-import TUI.CommandParser (parseInput, commandCompletions)
+import TUI.CommandParser (ParseError, Command(Quit), parseInput, commandCompletions)
 import TUI.CommandRunner (runCommand)
 import Entity (Entity, nullEntity)
 
@@ -50,21 +50,31 @@ launch entityVar = HL.runInputT settings (loop entityVar)
 
 -- | Determine if we should loop again or bail out.
 loop :: (Show p, Fractional p, Eq p) => TMVar (Entity p) -> HL.InputT IO ()
-loop entityVar =
-    HL.getInputLine "mycad> " >>= \case
-        Nothing    -> exit
-        Just input -> case parseInput (pack input) of
-            Left  err     -> do
-                HL.outputStrLn (errorBundlePretty err)
-                loop entityVar
-            Right command -> do
-                entity <- liftIO (atomically $ takeTMVar entityVar)
-                case runState (runCommand command) entity of
-                    (Nothing, _)        -> exit
-                    (Just msg, entity') -> do
-                        HL.outputStrLn msg
-                        liftIO (atomically $ putTMVar entityVar entity')
-                        loop entityVar
+loop entityVar = HL.getInputLine "mycad> "
+                 >>= maybe exit
+                 ((either (handleError entityVar) (handleCommand entityVar)) . (parseInput . pack))
+
+-- | This will handle an error produced by the parser
+handleError :: (Show a, Fractional a, Eq a)
+            => TMVar (Entity a)
+            -> ParseError
+            -> HL.InputT IO ()
+handleError entityVar pError =
+    HL.outputStrLn (errorBundlePretty pError) >> loop entityVar
+
+-- | This will execute/handle a Command produced by the parser
+handleCommand :: (Show a, Fractional a, Eq a) 
+              => TMVar (Entity a)
+              -> Command a
+              -> HL.InputT IO ()
+handleCommand _ Quit = exit
+handleCommand entityVar command = do
+    liftIO $ do
+        entity <- atomically (takeTMVar entityVar)
+        let (maybeMsg, entity') = runState (runCommand command) entity
+        maybe (pure ()) putStrLn maybeMsg
+        atomically (putTMVar entityVar entity')
+    loop entityVar
 
 -- ----------------------------------------------------------------------------
 --                   Haskeline-Specific Setup Stuff. You can probably ignore

@@ -19,6 +19,7 @@ module TUI.CommandParser
   Command(..)
 , CommandToken(..)
 , AddCommand(..)
+, ParseError
 , parseInput
 , commandCompletions
 )where

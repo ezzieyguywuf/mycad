@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-|
 Module      : CommandRunner
 Description : Used to execute a given Action in the MyCAD application
