@@ -50,31 +50,39 @@ launch entityVar = HL.runInputT settings (loop entityVar)
 
 -- | Determine if we should loop again or bail out.
 loop :: (Show p, Fractional p, Eq p) => TMVar (Entity p) -> HL.InputT IO ()
-loop entityVar = HL.getInputLine "mycad> "
-                 >>= maybe exit
-                 ((either (handleError entityVar) (handleCommand entityVar)) . (parseInput . pack))
+loop entityVar = do
+    -- First get the input from the user. Returns Nothing if ctrl-D was pressed
+    userString <- HL.getInputLine "mycad> "
+    let -- Turn a ctrl-D into a Quit command
+        commandString = maybe "quit" id userString
+        -- Parse the string into a Command
+        eitherCommand = parseInput (pack commandString)
+
+    -- Let handleCommand determine if we should loop again (note: handleError
+    -- just prints out the error, then loops again)
+    loopAgain <- either handleError (handleCommand entityVar) eitherCommand
+    if loopAgain
+       then (loop entityVar)
+       else exit
 
 -- | This will handle an error produced by the parser
-handleError :: (Show a, Fractional a, Eq a)
-            => TMVar (Entity a)
-            -> ParseError
-            -> HL.InputT IO ()
-handleError entityVar pError =
-    HL.outputStrLn (errorBundlePretty pError) >> loop entityVar
+handleError :: ParseError -> HL.InputT IO Bool
+handleError pError =
+    HL.outputStrLn (errorBundlePretty pError) >> pure True
 
 -- | This will execute/handle a Command produced by the parser
-handleCommand :: (Show a, Fractional a, Eq a) 
+handleCommand :: (Show a, Fractional a, Eq a)
               => TMVar (Entity a)
               -> Command a
-              -> HL.InputT IO ()
-handleCommand _ Quit = exit
+              -> HL.InputT IO Bool
+handleCommand _ Quit = pure False
 handleCommand entityVar command = do
     liftIO $ do
         entity <- atomically (takeTMVar entityVar)
         let (maybeMsg, entity') = runState (runCommand command) entity
         maybe (pure ()) putStrLn maybeMsg
         atomically (putTMVar entityVar entity')
-    loop entityVar
+    pure True
 
 -- ----------------------------------------------------------------------------
 --                   Haskeline-Specific Setup Stuff. You can probably ignore
