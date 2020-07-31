@@ -19,8 +19,7 @@ main = do
                    ,  "add vertex 50 60 70"
                    ,  "add line v0 v1"
                    ,  "add line v1 v2"
-                   ,  "add line v2 v3"
-                   ,  "add line v3 v4"
+                   ,  "add line v2 v1"
                    ,  "help help"
                    ,  "show"
                    ]
