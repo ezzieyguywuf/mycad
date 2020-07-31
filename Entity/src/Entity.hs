@@ -188,10 +188,8 @@ vertexFromID n = do
 
 prettyPrintEntity :: Show p => Entity p -> Doc ()
 prettyPrintEntity (Entity vs es topology) = doc
-    where vpretty = (\v -> evalState (prettyPrintVertex v) topology)
-            :: Topo.Vertex -> Maybe (Doc ())
-          epretty = (\e -> evalState (prettyPrintEdge e) topology)
-            :: Topo.Edge -> Maybe (Doc ())
+    where vpretty v = evalState (prettyPrintVertex v) topology
+          epretty e = evalState (prettyPrintEdge e) topology
           prettyVS  = makePretty vpretty (Map.assocs vs)
           prettyES  = makePretty epretty (Map.assocs es)
           doc = vsep $ prettyVS <> prettyES
