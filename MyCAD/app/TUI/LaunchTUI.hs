@@ -54,7 +54,7 @@ loop entityVar = do
     -- First get the input from the user. Returns Nothing if ctrl-D was pressed
     userString <- HL.getInputLine "mycad> "
     let -- Turn a ctrl-D into a Quit command
-        commandString = maybe "quit" id userString
+        commandString = fromMaybe "quit" userString
         -- Parse the string into a Command
         eitherCommand = parseInput (pack commandString)
 
@@ -62,7 +62,7 @@ loop entityVar = do
     -- just prints out the error, then loops again)
     loopAgain <- either handleError (handleCommand entityVar) eitherCommand
     if loopAgain
-       then (loop entityVar)
+       then loop entityVar
        else exit
 
 -- | This will handle an error produced by the parser
