@@ -44,10 +44,10 @@ rotateCameraNudge :: CameraData
                   -> CameraData
 rotateCameraNudge (LookAt loc up dir) yaw pitch = LookAt loc' up' dir
     where p1 = normalize loc
-          p2 = normalize $ rotate (pitchRot * yawRot) p1
+          p2 = normalize (rotate (pitchRot * yawRot) p1)
           right = (loc - dir) `cross` up
           yawRot = axisAngle up yaw
-          pitchRot = axisAngle right (-pitch)
+          pitchRot = axisAngle right pitch
           axis = p1 `cross` p2
           theta = acos (p1 `dot` p2)
           rot = axisAngle axis theta

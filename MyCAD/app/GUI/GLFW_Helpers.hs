@@ -32,7 +32,9 @@ data Window = Window { getWindow   :: GLFW.Window
                      }
 
 -- | This data is used to determine how far the cursor has moved in callbacks
-data CursorPosition = CursorPosition Float Float
+data CursorPosition = CursorPosition { _prevCursor :: (Float, Float)
+                                     , _cumCursor  :: (Float, Float)
+                                     }
 
 -- | Initializes a GLFW window, including the openGL context
 glfwInit :: Int -> Int -> String -> RenderQueue -> CameraData -> IO (Maybe Window)
@@ -50,7 +52,7 @@ initWindow :: RenderQueue -> CameraData -> GLFW.Window -> IO (Maybe Window)
 initWindow queue cData glfwWindow = do
     -- Initialize...well, global stuf :(
     ioCam  <- newIORef cData
-    cursor <- newIORef $ CursorPosition 0 0
+    cursor <- newIORef $ CursorPosition  (0, 0) (0, 0)
 
     let window = Window glfwWindow ioCam queue
 
@@ -104,8 +106,8 @@ keypressed window glfwWindow key _ keyState _ = do
         isRight     = key == GLFW.Key'Right
 
     when (isPressed && isEscape) (GLFW.setWindowShouldClose glfwWindow True)
-    when (isUp    && (isPressed || isRepeating)) (bumpCamera window 0   delta)
-    when (isDown  && (isPressed || isRepeating)) (bumpCamera window 0 (-delta))
+    when (isUp    && (isPressed || isRepeating)) (bumpCamera window 0  (-delta))
+    when (isDown  && (isPressed || isRepeating)) (bumpCamera window 0 delta)
     when (isRight && (isPressed || isRepeating)) (bumpCamera window (-delta) 0)
     when (isLeft  && (isPressed || isRepeating)) (bumpCamera window   delta  0)
 
@@ -153,18 +155,26 @@ sendRedraw window = do
 cursorMoved :: IORef CursorPosition -> Window -> GLFW.CursorPosCallback
 cursorMoved ioCursor window _ x y = do
     -- Calculate delta
-    (CursorPosition x0 y0) <- readIORef ioCursor
-    let sensitivity = 0.1
-        x' = realToFrac x
+    (CursorPosition (x0, y0) (cumX, cumY)) <- readIORef ioCursor
+    let x' = realToFrac x
         y' = realToFrac y
         dx = sensitivity * (x' - x0)
-        dy = -1 * sensitivity * (y' - y0)
+        dy = sensitivity * (y' - y0)
+        cumX' = cumX + abs dx
+        cumY' = cumY + abs dy
+        -- How sensitive to be
+        sensitivity = 0.01
+        -- Only bump the camera when at least this much delta has accumulated
+        trigger = 5
 
-    -- Update our IORef (err....global var.)
-    writeIORef  ioCursor (CursorPosition x' y')
-
-    -- Update camera
-    bumpCamera window (-dx) dy
+    case (cumX' >= trigger, cumY' >= trigger) of
+        (True, True) -> do bumpCamera window (-dx) dy
+                           writeIORef  ioCursor (CursorPosition (x', y') (0, 0))
+        (True, False) -> do bumpCamera window (-dx) 0
+                            writeIORef  ioCursor (CursorPosition (x', y') (0, cumY'))
+        (False, True) -> do bumpCamera window 0 dy
+                            writeIORef  ioCursor (CursorPosition (x', y') (cumX', 0))
+        (False, False) ->  writeIORef  ioCursor (CursorPosition (x', y') (cumX', cumY'))
 
 -- | Callback for when the user presses a button in the window
 mouseButtonPressed :: Window -> IORef CursorPosition -> GLFW.MouseButtonCallback
@@ -175,7 +185,8 @@ mouseButtonPressed window cursor glfwWindow button state _ = do
        then do
            -- track the cursor's movement
            (x, y) <- GLFW.getCursorPos glfwWindow
-           writeIORef cursor (CursorPosition (realToFrac x) (realToFrac y))
+           let prevPos = (realToFrac x, realToFrac y)
+           writeIORef cursor (CursorPosition prevPos (0, 0))
            GLFW.setCursorPosCallback glfwWindow (Just (cursorMoved cursor window))
            GLFW.setCursorInputMode glfwWindow GLFW.CursorInputMode'Disabled
        else do
