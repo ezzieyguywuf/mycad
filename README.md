@@ -1,4 +1,4 @@
-![A brief tour of MyCD's capabilities. Very Brief.] (res/drawEntity_demo.gif "MyCAD Demo")
+![A brief tour of MyCD's capabilities. Very Brief.](res/drawEntity_demo.gif "MyCAD Demo")
 
 MyCAD
 =====
