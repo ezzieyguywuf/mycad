@@ -26,16 +26,16 @@ import Linear.V3 (V3(..))
 -- internal
 import GUI.GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose)
 import GUI.ViewSpace (CameraData(..), rotateCameraNudge)
-import GUI.RenderQueue (RenderQueue, queueObject, initRenderQueue)
+import GUI.RenderQueue (RenderQueue, initRenderQueue)
 import GUI.GL.RenderData (RenderData, initRenderData)
-import GUI.GL.Primitives (makeLine)
+--import GUI.GL.Primitives (makeLine)
 import GUI.GL.Renderer (renderIfNecessary)
 
 winWIDTH :: Int
 winWIDTH      = 800
 
 winHEIGHT :: Int
-winHEIGHT     = 600
+winHEIGHT     = 450
 
 winASPECT :: Float
 winASPECT     = fromIntegral winWIDTH / fromIntegral winHEIGHT
@@ -86,8 +86,8 @@ startCam = rotateCameraNudge initialCam yaw pitch
                               , getUp  = V3 0 1 0   -- Which way is "up" to the camera
                               , getDir = V3 0 0 0   -- Where is it looking
                               }
-          yaw = (-pi / 4.0)
-          pitch = pi / 6
+          yaw = (10) * (pi/180)
+          pitch = (-60) * (pi/180)
 
 -- | This message provides some useful output in case we can't initialize
 initFailMsg :: IO ()
@@ -100,20 +100,23 @@ initFailMsg = do
 -- Make a few lines - this is for testing. This should be a wireframe cube
 -- (sort of)
 debuggingLines :: RenderQueue -> IO ()
-debuggingLines queue = do
+debuggingLines _queue = do pure ()
     -- Two basic lines
     --addObject renderer (makeLine (V3 0 0 0 ) (V3 10 10 10))
     -- >>= (flip addObject (makeLine (V3 10 10 10) (V3 10 20 10)))
     -- cube below
-    queueObject queue (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
-    queueObject queue (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
-    queueObject queue (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
-    queueObject queue (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
-    queueObject queue (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
-    queueObject queue (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
-    queueObject queue (makeLine (V3 10 10 (-10))  (V3 10 10 10))
-    queueObject queue (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
-    queueObject queue (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
-    queueObject queue (makeLine (V3 10 (-10) 10) (V3 10 10 10))
-    queueObject queue (makeLine (V3 10 10 10) (V3  (-10) 10 10))
-    queueObject queue (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
+    --queueObject queue (makeLine (V3 (0) (0) (0))    (V3 10  (0)  (0)))
+    --queueObject queue (makeLine (V3 0  (0)  (0)) (V3 0 20  (0)))
+    --queueObject queue (makeLine (V3 0 0  (0)) (V3  (0) 0  (40)))
+    --queueObject queue (makeLine (V3 (-10) (-10) (-10))    (V3 10  (-10)  (-10)))
+    --queueObject queue (makeLine (V3 10  (-10)  (-10)) (V3 10 10  (-10)))
+    --queueObject queue (makeLine (V3 10 10  (-10)) (V3  (-10) 10  (-10)))
+    --queueObject queue (makeLine (V3  (-10) 10  (-10)) (V3  (-10)  (-10) (-10)))
+    --queueObject queue (makeLine (V3  (-10)  (-10) (-10)) (V3  (-10) (-10) 10))
+    --queueObject queue (makeLine (V3 10 (-10) (-10))  (V3 10 (-10) 10))
+    --queueObject queue (makeLine (V3 10 10 (-10))  (V3 10 10 10))
+    --queueObject queue (makeLine (V3  (-10) 10 (-10))  (V3  (-10) 10 10))
+    --queueObject queue (makeLine (V3  (-10)  (-10) 10) (V3 10  (-10) 10))
+    --queueObject queue (makeLine (V3 10 (-10) 10) (V3 10 10 10))
+    --queueObject queue (makeLine (V3 10 10 10) (V3  (-10) 10 10))
+    --queueObject queue (makeLine (V3 (-10) 10 10) (V3  (-10) (-10) 10))
