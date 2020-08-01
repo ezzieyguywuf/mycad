@@ -81,7 +81,7 @@ loop window renderData =
 
 -- | This will initialize the camera.
 startCam :: CameraData
-startCam = LookAt { getLoc = V3 0 0 100 -- Where is the camera located
+startCam = LookAt { getLoc = V3 100 100 100 -- Where is the camera located
                   , getUp  = V3 0 1 0   -- Which way is "up" to the camera
                   , getDir = V3 0 0 0   -- Where is it looking
                   }
