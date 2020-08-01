@@ -77,5 +77,5 @@ putViewUniform (LookAt loc up dir) shader = do
 -- | Update the openGL \"Uniform\" matrix that specifies the Projection
 putProjectionUniform :: Float -> Shader -> IO ()
 putProjectionUniform aspect shader = putUniform shader projectionUniform
-    where projectionMatrix = perspective (pi/2.0) aspect 0.1 1000.0
+    where projectionMatrix = perspective (pi/4.0) aspect 0.1 1000.0
           projectionUniform = makeUniform "projection" projectionMatrix

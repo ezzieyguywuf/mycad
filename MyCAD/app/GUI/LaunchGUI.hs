@@ -25,7 +25,7 @@ import Linear.V3 (V3(..))
 
 -- internal
 import GUI.GLFW_Helpers (Window, glfwInit, shutdownGLFW, shouldClose)
-import GUI.ViewSpace (CameraData(..))
+import GUI.ViewSpace (CameraData(..), rotateCameraNudge)
 import GUI.RenderQueue (RenderQueue, queueObject, initRenderQueue)
 import GUI.GL.RenderData (RenderData, initRenderData)
 import GUI.GL.Primitives (makeLine)
@@ -81,10 +81,13 @@ loop window renderData =
 
 -- | This will initialize the camera.
 startCam :: CameraData
-startCam = LookAt { getLoc = V3 100 100 100 -- Where is the camera located
-                  , getUp  = V3 0 1 0   -- Which way is "up" to the camera
-                  , getDir = V3 0 0 0   -- Where is it looking
-                  }
+startCam = rotateCameraNudge initialCam yaw pitch
+    where initialCam = LookAt { getLoc = V3 0 0 100 -- Where is the camera located
+                              , getUp  = V3 0 1 0   -- Which way is "up" to the camera
+                              , getDir = V3 0 0 0   -- Where is it looking
+                              }
+          yaw = (-pi / 4.0)
+          pitch = pi / 6
 
 -- | This message provides some useful output in case we can't initialize
 initFailMsg :: IO ()
