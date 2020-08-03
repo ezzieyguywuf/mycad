@@ -1,16 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
---
--- see: https://github.com/sol/hpack
---
--- hash: 06bba26800426e909d081acaed2b28f10c5039e41864d4086fc2639cbb39c696
-
 name:           MyCAD
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/opengl-haskell#readme>
-homepage:       https://github.com/githubuser/mycad#readme
-bug-reports:    https://github.com/githubuser/mycad/issues
+description:    Please see the README on Gitlab at
+                <https://gitlab.com/ezzieyguywuf/mycad/-/blob/master/README.md>
+homepage:       https://gitlab.com/ezzieyguywuf/mycad/
+bug-reports:    https://gitlab.com/ezzieyguywuf/mycad/-/issues
 author:         Wolfgang E. Sanyer
 maintainer:     WolfgangESanyer@Gmail.com
 copyright:      2020 Wolfgang E. Sanyer
@@ -22,134 +17,134 @@ extra-source-files:
     ChangeLog.md
 
 source-repository head
-  type: git
-  location: https://github.com/githubuser/mycad
+    type: git
+    location: https://gitlab.com/ezzieyguywuf/mycad
 
 executable mycad
-  main-is: MyCAD.hs
-  other-modules:
-      GUI.GL.Helpers
-      GUI.GL.Primitives
-      GUI.GL.RenderData
-      GUI.GL.Renderer
-      GUI.GL.Pictures
-      GUI.LaunchGUI
-      GUI.GLFW_Helpers
-      GUI.GraphicData
-      GUI.RenderQueue
-      GUI.ViewSpace
-      TUI.CommandParser
-      TUI.CommandRunner
-      TUI.Errors
-      TUI.LaunchTUI
-      Paths_MyCAD
-  hs-source-dirs:
-      app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      Entity
-    , GLFW-b
-    , Geometry
-    , JuicyPixels
-    , Topology
-    , ansi-terminal
-    , base >=4.7 && <5
-    , containers
-    , filepath
-    , gl
-    , haskeline
-    , linear
-    , megaparsec
-    , mtl
-    , stm
-    , text
-    , transformers
-    , vector
-  default-language: Haskell2010
+    main-is: MyCAD.hs
+    other-modules:
+        GUI.GL.Helpers
+        GUI.GL.Primitives
+        GUI.GL.RenderData
+        GUI.GL.Renderer
+        GUI.GL.Pictures
+        GUI.LaunchGUI
+        GUI.GLFW_Helpers
+        GUI.GraphicData
+        GUI.RenderQueue
+        GUI.ViewSpace
+        TUI.CommandParser
+        TUI.CommandRunner
+        TUI.Errors
+        TUI.LaunchTUI
+        Paths_MyCAD
+    hs-source-dirs:
+        app
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+    build-depends:
+        Entity
+      , GLFW-b
+      , Geometry
+      , JuicyPixels
+      , Topology
+      , ansi-terminal
+      , base >=4.7 && <5
+      , containers
+      , filepath
+      , gl
+      , haskeline
+      , linear
+      , megaparsec
+      , mtl
+      , stm
+      , text
+      , transformers
+      , vector
+    default-language: Haskell2010
 
 executable mycad-dev
-  main-is: MyCAD_dev.hs
-  other-modules:
-      TUI.CommandParser
-      TUI.CommandRunner
-  hs-source-dirs:
-      app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      Entity
-    , Geometry
-    , Topology
-    , base >=4.7 && <5
-    , containers
-    , haskeline
-    , linear
-    , megaparsec
-    , mtl
-    , stm
-    , text
-    , transformers
-  default-language: Haskell2010
+    main-is: MyCAD_dev.hs
+    other-modules:
+        TUI.CommandParser
+        TUI.CommandRunner
+    hs-source-dirs:
+        app
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+    build-depends:
+        Entity
+      , Geometry
+      , Topology
+      , base >=4.7 && <5
+      , containers
+      , haskeline
+      , linear
+      , megaparsec
+      , mtl
+      , stm
+      , text
+      , transformers
+    default-language: Haskell2010
 
 executable mycad-gui
-  main-is: MyCAD_Gui.hs
-  other-modules:
-      GUI.GL.Helpers
-      GUI.GL.Primitives
-      GUI.GL.RenderData
-      GUI.GL.Renderer
-      GUI.GL.Pictures
-      GUI.LaunchGUI
-      GUI.GLFW_Helpers
-      GUI.GraphicData
-      GUI.RenderQueue
-      GUI.ViewSpace
-      Paths_MyCAD
-  hs-source-dirs:
-      app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      Entity
-    , GLFW-b
-    , Geometry
-    , JuicyPixels
-    , Topology
-    , ansi-terminal
-    , base >=4.7 && <5
-    , containers
-    , filepath
-    , gl
-    , haskeline
-    , linear
-    , megaparsec
-    , mtl
-    , stm
-    , text
-    , transformers
-    , vector
-  default-language: Haskell2010
+    main-is: MyCAD_Gui.hs
+    other-modules:
+        GUI.GL.Helpers
+        GUI.GL.Primitives
+        GUI.GL.RenderData
+        GUI.GL.Renderer
+        GUI.GL.Pictures
+        GUI.LaunchGUI
+        GUI.GLFW_Helpers
+        GUI.GraphicData
+        GUI.RenderQueue
+        GUI.ViewSpace
+        Paths_MyCAD
+    hs-source-dirs:
+        app
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+    build-depends:
+        Entity
+      , GLFW-b
+      , Geometry
+      , JuicyPixels
+      , Topology
+      , ansi-terminal
+      , base >=4.7 && <5
+      , containers
+      , filepath
+      , gl
+      , haskeline
+      , linear
+      , megaparsec
+      , mtl
+      , stm
+      , text
+      , transformers
+      , vector
+    default-language: Haskell2010
 
 executable mycad-tui
-  main-is: MyCAD_Tui.hs
-  other-modules:
-      TUI.CommandParser
-      TUI.CommandRunner
-      TUI.Errors
-      TUI.LaunchTUI
-      Paths_MyCAD
-  hs-source-dirs:
-      app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      Entity
-    , Geometry
-    , Topology
-    , base >=4.7 && <5
-    , containers
-    , haskeline
-    , linear
-    , megaparsec
-    , mtl
-    , stm
-    , text
-    , transformers
-  default-language: Haskell2010
+    main-is: MyCAD_Tui.hs
+    other-modules:
+        TUI.CommandParser
+        TUI.CommandRunner
+        TUI.Errors
+        TUI.LaunchTUI
+        Paths_MyCAD
+    hs-source-dirs:
+        app
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+    build-depends:
+        Entity
+      , Geometry
+      , Topology
+      , base >=4.7 && <5
+      , containers
+      , haskeline
+      , linear
+      , megaparsec
+      , mtl
+      , stm
+      , text
+      , transformers
+    default-language: Haskell2010
