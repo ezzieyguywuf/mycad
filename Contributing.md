@@ -1,3 +1,9 @@
+NOTE: This document was originally written when this project was written in
+C++. While the general "spirit" of this document still applies, it needs to be
+updated to reference haskell things (i.e. haddock instead of doxygen).
+
+In general, we want your code, some come on over!
+
 # Table of Contents
 1. [Work Flow](#work-flow)
 2. [Code Documentation](#code-documentation)
