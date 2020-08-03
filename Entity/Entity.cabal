@@ -1,16 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
---
--- see: https://github.com/sol/hpack
---
--- hash: 4738576504c60649ec57b6e276ae43bec095b1dbdadb724c54af0cb21868c711
-
 name:           Entity
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/HaskellCAD#readme>
-homepage:       https://github.com/githubuser/Entity#readme
-bug-reports:    https://github.com/githubuser/Entity/issues
+description:    Please see the README on Gitlab at
+                <https://gitlab.com/ezzieyguywuf/mycad/-/blob/master/README.md>
+homepage:       https://gitlab.com/ezzieyguywuf/mycad/
+bug-reports:    https://gitlab.com/ezzieyguywuf/mycad/-/issues
 author:         Wolfgang E. Sanyer
 maintainer:     WolfgangESanyer@Gmail.com
 copyright:      2020 Wolfgang E. Sanyer
@@ -22,46 +17,46 @@ extra-source-files:
     ChangeLog.md
 
 source-repository head
-  type: git
-  location: https://github.com/githubuser/Entity
+    type: git
+    location: https://gitlab.com/ezzieyguywuf/mycad
 
 library
-  exposed-modules:
-      Entity
-  other-modules:
-      Paths_Entity
-  hs-source-dirs:
-      src
-  build-depends:
-      Geometry
-    , Topology
-    , base >=4.7 && <5
-    , containers
-    , linear
-    , mtl
-    , prettyprinter
-    , transformers
-  default-language: Haskell2010
+    exposed-modules:
+        Entity
+    other-modules:
+        Paths_Entity
+    hs-source-dirs:
+        src
+    build-depends:
+        Geometry
+      , Topology
+      , base >=4.7 && <5
+      , containers
+      , linear
+      , mtl
+      , prettyprinter
+      , transformers
+    default-language: Haskell2010
 
 test-suite Entity-test
-  type: exitcode-stdio-1.0
-  main-is: Spec.hs
-  other-modules:
-      EntitySpec
-      Paths_Entity
-  hs-source-dirs:
-      test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      Entity
-    , Geometry
-    , QuickCheck
-    , Topology
-    , base >=4.7 && <5
-    , containers
-    , hspec
-    , linear
-    , mtl
-    , prettyprinter
-    , transformers
-  default-language: Haskell2010
+    type: exitcode-stdio-1.0
+    main-is: Spec.hs
+    other-modules:
+        EntitySpec
+        Paths_Entity
+    hs-source-dirs:
+        test
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+    build-depends:
+        Entity
+      , Geometry
+      , QuickCheck
+      , Topology
+      , base >=4.7 && <5
+      , containers
+      , hspec
+      , linear
+      , mtl
+      , prettyprinter
+      , transformers
+    default-language: Haskell2010
