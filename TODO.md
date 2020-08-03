@@ -3,8 +3,8 @@
 - Add gitlab CI integration back, using the haskell stuff.
 - Figure out how to host haddock documentation on gitlab
 - Make it so that `quit` in TUI will close GUI as well.
-- Update build instructions for haskell - should be cross-platform automatically!
-  build system
+- Update build instructions for haskell - should be cross-platform
+  automatically!  build system
 - Update all imports to "explicit", i.e. `import SomeModule (f1, f2, etc...)`
     - Or, `import qualified SomeModule as SM` if you need a bunch of stuff
 - Make a logging facility.
@@ -14,8 +14,6 @@
 - check out 'boxes' for prettyprinter using 'columns'
 
 # Commands
-- Move away from individual "addXXX" (i.e. `addVertex` right now) and instead
-  use a generic `add` which accepts a sub-command, i.e. `add vertex`
 - Allow for a "brief" and a "long" help message.
 - Add actual help messages
 - Add unit tests for parser
@@ -31,8 +29,6 @@
   errors, one from no nodes, one for more than one node
 
 # Entity
-- Add Arbitrary instance for Entity and update tests to use QuickCheck
-- Add prettyPrinter back!
 
 # GUI
 - Add lighting/shading
@@ -41,7 +37,7 @@
 - Update Shader data type to actually use the Uniform data type 
 - Figure out why line thickness zooms - it shouldn't, it should always be the same
   not in getAttributeDataIndex
-- Update mouse rotation so that it's not so twitchy.
+- Reduce "cumulative delta" in mouse rotation so that it starts rotating sooner
 - Allow simultaneous keys, i.e. arrows, to control things
 - Update resize technique so that there are no visual artifacts.
 - Fix window resize to also adjust aspectRatio, i.e. in the lineVShader
@@ -59,3 +55,5 @@
   megaparsec
 - LaunchTUI.handleCommand could probably use `modify` or something to clean it
   up a bit
+- Accept command-line arguments for things like window size, so that we don't
+  have to rebuild the whole thing to try different values
