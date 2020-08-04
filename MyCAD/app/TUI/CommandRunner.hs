@@ -26,6 +26,9 @@ module TUI.CommandRunner
   runCommand
 )where
 
+-- Base
+import Control.Applicative((<|>))
+
 -- Third-party
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
@@ -56,10 +59,11 @@ runAdd cmd =
     case cmd of
         AddVertex point -> addVertex point >> pure (Just "Added a vertex")
         AddEdge n1 n2   -> runMaybeT $ do
-            v1        <- MaybeT $ vertexFromID n1
-            v2        <- MaybeT $ vertexFromID n2
+            v1        <- MaybeT (vertexFromID n1)
+            v2        <- MaybeT (vertexFromID n2)
             lift $ addEdge v1 v2 
             pure "Added a line"
+            <|> pure "There was an error adding a line"
 
 getHelpString :: Maybe CommandToken -> String
 getHelpString = maybe help commandHelp
