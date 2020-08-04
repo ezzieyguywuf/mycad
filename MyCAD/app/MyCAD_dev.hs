@@ -4,31 +4,25 @@ module Main (main) where
 --import Data.Text (Text)
 import Control.Monad.State  (evalState)
 import TUI.CommandParser (Command, parseInput)
-import TUI.CommandRunner (runCommand)
+import TUI.CommandRunner (runCommand')
 import Entity (Entity, nullEntity)
 --import Text.Megaparsec.Error (errorBundlePretty)
 import Data.Either (rights)
-import Data.Maybe (catMaybes)
 
 main :: IO ()
 main = do
-    let to_parse = [  "add vertex 10 20 30"
-                   ,  "add vertex 40 50 60"
-                   ,  "add vertex 70 80 90"
-                   ,  "add vertex 60 70 80"
-                   ,  "add vertex 50 60 70"
-                   ,  "add line v0 v1"
-                   ,  "add line v1 v2"
-                   ,  "add line v2 v1"
-                   ,  "help help"
+    let to_parse = [  "add vertex 0 0 0"
+                   ,  "add vertex 10 20 30"
+                   ,  "add vertex 5 30 10"
+                   ,  "add line v1 v0"
+                   ,  "add line v0 v2"
                    ,  "show"
                    ]
         cmds = rights (fmap parseInput to_parse) :: [Command Float]
-        states = fmap runCommand cmds
+        states = fmap runCommand' cmds
         estate = sequence states
         entity = nullEntity :: Entity Float
-        mStrings  = evalState estate entity  :: [Maybe String]
-        ios = fmap putStrLn (catMaybes mStrings)
+        ios  = evalState estate entity  :: [IO ()]
     putStrLn "Running the following commands: "
     mapM_ print cmds
     putStrLn "-------- Starting -------------"

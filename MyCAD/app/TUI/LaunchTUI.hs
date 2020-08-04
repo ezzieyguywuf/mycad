@@ -84,7 +84,7 @@ handleCommand entityVar command = do
         -- run the command using the entity
         let (maybeMsg, entity') = runState (runCommand command) entity
         -- Print out any messages that runCommand produced
-        maybe (pure ()) putStrLn maybeMsg
+        maybe (putStrLn "runCommand returned Nothing") putStrLn maybeMsg
         -- write back the (potentially) mutated entity
         atomically (putTMVar entityVar entity')
     pure True

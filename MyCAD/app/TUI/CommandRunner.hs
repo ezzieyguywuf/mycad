@@ -24,6 +24,7 @@ module TUI.CommandRunner
 (
 -- * Exported functions
   runCommand
+, runCommand'
 )where
 
 -- Base
@@ -53,6 +54,12 @@ runCommand cmd =
         Add acmd -> runAdd acmd
         Show     -> gets (Just . show . prettyPrintEntity)
         Quit     -> pure Nothing
+
+runCommand' :: (Show p, Fractional p, Eq p) => Command p -> EntityState p (IO ())
+runCommand' cmd =
+    case cmd of
+        Help arg -> pure (putStrLn (getHelpString arg))
+        _        -> pure (putStrLn "This command is not implemented in runCummand' yet")
 
 runAdd :: (Fractional p, Eq p) => AddCommand p-> EntityState p (Maybe String)
 runAdd cmd =
