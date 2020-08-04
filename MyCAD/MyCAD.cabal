@@ -61,7 +61,6 @@ executable mycad
       , transformers
       , vector
     default-language: Haskell2010
-    extra-libraries: glfw
 
 executable mycad-dev
     main-is: MyCAD_dev.hs
@@ -123,7 +122,6 @@ executable mycad-gui
       , transformers
       , vector
     default-language: Haskell2010
-    extra-libraries: glfw
 
 executable mycad-tui
     main-is: MyCAD_Tui.hs
