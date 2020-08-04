@@ -4,10 +4,11 @@ module Main (main) where
 --import Data.Text (Text)
 import Control.Monad.State  (evalState)
 import TUI.CommandParser (Command, parseInput)
-import TUI.CommandRunner (runCommand')
+import TUI.CommandRunner (runCommand)
 import Entity (Entity, nullEntity)
 --import Text.Megaparsec.Error (errorBundlePretty)
 import Data.Either (rights)
+import Data.Maybe (catMaybes)
 
 main :: IO ()
 main = do
@@ -19,10 +20,11 @@ main = do
                    ,  "show"
                    ]
         cmds = rights (fmap parseInput to_parse) :: [Command Float]
-        states = fmap runCommand' cmds
+        states = fmap runCommand cmds
         estate = sequence states
         entity = nullEntity :: Entity Float
-        ios  = evalState estate entity  :: [IO ()]
+        mStrings  = evalState estate entity  :: [Maybe String]
+        ios = fmap putStrLn (catMaybes mStrings)
     putStrLn "Running the following commands: "
     mapM_ print cmds
     putStrLn "-------- Starting -------------"
