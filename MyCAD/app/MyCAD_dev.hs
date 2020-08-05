@@ -5,10 +5,9 @@ module Main (main) where
 import Control.Monad.State  (evalState)
 import TUI.CommandParser (Command, parseInput)
 import TUI.CommandRunner (runCommand)
-import Entity (Entity, nullEntity)
+import Entity (Entity, nullEntity, EntityState)
 --import Text.Megaparsec.Error (errorBundlePretty)
 import Data.Either (rights)
-import Data.Maybe (catMaybes)
 
 main :: IO ()
 main = do
@@ -21,10 +20,17 @@ main = do
                    ]
         cmds = rights (fmap parseInput to_parse) :: [Command Float]
         states = fmap runCommand cmds
+            :: [EntityState Float (Either String (Maybe String))]
         estate = sequence states
+            :: EntityState Float [Either String (Maybe String)]
         entity = nullEntity :: Entity Float
-        mStrings  = evalState estate entity  :: [Maybe String]
-        ios = fmap putStrLn (catMaybes mStrings)
+        eitherStrings  = evalState estate entity  :: [Either String (Maybe String)]
+        handleEither eith = case eith of
+                                Left msg -> putStrLn $ "Error: " <> msg
+                                Right mmsg -> case mmsg of
+                                                  Nothing -> putStrLn "quit requested"
+                                                  Just msg -> putStrLn msg
+        ios = fmap handleEither eitherStrings
     putStrLn "Running the following commands: "
     mapM_ print cmds
     putStrLn "-------- Starting -------------"

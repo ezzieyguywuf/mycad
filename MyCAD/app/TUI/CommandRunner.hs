@@ -26,12 +26,9 @@ module TUI.CommandRunner
   runCommand
 )where
 
--- Base
-import Control.Applicative((<|>))
-
 -- Third-party
+import Control.Monad.Except (MonadError, runExceptT, throwError)
 import Control.Monad.Trans.Class (lift)
-import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State (gets)
 
 -- | Internal imports
@@ -41,29 +38,31 @@ import Entity (EntityState, addVertex, addEdge, prettyPrintEntity
 
 -- | This will execute the "Command".
 --
---   @Nothing@ indicates that the user has requested to exit the application
---   @Just s@ indicates that the "Command" executed succesfully - @s@ may be
---   empty or a message
---
---   Error-handling is done using the "Except" monad.
-runCommand :: (Show p, Fractional p, Eq p) => Command p -> EntityState p (Maybe String)
+--   Left msg       means that an error occured during execution
+--   Right Nothing  means that he user has requested to exit the program
+--   Right Just msg means that the command executed properly, and returned a
+--                  (possibly empty) message
+runCommand :: (Show p, Fractional p, Eq p)
+           => Command p
+           -> EntityState p (Either String (Maybe String))
 runCommand cmd =
     case cmd of
-        Help arg -> pure (Just $ getHelpString arg)
+        Help arg -> pure . Right . Just $ getHelpString arg
         Add acmd -> runAdd acmd
-        Show     -> gets (Just . show . prettyPrintEntity)
-        Quit     -> pure Nothing
+        Show     -> gets (Right . Just . show . prettyPrintEntity)
+        Quit     -> pure (Right Nothing)
 
-runAdd :: (Fractional p, Eq p) => AddCommand p-> EntityState p (Maybe String)
+runAdd :: (Fractional p, Eq p)
+       => AddCommand p
+       -> EntityState p (Either String (Maybe String))
 runAdd cmd =
     case cmd of
-        AddVertex point -> addVertex point >> pure (Just "Added a vertex")
-        AddEdge n1 n2   -> runMaybeT $ do
-            v1        <- MaybeT (vertexFromID n1)
-            v2        <- MaybeT (vertexFromID n2)
-            lift $ addEdge v1 v2 
-            pure "Added a line"
-            <|> pure "There was an error adding a line"
+        AddVertex point -> addVertex point >> pure (Right . Just $ "Added a vertex")
+        AddEdge n1 n2   -> runExceptT $ do
+            v1 <- lift (vertexFromID n1) >>= note ("Can't find Vertex" <> show n1)
+            v2 <- lift (vertexFromID n1) >>= note ("Can't find Vertex" <> show n2)
+            lift (addEdge v1 v2)
+            pure (Just "Added an Edge")
 
 getHelpString :: Maybe CommandToken -> String
 getHelpString = maybe help commandHelp
@@ -76,3 +75,6 @@ commandHelp token =
     case token of
         AddT -> "This is add help"
         _    -> help
+
+note :: MonadError e m => e -> Maybe a -> m a
+note msg = maybe (throwError msg) pure
