@@ -56,9 +56,9 @@ module Entity
 -- Third-party
 import qualified Data.Map as Map
 import Data.Text.Prettyprint.Doc (Doc, pretty, line, viaShow, vsep)
-import Control.Monad (when, mzero)
+import Control.Monad (when)
 import Control.Monad.Trans.Class (lift)
-import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Control.Monad.Except (MonadError, runExceptT, throwError)
 import Control.Monad.State (State, get, gets, runState, evalState, put)
 
 -- Internal
@@ -128,21 +128,27 @@ addVertex p = do
 --
 --   The created Edge will geometrically have a straight line between the two
 --   Vertex
-addEdge :: (Fractional a, Eq a) => Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe Topo.Edge)
-addEdge v1 v2 = runMaybeT $ do
+addEdge :: (Fractional a, Eq a)
+        => Topo.Vertex
+        -> Topo.Vertex
+        -> EntityState a (Either String Topo.Edge)
+addEdge v1 v2 = runExceptT $ do
     -- First, retrieve the current state
-    (Entity vmap emap _) <- lift get
+    (Entity vmap emap topology) <- lift get
 
     -- Try to retrieve the points associated with these Vertices
-    p1   <- MaybeT (getPoint' v1) :: MaybeT (EntityState a) (Geo.Point a)
-    p2   <- MaybeT (getPoint' v2) :: MaybeT (EntityState a) (Geo.Point a)
+    p1 <- lift (getPoint' v1) >>= note ("Can't find point for " <> (show v1))
+    p2 <- lift (getPoint' v2) >>= note ("Can't find point for " <> (show v2)) 
 
     -- Bail out if the two points are geometrically equivalent - how would you
     -- make a line then?!
-    when (p1 == p2) mzero
+    when (p1 == p2) (throwError "Cannot add an Edge when p1 == p2")
+        -- :: ExceptT String (EntityState p) ()
 
-    -- Try to add the Edge to the topology
-    (edge, t') <- MaybeT (addEdge' v1 v2)
+    -- Try to add the given Edge to the Topology
+    (edge, t1) <- case runState (Topo.addEdge v1 v2) topology of
+                      (Nothing, _)    -> throwError "Could not add Edge to topology"
+                      (Just edge, t') -> pure (edge, t')
 
     let -- We'll make a geometric straight line between the two points
         geoline = Geo.makeLine p1 p2
@@ -150,32 +156,24 @@ addEdge v1 v2 = runMaybeT $ do
         emap' = Map.insert edge geoline emap
 
     -- Update our state with the new information
-    lift (put (Entity vmap emap' t'))
+    lift (put (Entity vmap emap' t1))
 
     -- Give the user a reference to the new Edge
     pure edge
 
+-- | Turns a `Maybe a` into in `ExceptT e a`, where `e` is the error provided.
+note :: MonadError e m => e -> Maybe a -> m a
+note msg = maybe (throwError msg) pure
+
 -- | Returns the underlying geometric Point of the Vertex
 --
 --   Returns Nothing if the Vertex is not part of this Entity
-getPoint :: Entity a -> Topo.Vertex -> Maybe (Geo.Point a)
+getPoint :: (Fractional a, Eq a) => Entity a -> Topo.Vertex -> Maybe (Geo.Point a)
 getPoint entity vertex = evalState (getPoint' vertex) entity
 
 -- | A stateful version of "getPoint".
-getPoint' :: Topo.Vertex -> EntityState a (Maybe (Geo.Point a))
+getPoint' :: (Fractional a, Eq a) => Topo.Vertex -> EntityState a (Maybe (Geo.Point a))
 getPoint' vertex = Map.lookup vertex <$> gets getVertexMap
-
-addEdge' :: Topo.Vertex -> Topo.Vertex -> EntityState a (Maybe (Topo.Edge, Topo.Topology))
-addEdge' v1 v2 = runMaybeT $ do
-    -- Unwrap the Topology from the EntityState
-    topology <- lift (gets _getTopology)
-
-    -- Try to add the given Edge
-    let (maybeEdge, t') = runState (Topo.addEdge v1 v2) topology
-    edge <- MaybeT . pure $ maybeEdge
-
-    -- Return the added Edge and the updated Topology
-    pure (edge, t')
 
 -- | Returns the underlying geometric "Curve" of the "Edge'"
 getCurve :: Entity a -> Topo.Edge -> Maybe (Geo.Line a)
