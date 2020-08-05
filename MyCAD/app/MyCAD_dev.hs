@@ -17,6 +17,7 @@ main = do
                    ,  "add line v1 v0"
                    ,  "add line v0 v2"
                    ,  "show"
+                   ,  "quit"
                    ]
         cmds = rights (fmap parseInput to_parse) :: [Command Float]
         states = fmap runCommand cmds
@@ -26,10 +27,10 @@ main = do
         entity = nullEntity :: Entity Float
         eitherStrings  = evalState estate entity  :: [Either String (Maybe String)]
         handleEither eith = case eith of
-                                Left msg -> putStrLn $ "Error: " <> msg
-                                Right mmsg -> case mmsg of
-                                                  Nothing -> putStrLn "quit requested"
-                                                  Just msg -> putStrLn msg
+            Left msg -> putStrLn $ "Error: " <> msg
+            Right mmsg -> case mmsg of
+                Nothing -> putStrLn "quit requested"
+                Just msg -> putStrLn msg
         ios = fmap handleEither eitherStrings
     putStrLn "Running the following commands: "
     mapM_ print cmds

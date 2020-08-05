@@ -7,7 +7,7 @@ import qualified Geometry as Geo
 import Linear.V3 (V3(V3))
 import Control.Monad.State (runState, execState, evalState, gets)
 import Control.Monad.Trans.Class (lift)
-import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Control.Monad.Except (runExceptT, throwError)
 import Data.Maybe (isNothing)
 
 spec :: Spec
@@ -30,13 +30,14 @@ prop_addVertexGetPoint (TestPoint p) (TestEntity e) = getPoint e' v == Just p
 
 prop_addEdgeGetLine :: TestPoint Float -> TestPoint Float -> TestEntity Float -> Property
 prop_addEdgeGetLine (TestPoint p1) (TestPoint p2) (TestEntity entity) =
-    p1 /= p2 ==> evalState eState entity == Just line
-    where eState = runMaybeT $ do
-              v1 <- lift . addVertex $ p1
-              v2 <- lift . addVertex $ p2
-              edge <- MaybeT (addEdge v1 v2)
-              MaybeT (gets (`getCurve` edge))
-
+    p1 /= p2 ==> evalState eState entity == Right line
+    where eState = runExceptT $ do
+              v1 <- lift (addVertex p1)
+              v2 <- lift (addVertex p2)
+              edge <- lift (addEdge v1 v2)
+              case edge of
+                  Nothing -> throwError ""
+                  Just edge' -> lift (gets (`getCurve` edge'))
           line = Geo.makeLine p1 p2
 
 prop_addEdgeFail :: TestPoint Float -> TestEntity Float -> Bool
