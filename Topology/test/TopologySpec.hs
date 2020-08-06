@@ -2,6 +2,7 @@
 module TopologySpec (spec) where
 
 import Topology
+import Data.Maybe (catMaybes)
 import Data.Tuple (swap)
 import Data.Foldable (traverse_)
 import Test.Hspec (Spec, describe, it, context, xit)
@@ -19,11 +20,11 @@ spec = do
             property (prop_runIdentity run)
     describe "vertexID" $ do
         it "provides a numeric ID that can be used to re-create the Vertex" $ do
-            let run = runMaybeT $ do vertex  <- lift addFreeVertex
-                                     vid     <- MaybeT (vertexID vertex)
-                                     vertex' <- MaybeT (vertexFromID vid)
-                                     pure (vertex == vertex')
-            property (prop_runExpect run (Just True))
+            let run = do vs    <- getVertices
+                         mVIDs <- sequence (fmap vertexID vs)
+                         vs'   <- sequence (fmap vertexFromID (catMaybes mVIDs))
+                         pure (vs == catMaybes vs')
+            property (prop_runExpect run True)
         it "returns Nothing if the numeric ID is invalid" $ do
             let run = do topo    <- get
                          vertex  <- addFreeVertex
@@ -46,7 +47,7 @@ spec = do
             it "the second vertex doesn't exist" $
                 property (prop_prepRunExpect prep' (run . swap) Nothing)
         it "creates an Out adjacency from v1 → Edge" $ do
-            let post ((v1, _), edge) = ([Out Edge] == ) <$> vertexEdges v1
+            let post ((v1, _), edge) = ([Out edge] == ) <$> vertexEdges v1
             property (prepRunMaybe post)
         it "creates an In adjacency for Edge ← v1" $ do
             let post ((v1, _), edge) = elem (In v1) <$> edgeVertices edge
@@ -150,5 +151,10 @@ newtype TestTopology = TestTopology {unTestTopology :: Topology} deriving (Show)
 instance Arbitrary TestTopology where
     arbitrary = do
         nVertices <- arbitrary
-        let topoState = replicateM nVertices addFreeVertex
+        nEdges    <- arbitrary
+        let topoState = do replicateM nVertices addFreeVertex
+                           replicateM nEdges $ do
+                               v1 <- addFreeVertex
+                               v2 <- addFreeVertex
+                               addEdge v1 v2
         pure $ TestTopology (execState topoState emptyTopology)
