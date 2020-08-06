@@ -52,7 +52,7 @@ runCommand cmd =
         Show     -> gets (Right . Just . show . prettyPrintEntity)
         Quit     -> pure (Right Nothing)
 
-runAdd :: (Fractional p, Eq p)
+runAdd :: (Fractional p, Eq p, Show p)
        => AddCommand p
        -> EntityState p (Either String (Maybe String))
 runAdd cmd =
@@ -60,7 +60,7 @@ runAdd cmd =
         AddVertex point -> addVertex point >> pure (Right . Just $ "Added a vertex")
         AddEdge n1 n2   -> runExceptT $ do
             v1 <- lift (vertexFromID n1) >>= note ("Can't find Vertex" <> show n1)
-            v2 <- lift (vertexFromID n1) >>= note ("Can't find Vertex" <> show n2)
+            v2 <- lift (vertexFromID n2) >>= note ("Can't find Vertex" <> show n2)
             lift (addEdge v1 v2)
                 >>= either throwError (const . pure . Just $ "Added an Edge")
 

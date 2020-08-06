@@ -128,7 +128,7 @@ addVertex p = do
 --
 --   The created Edge will geometrically have a straight line between the two
 --   Vertex
-addEdge :: (Fractional a, Eq a)
+addEdge :: (Fractional a, Eq a, Show a)
         => Topo.Vertex
         -> Topo.Vertex
         -> EntityState a (Either String Topo.Edge)
@@ -142,8 +142,10 @@ addEdge v1 v2 = runExceptT $ do
 
     -- Bail out if the two points are geometrically equivalent - how would you
     -- make a line then?!
-    when (p1 == p2) (throwError "Cannot add an Edge when p1 == p2")
-        -- :: ExceptT String (EntityState p) ()
+    when (p1 == p2) (throwError $
+        "Cannot add an Edge when p1 == p2. p1 = " <> (show p1)
+        <> ", p2 = " <> (show p2)
+        )
 
     -- Try to add the given Edge to the Topology
     (edge, t1) <- case runState (Topo.addEdge v1 v2) topology of
