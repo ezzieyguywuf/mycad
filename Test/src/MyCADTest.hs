@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Main (main) where
+module MyCADTest (main) where
 
 --import Data.Text (Text)
 import Control.Monad.State  (evalState)
