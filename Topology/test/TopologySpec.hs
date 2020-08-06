@@ -72,6 +72,20 @@ spec = do
                                edge' <- run args
                                pure (edge == edge')
             property (prop_prepRunExpect prep run' True)
+    context "an Edge from v1→v2" $ do
+        let prep = do v1 <- addFreeVertex
+                      v2 <- addFreeVertex
+                      edge <- addEdge v1 v2
+                      pure (v1, v2, edge)
+            run (v1, v2, _) = addEdge v2 v1
+            prepRunMaybe = prop_prepRunPostMaybeExpect prep run
+        describe "addEdge from v2→v1" $ do
+            it "returns the same Edge as addEdge v1 v2" $ do
+                let post ((_, _, edge), edge') = pure (edge == edge')
+                property (prop_prepRunPostExpect prep run post)
+            it "creates an InOut adjacency for v1 ↔ Edge" $ do
+                let post ((v1, _, _), edge) = ([InOut edge] == ) <$> vertexEdges v1
+                property (prepRunMaybe post)
 
 -- ===========================================================================
 --                            Properties

@@ -15,6 +15,8 @@ main = do
                    ,  "add vertex 10 20 30"
                    ,  "add vertex 5 30 10"
                    ,  "add line v1 v0"
+                   ,  "add line v1 v0"
+                   ,  "add line v0 v1"
                    ,  "add line v0 v2"
                    ,  "show"
                    ,  "quit"
