@@ -53,7 +53,7 @@ module Topology
 )where
 
 -- Base
-import Control.Monad (void, mzero)
+import Control.Monad (void)
 import Data.List ((\\), intersect)
 
 -- third-party
@@ -210,11 +210,18 @@ vertexID (Vertex gid) = runMaybeT $ do
 
 -- | Re-creates a Vertex from the given Int
 vertexFromID :: Int -> TopoState (Maybe Vertex)
-vertexFromID eid = runMaybeT $ do
-    gids <- lift . gets $ (nodes . labfilter ((eid == ) . getEntityID) . unTopology) 
+vertexFromID eid = do
+    -- First, make a NodeLabel
+    let node = NodeLabel VertexEntity eid
+
+    -- Filter the graph using that NodeLabel
+    gids <- gets (nodes . labfilter (node ==) . unTopology)
+        :: TopoState [Int]
+
+    -- Filter the TopoGraph
     case gids of
-        [gid] -> pure . Vertex $ gid
-        _          -> mzero
+        [gid] -> pure . Just $ (Vertex gid)
+        _     -> pure Nothing
 
 -- | Returns an Int ID that can be used to re-create the Edge
 edgeID :: Edge -> TopoState (Maybe Int)
