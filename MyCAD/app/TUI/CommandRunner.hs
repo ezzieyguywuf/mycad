@@ -61,10 +61,8 @@ runAdd cmd =
         AddEdge n1 n2   -> runExceptT $ do
             v1 <- lift (vertexFromID n1) >>= note ("Can't find Vertex" <> show n1)
             v2 <- lift (vertexFromID n1) >>= note ("Can't find Vertex" <> show n2)
-            maybeEdge <- lift (addEdge v1 v2)
-            case maybeEdge of
-                Nothing -> throwError "Unable to add the Edge for some reason..."
-                Just _  -> pure (Just "Added an Edge")
+            lift (addEdge v1 v2)
+                >>= either throwError (const . pure . Just $ "Added an Edge")
 
 getHelpString :: Maybe CommandToken -> String
 getHelpString = maybe help commandHelp
