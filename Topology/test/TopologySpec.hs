@@ -7,6 +7,7 @@ import Data.Tuple (swap)
 import Data.Foldable (traverse_)
 import Test.Hspec (Spec, describe, it, context, xit)
 import Test.QuickCheck (Arbitrary, arbitrary, property)
+import Test.QuickCheck.Gen (sublistOf)
 import Control.Monad ((>=>), replicateM)
 import Control.Monad.State (execState, get, put, evalState)
 import Control.Monad.Trans.Class (lift)
@@ -164,11 +165,10 @@ newtype TestTopology = TestTopology {unTestTopology :: Topology} deriving (Show)
 -- | This will generate a random Topology
 instance Arbitrary TestTopology where
     arbitrary = do
-        nVertices <- arbitrary
-        nEdges    <- arbitrary
-        let topoState = do replicateM nVertices addFreeVertex
-                           replicateM nEdges $ do
-                               v1 <- addFreeVertex
-                               v2 <- addFreeVertex
-                               addEdge v1 v2
+        nVertices    <- arbitrary
+        freeVertices <- arbitrary
+        let topoState = do vs <- replicateM nVertices addFreeVertex
+                           replicateM freeVertices addFreeVertex
+                           let vPairs = zip vs (tail vs)
+                           mapM_ (uncurry addEdge) vPairs
         pure $ TestTopology (execState topoState emptyTopology)
