@@ -87,6 +87,13 @@ spec = do
             xit "creates an InOut adjacency for v1 ↔ Edge" $ do
                 let post ((v1, _, _), edge) = ([InOut edge] == ) <$> vertexEdges v1
                 property (prepRunMaybe post)
+    describe "makeEdgeLoop" $ do
+        it "returns Nothing if the list of Edges do not form a loop" $ do
+            let run = do vs <- replicateM 6 addFreeVertex
+                         let vPairs = zip vs (tail vs)
+                         es <- mapM (uncurry addEdge) vPairs
+                         makeEdgeLoop (catMaybes es)
+            property (prop_runExpect run Nothing)
 
 -- ===========================================================================
 --                            Properties

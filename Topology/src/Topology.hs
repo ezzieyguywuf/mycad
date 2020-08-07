@@ -36,6 +36,7 @@ module Topology
 , addEdge
 , removeVertex
 , removeEdge
+, makeEdgeLoop
   -- * Adjacency information
   -- | This is really the heart of this module. It's kind of the whole "point"
   --   of Topology
@@ -94,6 +95,12 @@ newtype Vertex = Vertex {getVertexID :: Int} deriving (Show, Eq, Ord)
 newtype Edge   = Edge   {getEdgeID   :: Int} deriving (Show, Eq, Ord)
 -- | A Face will be adjacent to at least one Edge, and at least one Vertex
 newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
+
+-- | An EdgeLoop is a contiguous series of Edges which ultimately ends back
+--   where it started
+data EdgeLoop = EdgeLoop { getFirstVertex :: Vertex
+                         , getFirstEdge   :: Edge
+                         } deriving (Show, Eq, Ord)
 
 -- | Specifies a given pair of topological entities are related to each other
 --
@@ -193,6 +200,19 @@ getEdges = gets (fmap Edge . filterNodes EdgeEntity . unTopology)
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
 removeEdge = void . deleteNode . getEdgeID
+
+-- | Tries to create a "loop" from the list of Edges
+--
+--   In order to succeed, each successive Edge must be directly connected to
+--   the Edge before it in the list.
+--
+--   In other words, for [Edge0, Edge1, Edge2...EdgeN], they must be connected
+--   as `Edge0 → v0 → Edge1 → v1 → Edge2 → v2 →...→ EdgeN`
+--
+--   A single Edge will be added to the Topology from `EdgeN` back to `Edge0`
+--   in order to complete the loop
+makeEdgeLoop :: [Edge] -> TopoState (Maybe EdgeLoop)
+makeEdgeLoop _ = pure Nothing
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
