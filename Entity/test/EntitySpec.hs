@@ -56,10 +56,12 @@ newtype TestEntity a = TestEntity {unTestEntity :: Entity a} deriving (Show)
 newtype TestPoint  a = TestPoint {unTestPoint :: Geo.Point a} deriving (Show)
 
 -- | This will generate a random Entity
-instance (Fractional a, Arbitrary a) => Arbitrary (TestEntity a) where
+instance (Fractional a, Arbitrary a, Eq a, Show a) => Arbitrary (TestEntity a) where
     arbitrary = do
         points <- listOf arbitrary
-        let entityState = mapM_ (addVertex . unTestPoint) points
+        let entityState = do vs <- mapM (addVertex . unTestPoint) points
+                             let vs' = zip vs (tail vs)
+                             mapM (uncurry addEdge) vs'
         pure $ TestEntity (execState entityState nullEntity)
 
 -- | This will generate a random Point
