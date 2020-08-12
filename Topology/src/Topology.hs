@@ -109,8 +109,10 @@ newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 --
 --   Notice that if v0 == vn, then we have a ClosedLoop, otherwise we have an
 --   OpenLoop
-data Wire = OpenLoop (NES.NESet Edge)
-          | ClosedLoop (NES.NESet Edge)
+data Wire = OpenLoop   { getWireStartingVertex :: Vertex
+                       , getWireStartingEdge   :: Edge}
+          | ClosedLoop { getWireStartingVertex :: Vertex
+                       , getWireStartingEdge   :: Edge}
           deriving (Show, Eq)
 
 -- | Specifies a given pair of topological entities are related to each other
