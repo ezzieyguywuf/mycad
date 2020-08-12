@@ -204,7 +204,7 @@ unAdjacency adjacency = case adjacency of
                             InOut val -> val
 
 -- | Returns the list of Edges that make up the Wire
-wireEdges :: Wire -> NES.NESet Edge
+wireEdges :: Wire -> TopoState (NES.NESet Edge)
 wireEdges _ = undefined
 
 -- | Returns all the Vertices in the Topology, in on particular order

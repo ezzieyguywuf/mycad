@@ -123,7 +123,7 @@ prop_createWire (Positive n1) (Positive n2) topology =
                         edgeSet = NES.fromList (NE.fromList es)
                     pure (vertex, edge, edgeSet)
           run (vertex, edge, _) = getWire vertex edge
-          post ((_, _, es), mwire) = pure (maybe False ((es ==) . wireEdges) mwire)
+          post ((_, _, es), mwire) = maybe (pure False) (fmap (es ==) . wireEdges) mwire
 
 -- Represents a function that modifie the topological state
 type TopoMod a b= a -> TopoState b
