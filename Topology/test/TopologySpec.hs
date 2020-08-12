@@ -1,17 +1,26 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 module TopologySpec (spec) where
 
-import Topology
+-- base
+import Data.List (sort)
 import Data.Maybe (catMaybes)
 import Data.Tuple (swap)
 import Data.Foldable (traverse_)
-import Test.Hspec (Spec, describe, it, context, xit)
-import Test.QuickCheck (Arbitrary, arbitrary, property)
-import Test.QuickCheck.Gen (sublistOf)
 import Control.Monad ((>=>), replicateM)
+import Control.Monad.IO.Class (liftIO)
+
+-- third-party
+import qualified Data.List.NonEmpty as NE
+import qualified Data.Set.NonEmpty as NES
+import Test.Hspec (Spec, describe, it, context, xit)
+import Test.QuickCheck (Arbitrary, Positive(Positive), arbitrary, property, generate
+                       , sublistOf, choose)
 import Control.Monad.State (execState, get, put, evalState)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+
+-- internal
+import Topology
 
 spec :: Spec
 spec = do
@@ -87,17 +96,35 @@ spec = do
             xit "creates an InOut adjacency for v1 ↔ Edge" $ do
                 let post ((v1, _, _), edge) = ([InOut edge] == ) <$> vertexEdges v1
                 property (prepRunMaybe post)
-    describe "makeEdgeLoop" $ do
-        it "returns Nothing if the list of Edges do not form a loop" $ do
-            let run = do vs <- replicateM 6 addFreeVertex
-                         let vPairs = zip vs (tail vs)
-                         es <- mapM (uncurry addEdge) vPairs
-                         makeEdgeLoop (catMaybes es)
-            property (prop_runExpect run Nothing)
+    describe "getWire" $ do
+        it "returns OpenLoop containing each Edge in a non-closed loop" $ do
+            property prop_createWire
 
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
+-- Builds a random number of vertices, joins them with edges, and then randomly
+-- selects a vertex→edge pair to try to create a Wire
+prop_createWire :: Positive Int -> Positive Int -> TestTopology -> Bool
+prop_createWire (Positive n1) (Positive n2) topology =
+    prop_prepRunPostExpect prep run post topology
+    where prep = do let (nVertices, which) = case compare n1 n2 of
+                                                 LT -> (n2, n1)
+                                                 GT -> (n1, n2)
+                                                 EQ -> (n1 + 1, n1)
+                    -- Create the Vertices
+                    vs <- replicateM nVertices addFreeVertex
+                    -- Join each consecutive pair of vertices with an Edge
+                    es <- catMaybes <$> mapM (uncurry addEdge) (zip vs (tail vs))
+                    -- Create the return values - the vertex and Edge _should_
+                    -- be such that vertex → edge
+                    let vertex  = vs !! which
+                        edge    = es !! which
+                        edgeSet = NES.fromList (NE.fromList es)
+                    pure (vertex, edge, edgeSet)
+          run (vertex, edge, _) = getWire vertex edge
+          post ((_, _, es), mwire) = pure (maybe False ((es ==) . wireEdges) mwire)
+
 -- Represents a function that modifie the topological state
 type TopoMod a b= a -> TopoState b
 

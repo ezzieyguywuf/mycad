@@ -36,17 +36,17 @@ module Topology
 , addEdge
 , removeVertex
 , removeEdge
-, makeEdgeLoop
   -- * Adjacency information
   -- | This is really the heart of this module. It's kind of the whole "point"
   --   of Topology
 , vertexEdges
 , edgeVertices
 , unAdjacency
-  -- * Inspection
+, wireEdges
   -- | Get information about the topology
 , getVertices
 , getEdges
+, getWire
   -- * Serialization
 , vertexID
 , vertexFromID
@@ -58,6 +58,7 @@ import Control.Monad (void)
 import Data.List ((\\), intersect)
 
 -- third-party
+import qualified Data.Set.NonEmpty as NES
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State (State, gets, modify)
@@ -96,11 +97,21 @@ newtype Edge   = Edge   {getEdgeID   :: Int} deriving (Show, Eq, Ord)
 -- | A Face will be adjacent to at least one Edge, and at least one Vertex
 newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 
--- | An EdgeLoop is a contiguous series of Edges which ultimately ends back
---   where it started
-data EdgeLoop = EdgeLoop { getFirstVertex :: Vertex
-                         , getFirstEdge   :: Edge
-                         } deriving (Show, Eq, Ord)
+-- | A Wire is a contiguous series of Edges.
+--
+--   In this context, "contiguous" means that each Edge has a distinct "left"
+--   and "right" Vertex, and the the "left" Vertex of a given Edge in the Wire
+--   is always the "right" Vertex of another Edge *unless* the given Edge is
+--   the first or last.
+--
+--   In other words, a Wire looks like: v0 → Edge0 → v1 → Edge1 → v2 →
+--   ...→EdgeN → vn.
+--
+--   Notice that if v0 == vn, then we have a ClosedLoop, otherwise we have an
+--   OpenLoop
+data Wire = OpenLoop (NES.NESet Edge)
+          | ClosedLoop (NES.NESet Edge)
+          deriving (Show, Eq)
 
 -- | Specifies a given pair of topological entities are related to each other
 --
@@ -190,6 +201,10 @@ unAdjacency adjacency = case adjacency of
                             Out val   -> val
                             InOut val -> val
 
+-- | Returns the list of Edges that make up the Wire
+wireEdges :: Wire -> NES.NESet Edge
+wireEdges _ = undefined
+
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
 getVertices = gets (fmap Vertex . filterNodes VertexEntity . unTopology)
@@ -201,18 +216,13 @@ getEdges = gets (fmap Edge . filterNodes EdgeEntity . unTopology)
 removeEdge :: Edge -> TopoState ()
 removeEdge = void . deleteNode . getEdgeID
 
--- | Tries to create a "loop" from the list of Edges
+-- | Returns a list of end-to-end "Edge", referred to as a Wire
 --
---   In order to succeed, each successive Edge must be directly connected to
---   the Edge before it in the list.
---
---   In other words, for [Edge0, Edge1, Edge2...EdgeN], they must be connected
---   as `Edge0 → v0 → Edge1 → v1 → Edge2 → v2 →...→ EdgeN`
---
---   A single Edge will be added to the Topology from `EdgeN` back to `Edge0`
---   in order to complete the loop
-makeEdgeLoop :: [Edge] -> TopoState (Maybe EdgeLoop)
-makeEdgeLoop _ = pure Nothing
+--   The Wire can either be OpenLoop, in which case the first and last Vertex
+--   are not the same, or ClosedLoop, in which case it loops all the way back
+--   to its starting point
+getWire :: Vertex -> Edge -> TopoState (Maybe Wire)
+getWire _ _ = undefined
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
