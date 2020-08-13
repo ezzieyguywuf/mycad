@@ -222,7 +222,8 @@ getEdges = gets (fmap Edge . filterNodes EdgeEntity . unTopology)
 removeEdge :: Edge -> TopoState ()
 removeEdge = void . deleteNode . getEdgeID
 
--- | Returns a list of end-to-end "Edge", referred to as a Wire
+-- | Returns a (Right Wire) if the Vertex and Edge form a pair such that
+--   Vertex→Edge
 --
 --   The Wire can either be OpenLoop, in which case the first and last Vertex
 --   are not the same, or ClosedLoop, in which case it loops all the way back

@@ -121,10 +121,10 @@ prop_createWire (Positive n1) (Positive n2) topology =
                     es <- catMaybes <$> mapM (uncurry addEdge) (zip vs (tail vs))
                     -- Create the return values - the vertex and Edge _should_
                     -- be such that vertex → edge
-                    let vertex  = vs !! which
-                        -- Subtract one because there will always be one less
+                    let -- Subtract one because there will always be one less
                         -- Edge than VVertex - this way we avoid an "index too
                         -- large" error
+                        vertex  = vs !! (which - 1)
                         edge    = es !! (which - 1)
                         edgeSet = NES.fromList (NE.fromList es)
                     pure (vertex, edge, edgeSet)
