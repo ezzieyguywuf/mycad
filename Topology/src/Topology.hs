@@ -54,13 +54,14 @@ module Topology
 )where
 
 -- Base
-import Control.Monad (void)
+import Control.Monad (void, unless)
 import Data.List ((\\), intersect)
 
 -- third-party
 import qualified Data.Set.NonEmpty as NES
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
+import Control.Monad.Except (MonadError, runExceptT, throwError)
 import Control.Monad.State (State, gets, modify)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
                                   , gelem, insEdge, lab, subgraph, suc, pre)
@@ -225,9 +226,23 @@ removeEdge = void . deleteNode . getEdgeID
 --   The Wire can either be OpenLoop, in which case the first and last Vertex
 --   are not the same, or ClosedLoop, in which case it loops all the way back
 --   to its starting point
-getWire :: Vertex -> Edge -> TopoState (Maybe Wire)
-getWire _ _ = undefined
+getWire :: Vertex -> Edge -> TopoState (Either String Wire)
+getWire vertex edge = runExceptT $ do
+    -- These two will fail and bail out if either does no exist in the topology
+    vid <- lift (getVertexNode vertex)
+           >>= note "The Vertex does not exist in the Topology"
+    eid <- lift (getEdgeNode edge)
+           >>= note "The Edge does not exist in the Topology"
 
+    -- We'll use the graph for relationship information
+    graph <- lift (gets unTopology)
+
+    -- Bail out if the the vertex is not a predecessor of the edge, i.e.
+    -- Vertex→Edge
+    unless (elem eid (suc graph vid)) (throwError "The Vertex but be a direct \
+        \predecessor to the Edge such that Vertex→Edge")
+
+    throwError "This function is incomplete"
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
 vertexEdges (Vertex gid) = fmap (fmap Edge) <$> adjacencies gid EdgeEntity
@@ -307,6 +322,14 @@ getVertexNode (Vertex gid) = do
        then pure . Just $ gid
        else pure Nothing
 
+-- | Returns Just the Node in our Graph, if it exists
+getEdgeNode :: Edge -> TopoState (Maybe Int)
+getEdgeNode (Edge gid) = do
+    graph <- gets unTopology
+    if gelem gid graph
+       then pure . Just $ gid
+       else pure Nothing
+
 -- | Returns all the Nodes in the graph of the given EntityType
 filterNodes :: EntityType -> TopoGraph -> [Int]
 filterNodes entity graph = nodes (labfilter predicate graph)
@@ -337,4 +360,8 @@ adjacencies gid etype = do
                          <> fmap Out outIDs'
                          <> fmap InOut inoutIDs
     pure allAdjacencies
+
+-- | Turns a `Maybe a` into in `ExceptT e a`, where `e` is the error provided.
+note :: MonadError e m => e -> Maybe a -> m a
+note msg = maybe (throwError msg) pure
 
