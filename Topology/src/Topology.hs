@@ -225,10 +225,6 @@ removeEdge = void . deleteNode . getEdgeID
 
 -- | Returns a (Right Wire) if the Vertex and Edge form a pair such that
 --   Vertex→Edge
---
---   The Wire can either be OpenLoop, in which case the first and last Vertex
---   are not the same, or ClosedLoop, in which case it loops all the way back
---   to its starting point
 getWire :: Vertex -> Edge -> TopoState (Either String Wire)
 getWire vertex edge = runExceptT $ do
     -- These two will fail and bail out if either does no exist in the topology
