@@ -55,6 +55,7 @@ module Topology
 
 -- Base
 import Control.Monad (void, unless)
+import Control.Exception (PatternMatchFail(PatternMatchFail), throw)
 import Data.List ((\\), intersect)
 
 -- third-party
@@ -62,7 +63,7 @@ import qualified Data.Set.NonEmpty as NES
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.Except (MonadError, runExceptT, throwError)
-import Control.Monad.State (State, gets, modify)
+import Control.Monad.State (State, gets, modify, evalState, get)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
                                   , gelem, insEdge, lab, subgraph, suc, pre)
 import Data.Graph.Inductive.PatriciaTree (Gr)
@@ -242,7 +243,46 @@ getWire vertex edge = runExceptT $ do
     unless (elem eid (suc graph vid)) (throwError "The Vertex but be a direct \
         \predecessor to the Edge such that Vertex→Edge")
 
-    throwError "This function is incomplete"
+    let -- filter the graph by just Edge and Vertex, since we don't care
+        -- about Face adjacencies
+        graph' = labfilter check graph
+        check  = (`elem` [VertexEntity, EdgeEntity]) . getEntityType
+
+    -- Return the successive Edges
+    pure (evalState (makeWire graph' (Wire OpenLoop vertex edge)) (NES.singleton (vertex, edge)))
+
+-- | Given the Vertex→Edge pair, finds the "first" pair in the chain
+--
+--   In other words, the providd Vertex→Edge pair may be any in the chain of
+--   V0→Edge0→V1→Edge1→...→VN→EdgeN. This function will return V0→Edge0
+makeWire :: TopoGraph -- ^ The graph containing adjacency information
+         -> Wire      -- ^ The starting point for the search
+         -> State (NES.NESet (Vertex, Edge)) Wire
+makeWire graph (Wire _ (Vertex vid) (Edge eid)) = do
+    -- First, get the current set of Vertex→Edge pairs
+    vePairs <- get
+
+    -- Determine if there is a predecessor for the current Vertex→Edge pair
+    let edgeGIDS  = pre graph vid
+        prevEdges = fmap Edge edgeGIDS
+    case prevEdges of
+        []         -> pure (Wire OpenLoop (Vertex vid) (Edge eid))
+        [prevEdge] -> do -- Find the previous Vertex
+                         let vertexGIDS = pre graph (getEdgeID prevEdge)
+                             prevVertices = fmap Vertex vertexGIDS
+                         case prevVertices of
+                             [] -> throw (PatternMatchFail "Every Edge must have \
+                                          \a preceding Vertex")
+                             [prevVertex] ->
+                                 if NES.member (prevVertex, prevEdge) vePairs
+                                    then pure (uncurry (Wire ClosedLoop) (NES.findMin vePairs))
+                                    else makeWire graph (Wire OpenLoop prevVertex prevEdge)
+                             _:_ -> throw (PatternMatchFail "A Vertex should only \
+                                           \ have one direct predecessor Edge")
+
+        _:_        -> throw (PatternMatchFail "An Edge should only have one \
+                                               \direct predecessor Vertex")
+
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
 vertexEdges (Vertex gid) = fmap (fmap Edge) <$> adjacencies gid EdgeEntity
