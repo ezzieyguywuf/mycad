@@ -376,7 +376,7 @@ filterNodes :: EntityType -> TopoGraph -> [Int]
 filterNodes entity graph = nodes (labfilter predicate graph)
     where predicate = (entity ==) . getEntityType
 
--- | A helper that returns all adjacency entities of the given type
+-- | A helper that returns all adjacent entities of the given type
 adjacencies :: Int        -- ^ The GID of the Node in question
             -> EntityType -- ^ The type of the adjacent entities to check
             -> TopoState [Adjacency Int]
