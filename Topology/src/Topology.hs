@@ -54,7 +54,7 @@ module Topology
 )where
 
 -- Base
-import Control.Monad (void)
+import Control.Monad (void, unless)
 import Data.List ((\\), intersect)
 
 -- third-party
@@ -228,10 +228,15 @@ removeEdge = void . deleteNode . getEdgeID
 --   are not the same, or ClosedLoop, in which case it loops all the way back
 --   to its starting point
 getWire :: Vertex -> Edge -> TopoState (Either String Wire)
-getWire vertex _ = runExceptT $ do
+getWire vertex edge = runExceptT $ do
     -- Get the Edges adjacent to our Vertex
-    _adjacentEdges <- lift (vertexEdges vertex)
-    undefined
+    adjacentEdges <- lift (vertexEdges vertex)
+
+    -- If the given Edge is not Out from the Vertex, bail out
+    unless (elem (Out edge) adjacentEdges) (throwError
+        "The given Edge _must_ be an Out Edge of the given Vertex")
+
+    throwError "This function is incomplete"
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
