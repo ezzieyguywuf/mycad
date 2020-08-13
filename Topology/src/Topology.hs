@@ -54,8 +54,7 @@ module Topology
 )where
 
 -- Base
-import Control.Monad (void, unless)
-import Control.Exception (PatternMatchFail(PatternMatchFail), throw)
+import Control.Monad (void)
 import Data.List ((\\), intersect)
 
 -- third-party
@@ -63,7 +62,7 @@ import qualified Data.Set.NonEmpty as NES
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.Except (MonadError, runExceptT, throwError)
-import Control.Monad.State (State, gets, modify, evalState, get)
+import Control.Monad.State (State, gets, modify)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
                                   , gelem, insEdge, lab, subgraph, suc, pre)
 import Data.Graph.Inductive.PatriciaTree (Gr)
@@ -229,60 +228,10 @@ removeEdge = void . deleteNode . getEdgeID
 --   are not the same, or ClosedLoop, in which case it loops all the way back
 --   to its starting point
 getWire :: Vertex -> Edge -> TopoState (Either String Wire)
-getWire vertex edge = runExceptT $ do
-    -- These two will fail and bail out if either does no exist in the topology
-    vid <- lift (getVertexNode vertex)
-           >>= note "The Vertex does not exist in the Topology"
-    eid <- lift (getEdgeNode edge)
-           >>= note "The Edge does not exist in the Topology"
-
-    -- We'll use the graph for relationship information
-    graph <- lift (gets unTopology)
-
-    -- Bail out if the the vertex is not a predecessor of the edge, i.e.
-    -- Vertex→Edge
-    unless (elem eid (suc graph vid)) (throwError "The Vertex but be a direct \
-        \predecessor to the Edge such that Vertex→Edge")
-
-    let -- filter the graph by just Edge and Vertex, since we don't care
-        -- about Face adjacencies
-        graph' = labfilter check graph
-        check  = (`elem` [VertexEntity, EdgeEntity]) . getEntityType
-
-    -- Return the successive Edges
-    pure (evalState (makeWire graph' (Wire OpenLoop vertex edge)) (NES.singleton (vertex, edge)))
-
--- | Given the Vertex→Edge pair, finds the "first" pair in the chain
---
---   In other words, the providd Vertex→Edge pair may be any in the chain of
---   V0→Edge0→V1→Edge1→...→VN→EdgeN. This function will return V0→Edge0
-makeWire :: TopoGraph -- ^ The graph containing adjacency information
-         -> Wire      -- ^ The starting point for the search
-         -> State (NES.NESet (Vertex, Edge)) Wire
-makeWire graph (Wire _ (Vertex vid) (Edge eid)) = do
-    -- First, get the current set of Vertex→Edge pairs
-    vePairs <- get
-
-    -- Determine if there is a predecessor for the current Vertex→Edge pair
-    let edgeGIDS  = pre graph vid
-        prevEdges = fmap Edge edgeGIDS
-    case prevEdges of
-        []         -> pure (Wire OpenLoop (Vertex vid) (Edge eid))
-        [prevEdge] -> do -- Find the previous Vertex
-                         let vertexGIDS = pre graph (getEdgeID prevEdge)
-                             prevVertices = fmap Vertex vertexGIDS
-                         case prevVertices of
-                             [] -> throw (PatternMatchFail "Every Edge must have \
-                                          \a preceding Vertex")
-                             [prevVertex] ->
-                                 if NES.member (prevVertex, prevEdge) vePairs
-                                    then pure (uncurry (Wire ClosedLoop) (NES.findMin vePairs))
-                                    else makeWire graph (Wire OpenLoop prevVertex prevEdge)
-                             _:_ -> throw (PatternMatchFail "A Vertex should only \
-                                           \ have one direct predecessor Edge")
-
-        _:_        -> throw (PatternMatchFail "An Edge should only have one \
-                                               \direct predecessor Vertex")
+getWire vertex _ = runExceptT $ do
+    -- Get the Edges adjacent to our Vertex
+    _adjacentEdges <- lift (vertexEdges vertex)
+    undefined
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
@@ -364,8 +313,8 @@ getVertexNode (Vertex gid) = do
        else pure Nothing
 
 -- | Returns Just the Node in our Graph, if it exists
-getEdgeNode :: Edge -> TopoState (Maybe Int)
-getEdgeNode (Edge gid) = do
+_getEdgeNode :: Edge -> TopoState (Maybe Int)
+_getEdgeNode (Edge gid) = do
     graph <- gets unTopology
     if gelem gid graph
        then pure . Just $ gid
@@ -403,6 +352,6 @@ adjacencies gid etype = do
     pure allAdjacencies
 
 -- | Turns a `Maybe a` into in `ExceptT e a`, where `e` is the error provided.
-note :: MonadError e m => e -> Maybe a -> m a
-note msg = maybe (throwError msg) pure
+_note :: MonadError e m => e -> Maybe a -> m a
+_note msg = maybe (throwError msg) pure
 
