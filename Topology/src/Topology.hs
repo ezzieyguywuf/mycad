@@ -110,8 +110,7 @@ newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 --
 --   Notice that if v0 == vn, then we have a ClosedLoop, otherwise we have an
 --   OpenLoop
-data Wire = Wire { getLoopType    :: Loop
-                 , getFirstVertex :: Vertex
+data Wire = Wire { getFirstVertex :: Vertex
                  , getFirstEdge   :: Edge
                  }
             deriving (Show, Eq)
@@ -236,7 +235,7 @@ getWire vertex edge = runExceptT $ do
     unless (elem (Out edge) adjacentEdges) (throwError
         "The given Edge _must_ be an Out Edge of the given Vertex")
 
-    throwError "This function is incomplete"
+    pure (Wire vertex edge)
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]
