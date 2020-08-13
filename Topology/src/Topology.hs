@@ -209,7 +209,6 @@ unAdjacency adjacency = case adjacency of
 
 -- | Returns the list of Edges that make up the Wire
 wireEdges :: Wire -> TopoState (NES.NESet Edge)
-wireEdges (Wire OpenLoop _ _) = undefined
 wireEdges _ = undefined
 
 -- | Returns all the Vertices in the Topology, in on particular order
@@ -225,6 +224,10 @@ removeEdge = void . deleteNode . getEdgeID
 
 -- | Returns a (Right Wire) if the Vertex and Edge form a pair such that
 --   Vertex→Edge
+--
+--   The Wire can either be OpenLoop, in which case the first and last Vertex
+--   are not the same, or ClosedLoop, in which case it loops all the way back
+--   to its starting point
 getWire :: Vertex -> Edge -> TopoState (Either String Wire)
 getWire vertex edge = runExceptT $ do
     -- These two will fail and bail out if either does no exist in the topology
