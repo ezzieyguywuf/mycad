@@ -209,6 +209,7 @@ unAdjacency adjacency = case adjacency of
 
 -- | Returns the list of Edges that make up the Wire
 wireEdges :: Wire -> TopoState (NES.NESet Edge)
+wireEdges (Wire OpenLoop _ _) = undefined
 wireEdges _ = undefined
 
 -- | Returns all the Vertices in the Topology, in on particular order
