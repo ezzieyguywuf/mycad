@@ -209,39 +209,41 @@ unAdjacency adjacency = case adjacency of
 
 -- | Returns the list of Edges that make up the Wire
 wireEdges :: Wire -> TopoState (NES.NESet Edge)
-wireEdges wire = forward (NES.singleton (getFirstEdge wire)) wire
-    where forward edges (Wire vertex edge) = do
-            -- Get all Out Vertices from the given Edge
-            let maybeOut b a | Out a'  <- a = if a' == b
-                                               then Nothing
-                                               else Just a'
-                             | otherwise    = Nothing
-            outVertices <- mapMaybe (maybeOut vertex) <$> edgeVertices edge
-                :: TopoState [Vertex]
+wireEdges wire = forwardWire (NES.singleton (getFirstEdge wire)) wire
 
-            -- Get all the Out Edges for each Out Vertex
-            outEdges <- mapMaybe (maybeOut edge) . concat
-                        <$> sequence (vertexEdges <$> outVertices)
-                :: TopoState [Edge]
+forwardWire :: NES.NESet Edge -> Wire -> TopoState (NES.NESet Edge)
+forwardWire edges (Wire vertex edge) = do
+    -- Get all Out Vertices from the given Edge
+    let maybeOut b a | Out a'  <- a = if a' == b
+                                       then Nothing
+                                       else Just a'
+                     | otherwise    = Nothing
+    outVertices <- mapMaybe (maybeOut vertex) <$> edgeVertices edge
+        :: TopoState [Vertex]
 
-            -- Figure out what to do next
-            case (outVertices, outEdges) of
-                -- Bail out if we've found a duplicate
-                ([outVertex], [outEdge]) ->
-                    if NES.member outEdge edges
-                       then pure edges
-                       else goState (NES.insert outEdge edges) (Wire outVertex outEdge)
-                -- Bail out if we've reached the end of the chain
-                ([_], [])  -> pure edges
-                (_:_ , [])  -> throw (PatternMatchFail
-                                   "A Vertex should have only a single Out Edge")
-                ([], []) -> throw (PatternMatchFail
-                                "Both Vertex and Edge should not have zero \
-                                \Out Adjacencies")
-                ([], _:_)  -> throw (PatternMatchFail
-                                "An Edge should have one or zero Out Vertices")
-                (_:_, _:_) -> throw (PatternMatchFail
-                                "Both Vertex and Edge had too many Out adjacencies")
+    -- Get all the Out Edges for each Out Vertex
+    outEdges <- mapMaybe (maybeOut edge) . concat
+                <$> sequence (vertexEdges <$> outVertices)
+        :: TopoState [Edge]
+
+    -- Figure out what to do next
+    case (outVertices, outEdges) of
+        -- Bail out if we've found a duplicate
+        ([outVertex], [outEdge]) ->
+            if NES.member outEdge edges
+               then pure edges
+               else forwardWire (NES.insert outEdge edges) (Wire outVertex outEdge)
+        -- Bail out if we've reached the end of the chain
+        ([_], [])  -> pure edges
+        (_:_ , [])  -> throw (PatternMatchFail
+                           "A Vertex should have only a single Out Edge")
+        ([], []) -> throw (PatternMatchFail
+                        "Both Vertex and Edge should not have zero \
+                        \Out Adjacencies")
+        ([], _:_)  -> throw (PatternMatchFail
+                        "An Edge should have one or zero Out Vertices")
+        (_:_, _:_) -> throw (PatternMatchFail
+                        "Both Vertex and Edge had too many Out adjacencies")
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
