@@ -225,13 +225,11 @@ traverseWire :: (forall a . Eq a => a ->
             -> Wire           -- ^ The current Vertex→Edge pair under inspection
             -> TopoState (NES.NESet Edge)
 traverseWire nextFilter edges (Wire vertex edge) = do
-    outVertices <- mapMaybe (nextFilter vertex :: Adjacency Vertex -> Maybe Vertex) <$> edgeVertices edge
-        :: TopoState [Vertex]
+    outVertices <- mapMaybe (nextFilter vertex) <$> edgeVertices edge
 
     -- Get all the Out Edges for each Out Vertex
     outEdges <- mapMaybe (nextFilter edge :: Adjacency Edge -> Maybe Edge) . concat
                 <$> sequence (vertexEdges <$> outVertices)
-        :: TopoState [Edge]
 
     -- Figure out what to do next
     case (outVertices, outEdges) of
@@ -239,7 +237,10 @@ traverseWire nextFilter edges (Wire vertex edge) = do
         ([outVertex], [outEdge]) ->
             if NES.member outEdge edges
                then pure edges
-               else traverseWire nextFilter (NES.insert outEdge edges) (Wire outVertex outEdge)
+               else traverseWire
+                        nextFilter
+                        (NES.insert outEdge edges)
+                        (Wire outVertex outEdge)
         -- Bail out if we've reached the end of the chain
         ([_], [])  -> pure edges
         (_:_ , [])  -> throw (PatternMatchFail
