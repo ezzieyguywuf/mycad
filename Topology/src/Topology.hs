@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE RankNTypes #-}
 {-|
 Module      : Topology
 Description : Adjacency relationships for geometric data.
@@ -209,20 +210,26 @@ unAdjacency adjacency = case adjacency of
 
 -- | Returns the list of Edges that make up the Wire
 wireEdges :: Wire -> TopoState (NES.NESet Edge)
-wireEdges wire = forwardWire (NES.singleton (getFirstEdge wire)) wire
+wireEdges wire = traverseWire forwardWire (NES.singleton (getFirstEdge wire)) wire
 
-forwardWire :: NES.NESet Edge -> Wire -> TopoState (NES.NESet Edge)
-forwardWire edges (Wire vertex edge) = do
-    -- Get all Out Vertices from the given Edge
-    let maybeOut b a | Out a'  <- a = if a' == b
-                                       then Nothing
-                                       else Just a'
-                     | otherwise    = Nothing
-    outVertices <- mapMaybe (maybeOut vertex) <$> edgeVertices edge
+forwardWire :: Eq a => a -> Adjacency a -> Maybe a
+forwardWire b a | Out a'  <- a = if a' == b
+                                    then Nothing
+                                    else Just a'
+                | otherwise    = Nothing
+
+traverseWire :: (forall a . Eq a => a ->
+                Adjacency a
+                -> Maybe a)   -- ^ Used to find the "next" Vertex→Edge pair
+            -> NES.NESet Edge -- ^ The cumulative list of found Edges
+            -> Wire           -- ^ The current Vertex→Edge pair under inspection
+            -> TopoState (NES.NESet Edge)
+traverseWire nextFilter edges (Wire vertex edge) = do
+    outVertices <- mapMaybe (nextFilter vertex :: Adjacency Vertex -> Maybe Vertex) <$> edgeVertices edge
         :: TopoState [Vertex]
 
     -- Get all the Out Edges for each Out Vertex
-    outEdges <- mapMaybe (maybeOut edge) . concat
+    outEdges <- mapMaybe (nextFilter edge :: Adjacency Edge -> Maybe Edge) . concat
                 <$> sequence (vertexEdges <$> outVertices)
         :: TopoState [Edge]
 
@@ -232,7 +239,7 @@ forwardWire edges (Wire vertex edge) = do
         ([outVertex], [outEdge]) ->
             if NES.member outEdge edges
                then pure edges
-               else forwardWire (NES.insert outEdge edges) (Wire outVertex outEdge)
+               else traverseWire nextFilter (NES.insert outEdge edges) (Wire outVertex outEdge)
         -- Bail out if we've reached the end of the chain
         ([_], [])  -> pure edges
         (_:_ , [])  -> throw (PatternMatchFail
