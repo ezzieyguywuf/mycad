@@ -209,8 +209,15 @@ unAdjacency adjacency = case adjacency of
 
 -- | Returns the list of Edges that make up the Wire
 wireEdges :: Wire -> TopoState (NES.NESet Edge)
-wireEdges startWire@(Wire _ startEdge) = gets (goForward startWire startSet)
-    where startSet = NES.singleton startEdge
+wireEdges startWire@(Wire _ startEdge) = do
+    -- The initial set of Edges
+    let startSet = NES.singleton startEdge
+
+    -- Cycle Forward
+    forwardSet <- gets (goForward startWire startSet)
+
+    -- Cycle Backwards
+    gets (goBackward startWire forwardSet)
 
 goForward :: Wire -> NES.NESet Edge -> Topology -> NES.NESet Edge
 goForward (Wire _ edge) currentSet topology =
@@ -230,6 +237,25 @@ goForward (Wire _ edge) currentSet topology =
         adjacentEdgeState = sequence (map vertexEdges outVertices)
         adjacentEdges = concat (evalState adjacentEdgeState topology)
         outEdges = mapMaybe mapOut adjacentEdges
+
+goBackward :: Wire -> NES.NESet Edge -> Topology -> NES.NESet Edge
+goBackward (Wire vertex _) currentSet topology =
+    case (inVertices, inEdges) of
+        ([inVertex], [inEdge]) -> goBackward newWire newSet topology
+            where newWire = Wire inVertex inEdge
+                  newSet  = NES.insert inEdge currentSet
+        _ -> currentSet
+    where
+        -- Get a list of adjacent In edges
+        adjacentEdges = evalState (vertexEdges vertex) topology
+        inEdges = mapMaybe mapIn adjacentEdges
+        mapIn (In a)  = Just a
+        mapIn _       = Nothing
+
+        -- Get a list of adjacent In vertices
+        adjacentVertexState = sequence (map edgeVertices inEdges)
+        adjacentVertices = concat (evalState adjacentVertexState topology)
+        inVertices = mapMaybe mapIn adjacentVertices
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
