@@ -56,7 +56,6 @@ module Topology
 
 -- Base
 import Data.Maybe (mapMaybe)
-import Control.Exception (PatternMatchFail(..), throw)
 import Control.Monad (void, unless)
 import Data.List ((\\), intersect)
 
@@ -65,7 +64,7 @@ import qualified Data.Set.NonEmpty as NES
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.Except (MonadError, runExceptT, throwError)
-import Control.Monad.State (State, gets, modify)
+import Control.Monad.State (State, gets, modify, evalState)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
                                   , gelem, insEdge, lab, subgraph, suc, pre)
 import Data.Graph.Inductive.PatriciaTree (Gr)
@@ -210,48 +209,27 @@ unAdjacency adjacency = case adjacency of
 
 -- | Returns the list of Edges that make up the Wire
 wireEdges :: Wire -> TopoState (NES.NESet Edge)
-wireEdges wire = traverseWire forwardWire (NES.singleton (getFirstEdge wire)) wire
+wireEdges startWire@(Wire _ startEdge) = gets (goForward startWire startSet)
+    where startSet = NES.singleton startEdge
 
-forwardWire :: Eq a => a -> Adjacency a -> Maybe a
-forwardWire b a | Out a'  <- a = if a' == b
-                                    then Nothing
-                                    else Just a'
-                | otherwise    = Nothing
-
-traverseWire :: (forall a . Eq a => a ->
-                Adjacency a
-                -> Maybe a)   -- ^ Used to find the "next" Vertex→Edge pair
-            -> NES.NESet Edge -- ^ The cumulative list of found Edges
-            -> Wire           -- ^ The current Vertex→Edge pair under inspection
-            -> TopoState (NES.NESet Edge)
-traverseWire nextFilter edges (Wire vertex edge) = do
-    outVertices <- mapMaybe (nextFilter vertex) <$> edgeVertices edge
-
-    -- Get all the Out Edges for each Out Vertex
-    outEdges <- mapMaybe (nextFilter edge :: Adjacency Edge -> Maybe Edge) . concat
-                <$> sequence (vertexEdges <$> outVertices)
-
-    -- Figure out what to do next
+goForward :: Wire -> NES.NESet Edge -> Topology -> NES.NESet Edge
+goForward (Wire _ edge) currentSet topology =
     case (outVertices, outEdges) of
-        -- Bail out if we've found a duplicate
-        ([outVertex], [outEdge]) ->
-            if NES.member outEdge edges
-               then pure edges
-               else traverseWire
-                        nextFilter
-                        (NES.insert outEdge edges)
-                        (Wire outVertex outEdge)
-        -- Bail out if we've reached the end of the chain
-        ([_], [])  -> pure edges
-        (_:_ , [])  -> throw (PatternMatchFail
-                           "A Vertex should have only a single Out Edge")
-        ([], []) -> throw (PatternMatchFail
-                        "Both Vertex and Edge should not have zero \
-                        \Out Adjacencies")
-        ([], _:_)  -> throw (PatternMatchFail
-                        "An Edge should have one or zero Out Vertices")
-        (_:_, _:_) -> throw (PatternMatchFail
-                        "Both Vertex and Edge had too many Out adjacencies")
+        ([outVertex], [outEdge]) -> goForward newWire newSet topology
+            where newWire = Wire outVertex outEdge
+                  newSet  = NES.insert outEdge currentSet
+        _ -> currentSet
+    where
+        -- Get a list of adjacent Out vertices
+        adjacentVertices = evalState (edgeVertices edge) topology
+        outVertices = mapMaybe mapOut adjacentVertices
+        mapOut (Out a)  = Just a
+        mapOut _        = Nothing
+
+        -- Get a list of adjacent Out edges
+        adjacentEdgeState = sequence (map vertexEdges outVertices)
+        adjacentEdges = concat (evalState adjacentEdgeState topology)
+        outEdges = mapMaybe mapOut adjacentEdges
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
