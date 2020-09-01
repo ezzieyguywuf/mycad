@@ -108,26 +108,33 @@ spec = do
 prop_createWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_createWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
-    where prep = do let -- Always add 1, so that we have at least 2
-                        n1' = n1 + 1
-                        n2' = n2 + 1
-                        (nVertices, which) = case compare n1' n2' of
-                                                 LT -> (n2', n1')
-                                                 GT -> (n1', n2')
-                                                 EQ -> (n1' + 1, n1')
-                    -- Create the Vertices
-                    vs <- replicateM nVertices addFreeVertex
-                    -- Join each consecutive pair of vertices with an Edge
-                    es <- catMaybes <$> mapM (uncurry addEdge) (zip vs (tail vs))
-                    -- Create the return values - the vertex and Edge _should_
-                    -- be such that vertex → edge
-                    let -- Subtract one because there will always be one less
-                        -- Edge than VVertex - this way we avoid an "index too
-                        -- large" error
-                        vertex  = vs !! (which - 1)
-                        edge    = es !! (which - 1)
-                        edgeSet = NES.fromList (NE.fromList es)
-                    pure (vertex, edge, edgeSet)
+    where prep = do
+                -- How many Vertex→Edge pairs are we making?
+                let (nVertices, which) =
+                        case compare n1 n2 of
+                            LT -> if n2 == 1
+                                     then (n2 + 1, n1 + 1)
+                                     else (n2, n1)
+                            GT -> if n1 == 1
+                                     then (n1 + 1, n2 + 1)
+                                     else (n1, n2)
+                            EQ -> (n1 + 1, n2)
+
+                -- Create the Vertices
+                vs <- replicateM nVertices addFreeVertex
+                -- Join each consecutive pair of vertices with an Edge
+                es <- catMaybes <$> mapM (uncurry addEdge) (zip vs (tail vs))
+
+                -- Create the return values - the vertex and Edge _should_
+                -- be such that vertex → edge
+                let -- Subtract one because there will always be one less
+                    -- Edge than VVertex - this way we avoid an "index too
+                    -- large" error
+                    vertex  = vs !! (which - 1)
+                    edge    = es !! (which - 1)
+                    edgeSet = NES.fromList (NE.fromList es)
+                pure (vertex, edge, edgeSet)
+
           run (vertex, edge, _) = getWire vertex edge
           post ((_, _, es), ewire) =  either (const (pure False))
                                              (fmap (es ==) . wireEdges)
