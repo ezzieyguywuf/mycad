@@ -222,7 +222,10 @@ wireEdges startWire@(Wire _ startEdge) = do
 goForward :: Wire -> NES.NESet Edge -> Topology -> NES.NESet Edge
 goForward (Wire _ edge) currentSet topology =
     case (outVertices, outEdges) of
-        ([outVertex], [outEdge]) -> goForward newWire newSet topology
+        ([outVertex], [outEdge]) ->
+            if outEdge `NES.notMember` currentSet
+               then goForward newWire newSet topology
+               else newSet
             where newWire = Wire outVertex outEdge
                   newSet  = NES.insert outEdge currentSet
         _ -> currentSet
@@ -241,7 +244,10 @@ goForward (Wire _ edge) currentSet topology =
 goBackward :: Wire -> NES.NESet Edge -> Topology -> NES.NESet Edge
 goBackward (Wire vertex _) currentSet topology =
     case (inVertices, inEdges) of
-        ([inVertex], [inEdge]) -> goBackward newWire newSet topology
+        ([inVertex], [inEdge]) ->
+            if inEdge `NES.notMember` currentSet
+               then goBackward newWire newSet topology
+               else newSet
             where newWire = Wire inVertex inEdge
                   newSet  = NES.insert inEdge currentSet
         _ -> currentSet
@@ -270,10 +276,6 @@ removeEdge = void . deleteNode . getEdgeID
 
 -- | Returns a (Right Wire) if the Vertex and Edge form a pair such that
 --   Vertex→Edge
---
---   The Wire can either be OpenLoop, in which case the first and last Vertex
---   are not the same, or ClosedLoop, in which case it loops all the way back
---   to its starting point
 getWire :: Vertex -> Edge -> TopoState (Either String Wire)
 getWire vertex edge = runExceptT $ do
     -- Get the Edges adjacent to our Vertex
