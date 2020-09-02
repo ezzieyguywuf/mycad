@@ -43,10 +43,10 @@ module Topology
 , vertexEdges
 , edgeVertices
 , unAdjacency
-, wireEdges
   -- | Get information about the topology
 , getVertices
 , getEdges
+, getRay
 , getWire
   -- * Serialization
 , vertexID
@@ -100,24 +100,16 @@ newtype Edge   = Edge   {getEdgeID   :: Int} deriving (Show, Eq, Ord)
 -- | A Face will be adjacent to at least one Edge, and at least one Vertex
 newtype Face   = Face   {getFaceID   :: Int} deriving (Show, Eq)
 
--- | A Wire is a contiguous series of Edges.
+-- | A Ray is a Vertex/Edge pair.
 --
---   In this context, "contiguous" means that each Edge has a distinct "left"
---   and "right" Vertex, and the the "left" Vertex of a given Edge in the Wire
---   is always the "right" Vertex of another Edge *unless* the given Edge is
---   the first or last.
+--   Speifically, a set of relationships exists such that:
 --
---   In other words, a Wire looks like: v0 → Edge0 → v1 → Edge1 → v2 →
---   ...→EdgeN → vn.
+--       - the Vertex has `Out Edge` as an adjacency
+--       - the Edge has `In Vertx` as an adjacency.
 --
---   Notice that if v0 == vn, then we have a ClosedLoop, otherwise we have an
---   OpenLoop
-data Wire = Wire { getFirstVertex :: Vertex
-                 , getFirstEdge   :: Edge
-                 }
-            deriving (Show, Eq)
-
-data Loop = OpenLoop | ClosedLoop deriving (Show, Eq)
+--   In other words, a Ray is a Vertex→Edge
+data Ray = Ray Vertex Edge
+            deriving (Show)
 
 -- | Specifies a given pair of topological entities are related to each other
 --
@@ -208,25 +200,25 @@ unAdjacency adjacency = case adjacency of
                             InOut val -> val
 
 -- | Returns the list of Edges that make up the Wire
-wireEdges :: Wire -> TopoState (NES.NESet Edge)
-wireEdges startWire@(Wire _ startEdge) = do
+getWire :: Ray -> TopoState (NES.NESet Edge)
+getWire startRay@(Ray _ startEdge) = do
     -- The initial set of Edges
     let startSet = NES.singleton startEdge
 
     -- Cycle Forward
-    forwardSet <- gets (goForward startWire startSet)
+    forwardSet <- gets (goForward startRay startSet)
 
     -- Cycle Backwards
-    gets (goBackward startWire forwardSet)
+    gets (goBackward startRay forwardSet)
 
-goForward :: Wire -> NES.NESet Edge -> Topology -> NES.NESet Edge
-goForward (Wire _ edge) currentSet topology =
+goForward :: Ray -> NES.NESet Edge -> Topology -> NES.NESet Edge
+goForward (Ray _ edge) currentSet topology =
     case (outVertices, outEdges) of
         ([outVertex], [outEdge]) ->
             if outEdge `NES.notMember` currentSet
-               then goForward newWire newSet topology
+               then goForward newRay newSet topology
                else newSet
-            where newWire = Wire outVertex outEdge
+            where newRay = Ray outVertex outEdge
                   newSet  = NES.insert outEdge currentSet
         _ -> currentSet
     where
@@ -241,14 +233,14 @@ goForward (Wire _ edge) currentSet topology =
         adjacentEdges = concat (evalState adjacentEdgeState topology)
         outEdges = mapMaybe mapOut adjacentEdges
 
-goBackward :: Wire -> NES.NESet Edge -> Topology -> NES.NESet Edge
-goBackward (Wire vertex _) currentSet topology =
+goBackward :: Ray -> NES.NESet Edge -> Topology -> NES.NESet Edge
+goBackward (Ray vertex _) currentSet topology =
     case (inVertices, inEdges) of
         ([inVertex], [inEdge]) ->
             if inEdge `NES.notMember` currentSet
-               then goBackward newWire newSet topology
+               then goBackward newRay newSet topology
                else newSet
-            where newWire = Wire inVertex inEdge
+            where newRay = Ray inVertex inEdge
                   newSet  = NES.insert inEdge currentSet
         _ -> currentSet
     where
@@ -274,10 +266,10 @@ getEdges = gets (fmap Edge . filterNodes EdgeEntity . unTopology)
 removeEdge :: Edge -> TopoState ()
 removeEdge = void . deleteNode . getEdgeID
 
--- | Returns a (Right Wire) if the Vertex and Edge form a pair such that
+-- | Returns a (Right Ray) if the Vertex and Edge form a pair such that
 --   Vertex→Edge
-getWire :: Vertex -> Edge -> TopoState (Either String Wire)
-getWire vertex edge = runExceptT $ do
+getRay :: Vertex -> Edge -> TopoState (Either String Ray)
+getRay vertex edge = runExceptT $ do
     -- Get the Edges adjacent to our Vertex
     adjacentEdges <- lift (vertexEdges vertex)
 
@@ -285,7 +277,7 @@ getWire vertex edge = runExceptT $ do
     unless (elem (Out edge) adjacentEdges) (throwError
         "The given Edge _must_ be an Out Edge of the given Vertex")
 
-    pure (Wire vertex edge)
+    pure (Ray vertex edge)
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Adjacency Edge]

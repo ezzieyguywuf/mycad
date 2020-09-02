@@ -111,20 +111,19 @@ prop_openLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_openLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
     where prep = makeVertexEdgePairs n1 n2 False
-          run (vertex, edge, _) = getWire vertex edge
+          run (vertex, edge, _) = getRay vertex edge
           post ((_, _, es), ewire) =  either (const (pure False))
-                                             (fmap (es ==) . wireEdges)
+                                             (fmap (es ==) . getWire)
                                              ewire
 
 prop_closedLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_closedLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
     where prep = makeVertexEdgePairs n1 n2 True
-          run (vertex, edge, _) = getWire vertex edge
+          run (vertex, edge, _) = getRay vertex edge
           post ((_, _, es), ewire) =  either (const (pure False))
-                                             (fmap (es ==) . wireEdges)
+                                             (fmap (es ==) . getWire)
                                              ewire
-
 
 -- Represents a function that modifie the topological state
 type TopoMod a b= a -> TopoState b
