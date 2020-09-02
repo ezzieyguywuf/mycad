@@ -97,16 +97,16 @@ spec = do
                 let post ((v1, _, _), edge) = ([InOut edge] == ) <$> vertexEdges v1
                 property (prepRunMaybe post)
     describe "getWire" $ do
-        it "returns OpenLoop containing each Edge in a non-closed loop" $ do
-            property prop_createWire
+        it "returns the list of Edges in an Open Wire" $ do
+            property prop_openLoopWire
 
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
 -- Builds a random number of vertices, joins them with edges, and then randomly
 -- selects a vertex→edge pair to try to create a Wire
-prop_createWire :: Positive Int -> Positive Int -> TestTopology -> Bool
-prop_createWire (Positive n1) (Positive n2) topology =
+prop_openLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
+prop_openLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
     where prep = makeVertexEdgePairs n1 n2
           run (vertex, edge, _) = getWire vertex edge
