@@ -234,7 +234,7 @@ makeVertexEdgePairs n1 n2 shouldClose = do
     -- Join each consecutive pair of vertices with an Edge
     let evPairs =
             if shouldClose
-               then (last vs, vs !! 0) : zip vs (tail vs)
+               then zip vs (tail vs ++ [head vs])
                else zip vs (tail vs)
     es <- catMaybes <$> mapM (uncurry addEdge) evPairs
 
