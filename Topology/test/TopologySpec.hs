@@ -99,6 +99,8 @@ spec = do
     describe "getWire" $ do
         it "returns the list of Edges in an Open Wire" $ do
             property prop_openLoopWire
+        it "returns the list of Edges in an Closed Wire" $ do
+            property prop_closedLoopWire
 
 -- ===========================================================================
 --                            Properties
@@ -108,11 +110,21 @@ spec = do
 prop_openLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_openLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
-    where prep = makeVertexEdgePairs n1 n2
+    where prep = makeVertexEdgePairs n1 n2 False
           run (vertex, edge, _) = getWire vertex edge
           post ((_, _, es), ewire) =  either (const (pure False))
                                              (fmap (es ==) . wireEdges)
                                              ewire
+
+prop_closedLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
+prop_closedLoopWire (Positive n1) (Positive n2) topology =
+    prop_prepRunPostExpect prep run post topology
+    where prep = makeVertexEdgePairs n1 n2 True
+          run (vertex, edge, _) = getWire vertex edge
+          post ((_, _, es), ewire) =  either (const (pure False))
+                                             (fmap (es ==) . wireEdges)
+                                             ewire
+
 
 -- Represents a function that modifie the topological state
 type TopoMod a b= a -> TopoState b
@@ -201,8 +213,11 @@ instance Arbitrary TestTopology where
 --   The return is a three-tuple of (Vertex, Edge, Edges), where the Vertex and
 --   Edge represent one of the created Vertex→Edge pairs and the Edges is all
 --   of the created Edges
-makeVertexEdgePairs :: Int -> Int -> TopoState (Vertex, Edge, NES.NESet Edge)
-makeVertexEdgePairs n1 n2 = do
+makeVertexEdgePairs :: Int 
+                    -> Int 
+                    -> Bool 
+                    -> TopoState (Vertex, Edge, NES.NESet Edge)
+makeVertexEdgePairs n1 n2 shouldClose = do
     -- How many Vertex→Edge pairs are we making?
     let (nVertices, which) =
             case compare n1 n2 of
@@ -217,7 +232,11 @@ makeVertexEdgePairs n1 n2 = do
     -- Create the Vertices
     vs <- replicateM nVertices addFreeVertex
     -- Join each consecutive pair of vertices with an Edge
-    es <- catMaybes <$> mapM (uncurry addEdge) (zip vs (tail vs))
+    let evPairs =
+            if shouldClose
+               then (last vs, vs !! 0) : zip vs (tail vs)
+               else zip vs (tail vs)
+    es <- catMaybes <$> mapM (uncurry addEdge) evPairs
 
     -- Create the return values - the vertex and Edge _should_
     -- be such that vertex → edge
