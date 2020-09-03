@@ -114,20 +114,20 @@ spec = do
 prop_openLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_openLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
-    where prep = makeVertexEdgePairs n1 n2 False
-          run (vertex, edge, _) = getRay vertex edge
-          post ((_, _, es), eRay) =  either (const (pure False))
-                                             (fmap (OpenWire es ==) . getWire)
-                                             eRay
+    where prep                    = makeVertexEdgePairs n1 n2 False
+          run  (vertex, edge, _)  = getRay vertex edge
+          post ((_, _, es), eRay) = either (const (pure False))
+                                           (fmap (OpenWire es ==) . getWire)
+                                           eRay
 
 prop_closedLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_closedLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
-    where prep = makeVertexEdgePairs n1 n2 True
-          run (vertex, edge, _) = getRay vertex edge
-          post ((_, _, es), eRay) =  either (const (pure False))
-                                             (fmap (ClosedWire es ==) . getWire)
-                                             eRay
+    where prep                    = makeVertexEdgePairs n1 n2 True
+          run  (vertex, edge, _)  = getRay vertex edge
+          post ((_, _, es), eRay) = either (const (pure False))
+                                           (fmap (ClosedWire es ==) . getWire)
+                                           eRay
 
 prop_makeFaceOpenWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_makeFaceOpenWire (Positive n1) (Positive n2) topology =
@@ -140,18 +140,18 @@ prop_makeFaceOpenWire (Positive n1) (Positive n2) topology =
           post (_, eFace)         = pure (isLeft eFace)
 
 -- Represents a function that modifie the topological state
-type TopoMod a b= a -> TopoState b
+type TopoMod a b = a -> TopoState b
 
 -- The given state should not modify anything when executed
 prop_runIdentity :: TopoState a -> TestTopology -> Bool
 prop_runIdentity run = prop_prepRunIdentity prep run'
-    where prep  = pure ()
+    where prep   = pure ()
           run' _ = prep >> run
 
 -- The given TopoMod should produce the given output.
 prop_runExpect :: Eq a => TopoState a -> a -> TestTopology -> Bool
 prop_runExpect run = prop_prepRunExpect prep run'
-    where prep = pure ()
+    where prep   = pure ()
           run' _ = run
 
 -- The state will first be "prepared" using prep, the output of which is passed
@@ -160,9 +160,9 @@ prop_runExpect run = prop_prepRunExpect prep run'
 -- The TopoMod should not modify the state
 prop_prepRunIdentity :: TopoState a -> TopoMod a b -> TestTopology -> Bool
 prop_prepRunIdentity prep run testTopology = initialState == finalState
-    where topology = unTestTopology testTopology
+    where topology     = unTestTopology testTopology
           initialState = execState prep topology
-          finalState = execState (prep >>= run) topology
+          finalState   = execState (prep >>= run) topology
 
 -- The given TopoMod should produce the given output. The TopoMod is "prepped"
 -- by running the prep state, and passing along the result

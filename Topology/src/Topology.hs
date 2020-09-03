@@ -208,15 +208,8 @@ addEdge v1 v2 = runMaybeT $ do
 
 -- | Will create a face from a ClosedWire. Returns an error if OpenWire
 makeFace :: Wire -> TopoState (Either String Face)
-makeFace (OpenWire _) = pure (Left "A Face can only be made with an OpenWire")
+makeFace (OpenWire _)   = pure (Left "A Face can only be made with an OpenWire")
 makeFace (ClosedWire _) = undefined
-
--- | This is useful when you don't need to know the Adjacency information
-unAdjacency :: Adjacency a -> a
-unAdjacency adjacency = case adjacency of
-                            In val    -> val
-                            Out val   -> val
-                            InOut val -> val
 
 -- | Returns the list of Edges that make up the Wire
 getWire :: Ray -> TopoState Wire
@@ -233,50 +226,6 @@ getWire startRay@(Ray _ startEdge) = do
     if looped
        then pure (ClosedWire finalSet)
        else pure (OpenWire finalSet)
-
-goForward :: Ray -> NES.NESet Edge -> Topology -> (Bool, EdgeSet)
-goForward (Ray _ edge) currentSet topology =
-    case (outVertices, outEdges) of
-        ([outVertex], [outEdge]) ->
-            if outEdge `NES.notMember` currentSet
-               then goForward newRay newSet topology
-               else (True, newSet)
-            where newRay = Ray outVertex outEdge
-                  newSet  = NES.insert outEdge currentSet
-        _ -> (False, currentSet)
-    where
-        -- Get a list of adjacent Out vertices
-        adjacentVertices = evalState (edgeVertices edge) topology
-        outVertices = mapMaybe mapOut adjacentVertices
-        mapOut (Out a)  = Just a
-        mapOut _        = Nothing
-
-        -- Get a list of adjacent Out edges
-        adjacentEdgeState = sequence (map vertexEdges outVertices)
-        adjacentEdges = concat (evalState adjacentEdgeState topology)
-        outEdges = mapMaybe mapOut adjacentEdges
-
-goBackward :: Ray -> NES.NESet Edge -> Topology -> (Bool, EdgeSet)
-goBackward (Ray vertex _) currentSet topology =
-    case (inVertices, inEdges) of
-        ([inVertex], [inEdge]) ->
-            if inEdge `NES.notMember` currentSet
-               then goBackward newRay newSet topology
-               else (True, newSet)
-            where newRay = Ray inVertex inEdge
-                  newSet  = NES.insert inEdge currentSet
-        _ -> (False, currentSet)
-    where
-        -- Get a list of adjacent In edges
-        adjacentEdges = evalState (vertexEdges vertex) topology
-        inEdges = mapMaybe mapIn adjacentEdges
-        mapIn (In a)  = Just a
-        mapIn _       = Nothing
-
-        -- Get a list of adjacent In vertices
-        adjacentVertexState = sequence (map edgeVertices inEdges)
-        adjacentVertices = concat (evalState adjacentVertexState topology)
-        inVertices = mapMaybe mapIn adjacentVertices
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
@@ -423,4 +372,55 @@ adjacencies gid etype = do
 -- | Turns a `Maybe a` into in `ExceptT e a`, where `e` is the error provided.
 _note :: MonadError e m => e -> Maybe a -> m a
 _note msg = maybe (throwError msg) pure
+
+-- | This is useful when you don't need to know the Adjacency information
+unAdjacency :: Adjacency a -> a
+unAdjacency adjacency = case adjacency of
+                            In val    -> val
+                            Out val   -> val
+                            InOut val -> val
+
+goForward :: Ray -> NES.NESet Edge -> Topology -> (Bool, EdgeSet)
+goForward (Ray _ edge) currentSet topology =
+    case (outVertices, outEdges) of
+        ([outVertex], [outEdge]) ->
+            if outEdge `NES.notMember` currentSet
+               then goForward newRay newSet topology
+               else (True, newSet)
+            where newRay  = Ray outVertex outEdge
+                  newSet  = NES.insert outEdge currentSet
+        _ -> (False, currentSet)
+    where
+        -- Get a list of adjacent Out vertices
+        adjacentVertices = evalState (edgeVertices edge) topology
+        outVertices      = mapMaybe mapOut adjacentVertices
+        mapOut (Out a)   = Just a
+        mapOut _         = Nothing
+
+        -- Get a list of adjacent Out edges
+        adjacentEdgeState = sequence (map vertexEdges outVertices)
+        adjacentEdges     = concat (evalState adjacentEdgeState topology)
+        outEdges          = mapMaybe mapOut adjacentEdges
+
+goBackward :: Ray -> NES.NESet Edge -> Topology -> (Bool, EdgeSet)
+goBackward (Ray vertex _) currentSet topology =
+    case (inVertices, inEdges) of
+        ([inVertex], [inEdge]) ->
+            if inEdge `NES.notMember` currentSet
+               then goBackward newRay newSet topology
+               else (True, newSet)
+            where newRay  = Ray inVertex inEdge
+                  newSet  = NES.insert inEdge currentSet
+        _ -> (False, currentSet)
+    where
+        -- Get a list of adjacent In edges
+        adjacentEdges = evalState (vertexEdges vertex) topology
+        inEdges       = mapMaybe mapIn adjacentEdges
+        mapIn (In a)  = Just a
+        mapIn _       = Nothing
+
+        -- Get a list of adjacent In vertices
+        adjacentVertexState = sequence (map edgeVertices inEdges)
+        adjacentVertices    = concat (evalState adjacentVertexState topology)
+        inVertices          = mapMaybe mapIn adjacentVertices
 
