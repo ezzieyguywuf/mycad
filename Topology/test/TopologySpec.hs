@@ -102,7 +102,7 @@ spec = do
             property prop_openLoopWire
         it "returns the list of Edges in an Closed Wire" $ do
             property prop_closedLoopWire
-    describe "getFace" $ do
+    describe "makeFace" $ do
         it "returns a Left String if the Wire is Open" $ do
             property prop_makeFaceOpenWire
 
