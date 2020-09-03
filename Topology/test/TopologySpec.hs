@@ -112,18 +112,18 @@ prop_openLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
     where prep = makeVertexEdgePairs n1 n2 False
           run (vertex, edge, _) = getRay vertex edge
-          post ((_, _, es), ewire) =  either (const (pure False))
-                                             (fmap (es ==) . getWire)
-                                             ewire
+          post ((_, _, es), eRay) =  either (const (pure False))
+                                             (fmap (OpenWire es ==) . getWire)
+                                             eRay
 
 prop_closedLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
 prop_closedLoopWire (Positive n1) (Positive n2) topology =
     prop_prepRunPostExpect prep run post topology
     where prep = makeVertexEdgePairs n1 n2 True
           run (vertex, edge, _) = getRay vertex edge
-          post ((_, _, es), ewire) =  either (const (pure False))
-                                             (fmap (es ==) . getWire)
-                                             ewire
+          post ((_, _, es), eRay) =  either (const (pure False))
+                                             (fmap (ClosedWire es ==) . getWire)
+                                             eRay
 
 -- Represents a function that modifie the topological state
 type TopoMod a b= a -> TopoState b
@@ -212,9 +212,9 @@ instance Arbitrary TestTopology where
 --   The return is a three-tuple of (Vertex, Edge, Edges), where the Vertex and
 --   Edge represent one of the created Vertex→Edge pairs and the Edges is all
 --   of the created Edges
-makeVertexEdgePairs :: Int 
-                    -> Int 
-                    -> Bool 
+makeVertexEdgePairs :: Int
+                    -> Int
+                    -> Bool
                     -> TopoState (Vertex, Edge, NES.NESet Edge)
 makeVertexEdgePairs n1 n2 shouldClose = do
     -- How many Vertex→Edge pairs are we making?
@@ -226,7 +226,7 @@ makeVertexEdgePairs n1 n2 shouldClose = do
                 GT -> if n1 == 1
                          then (n1 + 1, n2 + 1)
                          else (n1, n2)
-                EQ -> (n1 + 1, n2)
+                EQ -> (n1 + 2, n2)
 
     -- Create the Vertices
     vs <- replicateM nVertices addFreeVertex
