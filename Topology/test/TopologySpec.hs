@@ -5,6 +5,7 @@ module TopologySpec (spec) where
 import Data.List (sort)
 import Data.Maybe (catMaybes)
 import Data.Tuple (swap)
+import Data.Either (isLeft)
 import Data.Foldable (traverse_)
 import Control.Monad ((>=>), replicateM)
 import Control.Monad.IO.Class (liftIO)
@@ -101,6 +102,9 @@ spec = do
             property prop_openLoopWire
         it "returns the list of Edges in an Closed Wire" $ do
             property prop_closedLoopWire
+    describe "getFace" $ do
+        it "returns a Left String if the Wire is Open" $ do
+            property prop_makeFaceOpenWire
 
 -- ===========================================================================
 --                            Properties
@@ -124,6 +128,16 @@ prop_closedLoopWire (Positive n1) (Positive n2) topology =
           post ((_, _, es), eRay) =  either (const (pure False))
                                              (fmap (ClosedWire es ==) . getWire)
                                              eRay
+
+prop_makeFaceOpenWire :: Positive Int -> Positive Int -> TestTopology -> Bool
+prop_makeFaceOpenWire (Positive n1) (Positive n2) topology =
+    prop_prepRunPostExpect prep run post topology
+    where prep                    = makeVertexEdgePairs n1 n2 False
+          run  (vertex, edge, _)  = getRay vertex edge >>=
+                                    either
+                                    (const . pure $ Left "Error in test")
+                                    (getWire >=> makeFace)
+          post (_, eFace)         = pure (isLeft eFace)
 
 -- Represents a function that modifie the topological state
 type TopoMod a b= a -> TopoState b

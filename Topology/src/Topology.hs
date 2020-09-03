@@ -39,6 +39,7 @@ module Topology
 , addEdge
 , removeVertex
 , removeEdge
+, makeFace
   -- * Adjacency information
   -- | This is really the heart of this module. It's kind of the whole "point"
   --   of Topology
@@ -204,6 +205,11 @@ addEdge v1 v2 = runMaybeT $ do
                      lift (connectNode gid1 edge)
                      lift (connectNode edge gid2)
                      pure $ Edge edge
+
+-- | Will create a face from a ClosedWire. Returns an error if OpenWire
+makeFace :: Wire -> TopoState (Either String Face)
+makeFace (OpenWire _) = pure (Left "A Face can only be made with an OpenWire")
+makeFace (ClosedWire _) = undefined
 
 -- | This is useful when you don't need to know the Adjacency information
 unAdjacency :: Adjacency a -> a
