@@ -67,7 +67,7 @@ import Data.List ((\\), intersect)
 import qualified Data.Set.NonEmpty as NES
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
-import Control.Monad.Except (MonadError, runExceptT, throwError)
+import Control.Monad.Except (ExceptT(ExceptT), MonadError, runExceptT, throwError)
 import Control.Monad.State (State, gets, modify, evalState)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
                                   , gelem, insEdge, lab, subgraph, suc, pre)
@@ -189,18 +189,16 @@ removeVertex = void . deleteNode . getVertexID
 --   Only adds an Edge if there is not already a "v1 → Edge → v2". If there is
 --   already an Edge, that same Edge is returned (i.e. the Topology is not
 --   modified)
-addEdge :: Vertex -> Vertex -> TopoState (Maybe Edge)
-addEdge v1 v2 = runMaybeT $ do
-    gid1 <- MaybeT (getVertexNode v1)
-    gid2 <- MaybeT (getVertexNode v2)
+addEdge :: Vertex -> Vertex -> TopoState (Either String Edge)
+addEdge v1 v2 = runExceptT $ do
+    -- Make sure both GID's exist in our graph
+    gid1 <- ExceptT (getVertexNode v1)
+    gid2 <- ExceptT (getVertexNode v2)
+
     -- Check if there's already an Edge between the two
-    v1Edges <- lift (vertexEdges v1)
-    v2Edges <- lift (vertexEdges v2)
-    let -- We don't need the adjacency information for this check
-        v1Edges' = fmap unAdjacency v1Edges
-        v2Edges' = fmap unAdjacency v2Edges
-        overlap  = v1Edges' `intersect` v2Edges'
-    case overlap of
+    v1Edges <- lift (fmap unAdjacency <$> vertexEdges v1)
+    v2Edges <- lift (fmap unAdjacency <$> vertexEdges v2)
+    case v1Edges `intersect` v2Edges of
         [edge] -> pure edge
         _      -> do edge <- lift (addNode EdgeEntity)
                      lift (connectNode gid1 edge)
@@ -327,13 +325,13 @@ deleteNode n = modify (Topology . delNode n . unTopology) >> pure ()
 connectNode :: Int -> Int -> TopoState ()
 connectNode n1 n2 = modify (Topology . insEdge (n1, n2, ()) . unTopology)
 
--- | Returns Just the Node in our Graph, if it exists
-getVertexNode :: Vertex -> TopoState (Maybe Int)
+-- | Returns `Right gid` if the node exists, otherwise an error
+getVertexNode :: Vertex -> TopoState (Either String Int)
 getVertexNode (Vertex gid) = do
     graph <- gets unTopology
     if gelem gid graph
-       then pure . Just $ gid
-       else pure Nothing
+       then pure . Right $ gid
+       else pure (Left ("The gid \"" <> show gid <> "\" does not exist in the graph"))
 
 -- | Returns Just the Node in our Graph, if it exists
 _getEdgeNode :: Edge -> TopoState (Maybe Int)

@@ -1,11 +1,12 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module TopologySpec (spec) where
 
 -- base
 import Data.List (sort)
 import Data.Maybe (catMaybes)
 import Data.Tuple (swap)
-import Data.Either (isLeft)
+import Data.Either (isLeft, isRight, rights)
 import Data.Foldable (traverse_)
 import Control.Monad ((>=>), replicateM)
 import Control.Monad.IO.Class (liftIO)
@@ -48,56 +49,57 @@ spec = do
                       v2 <- addFreeVertex
                       pure (v1, v2)
             run  = uncurry addEdge
-            prepRunMaybe = prop_prepRunPostMaybeExpect prep run
+            prepRun = prop_prepRunPostExpect prep run
         it "is inversed by removeedge" $ do
             let run' = run >=> traverse_ removeEdge
             property (prop_prepRunIdentity prep run')
         context "returns Nothing if" $ do
             let prep' = prep >>= \vals -> removeVertex (snd vals) >> pure vals
+                post' = pure . isLeft . snd
             it "the first vertex doesn't exist" $
-                property (prop_prepRunExpect prep' run Nothing)
+                property (prop_prepRunPostExpect prep' run post')
             it "the second vertex doesn't exist" $
-                property (prop_prepRunExpect prep' (run . swap) Nothing)
+                property (prop_prepRunPostExpect prep' (run . swap) post')
         it "creates an Out adjacency from v1 → Edge" $ do
-            let post ((v1, _), edge) = ([Out edge] == ) <$> vertexEdges v1
-            property (prepRunMaybe post)
+            let post ((v1, _), Right edge) = ([Out edge] == ) <$> vertexEdges v1
+            property (prop_prepRunPostExpect prep run post)
         it "creates an In adjacency for Edge ← v1" $ do
-            let post ((v1, _), edge) = elem (In v1) <$> edgeVertices edge
-            property (prepRunMaybe post)
+            let post ((v1, _), Right edge) = elem (In v1) <$> edgeVertices edge
+            property (prepRun post)
         it "creates an Out adjacency for Edge → v2" $ do
-            let post ((_, v2), edge) = elem (Out v2) <$> edgeVertices edge
-            property (prepRunMaybe post)
+            let post ((_, v2), Right edge) = elem (Out v2) <$> edgeVertices edge
+            property (prepRun post)
         it "creates an In adjacency from v2 ← Edge" $ do
-            let post ((_, v2), edge) = ([In edge] ==) <$> vertexEdges v2
-            property (prepRunMaybe post)
+            let post ((_, v2), Right edge) = ([In edge] ==) <$> vertexEdges v2
+            property (prepRun post)
         it "creates a single Edge adjacency on v1" $ do
             let post ((v1, _), _) = (1 ==) . length <$> vertexEdges v1
-            property (prepRunMaybe post)
+            property (prepRun post)
         it "creates a single Edge adjacency on v2" $ do
             let post ((_, v2), _) = (1 ==) . length <$> vertexEdges v2
-            property (prepRunMaybe post)
+            property (prepRun post)
         it "creates a two Vertex adjacencies on edge" $ do
-            let post ((_, _), edge) = (2 ==) . length <$> edgeVertices edge
-            property (prepRunMaybe post)
+            let post ((_, _), Right edge) = (2 ==) . length <$> edgeVertices edge
+            property (prepRun post)
         it "returns the same Edge if called twice with v1→v2" $ do
             let run' args = do edge  <- run args
                                edge' <- run args
                                pure (edge == edge')
             property (prop_prepRunExpect prep run' True)
     context "an Edge from v1→v2" $ do
-        let prep = do v1 <- addFreeVertex
-                      v2 <- addFreeVertex
-                      edge <- addEdge v1 v2
-                      pure (v1, v2, edge)
+        let prep            = do v1 <- addFreeVertex
+                                 v2 <- addFreeVertex
+                                 edge <- addEdge v1 v2
+                                 pure (v1, v2, edge)
             run (v1, v2, _) = addEdge v2 v1
-            prepRunMaybe = prop_prepRunPostMaybeExpect prep run
+            prepRun         = prop_prepRunPostExpect prep run
         describe "addEdge from v2→v1" $ do
             it "returns the same Edge as addEdge v1 v2" $ do
-                let post ((_, _, edge), edge') = pure (edge == edge')
-                property (prop_prepRunPostExpect prep run post)
+                let post ((_, _, Right edge), Right edge') = pure (edge == edge')
+                property (prepRun post)
             xit "creates an InOut adjacency for v1 ↔ Edge" $ do
-                let post ((v1, _, _), edge) = ([InOut edge] == ) <$> vertexEdges v1
-                property (prepRunMaybe post)
+                let post ((v1, _, _), Right edge) = ([InOut edge] == ) <$> vertexEdges v1
+                property (prepRun post)
     describe "makeFace" $ do
         xit "is inversed by removeFace" $ do
             property prop_makeDeleteFace
@@ -167,18 +169,6 @@ prop_prepRunPostExpect prep run post (TestTopology topology) =
                             b <- run a
                             post (a, b)
 
--- | A convenience - modifies "post" so that if "run" produced Nothing, "post"
---   returns False. Otherwise, passes along "Just b"
-prop_prepRunPostMaybeExpect :: TopoState a
-                            -> TopoMod a (Maybe b)
-                            -> TopoMod (a,b) Bool
-                            -> TestTopology
-                            -> Bool
-prop_prepRunPostMaybeExpect prep run post= prop_prepRunPostExpect prep run post'
-        where post' (a, maybeB) = case maybeB of
-                                      Just b  -> post (a,b)
-                                      Nothing -> pure False
-
 -- ===========================================================================
 --                            Helper Functions
 -- ===========================================================================
@@ -225,7 +215,7 @@ makeVertexEdgePairs n1 n2 shouldClose = do
             if shouldClose
                then zip vs (tail vs ++ [head vs])
                else zip vs (tail vs)
-    es <- catMaybes <$> mapM (uncurry addEdge) evPairs
+    es <- rights <$> mapM (uncurry addEdge) evPairs
 
     -- Create the return values - the vertex and Edge _should_
     -- be such that vertex → edge

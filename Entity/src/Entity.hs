@@ -133,9 +133,6 @@ addEdge :: (Fractional a, Eq a, Show a)
         -> Topo.Vertex
         -> EntityState a (Either String Topo.Edge)
 addEdge v1 v2 = runExceptT $ do
-    -- First, retrieve the current state
-    (Entity vmap emap topology) <- lift get
-
     -- Try to retrieve the points associated with these Vertices
     p1 <- lift (getPoint' v1) >>= note ("Can't find point for " <> (show v1))
     p2 <- lift (getPoint' v2) >>= note ("Can't find point for " <> (show v2)) 
@@ -143,14 +140,18 @@ addEdge v1 v2 = runExceptT $ do
     -- Bail out if the two points are geometrically equivalent - how would you
     -- make a line then?!
     when (p1 == p2) (throwError $
-        "Cannot add an Edge when p1 == p2. p1 = " <> (show p1)
-        <> ", p2 = " <> (show p2)
+        "Cannot add an Edge when p1 == p2. " <>
+        "p1 = " <> (show p1) <> ", " <>
+        "p2 = " <> (show p2)
         )
 
+    -- First, retrieve the current state
+    (Entity vmap emap topology) <- lift get
+
     -- Try to add the given Edge to the Topology
-    (edge, t1) <- case runState (Topo.addEdge v1 v2) topology of
-                      (Nothing, _)    -> throwError "Could not add Edge to topology"
-                      (Just edge, t') -> pure (edge, t')
+    (edge, topology') <- case runState (Topo.addEdge v1 v2) topology of
+                             (Left err, _)    -> throwError err
+                             (Right edge, t') -> pure (edge, t')
 
     let -- We'll make a geometric straight line between the two points
         geoline = Geo.makeLine p1 p2
@@ -158,10 +159,12 @@ addEdge v1 v2 = runExceptT $ do
         emap' = Map.insert edge geoline emap
 
     -- Update our state with the new information
-    lift (put (Entity vmap emap' t1))
+    lift (put (Entity vmap emap' topology'))
 
     -- Give the user a reference to the new Edge
     pure edge
+
+
 
 -- | Turns a `Maybe a` into in `ExceptT e a`, where `e` is the error provided.
 note :: MonadError e m => e -> Maybe a -> m a
