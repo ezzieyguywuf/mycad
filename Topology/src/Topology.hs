@@ -31,8 +31,8 @@ module Topology
 , Face
 , Edge
 , Adjacency(..)
-, Wire(..)
-, Ray (..)
+, Ray
+, Wire
   -- * Mutating
 , emptyTopology
 , addFreeVertex
@@ -40,6 +40,7 @@ module Topology
 , removeVertex
 , removeEdge
 , makeFace
+, removeFace
   -- * Adjacency information
   -- | This is really the heart of this module. It's kind of the whole "point"
   --   of Topology
@@ -210,6 +211,10 @@ addEdge v1 v2 = runMaybeT $ do
 makeFace :: Wire -> TopoState (Either String Face)
 makeFace (OpenWire _)   = pure (Left "A Face can only be made with an OpenWire")
 makeFace (ClosedWire _) = undefined
+
+-- | The inverse of makeFace
+removeFace :: Face -> TopoState ()
+removeFace _ = pure ()
 
 -- | Returns the list of Edges that make up the Wire
 getWire :: Ray -> TopoState Wire

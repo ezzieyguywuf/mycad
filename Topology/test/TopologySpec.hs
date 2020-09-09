@@ -17,6 +17,7 @@ import Test.Hspec (Spec, describe, it, context, xit)
 import Test.QuickCheck (Arbitrary, Positive(Positive), arbitrary, property, generate
                        , sublistOf, choose)
 import Control.Monad.State (execState, get, put, evalState)
+import Control.Monad.Except (runExceptT, liftEither, ExceptT(..))
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 
@@ -97,47 +98,22 @@ spec = do
             xit "creates an InOut adjacency for v1 ↔ Edge" $ do
                 let post ((v1, _, _), edge) = ([InOut edge] == ) <$> vertexEdges v1
                 property (prepRunMaybe post)
-    describe "getWire" $ do
-        it "returns the list of Edges in an Open Wire" $ do
-            property prop_openLoopWire
-        it "returns the list of Edges in an Closed Wire" $ do
-            property prop_closedLoopWire
     describe "makeFace" $ do
-        it "returns a Left String if the Wire is Open" $ do
-            property prop_makeFaceOpenWire
+        xit "is inversed by removeFace" $ do
+            property prop_makeDeleteFace
 
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
--- Builds a random number of vertices, joins them with edges, and then randomly
--- selects a vertex→edge pair to try to create a Wire
-prop_openLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
-prop_openLoopWire (Positive n1) (Positive n2) topology =
-    prop_prepRunPostExpect prep run post topology
-    where prep                    = makeVertexEdgePairs n1 n2 False
-          run  (vertex, edge, _)  = getRay vertex edge
-          post ((_, _, es), eRay) = either (const (pure False))
-                                           (fmap (OpenWire es ==) . getWire)
-                                           eRay
-
-prop_closedLoopWire :: Positive Int -> Positive Int -> TestTopology -> Bool
-prop_closedLoopWire (Positive n1) (Positive n2) topology =
-    prop_prepRunPostExpect prep run post topology
-    where prep                    = makeVertexEdgePairs n1 n2 True
-          run  (vertex, edge, _)  = getRay vertex edge
-          post ((_, _, es), eRay) = either (const (pure False))
-                                           (fmap (ClosedWire es ==) . getWire)
-                                           eRay
-
-prop_makeFaceOpenWire :: Positive Int -> Positive Int -> TestTopology -> Bool
-prop_makeFaceOpenWire (Positive n1) (Positive n2) topology =
-    prop_prepRunPostExpect prep run post topology
-    where prep                    = makeVertexEdgePairs n1 n2 False
-          run  (vertex, edge, _)  = getRay vertex edge >>=
-                                    either
-                                    (const . pure $ Left "Error in test")
-                                    (getWire >=> makeFace)
-          post (_, eFace)         = pure (isLeft eFace)
+prop_makeDeleteFace :: Positive Int -> Positive Int -> TestTopology -> Bool
+prop_makeDeleteFace (Positive n1) (Positive n2) topology =
+    prop_prepRunIdentity prep run topology
+    where prep       = makeVertexEdgePairs n1 n2 True
+          run (eRay) = runExceptT $ do
+              ray  <- liftEither eRay
+              wire <- lift (getWire ray)
+              face <- ExceptT (makeFace wire)
+              pure (removeFace face)
 
 -- Represents a function that modifie the topological state
 type TopoMod a b = a -> TopoState b
@@ -229,7 +205,7 @@ instance Arbitrary TestTopology where
 makeVertexEdgePairs :: Int
                     -> Int
                     -> Bool
-                    -> TopoState (Vertex, Edge, NES.NESet Edge)
+                    -> TopoState (Either String Ray)
 makeVertexEdgePairs n1 n2 shouldClose = do
     -- How many Vertex→Edge pairs are we making?
     let (nVertices, which) =
@@ -258,5 +234,5 @@ makeVertexEdgePairs n1 n2 shouldClose = do
         -- large" error
         vertex  = vs !! (which - 1)
         edge    = es !! (which - 1)
-        edgeSet = NES.fromList (NE.fromList es)
-    pure (vertex, edge, edgeSet)
+
+    getRay vertex edge
