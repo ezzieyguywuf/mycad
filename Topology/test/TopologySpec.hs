@@ -97,11 +97,8 @@ spec = do
             it "returns the same Edge as addEdge v1 v2" $ do
                 let post ((_, _, Right edge), Right edge') = pure (edge == edge')
                 property (prepRun post)
-            xit "creates an InOut adjacency for v1 ↔ Edge" $ do
-                let post ((v1, _, _), Right edge) = ([edge] == ) <$> vertexEdges v1
-                property (prepRun post)
     describe "makeFace" $ do
-        xit "is inversed by removeFace" $ do
+        it "is inversed by removeFace" $ do
             property prop_makeDeleteFace
 
 -- ===========================================================================
