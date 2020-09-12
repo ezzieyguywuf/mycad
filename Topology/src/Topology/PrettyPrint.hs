@@ -46,7 +46,7 @@ prettyShowVertex vertex = runMaybeT $ do
     pure (pretty $ "Vertex" <> show gid)
 
 prettyPrintAdjacency :: a-> TopoDoc
-prettyPrintAdjacency _ = undefined
+prettyPrintAdjacency _ = pretty " ↔ "
     --case adjacency of
         --In    _ -> pretty " ← "
         --Out   _ -> pretty " → "
