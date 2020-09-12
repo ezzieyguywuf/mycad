@@ -30,7 +30,6 @@ module Topology
 , Vertex
 , Face
 , Edge
-, Adjacency(..)
 , Ray
 , Wire
   -- * Mutating
@@ -46,7 +45,6 @@ module Topology
   --   of Topology
 , vertexEdges
 , edgeVertices
-, unAdjacency
   -- | Get information about the topology
 , getVertices
 , getEdges
@@ -59,18 +57,18 @@ module Topology
 )where
 
 -- Base
-import Data.Maybe (mapMaybe)
-import Control.Monad (void, unless)
-import Data.List ((\\), intersect)
+import Control.Monad (void)
+import Data.List (intersect)
 
 -- third-party
 import qualified Data.Set.NonEmpty as NES
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.Except (ExceptT(ExceptT), MonadError, runExceptT, throwError)
-import Control.Monad.State (State, gets, modify, evalState)
+import Control.Monad.State (State, gets, modify)
 import Data.Graph.Inductive.Graph (empty, delNode, insNode, nodes, labfilter
-                                  , gelem, insEdge, lab, subgraph, suc, pre)
+                                  , gelem, insEdge, lab, subgraph
+                                  , neighbors)
 import Data.Graph.Inductive.PatriciaTree (Gr)
 
 -- ===========================================================================
@@ -128,12 +126,6 @@ type EdgeSet = NES.NESet Edge
 
 -- | Specifies a given pair of topological entities are related to each other
 --
---   This is parametrized over the type of "Entity2".
-data Adjacency a = In    a -- ^ Entity1 ← Entity2, from Entity2 to Entity1
-                 | Out   a -- ^ Entity1 → Entity2, from Entity1 to Entity2
-                 | InOut a -- ^ Entity1 ↔ Entity2, both directions between the two
-                 deriving (Show, Eq, Functor)
-
 -- | In fgl, each Node and Bridge in the Graph can contain an arbitrary piece
 --   of data. This data is referred to as a \"Label\", and thus we have "LNode"
 --   (labelled node) and "LEdge" (labelled edge, which we call a bridge)
@@ -156,6 +148,7 @@ data NodeLabel = NodeLabel { getEntityType :: EntityType
 -- | These are the fundamental topological entities that our graph will be
 --   built from
 data EntityType = VertexEntity
+                | LinkEntity
                 | EdgeEntity
                 | FaceEntity
                   deriving (Show, Eq)
@@ -190,19 +183,36 @@ removeVertex = void . deleteNode . getVertexID
 --   already an Edge, that same Edge is returned (i.e. the Topology is not
 --   modified)
 addEdge :: Vertex -> Vertex -> TopoState (Either String Edge)
-addEdge v1 v2 = runExceptT $ do
+addEdge vertex1 vertex2 = runExceptT $ do
     -- Make sure both GID's exist in our graph
-    gid1 <- ExceptT (getVertexNode v1)
-    gid2 <- ExceptT (getVertexNode v2)
+    v1 <- ExceptT (getVertexNode vertex1)
+    v2 <- ExceptT (getVertexNode vertex2)
 
     -- Check if there's already an Edge between the two
-    v1Edges <- lift (fmap unAdjacency <$> vertexEdges v1)
-    v2Edges <- lift (fmap unAdjacency <$> vertexEdges v2)
+    v1Edges <- lift (vertexEdges vertex1)
+    v2Edges <- lift (vertexEdges vertex2)
     case v1Edges `intersect` v2Edges of
         [edge] -> pure edge
-        _      -> do edge <- lift (addNode EdgeEntity)
-                     lift (connectNode gid1 edge)
-                     lift (connectNode edge gid2)
+        _      -> do -- Add two new nodes
+                     link1 <- lift (addNode LinkEntity)
+                     link2 <- lift (addNode LinkEntity)
+                     edge  <- lift (addNode EdgeEntity)
+
+                     -- A vertex must know about all it's links
+                     lift (connectNode v1 link1)
+                     lift (connectNode v2 link2)
+
+                     -- Each link must know about which vertex it belongs to
+                     lift (connectNode link1 v1)
+                     lift (connectNode link2 v2)
+
+                     -- Each link must know which edge it is connected to
+                     lift (connectNode link1 edge)
+                     lift (connectNode link2 edge)
+
+                     -- Each edge must know about its links
+                     lift (connectNode edge link1)
+                     lift (connectNode edge link2)
                      pure $ Edge edge
 
 -- | Will create a face from a ClosedWire. Returns an error if OpenWire
@@ -239,28 +249,50 @@ getEdges = gets (fmap Edge . filterNodes EdgeEntity . unTopology)
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
-removeEdge = void . deleteNode . getEdgeID
+removeEdge (Edge eid) = do
+    -- Get the Edge's links
+    linkIDs <- adjacencies LinkEntity eid
+
+    -- Delete all the pertinent nodes
+    sequence_ (fmap deleteNode (eid : linkIDs))
 
 -- | Returns a (Right Ray) if the Vertex and Edge form a pair such that
 --   Vertex→Edge
 getRay :: Vertex -> Edge -> TopoState (Either String Ray)
-getRay vertex edge = runExceptT $ do
-    -- Get the Edges adjacent to our Vertex
-    adjacentEdges <- lift (vertexEdges vertex)
+getRay _ _ = undefined
+--getRay vertex edge = runExceptT $ do
+    ---- Get the Edges adjacent to our Vertex
+    --adjacentEdges <- lift (vertexEdges vertex)
 
-    -- If the given Edge is not Out from the Vertex, bail out
-    unless (elem (Out edge) adjacentEdges) (throwError
-        "The given Edge _must_ be an Out Edge of the given Vertex")
+    ---- If the given Edge is not Out from the Vertex, bail out
+    --unless (elem (Out edge) adjacentEdges) (throwError
+        --"The given Edge _must_ be an Out Edge of the given Vertex")
 
-    pure (Ray vertex edge)
+    --pure (Ray vertex edge)
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
-vertexEdges :: Vertex -> TopoState [Adjacency Edge]
-vertexEdges (Vertex gid) = fmap (fmap Edge) <$> adjacencies gid EdgeEntity
+vertexEdges :: Vertex -> TopoState [Edge]
+vertexEdges (Vertex vid) = do
+    -- First get all the links that the Vertex knows about
+    linkIDs <- adjacencies LinkEntity vid
+
+    -- Collect all the Edges attached to the links
+    edgeIDs <- concat <$> sequence (fmap (adjacencies EdgeEntity) linkIDs)
+
+    -- Return the list of Edges
+    pure (fmap Edge edgeIDs)
 
 -- | Returns the list ef Vertices that are adjacent to the given Edge
-edgeVertices :: Edge -> TopoState [Adjacency Vertex]
-edgeVertices (Edge gid) = fmap (fmap Vertex) <$> adjacencies gid VertexEntity
+edgeVertices :: Edge -> TopoState [Vertex]
+edgeVertices (Edge eid) = do
+    -- First get all the links that the Edge knows about
+    linkIDs <- adjacencies LinkEntity eid
+
+    -- Collect all the Vertices attached to the links
+    vertexIDs <- concat <$> sequence (fmap (adjacencies VertexEntity) linkIDs)
+
+    -- Return the list of Vertices
+    pure (fmap Vertex vertexIDs)
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
@@ -347,83 +379,66 @@ filterNodes entity graph = nodes (labfilter predicate graph)
     where predicate = (entity ==) . getEntityType
 
 -- | A helper that returns all adjacent entities of the given type
-adjacencies :: Int        -- ^ The GID of the Node in question
-            -> EntityType -- ^ The type of the adjacent entities to check
-            -> TopoState [Adjacency Int]
-adjacencies gid etype = do
-    -- first, unwrap the graph from the Topology data type
-    graph <- gets unTopology
+adjacencies :: EntityType -- ^ The type of the adjacent entities to check
+            -> Int        -- ^ The GID of the Node in question
+            -> TopoState [Int]
+adjacencies etype gid = do
+    -- First, get all adjacent nodes
+    gids <- gets (flip neighbors gid . unTopology)
 
-    let -- create a sub-graph of the entities "In" from our target
-        preGraph = subgraph (pre graph gid) graph
-        -- create a sub-graph of the entities "Out" from our target
-        sucGraph = subgraph (suc graph gid) graph
-        -- Create a list of Nodes of the given EntityType for each sub-graph
-        inIDs  = filterNodes etype preGraph
-        outIDs = filterNodes etype sucGraph
-        -- Figure out which are both In and Out
-        inoutIDs = inIDs `intersect` outIDs
-        -- Filter out InOut values from the separate In and Out lists
-        inIDs'  = inIDs \\ inoutIDs
-        outIDs' = outIDs \\ inoutIDs
-        -- Wrap our GID's in the appropriate Adjacency, as well as Edge data types
-        allAdjacencies = fmap In inIDs'
-                         <> fmap Out outIDs'
-                         <> fmap InOut inoutIDs
-    pure allAdjacencies
+    -- Make a sub graph of just these adjacent nodes
+    graph <- gets (subgraph gids . unTopology)
+
+    -- Return the nodes in the sub-graph that match
+    pure (filterNodes etype graph)
 
 -- | Turns a `Maybe a` into in `ExceptT e a`, where `e` is the error provided.
 _note :: MonadError e m => e -> Maybe a -> m a
 _note msg = maybe (throwError msg) pure
 
--- | This is useful when you don't need to know the Adjacency information
-unAdjacency :: Adjacency a -> a
-unAdjacency adjacency = case adjacency of
-                            In val    -> val
-                            Out val   -> val
-                            InOut val -> val
-
 goForward :: Ray -> NES.NESet Edge -> Topology -> (Bool, EdgeSet)
-goForward (Ray _ edge) currentSet topology =
-    case (outVertices, outEdges) of
-        ([outVertex], [outEdge]) ->
-            if outEdge `NES.notMember` currentSet
-               then goForward newRay newSet topology
-               else (True, newSet)
-            where newRay  = Ray outVertex outEdge
-                  newSet  = NES.insert outEdge currentSet
-        _ -> (False, currentSet)
-    where
-        -- Get a list of adjacent Out vertices
-        adjacentVertices = evalState (edgeVertices edge) topology
-        outVertices      = mapMaybe mapOut adjacentVertices
-        mapOut (Out a)   = Just a
-        mapOut _         = Nothing
+goForward _ _ _= undefined
+--goForward (Ray _ edge) currentSet topology =
+    --case (outVertices, outEdges) of
+        --([outVertex], [outEdge]) ->
+            --if outEdge `NES.notMember` currentSet
+               --then goForward newRay newSet topology
+               --else (True, newSet)
+                   --where newRay  = Ray outVertex outEdge
+                  --newSet  = NES.insert outEdge currentSet
+        --_ -> (False, currentSet)
+            --where
+                ---- Get a list of adjacent Out vertices
+        --adjacentVertices = evalState (edgeVertices edge) topology
+        --outVertices      = mapMaybe mapOut adjacentVertices
+        --mapOut (Out a)   = Just a
+        --mapOut _         = Nothing
 
-        -- Get a list of adjacent Out edges
-        adjacentEdgeState = sequence (map vertexEdges outVertices)
-        adjacentEdges     = concat (evalState adjacentEdgeState topology)
-        outEdges          = mapMaybe mapOut adjacentEdges
+        ---- Get a list of adjacent Out edges
+        --adjacentEdgeState = sequence (map vertexEdges outVertices)
+        --adjacentEdges     = concat (evalState adjacentEdgeState topology)
+        --outEdges          = mapMaybe mapOut adjacentEdges
 
 goBackward :: Ray -> NES.NESet Edge -> Topology -> (Bool, EdgeSet)
-goBackward (Ray vertex _) currentSet topology =
-    case (inVertices, inEdges) of
-        ([inVertex], [inEdge]) ->
-            if inEdge `NES.notMember` currentSet
-               then goBackward newRay newSet topology
-               else (True, newSet)
-            where newRay  = Ray inVertex inEdge
-                  newSet  = NES.insert inEdge currentSet
-        _ -> (False, currentSet)
-    where
-        -- Get a list of adjacent In edges
-        adjacentEdges = evalState (vertexEdges vertex) topology
-        inEdges       = mapMaybe mapIn adjacentEdges
-        mapIn (In a)  = Just a
-        mapIn _       = Nothing
+goBackward _ _ _= undefined
+--goBackward (Ray vertex _) currentSet topology =
+    --case (inVertices, inEdges) of
+        --([inVertex], [inEdge]) ->
+            --if inEdge `NES.notMember` currentSet
+               --then goBackward newRay newSet topology
+               --else (True, newSet)
+            --where newRay  = Ray inVertex inEdge
+                  --newSet  = NES.insert inEdge currentSet
+        --_ -> (False, currentSet)
+    --where
+        ---- Get a list of adjacent In edges
+        --adjacentEdges = evalState (vertexEdges vertex) topology
+        --inEdges       = mapMaybe mapIn adjacentEdges
+        --mapIn (In a)  = Just a
+        --mapIn _       = Nothing
 
-        -- Get a list of adjacent In vertices
-        adjacentVertexState = sequence (map edgeVertices inEdges)
-        adjacentVertices    = concat (evalState adjacentVertexState topology)
-        inVertices          = mapMaybe mapIn adjacentVertices
+        ---- Get a list of adjacent In vertices
+        --adjacentVertexState = sequence (map edgeVertices inEdges)
+        --adjacentVertices    = concat (evalState adjacentVertexState topology)
+        --inVertices          = mapMaybe mapIn adjacentVertices
 

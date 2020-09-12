@@ -60,17 +60,17 @@ spec = do
                 property (prop_prepRunPostExpect prep' run post')
             it "the second vertex doesn't exist" $
                 property (prop_prepRunPostExpect prep' (run . swap) post')
-        it "creates an Out adjacency from v1 → Edge" $ do
-            let post ((v1, _), Right edge) = ([Out edge] == ) <$> vertexEdges v1
+        it "creates an adjacency from v1 → Edge" $ do
+            let post ((v1, _), Right edge) = ([edge] == ) <$> vertexEdges v1
             property (prop_prepRunPostExpect prep run post)
-        it "creates an In adjacency for Edge ← v1" $ do
-            let post ((v1, _), Right edge) = elem (In v1) <$> edgeVertices edge
+        it "creates an adjacency for Edge ← v1" $ do
+            let post ((v1, _), Right edge) = elem v1 <$> edgeVertices edge
             property (prepRun post)
-        it "creates an Out adjacency for Edge → v2" $ do
-            let post ((_, v2), Right edge) = elem (Out v2) <$> edgeVertices edge
+        it "creates an adjacency for Edge → v2" $ do
+            let post ((_, v2), Right edge) = elem v2 <$> edgeVertices edge
             property (prepRun post)
-        it "creates an In adjacency from v2 ← Edge" $ do
-            let post ((_, v2), Right edge) = ([In edge] ==) <$> vertexEdges v2
+        it "creates an adjacency from v2 ← Edge" $ do
+            let post ((_, v2), Right edge) = ([edge] ==) <$> vertexEdges v2
             property (prepRun post)
         it "creates a single Edge adjacency on v1" $ do
             let post ((v1, _), _) = (1 ==) . length <$> vertexEdges v1
@@ -98,7 +98,7 @@ spec = do
                 let post ((_, _, Right edge), Right edge') = pure (edge == edge')
                 property (prepRun post)
             xit "creates an InOut adjacency for v1 ↔ Edge" $ do
-                let post ((v1, _, _), Right edge) = ([InOut edge] == ) <$> vertexEdges v1
+                let post ((v1, _, _), Right edge) = ([edge] == ) <$> vertexEdges v1
                 property (prepRun post)
     describe "makeFace" $ do
         xit "is inversed by removeFace" $ do

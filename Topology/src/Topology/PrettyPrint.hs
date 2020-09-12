@@ -28,8 +28,8 @@ import Control.Monad.Trans.Maybe (MaybeT(MaybeT), runMaybeT)
 import Control.Monad.State(evalState, State)
 
 -- Internal
-import Topology ( Vertex, Edge, Adjacency(..), TopoState, Topology
-                , vertexEdges, edgeVertices, vertexID, edgeID, unAdjacency
+import Topology ( Vertex, Edge, TopoState, Topology
+                , vertexEdges, edgeVertices, vertexID, edgeID
                 , emptyTopology, getVertices, getEdges)
 
 -- | The document type used in our pretty printer
@@ -45,18 +45,18 @@ prettyShowVertex vertex = runMaybeT $ do
     gid <- MaybeT (vertexID vertex)
     pure (pretty $ "Vertex" <> show gid)
 
-prettyPrintAdjacency :: Adjacency a -> TopoDoc
-prettyPrintAdjacency adjacency =
-    case adjacency of
-        In    _ -> pretty " ← "
-        Out   _ -> pretty " → "
-        InOut _ -> pretty " ↔ "
+prettyPrintAdjacency :: a-> TopoDoc
+prettyPrintAdjacency _ = undefined
+    --case adjacency of
+        --In    _ -> pretty " ← "
+        --Out   _ -> pretty " → "
+        --InOut _ -> pretty " ↔ "
 
 prettyPrintVertex :: Vertex -> TopoState (Maybe TopoDoc)
 prettyPrintVertex vertex = runMaybeT $ do
     showV           <- MaybeT (prettyShowVertex vertex)
     edgeAdjacencies <- lift (vertexEdges vertex)
-    let getMaybePPEdges = mapM (prettyShowEdge . unAdjacency)
+    let getMaybePPEdges = mapM prettyShowEdge
     maybePPEdges    <- lift $ getMaybePPEdges edgeAdjacencies
     let ppAdjacencies = fmap prettyPrintAdjacency edgeAdjacencies
         ppEdges       = catMaybes maybePPEdges
@@ -66,7 +66,7 @@ prettyPrintEdge :: Edge -> TopoState (Maybe TopoDoc)
 prettyPrintEdge edge = runMaybeT $ do
     showE             <- MaybeT (prettyShowEdge edge)
     vertexAdjacencies <- lift (edgeVertices edge)
-    let getMaybePPVertices = mapM (prettyShowVertex . unAdjacency)
+    let getMaybePPVertices = mapM prettyShowVertex
     maybePPVertices   <- lift $ getMaybePPVertices vertexAdjacencies
     let ppAdjacencies = fmap prettyPrintAdjacency vertexAdjacencies
         ppVertices    = catMaybes maybePPVertices
