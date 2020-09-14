@@ -97,23 +97,10 @@ spec = do
             it "returns the same Edge as addEdge v1 v2" $ do
                 let post ((_, _, Right edge), Right edge') = pure (edge == edge')
                 property (prepRun post)
-    describe "makeFace" $ do
-        it "is inversed by removeFace" $ do
-            property prop_makeDeleteFace
 
 -- ===========================================================================
 --                            Properties
 -- ===========================================================================
-prop_makeDeleteFace :: Positive Int -> Positive Int -> TestTopology -> Bool
-prop_makeDeleteFace (Positive n1) (Positive n2) topology =
-    prop_prepRunIdentity prep run topology
-    where prep       = makeVertexEdgePairs n1 n2 True
-          run (eRay) = runExceptT $ do
-              ray  <- liftEither eRay
-              wire <- lift (getWire ray)
-              face <- ExceptT (makeFace wire)
-              pure (removeFace face)
-
 -- Represents a function that modifie the topological state
 type TopoMod a b = a -> TopoState b
 
@@ -183,43 +170,3 @@ instance Arbitrary TestTopology where
                            let vPairs = zip vs (tail vs)
                            mapM_ (uncurry addEdge) vPairs
         pure $ TestTopology (execState topoState emptyTopology)
-
--- | This will create n Vertex→Edge pairs
---
---   The return is a three-tuple of (Vertex, Edge, Edges), where the Vertex and
---   Edge represent one of the created Vertex→Edge pairs and the Edges is all
---   of the created Edges
-makeVertexEdgePairs :: Int
-                    -> Int
-                    -> Bool
-                    -> TopoState (Either String Ray)
-makeVertexEdgePairs n1 n2 shouldClose = do
-    -- How many Vertex→Edge pairs are we making?
-    let (nVertices, which) =
-            case compare n1 n2 of
-                LT -> if n2 == 1
-                         then (n2 + 1, n1 + 1)
-                         else (n2, n1)
-                GT -> if n1 == 1
-                         then (n1 + 1, n2 + 1)
-                         else (n1, n2)
-                EQ -> (n1 + 2, n2)
-
-    -- Create the Vertices
-    vs <- replicateM nVertices addFreeVertex
-    -- Join each consecutive pair of vertices with an Edge
-    let evPairs =
-            if shouldClose
-               then zip vs (tail vs ++ [head vs])
-               else zip vs (tail vs)
-    es <- rights <$> mapM (uncurry addEdge) evPairs
-
-    -- Create the return values - the vertex and Edge _should_
-    -- be such that vertex → edge
-    let -- Subtract one because there will always be one less
-        -- Edge than VVertex - this way we avoid an "index too
-        -- large" error
-        vertex  = vs !! (which - 1)
-        edge    = es !! (which - 1)
-
-    getRay vertex edge

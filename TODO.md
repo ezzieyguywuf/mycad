@@ -12,6 +12,8 @@
 - Figure out how to package executable
 - move pretty printing to it's own module
 - check out 'boxes' for prettyprinter using 'columns'
+- Can we get away from the fgl library altogether? It seems that we're jumping
+  through quite a number of hoops to make it work for us.
 
 # Commands
 - Allow for a "brief" and a "long" help message.
