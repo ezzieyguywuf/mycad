@@ -29,6 +29,7 @@
   infinite Edge (because it only has one Vertex)
 - Update to use ErrorT, especially vertexFromID should have two different
   errors, one from no nodes, one for more than one node
+- Should vertexEdges and friends return a Set rather than a List?
 
 # Entity
 

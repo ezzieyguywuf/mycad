@@ -27,7 +27,10 @@ module Topology
   -- | These types can be used to hold a reference to the given topological entity.
   --
   --   Although each of these is a shallow wrapper around an "Int", they have
-  --   been defined as "newtype" in order to allow for type-checking
+  --   been defined as "newtype" in order to allow for type-checking.
+  --
+  --   Note that the constructors are not exported - these are not intended to
+  --   be created ad-hoc, but rather using the API provided herein
 , Vertex
 , Face
 , Edge
@@ -54,68 +57,73 @@ module Topology
 )where
 
 -- Base
+import Data.Bool (bool)
+import Control.Monad (void)
+import Data.List (intersect)
 
 -- third-party
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Control.Monad.State (State, gets, modify)
+import Control.Monad.State (State, get, put, gets)
+import Control.Monad.Except (MonadError, ExceptT(ExceptT), runExceptT, throwError)
+import Control.Monad.Trans.Class (lift)
 
 -- ===========================================================================
 --                               Data Types
 -- ===========================================================================
 -- | A Topology is a collection of relationships between Vertex, Edge, and Face
 --
---   Really, this forms a sort of "graph", but rather than using (say) the fgl
---   library, we're implementing the data structure ourselves. The reason is
---   that we want to control how each Node in our graph can behave, i.e. how
---   many and what types of connections it can have with other Nodes in the
---   Graph. This control will allow us to simplify the API and logic.
-type Topology = Map.Map NodeID TopoEntity
-
--- | Used to manage the State of the Topology
-type TopoState a = State Topology a
+--   The "Link" data type will hold the actual adjacency information, and the
+--   Topology data type will mantain a list of all Vertices, Edges, and Faces
+data Topology = Topology { getTopoVertices :: Vertices
+                         , getTopoEdges    :: Edges
+                         , getTopoFaces    :: Faces
+                         } deriving (Show, Eq)
 
 -- | They key in our Topology Map.
 type NodeID = Int
 
--- | The "nodes" in our graph.
-data TopoEntity = TopoVertex Vertex EntityID
-                | TopoEdge   Edge EntityID
-                | TopoFace   Face EntityID
-                deriving (Show, Eq)
+-- | These three type aliases hold our three topological entities
+type Vertices = Map.Map NodeID TopoVertex
+type Edges    = Map.Map NodeID TopoEdge
+type Faces    = Map.Map NodeID TopoFace
 
--- | Which nth of the given Entity is it?
+-- | Used to manage the State of the Topology
+type TopoState a = State Topology a
+
+-- | The Link is what holds the relatiosnhip information between topological
+--   entities
+data Link = Link { getBasicLink  :: BasicLink
+                 , getLinkFace   :: NodeID
+                 , getNextLink   :: Link
+                 }
+          | LoopLink { getBasicLink :: BasicLink
+                     , getNextLink  :: Link
+                     }
+          | EndLink { getBasicLink :: BasicLink}
+          deriving (Show, Eq, Ord)
+
+-- | This is the most fundaental information that all links must have
+data BasicLink = BasicLink { getLinkVertex :: NodeID
+                           , getLinkEdge   :: NodeID
+                           } deriving (Show, Eq, Ord)
+
+
+-- | A Vertex can contain zero or more "Link"
+data TopoVertex = TopoVertex (Set.Set Link) deriving (Show, Eq, Ord)
+
+-- | An Edge must contain exactly two "Link"
+data TopoEdge = TopoEdge Link Link deriving (Show, Eq, Ord)
+
+-- | A Face will be defined by a single Link
 --
---   For example, the 1st, 2nd, 3rd, etc.. Vertex would have 0, 1, 2, etc...
---   for EntityID
-type EntityID = Int
+--   This API will guarantee that the Link is always a LoopLink, so that we
+--   always have a list of Edges in a Loop that define the Face
+newtype TopoFace = TopoFace Link deriving (Show, Eq, Ord)
 
--- | The Vertex is the backbone of our topological structure - it will be
---   adjacent to zero or more Link
-data Vertex = Vertex { getVertexLinks :: LinkSet
-                     , getVertexNodeID :: NodeID
-                     } deriving (Show, Eq, Ord)
-
--- | A Link is used to glue together Edges and Vertices, and can also be used
---   to trace a loop around a Face
-data Link = Link { getLinkVertex :: NodeID
-                 , getLinkEdge   :: NodeID
-                 , getNextLinkID :: NodeID
-                 } deriving (Show, Eq, Ord)
-
-type LinkSet = Set.Set Link
-
--- | An Edge will be adjacent to two Link...maybe one for a loop Edge
-data Edge = Edge { getLeftLink :: Link
-                 , getRightLink :: Link
-                 } deriving (Show, Eq, Ord)
-
--- | A Face will be adjacent to a single Link, which can be used to trace a
---   loop around the Face
-newtype Face = Face {getFaceLink :: Link} deriving (Show, Eq)
-
--- | Used to distinguish the different entity types from each other
-data EntityType = VertexEntity | EdgeEntity | FaceEntity deriving (Show)
+newtype Vertex = Vertex NodeID deriving (Show, Eq, Ord)
+newtype Edge   = Edge   NodeID deriving (Show, Eq, Ord)
+newtype Face   = Face   NodeID deriving (Show, Eq, Ord)
 
 -- ===========================================================================
 --                               Free Functions
@@ -124,31 +132,37 @@ data EntityType = VertexEntity | EdgeEntity | FaceEntity deriving (Show)
 --   constructors for 'Topology' are exported, this is the only way to create
 --   one.
 emptyTopology :: Topology
-emptyTopology = Map.empty
+emptyTopology = Topology Map.empty Map.empty Map.empty
 
 -- | Adds a single "free" Vertex to the 'Topology'. In this context, "free"
 --   means that it is does not have any entities adjacent to it.
 addFreeVertex :: TopoState Vertex
 addFreeVertex = do
-    -- What is the "next" key value?
-    key <- gets Map.lookupMax >>=
-        \case
-             Nothing -> pure 0
-             Just (k, _) -> pure (k + 1)
-                                
-    -- How many Vertices are in the graph right now?
-    nVertices <- gets (length . Map.filter (isEntity VertexEntity))
+    -- Unpack the data in the Topology
+    (Topology vertices edges faces) <- get
 
-    -- Add the new Vertex to the Map
-    let vertex = Vertex (Set.empty) key
-    modify (Map.insert key (TopoVertex vertex nVertices))
+    -- Calculate our new Vertices
+    let vertices' = Map.insert nVertices newVertex vertices
+        nVertices = length vertices
+        newVertex = TopoVertex (Set.empty)
 
-    -- Return the added vertex
-    pure vertex
+    -- update our State
+    put (Topology vertices' edges faces)
+
+    -- Return the newly created Vertex
+    pure (Vertex nVertices)
 
 -- | If the Vertex does not exist, this does nothing.
 removeVertex :: Vertex -> TopoState ()
-removeVertex = modify . Map.delete . getVertexNodeID
+removeVertex (Vertex nodeID) = do
+    -- unpack teh data in the Topology
+    (Topology vertices edges faces) <- get
+
+    -- delete the appropriate Vertex
+    let vertices' = Map.delete nodeID vertices
+
+    -- Update the topology data
+    put (Topology vertices' edges faces)
 
 -- | Adds an Edge adjacent to both Vertex
 --
@@ -158,7 +172,35 @@ removeVertex = modify . Map.delete . getVertexNodeID
 --   already an Edge, that same Edge is returned (i.e. the Topology is not
 --   modified)
 addEdge :: Vertex -> Vertex -> TopoState (Either String Edge)
-addEdge _ _ = undefined
+addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
+    -- Bail out if there is already an Edge between these two Vertices
+    leftEdges  <- lift (vertexEdges v1)
+    rightEdges <- lift (vertexEdges v2)
+    case intersect leftEdges rightEdges of
+        [edge] -> ExceptT (pure $ Right edge)
+        _ -> do
+            -- Unpack the topology data
+            (Topology vertices edges faces) <- lift get
+
+            -- Get the Vertex data
+            (TopoVertex leftLinkSet)  <- ExceptT (lookupVertex leftVID)
+            (TopoVertex rightLinkSet) <- ExceptT (lookupVertex rightVID)
+
+            -- create the two new links and update our maps
+            let leftLink  = EndLink (BasicLink leftVID  newEdgeID)
+                rightLink = EndLink (BasicLink rightVID newEdgeID)
+                newEdgeID = length edges
+                vertices' = Map.insert leftVID  (insertVertex leftLink leftLinkSet) (
+                            Map.insert rightVID (insertVertex rightLink rightLinkSet)
+                                vertices)
+                insertVertex link links = TopoVertex (Set.insert link links)
+                edges'    = Map.insert newEdgeID (TopoEdge leftLink rightLink) edges
+
+            -- Write back our updated data
+            put (Topology vertices' edges' faces)
+
+            -- Return the newly created Edge
+            pure (Edge newEdgeID)
 
 -- | Will create a face from a ClosedWire. Returns an error if OpenWire
 --makeFace :: Wire -> TopoState (Either String Face)
@@ -171,38 +213,80 @@ addEdge _ _ = undefined
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
-getVertices = undefined
+getVertices = gets (Map.keys . getTopoVertices) >>= pure . fmap Vertex
 
 getEdges :: TopoState [Edge]
-getEdges = undefined
+getEdges = gets (Map.keys . getTopoEdges) >>= pure . fmap Edge
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
-removeEdge _ = undefined
+removeEdge (Edge eid) = void $ runExceptT $ do
+    -- unpack the topology data
+    (Topology vertices edges faces) <- lift get
+
+    -- update the edge data and delete orphaned links in vertex data
+    let edges' = Map.delete eid edges
+        vertices' = Map.map processVertex vertices
+        processVertex (TopoVertex links) = TopoVertex (Set.filter filterLink links)
+        filterLink link = findLinkEdge link /= Edge eid
+
+    -- write the updated data
+    lift (put (Topology vertices' edges' faces))
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Edge]
-vertexEdges _ = undefined
+vertexEdges (Vertex vid) =
+    lookupVertex vid >>=
+    either (pure . const []) (pure . Set.toList . processVertex)
+        where processVertex (TopoVertex links) = Set.map findLinkEdge links
 
 -- | Returns the list ef Vertices that are adjacent to the given Edge
 edgeVertices :: Edge -> TopoState [Vertex]
-edgeVertices _ = undefined
+edgeVertices (Edge eid) =
+    lookupEdge eid >>=
+    either (pure . const []) (pure . processEdge)
+        where processEdge (TopoEdge leftLink rightLink) = [ findLinkVertex leftLink
+                                                          , findLinkVertex rightLink
+                                                          ]
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
-vertexID _ = undefined
+vertexID (Vertex vid) = gets (Map.member vid . getTopoVertices) >>=
+                        pure . bool Nothing (Just vid)
 
 -- | Re-creates a Vertex from the given Int
 vertexFromID :: Int -> TopoState (Maybe Vertex)
-vertexFromID _ = undefined
+vertexFromID vid = pure . Just $ (Vertex vid)
 
 -- | Returns an Int ID that can be used to re-create the Edge
 edgeID :: Edge -> TopoState (Maybe Int)
-edgeID _ = undefined
+edgeID (Edge eid) = pure . Just $ eid
 
 -- ===========================================================================
 --                        Private, Non-Exported stuff
 -- ===========================================================================
-isEntity :: EntityType -> TopoEntity -> Bool
-isEntity VertexEntity (TopoVertex _ _)= True
-isEntity _ _ = False
+note :: MonadError e m => e -> Maybe a -> m a
+note msg = maybe (throwError msg) pure
+
+lookupEither :: (Ord k, Show k)
+             => k -> String -> (Topology -> Map.Map k v)
+             -> TopoState (Either String v)
+lookupEither key topoName getDataMap =
+    gets (Map.lookup key . getDataMap) >>=
+    runExceptT . note ("The " <> topoName <>
+                       " with ID " <> show key <>
+                       " does not exist in the topology")
+
+lookupVertex :: NodeID -> TopoState (Either String TopoVertex)
+lookupVertex nodeID = lookupEither nodeID "Vertex" getTopoVertices
+
+lookupEdge :: NodeID -> TopoState (Either String TopoEdge)
+lookupEdge nodeID = lookupEither nodeID "Vertex" getTopoEdges
+
+-- | Returns the Vertex that is associated with the Link
+findLinkVertex :: Link -> Vertex
+findLinkVertex = Vertex . getLinkVertex . getBasicLink
+
+-- | Returns the Edge that is associated with the Link
+findLinkEdge :: Link -> Edge
+findLinkEdge = Edge . getLinkEdge . getBasicLink
