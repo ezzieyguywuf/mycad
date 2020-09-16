@@ -101,8 +101,8 @@ spec = do
         let prep = do vs <- replicateM 3 addFreeVertex
                       let pairs = zip vs (tail vs)
                       es <- sequence (fmap (uncurry addEdge) pairs)
-                      pure (head vs, fromRight $ head es)
-            run = uncurry addFace
+                      pure (rights es)
+            run = addFace
         it "is inversed by removeFace" $ do
             let run' = run >=> traverse_ removeFace
             property (prop_prepRunIdentity prep run')
@@ -179,8 +179,3 @@ instance Arbitrary TestTopology where
                            let vPairs = zip vs (tail vs)
                            mapM_ (uncurry addEdge) vPairs
         pure $ TestTopology (execState topoState emptyTopology)
-
--- | like fromJust, but from Either
-fromRight :: Either a b -> b
-fromRight (Right b) = b
-fromRight _         = undefined

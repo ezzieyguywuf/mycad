@@ -42,8 +42,6 @@ module Topology
 , removeVertex
 , removeEdge
 , removeFace
---, makeFace
---, removeFace
   -- * Adjacency information
   -- | This is really the heart of this module. It's kind of the whole "point"
   --   of Topology
@@ -219,10 +217,11 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
 --   curl your right fingers from the Edge you're on towards the next "left"
 --   Edge, then your thumb will be pointing upwards, normal from the Face
 --   you're tracing
-addFace :: Vertex -> Edge -> TopoState (Either String Face)
-addFace _ = undefined
+addFace :: [Edge] -> TopoState (Either String Face)
+addFace _ = runExceptT $ do
+    undefined
 
--- | The inverse of makeFace
+-- | The inverse of addFace
 removeFace :: Face -> TopoState ()
 removeFace _ = pure ()
 
