@@ -38,8 +38,10 @@ module Topology
 , emptyTopology
 , addFreeVertex
 , addEdge
+, addFace
 , removeVertex
 , removeEdge
+, removeFace
 --, makeFace
 --, removeFace
   -- * Adjacency information
@@ -202,14 +204,27 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
             -- Return the newly created Edge
             pure (Edge newEdgeID)
 
--- | Will create a face from a ClosedWire. Returns an error if OpenWire
---makeFace :: Wire -> TopoState (Either String Face)
---makeFace (OpenWire _)   = pure (Left "A Face can only be made with an OpenWire")
---makeFace (ClosedWire _) = undefined
+-- | Will create a Face from an "edge loop"
+--
+--   Here, "edge loop" is defined as a chain of end-to-end edges that form a
+--   closed loop.
+--
+--   This loop can be identified by a single Vertex and Edge by following the
+--   following rule - travelling from the Vertex along the Edge, any time
+--   another Vertex is encountered, the next Edge to the "left" is followed.
+--   This pattern is repeated until either a dangling Vertex is found or the
+--   loop is completed
+--
+--   Note that "left" here follows the "right-hand rule". In other word, if you
+--   curl your right fingers from the Edge you're on towards the next "left"
+--   Edge, then your thumb will be pointing upwards, normal from the Face
+--   you're tracing
+addFace :: Vertex -> Edge -> TopoState (Either String Face)
+addFace _ = undefined
 
 -- | The inverse of makeFace
---removeFace :: Face -> TopoState ()
---removeFace _ = pure ()
+removeFace :: Face -> TopoState ()
+removeFace _ = pure ()
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]

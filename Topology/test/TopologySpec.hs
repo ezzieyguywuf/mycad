@@ -97,6 +97,15 @@ spec = do
             it "returns the same Edge as addEdge v1 v2" $ do
                 let post ((_, _, Right edge), Right edge') = pure (edge == edge')
                 property (prepRun post)
+    describe "addFace" $ do
+        let prep = do vs <- replicateM 3 addFreeVertex
+                      let pairs = zip vs (tail vs)
+                      es <- sequence (fmap (uncurry addEdge) pairs)
+                      pure (head vs, fromRight $ head es)
+            run = uncurry addFace
+        it "is inversed by removeFace" $ do
+            let run' = run >=> traverse_ removeFace
+            property (prop_prepRunIdentity prep run')
 
 -- ===========================================================================
 --                            Properties
@@ -170,3 +179,8 @@ instance Arbitrary TestTopology where
                            let vPairs = zip vs (tail vs)
                            mapM_ (uncurry addEdge) vPairs
         pure $ TestTopology (execState topoState emptyTopology)
+
+-- | like fromJust, but from Either
+fromRight :: Either a b -> b
+fromRight (Right b) = b
+fromRight _         = undefined
