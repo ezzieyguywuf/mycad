@@ -8,7 +8,7 @@ import Data.Maybe (catMaybes)
 import Data.Tuple (swap)
 import Data.Either (isLeft, isRight, rights)
 import Data.Foldable (traverse_)
-import Control.Monad ((>=>), replicateM)
+import Control.Monad ((>=>), replicateM, replicateM_)
 import Control.Monad.IO.Class (liftIO)
 
 -- third-party
@@ -34,8 +34,8 @@ spec = do
     describe "vertexID" $ do
         it "provides a numeric ID that can be used to re-create the Vertex" $ do
             let run = do vs    <- getVertices
-                         mVIDs <- sequence (fmap vertexID vs)
-                         vs'   <- sequence (fmap vertexFromID (catMaybes mVIDs))
+                         mVIDs <- mapM vertexID vs
+                         vs'   <- mapM vertexFromID (catMaybes mVIDs)
                          pure (vs == catMaybes vs')
             property (prop_runExpect run True)
         it "returns Nothing if the numeric ID is invalid" $ do
@@ -93,14 +93,14 @@ spec = do
                                  pure (v1, v2, edge)
             run (v1, v2, _) = addEdge v2 v1
             prepRun         = prop_prepRunPostExpect prep run
-        describe "addEdge from v2→v1" $ do
+        describe "addEdge from v2→v1" $
             it "returns the same Edge as addEdge v1 v2" $ do
                 let post ((_, _, Right edge), Right edge') = pure (edge == edge')
                 property (prepRun post)
     describe "addFace" $ do
         let prep = do vs <- replicateM 3 addFreeVertex
                       let pairs = zip vs (tail vs)
-                      es <- sequence (fmap (uncurry addEdge) pairs)
+                      es <- mapM (uncurry addEdge) pairs
                       pure (rights es)
             run = addFace
         it "is inversed by removeFace" $ do
@@ -175,7 +175,7 @@ instance Arbitrary TestTopology where
         nVertices    <- arbitrary
         freeVertices <- arbitrary
         let topoState = do vs <- replicateM nVertices addFreeVertex
-                           replicateM freeVertices addFreeVertex
+                           replicateM_ freeVertices addFreeVertex
                            let vPairs = zip vs (tail vs)
                            mapM_ (uncurry addEdge) vPairs
         pure $ TestTopology (execState topoState emptyTopology)
