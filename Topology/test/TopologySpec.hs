@@ -106,6 +106,10 @@ spec = do
         it "is inversed by removeFace" $ do
             let run' = run >=> traverse_ removeFace
             property (prop_prepRunIdentity prep run')
+        it "returns Right of the Edges are contigous and form a loop" $ do
+            let post = pure . isRight . snd
+            property (prop_prepRunPostExpect prep run post)
+        
 
 -- ===========================================================================
 --                            Properties
