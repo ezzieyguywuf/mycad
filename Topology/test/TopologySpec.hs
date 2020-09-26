@@ -6,7 +6,7 @@ module TopologySpec (spec) where
 import Data.List (sort)
 import Data.Maybe (catMaybes)
 import Data.Tuple (swap)
-import Data.Either (isLeft, isRight, rights)
+import Data.Either (isLeft, isRight, rights, either)
 import Data.Foldable (traverse_)
 import Control.Monad ((>=>), replicateM, replicateM_)
 import Control.Monad.IO.Class (liftIO)
@@ -109,6 +109,13 @@ spec = do
         it "returns Right if the Edges are contigous and form a loop" $ do
             let post = pure . isRight . snd
             property (prop_prepRunPostExpect prep run post)
+        it "returns Left if there is a dangling Edge" $ do
+            let prep' = do es <- prep
+                           newVertex <- addFreeVertex
+                           vs <- getVertices
+                           either (const es) (: es) <$> addEdge (last vs) newVertex
+                post = pure . isLeft . snd
+            property (prop_prepRunPostExpect prep' run post)
         
 
 -- ===========================================================================
