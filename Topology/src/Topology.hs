@@ -58,14 +58,16 @@ module Topology
 
 -- Base
 import Data.Bool (bool)
-import Control.Monad (void)
+import Control.Monad (void, when)
 import Data.List (intersect)
+import Data.Foldable (find)
 
 -- third-party
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Control.Monad.State (State, get, put, gets)
-import Control.Monad.Except (MonadError, ExceptT(ExceptT), runExceptT, throwError)
+import Control.Monad.Except ( MonadError, ExceptT(ExceptT), runExceptT
+                            , throwError, liftEither)
 import Control.Monad.Trans.Class (lift)
 
 -- ===========================================================================
@@ -183,8 +185,8 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
             (Topology vertices edges faces) <- lift get
 
             -- Get the Vertex data
-            (TopoVertex leftLinkSet)  <- ExceptT (lookupVertex leftVID)
-            (TopoVertex rightLinkSet) <- ExceptT (lookupVertex rightVID)
+            (TopoVertex leftLinkSet)  <- ExceptT (lookupVertex v1)
+            (TopoVertex rightLinkSet) <- ExceptT (lookupVertex v2)
 
             -- create the two new links and update our maps
             let leftLink  = EndLink (BasicLink leftVID  newEdgeID)
@@ -202,24 +204,48 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
             -- Return the newly created Edge
             pure (Edge newEdgeID)
 
--- | Will create a Face from an "edge loop"
+-- | Will create a Face from the list of Edges
 --
---   Here, "edge loop" is defined as a chain of end-to-end edges that form a
---   closed loop.
+--   Each consecutive Edge must share a common Vertex, with the last Edge
+--   closing a loop with the first Edge.
 --
---   This loop can be identified by a single Vertex and Edge by following the
---   following rule - travelling from the Vertex along the Edge, any time
---   another Vertex is encountered, the next Edge to the "left" is followed.
---   This pattern is repeated until either a dangling Vertex is found or the
---   loop is completed
---
---   Note that "left" here follows the "right-hand rule". In other word, if you
---   curl your right fingers from the Edge you're on towards the next "left"
---   Edge, then your thumb will be pointing upwards, normal from the Face
---   you're tracing
+--   In other words: V₀ → E₀ → ... Vₙ → Eₙ → V₀
 addFace :: [Edge] -> TopoState (Either String Face)
-addFace _ = runExceptT $ do
-    undefined
+addFace edgeLoop = runExceptT $ do
+    -- Make sure we have enough Edges
+    when (length edgeLoop < 3)
+         (throwError "A minimum of three edges is needed to create a Face")
+
+    -- Ensure it's a closed loop
+    let firstEdge = head edgeLoop
+        lastEdge  = last edgeLoop
+    (TopoVertex startLinks) <- ExceptT (sharesVertex firstEdge lastEdge)
+
+    -- Make pairs of each consective Edge
+    let pairs = zip edgeLoop (tail edgeLoop)
+
+    -- Ensure each pair shairs a common Vertex
+    lift (sequence (fmap (uncurry sharesVertex) pairs))
+
+    -- Unpack the topology data
+    (Topology vertices edges faces) <- lift get
+
+    -- Find the target Link, i.e. the first Link in the Face
+    firstTopoEdge <- ExceptT (lookupEdge firstEdge)
+    targetLink <- liftEither $ case find (edgeHasLink firstTopoEdge) startLinks of
+                      Just foundLink -> Right foundLink
+                      Nothing -> Left "Could not find a Link to the first \
+                                       \Edge from the first Vertex"
+    -- Add a face
+    let faces'  = Map.insert nFaces newFace faces
+        nFaces  = length faces
+        newFace = TopoFace targetLink
+
+    -- Write out the updated Topology State
+    lift . put $ (Topology vertices edges faces')
+
+    -- Return the newly created Face
+    pure (Face nFaces)
 
 -- | The inverse of addFace
 removeFace :: Face -> TopoState ()
@@ -249,15 +275,15 @@ removeEdge (Edge eid) = void $ runExceptT $ do
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Edge]
-vertexEdges (Vertex vid) =
-    lookupVertex vid >>=
+vertexEdges vertex =
+    lookupVertex vertex >>=
     either (pure . const []) (pure . Set.toList . processVertex)
         where processVertex (TopoVertex links) = Set.map findLinkEdge links
 
 -- | Returns the list ef Vertices that are adjacent to the given Edge
 edgeVertices :: Edge -> TopoState [Vertex]
-edgeVertices (Edge eid) =
-    lookupEdge eid >>=
+edgeVertices edge =
+    lookupEdge edge >>=
     either (pure . const []) (pure . processEdge)
         where processEdge (TopoEdge leftLink rightLink) = [ findLinkVertex leftLink
                                                           , findLinkVertex rightLink
@@ -291,11 +317,11 @@ lookupEither key topoName getDataMap =
                        " with ID " <> show key <>
                        " does not exist in the topology")
 
-lookupVertex :: NodeID -> TopoState (Either String TopoVertex)
-lookupVertex nodeID = lookupEither nodeID "Vertex" getTopoVertices
+lookupVertex :: Vertex -> TopoState (Either String TopoVertex)
+lookupVertex (Vertex nodeID) = lookupEither nodeID "Vertex" getTopoVertices
 
-lookupEdge :: NodeID -> TopoState (Either String TopoEdge)
-lookupEdge nodeID = lookupEither nodeID "Vertex" getTopoEdges
+lookupEdge :: Edge -> TopoState (Either String TopoEdge)
+lookupEdge (Edge nodeID) = lookupEither nodeID "Vertex" getTopoEdges
 
 -- | Returns the Vertex that is associated with the Link
 findLinkVertex :: Link -> Vertex
@@ -304,3 +330,20 @@ findLinkVertex = Vertex . getLinkVertex . getBasicLink
 -- | Returns the Edge that is associated with the Link
 findLinkEdge :: Link -> Edge
 findLinkEdge = Edge . getLinkEdge . getBasicLink
+
+-- | Checks if the TopoEdge contains the given Link
+edgeHasLink :: TopoEdge -> Link -> Bool
+edgeHasLink (TopoEdge link1 link2) checkLink = any (== checkLink) [link1, link2]
+
+-- | Determines whether or not two Edges have a common Vertex
+sharesVertex :: Edge -> Edge -> TopoState (Either String TopoVertex)
+sharesVertex leftEdge rightEdge = do
+    -- First, get the vertices for both Edges
+    leftVertices  <- edgeVertices leftEdge
+    rightVertices <- edgeVertices rightEdge
+
+    -- See if they have a single common vertex
+    case leftVertices `intersect` rightVertices of
+        [commonVertex] -> lookupVertex commonVertex
+        []             -> pure . Left $ "The Edges do not share a Vertex"
+        _              -> pure . Left $ "The Edges share more than one Vertex"

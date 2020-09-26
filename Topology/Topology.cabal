@@ -36,6 +36,7 @@ library
       , prettyprinter
       , text
       , nonempty-containers
+      , containers
       , transformers
     default-language: Haskell2010
 
