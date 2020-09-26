@@ -116,6 +116,10 @@ spec = do
                            either (const es) (: es) <$> addEdge (last vs) newVertex
                 post = pure . isLeft . snd
             property (prop_prepRunPostExpect prep' run post)
+        it "returns Left if the loop is not closed" $ do
+            let prep' = init <$> prep
+                post = pure . isLeft . snd
+            property (prop_prepRunPostExpect prep' run post)
         
 
 -- ===========================================================================
