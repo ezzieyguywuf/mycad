@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE LambdaCase #-}
 {-|
 Module      : Topology
 Description : Adjacency relationships for geometric data.
@@ -112,7 +110,7 @@ data BasicLink = BasicLink { getLinkVertex :: NodeID
 
 
 -- | A Vertex can contain zero or more "Link"
-data TopoVertex = TopoVertex (Set.Set Link) deriving (Show, Eq, Ord)
+newtype TopoVertex = TopoVertex (Set.Set Link) deriving (Show, Eq, Ord)
 
 -- | An Edge must contain exactly two "Link"
 data TopoEdge = TopoEdge Link Link deriving (Show, Eq, Ord)
@@ -146,7 +144,7 @@ addFreeVertex = do
     -- Calculate our new Vertices
     let vertices' = Map.insert nVertices newVertex vertices
         nVertices = length vertices
-        newVertex = TopoVertex (Set.empty)
+        newVertex = TopoVertex Set.empty
 
     -- update our State
     put (Topology vertices' edges faces)
@@ -178,7 +176,7 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
     -- Bail out if there is already an Edge between these two Vertices
     leftEdges  <- lift (vertexEdges v1)
     rightEdges <- lift (vertexEdges v2)
-    case intersect leftEdges rightEdges of
+    case leftEdges `intersect` rightEdges of
         [edge] -> ExceptT (pure $ Right edge)
         _ -> do
             -- Unpack the topology data
@@ -225,7 +223,7 @@ addFace edgeLoop = runExceptT $ do
     let pairs = zip edgeLoop (tail edgeLoop)
 
     -- Ensure each pair shairs a common Vertex
-    lift (sequence (fmap (uncurry sharesVertex) pairs))
+    lift (mapM (uncurry sharesVertex) pairs)
 
     -- Unpack the topology data
     (Topology vertices edges faces) <- lift get
@@ -242,7 +240,7 @@ addFace edgeLoop = runExceptT $ do
         newFace = TopoFace targetLink
 
     -- Write out the updated Topology State
-    lift . put $ (Topology vertices edges faces')
+    lift . put $ Topology vertices edges faces'
 
     -- Return the newly created Face
     pure (Face nFaces)
@@ -253,10 +251,10 @@ removeFace _ = pure ()
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
-getVertices = gets (Map.keys . getTopoVertices) >>= pure . fmap Vertex
+getVertices = fmap Vertex <$> gets (Map.keys . getTopoVertices)
 
 getEdges :: TopoState [Edge]
-getEdges = gets (Map.keys . getTopoEdges) >>= pure . fmap Edge
+getEdges = fmap Edge <$> gets (Map.keys . getTopoEdges)
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
@@ -291,12 +289,12 @@ edgeVertices edge =
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
-vertexID (Vertex vid) = gets (Map.member vid . getTopoVertices) >>=
-                        pure . bool Nothing (Just vid)
+vertexID (Vertex vid) = bool Nothing (Just vid) <$>
+                        gets (Map.member vid . getTopoVertices)
 
 -- | Re-creates a Vertex from the given Int
 vertexFromID :: Int -> TopoState (Maybe Vertex)
-vertexFromID vid = pure . Just $ (Vertex vid)
+vertexFromID vid = pure . Just $ Vertex vid
 
 -- | Returns an Int ID that can be used to re-create the Edge
 edgeID :: Edge -> TopoState (Maybe Int)
@@ -333,7 +331,7 @@ findLinkEdge = Edge . getLinkEdge . getBasicLink
 
 -- | Checks if the TopoEdge contains the given Link
 edgeHasLink :: TopoEdge -> Link -> Bool
-edgeHasLink (TopoEdge link1 link2) checkLink = any (== checkLink) [link1, link2]
+edgeHasLink (TopoEdge link1 link2) checkLink = checkLink `elem` [link1, link2]
 
 -- | Determines whether or not two Edges have a common Vertex
 sharesVertex :: Edge -> Edge -> TopoState (Either String TopoVertex)
