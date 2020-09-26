@@ -99,7 +99,7 @@ spec = do
                 property (prepRun post)
     describe "addFace" $ do
         let prep = do vs <- replicateM 3 addFreeVertex
-                      let pairs = zip vs (tail vs)
+                      let pairs = zip vs (tail vs) ++ [(last vs, head vs)]
                       es <- mapM (uncurry addEdge) pairs
                       pure (rights es)
             run = addFace
