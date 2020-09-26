@@ -247,7 +247,15 @@ addFace edgeLoop = runExceptT $ do
 
 -- | The inverse of addFace
 removeFace :: Face -> TopoState ()
-removeFace _ = pure ()
+removeFace (Face faceNode) = do
+    -- Unpack the topology data
+    (Topology vertices edges faces) <- get
+
+    -- delete the appropriate Face
+    let faces' = Map.delete faceNode faces
+
+    -- Update the topology data
+    put (Topology vertices edges faces')
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
