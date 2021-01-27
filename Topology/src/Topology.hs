@@ -94,18 +94,18 @@ type TopoState = State Topology
 
 -- | The Link is what holds the relatiosnhip information between topological
 --   entities
-data Link = Link { getBasicLink  :: BasicLink
+data Link = Link { getLinkBase  :: LinkBase
                  , getLinkFace   :: NodeID
                  , getNextLink   :: Link
                  }
-          | LoopLink { getBasicLink :: BasicLink
+          | LoopLink { getLinkBase :: LinkBase
                      , getNextLink  :: Link
                      }
-          | EndLink { getBasicLink :: BasicLink}
+          | EndLink { getLinkBase :: LinkBase}
           deriving (Show, Eq, Ord)
 
 -- | This is the most fundaental information that all links must have
-data BasicLink = BasicLink { getLinkVertex :: NodeID
+data LinkBase = LinkBase { getLinkVertex :: NodeID
                            , getLinkEdge   :: NodeID
                            } deriving (Show, Eq, Ord)
 
@@ -188,8 +188,8 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
             (TopoVertex rightLinkSet) <- ExceptT (lookupVertex v2)
 
             -- create the two new links and update our maps
-            let leftLink  = EndLink (BasicLink leftVID  newEdgeID)
-                rightLink = EndLink (BasicLink rightVID newEdgeID)
+            let leftLink  = EndLink (LinkBase leftVID  newEdgeID)
+                rightLink = EndLink (LinkBase rightVID newEdgeID)
                 newEdgeID = length edges
                 vertices' = Map.insert leftVID  (insertVertex leftLink leftLinkSet) (
                             Map.insert rightVID (insertVertex rightLink rightLinkSet)
@@ -354,11 +354,11 @@ lookupFace (Face nodeID) = lookupEither nodeID "Face" getTopoFaces
 
 -- | Returns the Vertex that is associated with the Link
 findLinkVertex :: Link -> Vertex
-findLinkVertex = Vertex . getLinkVertex . getBasicLink
+findLinkVertex = Vertex . getLinkVertex . getLinkBase
 
 -- | Returns the Edge that is associated with the Link
 findLinkEdge :: Link -> Edge
-findLinkEdge = Edge . getLinkEdge . getBasicLink
+findLinkEdge = Edge . getLinkEdge . getLinkBase
 
 -- | Checks if the TopoEdge contains the given Link
 edgeHasLink :: TopoEdge -> Link -> Bool
