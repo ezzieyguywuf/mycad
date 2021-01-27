@@ -10,6 +10,7 @@ import Data.Either (isLeft, isRight, rights, either)
 import Data.Foldable (traverse_)
 import Control.Monad ((>=>), replicateM, replicateM_)
 import Control.Monad.IO.Class (liftIO)
+import qualified Data.Set as Set
 
 -- third-party
 import qualified Data.List.NonEmpty as NE
@@ -120,6 +121,11 @@ spec = do
             let prep' = init <$> prep
                 post = pure . isLeft . snd
             property (prop_prepRunPostExpect prep' run post)
+        xit "makes Face adjacent to all Vertices" $ do
+            let post (es, Right face) = do vs  <- Set.fromList . concat <$> mapM edgeVertices es
+                                           vs' <- Set.fromList . either (const []) id <$> faceVertices face
+                                           pure (vs == vs')
+            property (prop_prepRunPostExpect prep run post)
         
 
 -- ===========================================================================

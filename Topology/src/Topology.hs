@@ -45,6 +45,7 @@ module Topology
   --   of Topology
 , vertexEdges
 , edgeVertices
+, faceVertices
   -- | Get information about the topology
 , getVertices
 , getEdges
@@ -89,7 +90,7 @@ type Edges    = Map.Map NodeID TopoEdge
 type Faces    = Map.Map NodeID TopoFace
 
 -- | Used to manage the State of the Topology
-type TopoState a = State Topology a
+type TopoState = State Topology
 
 -- | The Link is what holds the relatiosnhip information between topological
 --   entities
@@ -295,6 +296,25 @@ edgeVertices edge =
                                                           , findLinkVertex rightLink
                                                           ]
 
+-- | Returns the list of Vertices that are adjacent to the given Face
+faceVertices :: Face -> TopoState (Either String [Vertex])
+faceVertices face = runExceptT (do
+    -- First, get the TopoFace
+    (TopoFace startLink) <- ExceptT (lookupFace face)
+
+    -- Now, traverse the loop and collect the Vertices
+    lift (traverseLoop [] startLink)
+
+    undefined
+    )
+
+-- | Recursively follows the "next" Edge in a chain
+--
+--   Returns Right [Vertices] if the loop actually loops, or Left String if the
+--   loop is open
+traverseLoop :: [Vertex] -> Link -> TopoState [Vertex]
+traverseLoop _vertices _link = undefined
+
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
 vertexID (Vertex vid) = bool Nothing (Just vid) <$>
@@ -328,6 +348,9 @@ lookupVertex (Vertex nodeID) = lookupEither nodeID "Vertex" getTopoVertices
 
 lookupEdge :: Edge -> TopoState (Either String TopoEdge)
 lookupEdge (Edge nodeID) = lookupEither nodeID "Vertex" getTopoEdges
+
+lookupFace :: Face -> TopoState (Either String TopoFace)
+lookupFace (Face nodeID) = lookupEither nodeID "Face" getTopoFaces
 
 -- | Returns the Vertex that is associated with the Link
 findLinkVertex :: Link -> Vertex
