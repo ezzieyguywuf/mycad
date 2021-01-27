@@ -107,9 +107,8 @@ data LinkBase = LinkBase { getLinkVertex :: NodeID
 -- | This extra data is useful for defining different types of links
 data LinkType =
       EndLink
-    | LoopLink {getNextLink :: LinkBase}
-    | FaceLink { getLinkFace :: NodeID
-               , getNextLink :: LinkBase }
+    | LoopLink { getNextLink :: LinkBase 
+               , getLinkFace :: Maybe NodeID }
     deriving (Show, Eq, Ord)
 
 -- | A Vertex can contain zero or more "Link"
@@ -300,22 +299,20 @@ edgeVertices edge =
 
 -- | Returns the list of Vertices that are adjacent to the given Face
 faceVertices :: Face -> TopoState (Either String [Vertex])
-faceVertices face = runExceptT (do
+faceVertices face = runExceptT $ do
     -- First, get the TopoFace
     (TopoFace startLink) <- ExceptT (lookupFace face)
 
     -- Now, traverse the loop and collect the Vertices
-    lift (traverseLoop [] startLink)
-
-    undefined
-    )
+    ExceptT (traverseLoop [] startLink)
 
 -- | Recursively follows the "next" Edge in a chain
 --
 --   Returns Right [Vertices] if the loop actually loops, or Left String if the
 --   loop is open
-traverseLoop :: [Vertex] -> Link -> TopoState [Vertex]
-traverseLoop _vertices _link = undefined
+traverseLoop :: [Vertex] -> Link -> TopoState (Either String [Vertex])
+traverseLoop _vertices (Link _ EndLink) = pure (Left "A Loop cannot contain an EndLink")
+traverseLoop _vertices (Link _linkBase _linkType) = undefined
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
