@@ -95,20 +95,22 @@ type TopoState = State Topology
 -- | The Link is what holds the relatiosnhip information between topological
 --   entities
 data Link = Link { getLinkBase  :: LinkBase
-                 , getLinkFace   :: NodeID
-                 , getNextLink   :: Link
+                 , getLinkType   :: LinkType
                  }
-          | LoopLink { getLinkBase :: LinkBase
-                     , getNextLink  :: Link
-                     }
-          | EndLink { getLinkBase :: LinkBase}
           deriving (Show, Eq, Ord)
 
 -- | This is the most fundaental information that all links must have
 data LinkBase = LinkBase { getLinkVertex :: NodeID
-                           , getLinkEdge   :: NodeID
-                           } deriving (Show, Eq, Ord)
+                         , getLinkEdge   :: NodeID
+                         } deriving (Show, Eq, Ord)
 
+-- | This extra data is useful for defining different types of links
+data LinkType =
+      EndLink
+    | LoopLink {getNextLink :: LinkBase}
+    | FaceLink { getLinkFace :: NodeID
+               , getNextLink :: LinkBase }
+    deriving (Show, Eq, Ord)
 
 -- | A Vertex can contain zero or more "Link"
 newtype TopoVertex = TopoVertex (Set.Set Link) deriving (Show, Eq, Ord)
@@ -188,8 +190,8 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
             (TopoVertex rightLinkSet) <- ExceptT (lookupVertex v2)
 
             -- create the two new links and update our maps
-            let leftLink  = EndLink (LinkBase leftVID  newEdgeID)
-                rightLink = EndLink (LinkBase rightVID newEdgeID)
+            let leftLink  = Link (LinkBase leftVID  newEdgeID) EndLink
+                rightLink = Link (LinkBase rightVID newEdgeID) EndLink
                 newEdgeID = length edges
                 vertices' = Map.insert leftVID  (insertVertex leftLink leftLinkSet) (
                             Map.insert rightVID (insertVertex rightLink rightLinkSet)
