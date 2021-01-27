@@ -30,6 +30,7 @@
 - Update to use ErrorT, especially vertexFromID should have two different
   errors, one from no nodes, one for more than one node
 - Should vertexEdges and friends return a Set rather than a List?
+- Add pictures to the documentation - or, at least add pictures *somewhere*
 
 # Entity
 

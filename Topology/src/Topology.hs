@@ -93,13 +93,90 @@ type Faces    = Map.Map NodeID TopoFace
 type TopoState = State Topology
 
 -- | The Link is what holds the relatiosnhip information between topological
---   entities
+--   entities.
+--
+--   Consider a basic line segment to begin - this consists of a single Edge
+--   with a Vertex on each end. In this case, two links would be used to
+--   describe the topological relationship:
+--
+--   Vertex₁ ↔ Link₁ ↔ Edge ↔ Link₂ ↔ Vertex₂
+--
+--   Notice that neither Vertices know anything about the Edge, and vice-versa.
+--   Rather, each topological entity is aware of a Link, which can later be used
+--   to figure out what is "adjacent" to each other.
+--
+--   In this case, both Link₁ and Link₂ would be referred to as "End" Links -
+--   this is the most basic form of a Link, which at the very least must refer
+--   to a single "parent" Vertex and a single "parent" Edge.
+--
+--   Let's build on this example and add a second Edge into the mix (we'll
+--   abbreviate Vertex to V, Link to L, etc...):
+--
+--   V₁ ↔ L₁ ↔ E₁ ↔ L₂ ↔ V₂
+--   V₂ ↔ L₃ ↔ E₂ ↔ L₄ ↔ V₃
+--
+--   So, these two Edges are both "adjacent" to V₂, but there is currently no
+--   relationship between E₁ and E₂. Why would we need this relationship? Well,
+--   that should hopefully become apparent a bit later. For now, let's just add
+--   the relationship:
+--
+--   V₁ ↔ L₁ ↔ E₁ ↔ L₂ ↔ V₂
+--   V₂ ↔ L₃ ↔ E₂ ↔ L₄ ↔ V₃
+--   L₂ → L₃
+--
+--   Two things to note here:
+--
+--   1. L₂ is no longer a simple "End" Link, but rather we can refer to it
+--      now as a "Chain" link, because it describes an Edge "chain" from E₁ to
+--      E₂
+--   2. The relationship here is directional - in other words, L₂ doesn't
+--      actually "know" anything about L₁. L₂ is still technically a simple
+--      "End" Link
+--
+--   This is nice, so now we have a "chain" from E₁ to E₂. We can express that
+--   visually something like this...
+--
+--                  V₂   V₂
+--                  ↕    ↕
+--   V₁ ↔ L₁ ↔ E₁ ↔ L₂ → L₃ ↔ E₂ ↔ L₄ ↔ V₃
+--
+--   Or simplify it down to:
+--
+--   V₁ ↔ E₁ ↔ V₂ ↔ E₂ ↔ V₃
+--
+--   It's important to note that while this final, simplified visual omits the
+--   links, that the links still exist and are an essential component of the
+--   topological data structure.
+--
+--   The "chain" link can be used to chain together an arbitrary number of
+--   Edges, even looping all the way back to the original link to form a loop.
+--
+--   It's important to know (this is why I'm mentioning it a third time) that
+--   the chains are directional - this is used to establish a "counterclockwise"
+--   convention for looping a chain of Edges around a Face.
 data Link = Link { getLinkBase  :: LinkBase
                  , getLinkType   :: LinkType
                  }
           deriving (Show, Eq, Ord)
 
 -- | This is the most fundaental information that all links must have
+--
+--   Each link will have, at the very least, an associated Vertex and Edge, thus
+--   we refer to this as a "Vertex-Link" structure.
+--
+--   The reason we call this the "Base" is because any link relationship *must*
+--   include at least these two pieces of information:
+--
+--      1. what is my "parent" Vertex
+--      2. what is my "parent" Edge
+--
+--   This will fully define the given Link as being "located" (if you will)
+--   between the given Vertex and Edge. To think of it differently, the given
+--   Link can be considered to "glue" the Vertex and Edge together.
+--
+--   Any other data, say "what is the next Link in this loop?" can be considered
+--   "extra", as it is not strictly needed to fully define the Link, but rather
+--   helps to further specialize the type of Link that is being described.
 data LinkBase = LinkBase { getLinkVertex :: NodeID
                          , getLinkEdge   :: NodeID
                          } deriving (Show, Eq, Ord)
@@ -107,7 +184,7 @@ data LinkBase = LinkBase { getLinkVertex :: NodeID
 -- | This extra data is useful for defining different types of links
 data LinkType =
       EndLink
-    | LoopLink { getNextLink :: LinkBase 
+    | LoopLink { getNextLink :: LinkBase
                , getLinkFace :: Maybe NodeID }
     deriving (Show, Eq, Ord)
 
