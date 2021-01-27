@@ -324,10 +324,11 @@ addFace edgeLoop = runExceptT $ do
 
     -- Find the target Link, i.e. the first Link in the Face
     firstTopoEdge <- ExceptT (lookupEdge firstEdge)
-    targetLink <- liftEither $ case find (edgeHasLink firstTopoEdge) startLinks of
-                      Just foundLink -> Right foundLink
-                      Nothing -> Left "Could not find a Link to the first \
-                                       \Edge from the first Vertex"
+    targetLink <- liftEither $
+        case find (edgeHasLink firstTopoEdge) startLinks of
+            Just foundLink -> Right foundLink
+            Nothing -> Left "Could not find a Link to the first Edge from the\
+                             \ first Vertex"
     -- Add a face
     let faces'  = Map.insert nFaces newFace faces
         nFaces  = length faces
