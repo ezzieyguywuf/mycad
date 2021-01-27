@@ -200,8 +200,7 @@ data LinkBase = LinkBase { getLinkVertex :: NodeID
 --      "next" link.
 data LinkType =
       EndLink
-    | LoopLink { getNextLink :: LinkBase
-               , getLinkFace :: Maybe NodeID }
+    | ChainLink { getNextLink :: LinkBase }
     deriving (Show, Eq, Ord)
 
 -- | A Vertex can contain zero or more "Link"
@@ -212,7 +211,7 @@ data TopoEdge = TopoEdge Link Link deriving (Show, Eq, Ord)
 
 -- | A Face will be defined by a single Link
 --
---   This API will guarantee that the Link is always a LoopLink, so that we
+--   This API will guarantee that the Link is always a ChainLink, so that we
 --   always have a list of Edges in a Loop that define the Face
 newtype TopoFace = TopoFace Link deriving (Show, Eq, Ord)
 
