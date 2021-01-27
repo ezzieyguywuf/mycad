@@ -181,7 +181,23 @@ data LinkBase = LinkBase { getLinkVertex :: NodeID
                          , getLinkEdge   :: NodeID
                          } deriving (Show, Eq, Ord)
 
--- | This extra data is useful for defining different types of links
+-- | The link "type" is used to describe what kind of Link we have.
+--
+--   EndLink:
+--      The most basic link - nothing more than the fundamental LinkBase data
+--      this is needed for any Link
+--
+--      Vertex ↔ EndLink ↔ Edge
+--
+--   ChainLink:
+--      Allows to chain together an abritrary number of Edges.
+--
+--      V₁ ↔ EndLink₁ ↔ E₁ ↔ ChainLink₁ ↔ V₂ ↔ EndLink₂ ↔ E₂...
+--      ChainLink₁ → EndLink₂
+--
+--      So, whereas an EndLink only allows a connection to a single Vertex and a
+--      single Edge, the ChainLink builds upon this by also allowing a link to a
+--      "next" link.
 data LinkType =
       EndLink
     | LoopLink { getNextLink :: LinkBase
