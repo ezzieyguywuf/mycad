@@ -201,6 +201,7 @@ data LinkBase = LinkBase { getLinkVertex :: NodeID
 data LinkType =
       EndLink
     | ChainLink { getNextLink :: LinkBase }
+    | FaceLink  { getLinkFace :: NodeID }
     deriving (Show, Eq, Ord)
 
 -- | A Vertex can contain zero or more "Link"
@@ -211,7 +212,7 @@ data TopoEdge = TopoEdge Link Link deriving (Show, Eq, Ord)
 
 -- | A Face will be defined by a single Link
 --
---   This API will guarantee that the Link is always a ChainLink, so that we
+--   This API will guarantee that the Link is always a FaceLink, so that we
 --   always have a list of Edges in a Loop that define the Face
 newtype TopoFace = TopoFace Link deriving (Show, Eq, Ord)
 
@@ -311,34 +312,46 @@ addFace edgeLoop = runExceptT $ do
     -- Ensure it's a closed loop
     let firstEdge = head edgeLoop
         lastEdge  = last edgeLoop
-    (TopoVertex startLinks) <- ExceptT (sharesVertex firstEdge lastEdge)
+    -- (TopoVertex startLinks) <- ExceptT (sharesVertex firstEdge lastEdge)
 
     -- Make pairs of each consective Edge
     let pairs = zip edgeLoop (tail edgeLoop)
 
-    -- Ensure each pair shairs a common Vertex
-    lift (mapM (uncurry sharesVertex) pairs)
+    -- Ensure each pair shairs a common Vertex, including the first and last
+    lift (mapM (uncurry sharesVertex) (pairs <> [(lastEdge, firstEdge)]))
 
     -- Unpack the topology data
     (Topology vertices edges faces) <- lift get
 
     -- Find the target Link, i.e. the first Link in the Face
+    -- TODO: I was in the middle of updating this so that instead of using the
+    -- following code, I simply:
+    -- 1. create a FaceLink from the new face to the firstVertex
+    -- 2. change the link in the lastVertex from an EndLink to a ChainLink, and
+    --    connect it to our new FaceLink
+
+    -- First, get the TopoEdge from the first Edge in the list
     firstTopoEdge <- ExceptT (lookupEdge firstEdge)
-    targetLink <- liftEither $
-        case find (edgeHasLink firstTopoEdge) startLinks of
-            Just foundLink -> Right foundLink
-            Nothing -> Left "Could not find a Link to the first Edge from the\
-                             \ first Vertex"
-    -- Add a face
-    let faces'  = Map.insert nFaces newFace faces
-        nFaces  = length faces
-        newFace = TopoFace targetLink
+    -- Next, get the EndLink attached to the TopoEdge
+    firstEndLink  <- liftEither $ (getEndLink firstTopoEdge)
+
+    let -- Create the FaceLink using firstEndLink's LinkBase
+        linkBase = getLinkBase firstEndLink
+        faceLink = FaceLink faceID
+        newLink = Link linkBase faceLink
+        -- Create the TopoFace and add it to our Topology
+        faceID  = length faces
+        newFace = TopoFace newLink
+        faces'  = Map.insert faceID newFace faces
+        -- Update the first edge in our Topology with the new Link
+        (Edge edgeID) = firstEdge
+        edges' = Map.adjust (\(TopoEdge _ rightLink) -> TopoEdge newLink rightLink) edgeID edges
 
     -- Write out the updated Topology State
-    lift . put $ Topology vertices edges faces'
+    lift . put $ Topology vertices edges' faces'
 
     -- Return the newly created Face
-    pure (Face nFaces)
+    pure (Face faceID)
 
 -- | The inverse of addFace
 removeFace :: Face -> TopoState ()
@@ -455,6 +468,12 @@ findLinkEdge = Edge . getLinkEdge . getLinkBase
 -- | Checks if the TopoEdge contains the given Link
 edgeHasLink :: TopoEdge -> Link -> Bool
 edgeHasLink (TopoEdge link1 link2) checkLink = checkLink `elem` [link1, link2]
+
+-- | Returns Right Link if the Edge contains a single EndLink. Otherwise returns
+--   an error
+getEndLink :: TopoEdge -> Either String Link
+getEndLink (TopoEdge (Link _ EndLink) (Link _ EndLink)) = Left msg
+    where msg = "The Edge can only contain a single EndLink in order to use getEndLink"
 
 -- | Determines whether or not two Edges have a common Vertex
 sharesVertex :: Edge -> Edge -> TopoState (Either String TopoVertex)
