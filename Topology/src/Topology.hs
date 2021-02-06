@@ -473,6 +473,8 @@ edgeHasLink (TopoEdge link1 link2) checkLink = checkLink `elem` [link1, link2]
 getEndLink :: TopoEdge -> Either String Link
 getEndLink (TopoEdge (Link _ EndLink) (Link _ EndLink)) = Left msg
     where msg = "The Edge can only contain a single EndLink in order to use getEndLink"
+getEndLink (TopoEdge link@(Link _ EndLink) (Link _ _)) = Right link
+getEndLink (TopoEdge (Link _ _) link@(Link _ EndLink)) = Right link
 
 -- | Determines whether or not two Edges have a common Vertex
 -- | Takes two Edges and joins them using a ChainLink
