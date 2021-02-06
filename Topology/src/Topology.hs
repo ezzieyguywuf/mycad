@@ -57,14 +57,14 @@ module Topology
 
 -- Base
 import Data.Bool (bool)
-import Control.Monad (void, when)
+import Control.Monad (void, when, unless)
 import Data.List (intersect)
 import Data.Foldable (find)
 
 -- third-party
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Control.Monad.State (State, get, put, gets)
+import Control.Monad.State (State, get, put, gets, modify)
 import Control.Monad.Except ( MonadError, ExceptT(ExceptT), runExceptT
                             , throwError, liftEither)
 import Control.Monad.Trans.Class (lift)
@@ -312,13 +312,12 @@ addFace edgeLoop = runExceptT $ do
     -- Ensure it's a closed loop
     let firstEdge = head edgeLoop
         lastEdge  = last edgeLoop
-    -- (TopoVertex startLinks) <- ExceptT (sharesVertex firstEdge lastEdge)
 
     -- Make pairs of each consective Edge
     let pairs = zip edgeLoop (tail edgeLoop)
 
-    -- Ensure each pair shairs a common Vertex, including the first and last
-    lift (mapM (uncurry sharesVertex) (pairs <> [(lastEdge, firstEdge)]))
+    -- Join each consecutive Edge using a ChainLink
+    lift (mapM (uncurry joinEdges) (pairs <> [(lastEdge, firstEdge)]))
 
     -- Unpack the topology data
     (Topology vertices edges faces) <- lift get
@@ -476,14 +475,54 @@ getEndLink (TopoEdge (Link _ EndLink) (Link _ EndLink)) = Left msg
     where msg = "The Edge can only contain a single EndLink in order to use getEndLink"
 
 -- | Determines whether or not two Edges have a common Vertex
-sharesVertex :: Edge -> Edge -> TopoState (Either String TopoVertex)
-sharesVertex leftEdge rightEdge = do
-    -- First, get the vertices for both Edges
-    leftVertices  <- edgeVertices leftEdge
-    rightVertices <- edgeVertices rightEdge
+-- | Takes two Edges and joins them using a ChainLink
+--
+--   The following assumptions are made:
+--
+--   1. The first edge is to the 'left' of the second edge
+--   2. The first link in each edges respective "TopoEdge" is the 'left' link
+--
+--   Given these assumptions, the only change made is that the "right" link of
+--   the "left" edge is updated to a "ChainLink" which points to the "left" link
+--   of the "right" edge.
+--
+--   Visually:
+--
+--   Initial State
+--   =============
+--   V₀ → L₀ → E_left → L₁ → V₁
+--   V₁ → L₂ → E_right → L₃ → V₂
+--
+--   Result State
+--   ============
+--                        → → → →
+--                      ↑         ↓
+--   V₀ → L₀ → E_Left → L₁ → V₁ → L₂ → E_right→ L₃ → V₂
+joinEdges :: Edge -> Edge -> TopoState (Either String ())
+joinEdges lEdge rEdge = runExceptT $ do
+    -- First, get the TopoEdge for each Edge
+    (TopoEdge leftEdgeLeftLink leftEdgeRightLink) <- ExceptT (lookupEdge lEdge)
+    (TopoEdge rightEdgeLeftLink rightEdgeRightLink) <- ExceptT (lookupEdge rEdge)
 
-    -- See if they have a single common vertex
-    case leftVertices `intersect` rightVertices of
-        [commonVertex] -> lookupVertex commonVertex
-        []             -> pure . Left $ "The Edges do not share a Vertex"
-        _              -> pure . Left $ "The Edges share more than one Vertex"
+    -- Make sure they share a common vertex
+    let leftEdgeRightVertex = findLinkVertex leftEdgeRightLink
+        rightEdgeLeftVertex = findLinkVertex rightEdgeLeftLink
+
+    unless
+        (leftEdgeRightVertex == rightEdgeLeftVertex)
+        (throwError
+            "The \"right\" link of the \"left\" Edge must share a vertex with\
+             \ the \"left\" link of the \"right\" Edge")
+
+    -- Create the new ChainLink
+    let newLink  = Link (getLinkBase leftEdgeRightLink) nextLink
+        nextLink = ChainLink (getLinkBase rightEdgeLeftLink)
+        -- Get the EdgeID to be updated
+        (Edge edgeID) = lEdge
+        -- Helper function
+        updateEdge (TopoEdge lLink _) = TopoEdge lLink newLink
+
+    -- update the topology
+    (Topology vertices edges faces) <- lift get
+    let edges' = Map.adjust updateEdge edgeID edges
+    lift (put (Topology vertices edges' faces))
