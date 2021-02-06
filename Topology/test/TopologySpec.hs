@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# LANGUAGE LambdaCase #-}
 module TopologySpec (spec) where
 
 -- base
@@ -99,33 +100,41 @@ spec = do
                 let post ((_, _, Right edge), Right edge') = pure (edge == edge')
                 property (prepRun post)
     describe "addFace" $ do
-        let prep = do vs <- replicateM 3 addFreeVertex
-                      let pairs = zip vs (tail vs) ++ [(last vs, head vs)]
-                      es <- mapM (uncurry addEdge) pairs
-                      pure (rights es)
+        let makePairs = do vs <- replicateM 3 addFreeVertex
+                           pure $ zip vs (tail vs)
+            closePairs = do
+                ps <- makePairs
+                let firstVertex = fst . head $ ps
+                    lastVertex  = snd . last $ ps
+                pure (ps <> [(lastVertex, firstVertex)])
+            prep pairs = do
+                es <- mapM (uncurry addEdge) pairs
+                makeEdgeChain (rights es) >>= \case
+                    (Right edgeChain) -> pure edgeChain
+                    _ -> error "There was an error making the edgeChain"
             run = addFace
         it "is inversed by removeFace" $ do
             let run' = run >=> traverse_ removeFace
-            property (prop_prepRunIdentity prep run')
+            property (prop_prepRunIdentity (closePairs >>= prep) run')
         it "returns Right if the Edges are contigous and form a loop" $ do
             let post = pure . isRight . snd
-            property (prop_prepRunPostExpect prep run post)
+            property (prop_prepRunPostExpect (closePairs >>= prep) run post)
         it "returns Left if there is a dangling Edge" $ do
-            let prep' = do es <- prep
+            let prep' = do vs <- closePairs
                            newVertex <- addFreeVertex
-                           vs <- getVertices
-                           either (const es) (: es) <$> addEdge (last vs) newVertex
+                           let firstVertex = fst . head $ vs
+                               vs' = vs <> [(firstVertex, newVertex)]
+                           prep vs'
                 post = pure . isLeft . snd
             property (prop_prepRunPostExpect prep' run post)
         it "returns Left if the loop is not closed" $ do
-            let prep' = init <$> prep
-                post = pure . isLeft . snd
-            property (prop_prepRunPostExpect prep' run post)
-        xit "makes Face adjacent to all Vertices" $ do
-            let post (es, Right face) = do vs  <- Set.fromList . concat <$> mapM edgeVertices es
-                                           vs' <- Set.fromList . either (const []) id <$> faceVertices face
-                                           pure (vs == vs')
-            property (prop_prepRunPostExpect prep run post)
+            let post = pure . isLeft . snd
+            property (prop_prepRunPostExpect (makePairs >>= prep) run post)
+        -- xit "makes Face adjacent to all Vertices" $ do
+        --     let post (es, Right face) = do vs  <- Set.fromList . concat <$> mapM edgeVertices es
+        --                                    vs' <- Set.fromList . either (const []) id <$> faceVertices face
+        --                                    pure (vs == vs')
+        --     property (prop_prepRunPostExpect (closePairs >>= prep) run post)
         
 
 -- ===========================================================================

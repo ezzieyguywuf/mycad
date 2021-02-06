@@ -36,6 +36,7 @@ module Topology
 , emptyTopology
 , addFreeVertex
 , addEdge
+, makeEdgeChain
 , addFace
 , removeVertex
 , removeEdge
@@ -220,6 +221,16 @@ newtype Vertex = Vertex NodeID deriving (Show, Eq, Ord)
 newtype Edge   = Edge   NodeID deriving (Show, Eq, Ord)
 newtype Face   = Face   NodeID deriving (Show, Eq, Ord)
 
+-- | An EdgeChain identifies a series of Edges that share common Vertices
+--
+--   Further, this API ensures that there is a "ChainLink" that points from each
+--   Edge to the next edge in the Chain (unless it's the last Edge in an
+--   OpenChain
+data EdgeChain =
+      OpenChain Link
+    | ClosedChain Link
+    deriving (Show)
+
 -- ===========================================================================
 --                               Free Functions
 -- ===========================================================================
@@ -297,27 +308,22 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
             -- Return the newly created Edge
             pure (Edge newEdgeID)
 
+makeEdgeChain :: [Edge] -> TopoState (Either String EdgeChain)
+makeEdgeChain = undefined
+
 -- | Will create a Face from the list of Edges
 --
 --   Each consecutive Edge must share a common Vertex, with the last Edge
 --   closing a loop with the first Edge.
 --
 --   In other words: V₀ → E₀ → ... Vₙ → Eₙ → V₀
-addFace :: [Edge] -> TopoState (Either String Face)
-addFace edgeLoop = runExceptT $ do
-    -- Make sure we have enough Edges
-    when (length edgeLoop < 3)
-         (throwError "A minimum of three edges is needed to create a Face")
-
-    -- Ensure it's a closed loop
-    let firstEdge = head edgeLoop
-        lastEdge  = last edgeLoop
-
-    -- Make pairs of each consective Edge
-    let pairs = zip edgeLoop (tail edgeLoop)
-
-    -- Join each consecutive Edge using a ChainLink
-    lift (mapM (uncurry joinEdges) (pairs <> [(lastEdge, firstEdge)]))
+addFace :: EdgeChain -> TopoState (Either String Face)
+addFace (OpenChain _) = pure (Left msg)
+    where msg = "A Face can only be created from a ClosedChain"
+addFace (ClosedChain firstLink) = runExceptT $ do
+    undefined
+    let firstEdge = undefined
+        lastEdge  = undefined
 
     -- Unpack the topology data
     (Topology vertices edges faces) <- lift get
