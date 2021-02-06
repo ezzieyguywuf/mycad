@@ -308,8 +308,29 @@ addEdge v1@(Vertex leftVID) v2@(Vertex rightVID) = runExceptT $ do
             -- Return the newly created Edge
             pure (Edge newEdgeID)
 
+-- | Creates an EdgeChain from the list of Edges
+--
+--   To create a "Closed" chain, make sure the last Edge in the list is the same
+--   as the first.
+--
+--   Will return an error if each consecutive Edge in the list does not share a
+--   common vertex
 makeEdgeChain :: [Edge] -> TopoState (Either String EdgeChain)
-makeEdgeChain = undefined
+makeEdgeChain edges = runExceptT $ do
+    -- Create pairs from each consective Edge
+    let pairs = zip edges (tail edges)
+
+    -- Join each pair into a chain
+    lift (mapM_ (uncurry joinEdges) pairs)
+
+    -- Get the (updated from joinEdges) link from our first Edge
+    firstEdge <- ExceptT (lookupEdge (head edges))
+    firstLink <- liftEither (getEndLink firstEdge)
+
+    -- Return the appropriate type of EdgeChain
+    if (head edges) == (last edges)
+        then pure $ ClosedChain firstLink
+        else pure $ OpenChain firstLink
 
 -- | Will create a Face from the list of Edges
 --
