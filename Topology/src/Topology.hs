@@ -329,7 +329,7 @@ makeEdgeChain edges = runExceptT $ do
     firstLink <- liftEither (getEndLink firstEdge)
 
     -- Return the appropriate type of EdgeChain
-    if (head edges) == (last edges)
+    if head edges == last edges
         then pure $ ClosedChain firstLink
         else pure $ OpenChain firstLink
 
@@ -360,7 +360,7 @@ addFace (ClosedChain firstLink) = runExceptT $ do
     -- First, get the TopoEdge from the first Edge in the list
     firstTopoEdge <- ExceptT (lookupEdge firstEdge)
     -- Next, get the EndLink attached to the TopoEdge
-    firstEndLink  <- liftEither $ (getEndLink firstTopoEdge)
+    firstEndLink  <- liftEither (getEndLink firstTopoEdge)
 
     let -- Create the FaceLink using firstEndLink's LinkBase
         linkBase = getLinkBase firstEndLink
@@ -394,10 +394,10 @@ removeFace (Face faceNode) = do
 
 -- | Returns all the Vertices in the Topology, in on particular order
 getVertices :: TopoState [Vertex]
-getVertices = fmap Vertex <$> gets (Map.keys . getTopoVertices)
+getVertices = gets (fmap Vertex . Map.keys . getTopoVertices)
 
 getEdges :: TopoState [Edge]
-getEdges = fmap Edge <$> gets (Map.keys . getTopoEdges)
+getEdges = gets (fmap Edge . Map.keys . getTopoEdges)
 
 -- | If the Edge does not exist, does nothing.
 removeEdge :: Edge -> TopoState ()
@@ -452,8 +452,7 @@ traverseLoop _vertices (Link _linkBase _linkType) = undefined
 
 -- | Returns an Int ID that can be used to re-create the Vertex
 vertexID :: Vertex -> TopoState (Maybe Int)
-vertexID (Vertex vid) = bool Nothing (Just vid) <$>
-                        gets (Map.member vid . getTopoVertices)
+vertexID (Vertex vid) = gets (bool Nothing (Just vid) . Map.member vid . getTopoVertices)
 
 -- | Re-creates a Vertex from the given Int
 vertexFromID :: Int -> TopoState (Maybe Vertex)
