@@ -227,10 +227,10 @@ newtype Face   = Face   NodeID deriving (Show, Eq, Ord)
 --   Further, this API ensures that there is a "ChainLink" that points from each
 --   Edge to the next edge in the Chain (unless it's the last Edge in an
 --   OpenChain
-data EdgeChain =
-      OpenChain Link
-    | ClosedChain Link
-    deriving (Show)
+data EdgeChain = EdgeChain Link EdgeChainType deriving (Show)
+
+-- | Used to describe an EdgeChain as either Opened or Closed
+data EdgeChainType = OpenEdgeChain | ClosedEdgeChain deriving (Show)
 
 -- ===========================================================================
 --                               Free Functions
@@ -330,8 +330,8 @@ makeEdgeChain edges = runExceptT $ do
 
     -- Return the appropriate type of EdgeChain
     if head edges == last edges
-        then pure $ ClosedChain firstLink
-        else pure $ OpenChain firstLink
+        then pure $ EdgeChain firstLink ClosedEdgeChain
+        else pure $ EdgeChain firstLink OpenEdgeChain
 
 -- | Will create a Face from the list of Edges
 --
@@ -340,9 +340,9 @@ makeEdgeChain edges = runExceptT $ do
 --
 --   In other words: V₀ → E₀ → ... Vₙ → Eₙ → V₀
 addFace :: EdgeChain -> TopoState (Either String Face)
-addFace (OpenChain _) = pure (Left msg)
+addFace (EdgeChain _ ClosedEdgeChain) = pure (Left msg)
     where msg = "A Face can only be created from a ClosedChain"
-addFace (ClosedChain firstLink) = runExceptT $ do
+addFace (EdgeChain firstLink _) = runExceptT $ do
     undefined
     let firstEdge = undefined
         lastEdge  = undefined
@@ -414,6 +414,9 @@ removeEdge (Edge eid) = void $ runExceptT $ do
     -- write the updated data
     lift (put (Topology vertices' edges' faces))
 
+-- | Turns each Link in the EdgeChain to an EndLink
+--
+--   This is the inverse of makeEdgeChain, and results in standalone Edges
 breakEdgeChain :: EdgeChain -> TopoState ()
 breakEdgeChain = undefined
 
