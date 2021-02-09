@@ -40,8 +40,8 @@ module Topology
 , addFace
 , removeVertex
 , removeEdge
-, removeEdgeChain
 , removeFace
+, breakEdgeChain
   -- * Adjacency information
   -- | This is really the heart of this module. It's kind of the whole "point"
   --   of Topology
@@ -414,8 +414,8 @@ removeEdge (Edge eid) = void $ runExceptT $ do
     -- write the updated data
     lift (put (Topology vertices' edges' faces))
 
-removeEdgeChain :: EdgeChain -> TopoState ()
-removeEdgeChain = undefined
+breakEdgeChain :: EdgeChain -> TopoState ()
+breakEdgeChain = undefined
 
 -- | Returns a list of Edges that are adjacent to the given Vertex
 vertexEdges :: Vertex -> TopoState [Edge]

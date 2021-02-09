@@ -109,9 +109,9 @@ spec = do
                 pure (ps <> [(lastVertex, firstVertex)])
             prep pairs = rights <$> mapM (uncurry addEdge) pairs
             run = makeEdgeChain
-        it "is inversed by removeChain" $ do
+        it "is inversed by breakEdgeChain" $ do
             let run' es = runExceptT (do edgeChain <- ExceptT (run es)
-                                         lift $ removeEdgeChain edgeChain)
+                                         lift $ breakEdgeChain edgeChain)
             property (prop_prepRunIdentity (closePairs >>= prep) run')
     describe "addFace" $ do
         let makePairs = do vs <- replicateM 3 addFreeVertex
