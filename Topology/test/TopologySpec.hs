@@ -99,6 +99,20 @@ spec = do
             it "returns the same Edge as addEdge v1 v2" $ do
                 let post ((_, _, Right edge), Right edge') = pure (edge == edge')
                 property (prepRun post)
+    describe "makeEdgeChain" $ do
+        let makePairs = do vs <- replicateM 3 addFreeVertex
+                           pure $ zip vs (tail vs)
+            closePairs = do
+                ps <- makePairs
+                let firstVertex = fst . head $ ps
+                    lastVertex  = snd . last $ ps
+                pure (ps <> [(lastVertex, firstVertex)])
+            prep pairs = rights <$> mapM (uncurry addEdge) pairs
+            run = makeEdgeChain
+        it "is inversed by removeChain" $ do
+            let run' es = runExceptT (do edgeChain <- ExceptT (run es)
+                                         lift $ removeEdgeChain edgeChain)
+            property (prop_prepRunIdentity (closePairs >>= prep) run')
     describe "addFace" $ do
         let makePairs = do vs <- replicateM 3 addFreeVertex
                            pure $ zip vs (tail vs)
