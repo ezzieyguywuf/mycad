@@ -127,13 +127,13 @@ spec = do
                     (Right edgeChain) -> pure edgeChain
                     _ -> error "There was an error making the edgeChain"
             run = addFace
-        it "is inversed by removeFace" $ do
+        xit "is inversed by removeFace" $ do
             let run' = run >=> traverse_ removeFace
             property (prop_prepRunIdentity (closePairs >>= prep) run')
-        it "returns Right if the Edges are contigous and form a loop" $ do
+        xit "returns Right if the Edges are contigous and form a loop" $ do
             let post = pure . isRight . snd
             property (prop_prepRunPostExpect (closePairs >>= prep) run post)
-        it "returns Left if there is a dangling Edge" $ do
+        xit "returns Left if there is a dangling Edge" $ do
             let prep' = do vs <- closePairs
                            newVertex <- addFreeVertex
                            let firstVertex = fst . head $ vs
@@ -141,7 +141,7 @@ spec = do
                            prep vs'
                 post = pure . isLeft . snd
             property (prop_prepRunPostExpect prep' run post)
-        it "returns Left if the loop is not closed" $ do
+        xit "returns Left if the loop is not closed" $ do
             let post = pure . isLeft . snd
             property (prop_prepRunPostExpect (makePairs >>= prep) run post)
         -- xit "makes Face adjacent to all Vertices" $ do
