@@ -11,3 +11,5 @@ package *
         -fwarn-unused-imports
         -fwarn-orphans
         -threaded
+        -Werror
+        -Wall

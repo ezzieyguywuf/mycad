@@ -59,14 +59,13 @@ module Topology
 
 -- Base
 import Data.Bool (bool)
-import Control.Monad (void, when, unless)
+import Control.Monad (void, unless)
 import Data.List (intersect)
-import Data.Foldable (find)
 
 -- third-party
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Control.Monad.State (State, get, put, gets, modify)
+import Control.Monad.State (State, get, put, gets)
 import Control.Monad.Except ( MonadError, ExceptT(ExceptT), runExceptT
                             , throwError, liftEither)
 import Control.Monad.Trans.Class (lift)
@@ -342,43 +341,43 @@ makeEdgeChain edges = runExceptT $ do
 addFace :: EdgeChain -> TopoState (Either String Face)
 addFace (EdgeChain _ ClosedEdgeChain) = pure (Left msg)
     where msg = "A Face can only be created from a ClosedChain"
-addFace (EdgeChain firstLink _) = runExceptT $ do
-    undefined
-    let firstEdge = undefined
-        lastEdge  = undefined
+addFace (EdgeChain _ _) = undefined -- runExceptT $ do
+    -- undefined
+    -- let firstEdge = undefined
+    --     _lastEdge  = undefined
 
-    -- Unpack the topology data
-    (Topology vertices edges faces) <- lift get
+    -- -- Unpack the topology data
+    -- (Topology vertices edges faces) <- lift get
 
-    -- Find the target Link, i.e. the first Link in the Face
-    -- TODO: I was in the middle of updating this so that instead of using the
-    -- following code, I simply:
-    -- 1. create a FaceLink from the new face to the firstVertex
-    -- 2. change the link in the lastVertex from an EndLink to a ChainLink, and
-    --    connect it to our new FaceLink
+    -- -- Find the target Link, i.e. the first Link in the Face
+    -- -- TODO: I was in the middle of updating this so that instead of using the
+    -- -- following code, I simply:
+    -- -- 1. create a FaceLink from the new face to the firstVertex
+    -- -- 2. change the link in the lastVertex from an EndLink to a ChainLink, and
+    -- --    connect it to our new FaceLink
 
-    -- First, get the TopoEdge from the first Edge in the list
-    firstTopoEdge <- ExceptT (lookupEdge firstEdge)
-    -- Next, get the EndLink attached to the TopoEdge
-    firstEndLink  <- liftEither (getEndLink firstTopoEdge)
+    -- -- First, get the TopoEdge from the first Edge in the list
+    -- firstTopoEdge <- ExceptT (lookupEdge firstEdge)
+    -- -- Next, get the EndLink attached to the TopoEdge
+    -- firstEndLink  <- liftEither (getEndLink firstTopoEdge)
 
-    let -- Create the FaceLink using firstEndLink's LinkBase
-        linkBase = getLinkBase firstEndLink
-        faceLink = FaceLink faceID
-        newLink = Link linkBase faceLink
-        -- Create the TopoFace and add it to our Topology
-        faceID  = length faces
-        newFace = TopoFace newLink
-        faces'  = Map.insert faceID newFace faces
-        -- Update the first edge in our Topology with the new Link
-        (Edge edgeID) = firstEdge
-        edges' = Map.adjust (\(TopoEdge _ rightLink) -> TopoEdge newLink rightLink) edgeID edges
+    -- let -- Create the FaceLink using firstEndLink's LinkBase
+    --     linkBase = getLinkBase firstEndLink
+    --     faceLink = FaceLink faceID
+    --     newLink = Link linkBase faceLink
+    --     -- Create the TopoFace and add it to our Topology
+    --     faceID  = length faces
+    --     newFace = TopoFace newLink
+    --     faces'  = Map.insert faceID newFace faces
+    --     -- Update the first edge in our Topology with the new Link
+    --     (Edge edgeID) = firstEdge
+    --     edges' = Map.adjust (\(TopoEdge _ rightLink) -> TopoEdge newLink rightLink) edgeID edges
 
-    -- Write out the updated Topology State
-    lift . put $ Topology vertices edges' faces'
+    -- -- Write out the updated Topology State
+    -- lift . put $ Topology vertices edges' faces'
 
-    -- Return the newly created Face
-    pure (Face faceID)
+    -- -- Return the newly created Face
+    -- pure (Face faceID)
 
 -- | The inverse of addFace
 removeFace :: Face -> TopoState ()
@@ -498,8 +497,8 @@ findLinkEdge :: Link -> Edge
 findLinkEdge = Edge . getLinkEdge . getLinkBase
 
 -- | Checks if the TopoEdge contains the given Link
-edgeHasLink :: TopoEdge -> Link -> Bool
-edgeHasLink (TopoEdge link1 link2) checkLink = checkLink `elem` [link1, link2]
+_edgeHasLink :: TopoEdge -> Link -> Bool
+_edgeHasLink (TopoEdge link1 link2) checkLink = checkLink `elem` [link1, link2]
 
 -- | Returns Right Link if the Edge contains a single EndLink. Otherwise returns
 --   an error
@@ -508,6 +507,7 @@ getEndLink (TopoEdge (Link _ EndLink) (Link _ EndLink)) = Left msg
     where msg = "The Edge can only contain a single EndLink in order to use getEndLink"
 getEndLink (TopoEdge link@(Link _ EndLink) (Link _ _)) = Right link
 getEndLink (TopoEdge (Link _ _) link@(Link _ EndLink)) = Right link
+getEndLink _ = Left "Unrecognized input to getEndLink"
 
 -- | Determines whether or not two Edges have a common Vertex
 -- | Takes two Edges and joins them using a ChainLink
@@ -536,8 +536,8 @@ getEndLink (TopoEdge (Link _ _) link@(Link _ EndLink)) = Right link
 joinEdges :: Edge -> Edge -> TopoState (Either String ())
 joinEdges lEdge rEdge = runExceptT $ do
     -- First, get the TopoEdge for each Edge
-    (TopoEdge leftEdgeLeftLink leftEdgeRightLink) <- ExceptT (lookupEdge lEdge)
-    (TopoEdge rightEdgeLeftLink rightEdgeRightLink) <- ExceptT (lookupEdge rEdge)
+    (TopoEdge _ leftEdgeRightLink) <- ExceptT (lookupEdge lEdge)
+    (TopoEdge rightEdgeLeftLink _) <- ExceptT (lookupEdge rEdge)
 
     -- Make sure they share a common vertex
     let leftEdgeRightVertex = findLinkVertex leftEdgeRightLink
@@ -553,11 +553,11 @@ joinEdges lEdge rEdge = runExceptT $ do
     let newLink  = Link (getLinkBase leftEdgeRightLink) nextLink
         nextLink = ChainLink (getLinkBase rightEdgeLeftLink)
         -- Get the EdgeID to be updated
-        (Edge edgeID) = lEdge
+        (Edge eid) = lEdge
         -- Helper function
         updateEdge (TopoEdge lLink _) = TopoEdge lLink newLink
 
     -- update the topology
     (Topology vertices edges faces) <- lift get
-    let edges' = Map.adjust updateEdge edgeID edges
+    let edges' = Map.adjust updateEdge eid edges
     lift (put (Topology vertices edges' faces))

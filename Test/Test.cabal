@@ -57,6 +57,7 @@ test-suite MyCAD-test
         Topology
         Topology.PrettyPrint
         Paths_Test
+    ghc-options: -main-is TestSpec
     hs-source-dirs:
         test
         ../Geometry/src
