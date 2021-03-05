@@ -48,7 +48,6 @@ test-suite Topology-test
         Paths_Topology
     hs-source-dirs:
         test
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N
     build-depends:
         QuickCheck
       , Topology

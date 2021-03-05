@@ -44,7 +44,6 @@ test-suite Geometry-test
         Paths_Geometry
     hs-source-dirs:
         test
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N
     build-depends:
         Geometry
       , QuickCheck

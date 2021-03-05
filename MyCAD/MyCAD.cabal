@@ -40,7 +40,6 @@ executable mycad
         Paths_MyCAD
     hs-source-dirs:
         app
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N
     build-depends:
         Entity
       , GLFW-b

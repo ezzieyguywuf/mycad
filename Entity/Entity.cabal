@@ -46,7 +46,6 @@ test-suite Entity-test
         Paths_Entity
     hs-source-dirs:
         test
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N
     build-depends:
         Entity
       , Geometry

@@ -4,3 +4,10 @@ packages:
     Topology
     Entity
     Test
+
+package *
+    ghc-options:
+        -fwarn-unused-binds
+        -fwarn-unused-imports
+        -fwarn-orphans
+        -threaded
