@@ -191,7 +191,7 @@ integer = some digitChar
 floatTrailing :: Parser String
 floatTrailing = do
     val <- integer
-    char '.'
+    _ <- char '.'
     pure $ val <> ".0"
 
 -- | A float with a leading decimal
@@ -199,7 +199,7 @@ floatTrailing = do
 --   We add a zero before the decimal, in order to make parsing it easier
 floatLeading :: Parser String
 floatLeading = do
-    char '.'
+    _ <- char '.'
     val <- integer
     pure $ "0." <> val
 
@@ -207,7 +207,7 @@ floatLeading = do
 floatBoth :: Parser String
 floatBoth = do
     before <- integer
-    char '.'
+    _ <- char '.'
     after <- integer
     pure $ before <> "." <> after
 

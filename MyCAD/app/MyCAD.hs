@@ -19,13 +19,13 @@ main = do entity <- TUI.initialize :: IO (TMVar (Entity Float))
           queue  <- GUI.initialize
 
           -- Run the TUI in a separate thread
-          forkIO (runTUI entity)
+          _ <- forkIO (runTUI entity)
 
           -- renderEntity compares the Entity passed in to the current value in
           -- the TMVar to determine if it needs to render. Therefore, we need
           -- to grab an initial value to pass
           initialEntity <- atomically (readTMVar entity)
-          forkIO (renderEntity initialEntity entity queue)
+          _ <- forkIO (renderEntity initialEntity entity queue)
           GUI.launch queue
 
           -- TODO: Use GUI.RenderQueue.queueObject with queue well as

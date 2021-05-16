@@ -43,7 +43,7 @@ glfwInit width height title queue cData = do
     GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
     GLFW.windowHint (GLFW.WindowHint'OpenGLProfile GLFW.OpenGLProfile'Core)
     GLFW.windowHint (GLFW.WindowHint'Resizable True)
-    GLFW.init
+    _ <- GLFW.init
 
     maybeWindow <- GLFW.createWindow width height title Nothing Nothing
     maybe (shutdownGLFW >> pure Nothing) (initWindow queue cData) maybeWindow

@@ -54,7 +54,7 @@ launch queue = do
         Nothing -> initFailMsg
         Just window -> do
             renderData <- initRenderData queue winASPECT lineThickness
-            forkIO (debuggingLines queue)
+            _ <- forkIO (debuggingLines queue)
             loop window renderData
 
 loop :: Window -> RenderData -> IO ()

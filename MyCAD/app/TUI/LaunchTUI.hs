@@ -82,9 +82,12 @@ handleCommand entityVar command = do
         -- Get the current entity
         entity <- atomically (takeTMVar entityVar)
         -- run the command using the entity
-        let (maybeMsg, entity') = runState (runCommand command) entity
-        -- Print out any messages that runCommand produced
-        maybe (putStrLn "runCommand returned Nothing") putStrLn maybeMsg
+        let (eitherRes, entity') = runState (runCommand command) entity
+        case eitherRes of
+            Left err -> putStrLn err
+            Right maybeMsg ->
+                -- Print out any messages that runCommand produced
+                maybe (putStrLn "runCommand returned Nothing") putStrLn maybeMsg
         -- write back the (potentially) mutated entity
         atomically (putTMVar entityVar entity')
     pure True
