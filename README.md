@@ -1,4 +1,6 @@
-![A brief tour of MyCD's capabilities. Very Brief.](res/drawEntity_demo.gif "MyCAD Demo")
+<p align="center">
+  <img src="https://github.com/ezzieyguywuf/gif_demos/blob/master/mycad_drawEntity_optimized.gif" />
+</p>
 
 MyCAD
 =====
