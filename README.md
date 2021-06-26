@@ -21,9 +21,14 @@ to what I think a CAD package should/could be.
 Project Status
 ==============
 
-mycad continues to be a work in progress. Most recently, we've transitioned the
-code base over to Haskell, and implemented a simple OpenGL viewer that can be
-used to draw the generated data.
+mycad continues to be a work in progress. It started in C++, making use of the
+CGAL library — later, the code-base was converted to haskell (because I wanted
+to learn about functional programming). Most recently, I've decided to take the
+(functional) lessons I've learned and re-convert the codebase back to C++. The
+reason for this is that I ultimately wish for mycad to reach as large of an
+audience as possible, both developers and users. In that regard, C++ feels to me
+to be a more "inclusive" language versus haskell. On a more practical note, C++
+is also supported on more platforms.
 
 One of the goals (number 3 below) is to be disciplined in our approach to
 growing the code base. As part of that, any new feature should start as a
