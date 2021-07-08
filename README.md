@@ -2,6 +2,19 @@
   <img src="https://github.com/ezzieyguywuf/gif_demos/blob/master/mycad_drawEntity_optimized.gif" />
 </p>
 
+NOTE - BEING MIGRATED TO mycad-org
+==================================
+
+This project is currently being migrated to https://github.com/mycad-org
+
+Aside from the mechanics of moving the project over (that would actually be
+pretty easy), I'm also working on re-rewriting it in C++. This is fun, and
+educational, but a bit time consuming, so stay tuned!
+
+"But ezziey, why are you re-rewriting it?"
+
+Great question. I answer it below in the "Project Status" section.
+
 MyCAD
 =====
 
